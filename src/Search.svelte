@@ -1,13 +1,13 @@
 <script lang="ts">
   import { data } from './data'
-  let search: string = history.state.search || '';
+  let search: string = history.state?.search || '';
   
   function matches(search: string, obj: any) {
     return obj.id && obj.id.includes(search);
   }
   function filter(text: string) {
     const matchesByType = new Map<string, any>()
-    for (const obj of $data) {
+    for (const obj of $data.all()) {
       if (matches(text, obj)) {
         if (!matchesByType.has(obj.type))
           matchesByType.set(obj.type, [])
@@ -17,7 +17,7 @@
     return matchesByType
   }
   
-  $: matchingObjects = search && $data && filter(search)
+  $: matchingObjects = search && search.length > 1 && $data && filter(search)
   
   $: history.replaceState({ search }, '')
   
