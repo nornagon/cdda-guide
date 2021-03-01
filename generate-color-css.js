@@ -313,7 +313,6 @@ colors =
 
     "dark_gray": [ 99, 99, 99 ],
     "light_red": [ 255, 150, 150 ],
-    "pink": [ 255, 150, 150 ],
     "light_green": [ 0, 255, 0 ],
     "yellow": [ 255, 255, 0 ],
     "light_blue": [ 100, 100, 255 ],
