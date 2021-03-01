@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-import Item from "./Item.svelte";
+	import Object from "./Object.svelte";
 
   import Search from "./Search.svelte";
   
@@ -10,7 +10,7 @@ import Item from "./Item.svelte";
     // the poor man's router!
     const path = window.location.hash.slice(1);
 
-    if (path.startsWith('/item')) {
+    if (path.startsWith('/view')) {
       const id = path.slice(6);
       item = id
 
@@ -26,7 +26,7 @@ import Item from "./Item.svelte";
 
 <main>
 {#if item}
-<Item id={item} />
+<Object id={item} />
 {:else}
 <Search />
 {/if}

@@ -30,7 +30,7 @@
 {#if matchingObjects}
   <ul>
     {#each matchingObjects as obj}
-    <li><a href="#/item/{obj.id}">{obj.id}</a></li>
+    <li><a href="#/view/{obj.id}">{obj.id}</a></li>
     {/each}
   </ul>
 {:else}

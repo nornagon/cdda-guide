@@ -1,28 +1,30 @@
 <script lang="ts">
   import { data } from './data';
   import Monster from './types/Monster.svelte'
+  import Item from './types/Item.svelte'
   import Unknown from './types/Unknown.svelte'
   export let id: string
   
-  let item: any;
-  $: item = $data?.byId(id)
+  let obj: any;
+  $: obj = $data?.byId(id)
   
   const displays = {
-    MONSTER: Monster
+    MONSTER: Monster,
+    TOOL: Item,
   }
 </script>
 
 {#if !$data}
 ...
 {:else}
-{#if !item}
-Unknown item: {id}
+{#if !obj}
+Unknown obj: {id}
 {:else}
-<svelte:component this={displays[item.type] ?? Unknown} {item} />
+<svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
 
 <details>
 <summary>Raw JSON</summary>
-<pre>{JSON.stringify(item, null, 2)}</pre>
+<pre>{JSON.stringify(obj, null, 2)}</pre>
 </details>
 {/if}
 {/if}
