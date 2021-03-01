@@ -65,6 +65,8 @@ button:focus {
 .fg_only { background: transparent !important; }
 
 body { color: var(--cata-color-white); background: var(--cata-color-black); }
+td { vertical-align: top; }
+table table { margin: -2px; }
 
 :root {
   --cata-color-black: rgb(0,0,0);

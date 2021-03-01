@@ -61,7 +61,7 @@
   }
   
   function damage(item: any) {
-    let { melee_dice, melee_dice_sides, melee_damage, melee_cut } = item
+    let { melee_dice = 0, melee_dice_sides = 0, melee_damage, melee_cut } = item
     //melee_damage = melee_damage ?? [ { damage_type: "bash", amount: `${melee_dice}d${melee_dice_sides}` } ]
     return `${melee_dice}d${melee_dice_sides}`
   }
@@ -204,29 +204,60 @@
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {item.name.str}</h1>
 <p>{item.description}</p>
-<p>HP: {item.hp}</p>
 <p>Difficulty: {difficulty(item)} <span class='c_{difficultyColor(difficulty(item))} fg_only'>({difficultyDescription(difficulty(item))})</span></p>
-<p>Melee skill: {item.melee_skill ?? 0}</p>
-<p>Dodge: {item.dodge ?? 0}</p>
-<p>Damage: {damage(item)}</p>
-<p>Bash armor: {item.armor_bash ?? 0}</p>
-<p>Cut armor: {item.armor_cut ?? 0}</p>
-<p>Stab armor: {item.armor_stab ?? ((item.armor_cut ?? 0) * 0.8)}</p>
-<p>Bullet armor: {item.armor_bullet ?? 0}</p>
-<p>Acid armor: {item.armor_acid ?? ((item.armor_cut ?? 0) * 0.5)}</p>
-<p>Fire armor: {item.armor_fire ?? 0}</p>
-<p>Body type: {item.bodytype}</p>
-<p>Volume: {item.volume}</p>
-<p>Weight: {item.weight}</p>
-<p>Speed: {item.speed}</p>
-<p>Material: {(item.material ?? []).join(', ')}</p>
+<h2>Combat</h2>
+<div style="display: flex; flex-direction: row">
+<table>
+  <tbody>
+    <tr><td>Speed:</td><td>{item.speed}</td></tr>
+    <tr><td>Melee skill:</td><td>{item.melee_skill ?? 0}</td></tr>
+    <tr><td>Damage:</td><td>{damage(item)}</td></tr>
+    {#if item.special_attacks}
+    <tr><td>Special attacks:</td><td>
+      <table>
+        <tbody>
+          {#each item.special_attacks as special_attack, i}
+            <tr><td>{specialAttackToString(special_attack)}</td></tr>
+          {/each}
+        </tbody>
+      </table>
+    </td></tr>
+    {/if}
+  </tbody>
+</table>
+<table>
+  <tbody>
+    <tr><td>HP:</td><td>{item.hp}</td></tr>
+    <tr><td>Dodge:</td><td>{item.dodge ?? 0}</td></tr>
+    <tr><td>Armor:</td>
+    <td><table>
+      <tbody>
+        <tr><td>Bash</td><td>{item.armor_bash ?? 0}</td></tr>
+        <tr><td>Cut</td><td>{item.armor_cut ?? 0}</td></tr>
+        <tr><td>Stab</td><td>{item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}</td></tr>
+        <tr><td>Bullet</td><td>{item.armor_bullet ?? 0}</td></tr>
+        <tr><td>Acid</td><td>{item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}</td></tr>
+        <tr><td>Fire</td><td>{item.armor_fire ?? 0}</td></tr>
+      </tbody>
+    </table></td></tr>
+  </tbody>
+</table>
+</div>
+<h2>Body</h2>
+<table>
+  <tbody>
+    <tr><td>Body type:</td><td>{item.bodytype}</td></tr>
+    <tr><td>Species:</td><td>{(item.species ?? []).join(', ')}</td></tr>
+    <tr><td>Volume:</td><td>{item.volume}</td></tr>
+    <tr><td>Weight</td><td>{item.weight}</td></tr>
+    <tr><td>Material:</td><td>{(item.material ?? []).join(', ')}</td></tr>
+  </tbody>
+</table>
+<h2>Behavior</h2>
 <p>Aggression: {item.aggression}</p>
 <p>Morale: {item.morale}</p>
-<p>Species: {(item.species ?? []).join(', ')}</p>
 <p>Default faction: {item.default_faction}</p>
-<p>Flags: {#each item.flags ?? [] as flag, i}<abbr title={mon_flag_descriptions[flag]}>{flag}</abbr>{#if i < item.flags.length - 1}, {/if}{/each}</p>
-<p>Categories: {(item.categories ?? []).join(', ')}</p>
 <p>Anger triggers: {(item.anger_triggers ?? []).join(', ')}</p>
 <p>Placate triggers: {(item.placate_triggers ?? []).join(', ')}</p>
+<p>Flags: {#each item.flags ?? [] as flag, i}<abbr title={mon_flag_descriptions[flag]}>{flag}</abbr>{#if i < item.flags.length - 1}, {/if}{/each}</p>
 <p>On death: {(item.death_function ?? []).join(', ')}</p>
-<p>Special attacks: {(item.special_attacks ?? []).map(specialAttackToString).join(', ')}</p>
