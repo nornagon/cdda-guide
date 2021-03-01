@@ -1,45 +1,38 @@
 <script lang="ts">
   import { data } from './data'
+  import Fuse from 'fuse.js'
+  
+  let fuse: Fuse<any>
+  $: fuse = new Fuse([...$data?.all() ?? []].filter(x => typeof x.id === 'string'), {
+    keys: ['id', 'name'],
+    getFn: (obj: any, path: string | string[]): string | string[] => {
+      if (path[0] === 'id')
+        return obj.id ?? obj.abstract ?? ''
+      if (path[0] === 'name')
+        return obj.name?.str ?? ''
+    },
+    ignoreFieldNorm: true,
+  })
+
   let search: string = history.state?.search || '';
   
-  function matches(search: string, obj: any) {
-    return obj.id && obj.id.includes(search);
-  }
   function filter(text: string) {
-    const matchesByType = new Map<string, any>()
-    for (const obj of $data.all()) {
-      if (matches(text, obj)) {
-        if (!matchesByType.has(obj.type))
-          matchesByType.set(obj.type, [])
-        matchesByType.get(obj.type).push(obj)
-      }
-    }
-    return matchesByType
+    const results = fuse.search(text, { limit: 100 })
+    return results.map(x => x.item)
   }
   
   $: matchingObjects = search && search.length > 1 && $data && filter(search)
   
   $: history.replaceState({ search }, '')
-  
-  const insensitive = (a: string, b: string) => {
-    return a.toLowerCase().localeCompare(b.toLowerCase())
-  }
-  
-  const byId = (a, b) => {
-    return a.id.localeCompare(b.id)
-  }
 </script>
 
 <input bind:value={search} tabindex=0 />
 {#if matchingObjects}
-  {#each [...matchingObjects.keys()].sort(insensitive) as type}
-  <h2>{type}</h2>
   <ul>
-    {#each matchingObjects.get(type).sort(byId) as obj}
+    {#each matchingObjects as obj}
     <li><a href="#/item/{obj.id}">{obj.id}</a></li>
     {/each}
   </ul>
-  {/each}
 {:else}
   <pre>...</pre>
 {/if}
