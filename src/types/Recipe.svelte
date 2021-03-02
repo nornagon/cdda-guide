@@ -58,6 +58,14 @@
     none
     {/each}
   </dd>
+  <dt>Proficiencies:</dt>
+  <dd>
+    <ul>
+    {#each recipe.proficiencies as prof}
+    <li><a href="#/proficiency/{prof.proficiency}">{singularName($data.byId('proficiency', prof.proficiency))}</a></li>
+    {/each}
+    </ul>
+  </dd>
   <dt>Time to complete:</dt>
   <dd>{recipe.time}</dd>
   <dt>Recipe makes:</dt>
