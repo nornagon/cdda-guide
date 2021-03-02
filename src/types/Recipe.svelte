@@ -37,12 +37,27 @@
   
   let result = $data.byId('item', recipe.result)
   let tools = flattenRequirement(recipe.tools ?? [])
+  
+  function normalizeSkillsRequired(skills_required: [string, number] | [string, number][] | undefined): [string, number][] {
+    if (skills_required === undefined) return []
+    if (Array.isArray(typeof skills_required[0]))
+      return skills_required as [string, number][]
+    return [skills_required as [string, number]]
+  }
+  
+  let skillsRequired = normalizeSkillsRequired(recipe.skills_required)
 </script>
 <dl>
   <dt>Primary skill:</dt>
-  <dd>{recipe.skill_used} ({recipe.difficulty ?? 0})</dd>
+  <dd><a href="#/skill/{recipe.skill_used}">{recipe.skill_used}</a> ({recipe.difficulty ?? 0})</dd>
   <dt>Other skills:</dt>
-  <dd>none<!-- TODO --></dd>
+  <dd>
+    {#each skillsRequired as [skill, level], i}
+    <a href="#/skill/{skill}">{skill}</a> ({level}){#if i === skillsRequired.length - 2}{' and '}{:else if i !== skillsRequired.length - 1}{', '}{/if}
+    {:else}
+    none
+    {/each}
+  </dd>
   <dt>Time to complete:</dt>
   <dd>{recipe.time}</dd>
   <dt>Recipe makes:</dt>
