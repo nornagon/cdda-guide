@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { data } from './data'
+  import { data, mapType } from './data'
   import Fuse from 'fuse.js'
   
   let fuse: Fuse<any>
@@ -30,7 +30,7 @@
 {#if matchingObjects}
   <ul>
     {#each matchingObjects as obj}
-    <li><a href="#/view/{obj.id}">{obj.id}</a></li>
+    <li><a href="#/{mapType(obj.type)}/{obj.id}">{obj.id}</a></li>
     {/each}
   </ul>
 {:else}

@@ -32,10 +32,10 @@
     return Math.floor(65 + ( parseVolume(item.volume) / 62.5 + parseMass(item.weight) / 60 ));
   }
   
-  let techniques = (item.techniques ?? []).map(t => $data.byId(t));
-  let qualities = (item.qualities ?? []).map(([id, level]) => ({ quality: $data.byId(id), level }));
-  let materials = (item.material ?? []).map(id => $data.byId(id));
-  let flags = (item.flags ?? []).map(id => $data.byId(id));
+  let techniques = (item.techniques ?? []).map(t => $data.byId('technique', t));
+  let qualities = (item.qualities ?? []).map(([id, level]) => ({ quality: $data.byId('tool_quality', id), level }));
+  let materials = (item.material ?? []).map(id => $data.byId('material', id));
+  let flags = (item.flags ?? []).map(id => $data.byId('json_flag', id));
   let ammo = Array.isArray(item.ammo) ? item.ammo[0] : item.ammo
   
   let recipes = $data.byType('recipe').filter(x => x.result === item.id)
@@ -43,9 +43,9 @@
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {item.name.str}</h1>
 <p>
-  Material: <span><ul class="comma-separated">{#each materials as m}<li><a href="#/view/{m.id}">{m.name}</a></li>{/each}</ul></span><br/>
+  Material: <span><ul class="comma-separated">{#each materials as m}<li><a href="#/material/{m.id}">{m.name}</a></li>{/each}</ul></span><br/>
   Volume: {item.volume} Weight: {item.weight} Length: {length(item)}<br/>
-  Flags: <span><ul class="comma-separated">{#each flags as f}<li><a href="#/view/{f.id}">{f.id}</a></li>{/each}</ul></span><br/>
+  Flags: <span><ul class="comma-separated">{#each flags as f}<li><a href="#/json_flag/{f.id}">{f.id}</a></li>{/each}</ul></span><br/>
 </p>
 {#if item.bashing || item.cutting}
 <p>
@@ -56,19 +56,19 @@ Moves per attack: {attackTime(item)}
 {#if techniques.length}
 <p>
   Techniques: <span><ul class="comma-separated">{#each techniques as technique}
-  <li><strong><a href="#/view/{technique.id}">{technique.name}</a></strong>: {technique.description}</li>
+  <li><strong><a href="#/technique/{technique.id}">{technique.name}</a></strong>: {technique.description}</li>
   {/each}
   </ul></span>
 {/if}
 {#if qualities.length}
 <ul class="no-bullets">
 {#each qualities as {quality, level}}
-  <li>Has level <strong>{level} <a href="#/view/{quality.id}">{quality.name.str}</a></strong> quality.</li>
+  <li>Has level <strong>{level} <a href="#/tool_quality/{quality.id}">{quality.name.str}</a></strong> quality.</li>
 {/each}
 </ul>
 {/if}
 {#if ammo}
-<p>Ammo: <a href="#/view/{ammo}">{$data.byId(ammo).name}</a></p>
+<p>Ammo: <a href="#/item/{ammo}">{$data.byId('item', ammo).name}</a></p>
 {/if}
 <p>
   {item.description}

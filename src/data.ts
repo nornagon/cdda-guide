@@ -20,25 +20,49 @@ const idlessTypes = new Set([
   "uncraft"
 ])
 
+const typeMappings = new Map([
+  ["AMMO", "item"],
+  ["GUN", "item"],
+  ["ARMOR", "item"],
+  ["PET_ARMOR", "item"],
+  ["TOOL", "item"],
+  ["TOOLMOD", "item"],
+  ["TOOL_ARMOR", "item"],
+  ["BOOK", "item"],
+  ["COMESTIBLE", "item"],
+  ["ENGINE", "item"],
+  ["WHEEL", "item"],
+  ["GUNMOD", "item"],
+  ["MAGAZINE", "item"],
+  ["BATTERY", "item"],
+  ["GENERIC", "item"],
+  ["BIONIC_ITEM", "item"],
+])
+
+export const mapType = (type: string): string => typeMappings.get(type) ?? type
+
 class CddaData {
   _raw: any[]
-  _byId: Map<string, any> = new Map
   _byType: Map<string, any[]> = new Map
-  _abstracts: Map<string, any> = new Map
+  _byTypeById: Map<string, Map<string, any>> = new Map
+  _abstractsByType: Map<string, Map<string, any>> = new Map
   _toolReplacements: Map<string, string[]> = new Map
 
   constructor(raw: any[]) {
     this._raw = raw
     for (const obj of raw) {
-      if (Object.hasOwnProperty.call(obj, 'id')) {
-        this._byId.set(obj.id, obj)
-      }
-      if (Object.hasOwnProperty.call(obj, 'abstract'))
-        this._abstracts.set(obj.abstract, obj)
       if (Object.hasOwnProperty.call(obj, 'type')) {
-        if (!this._byType.has(obj.type))
-          this._byType.set(obj.type, [])
-        this._byType.get(obj.type).push(obj)
+        const mappedType = mapType(obj.type)
+        if (!this._byType.has(mappedType)) this._byType.set(mappedType, [])
+        this._byType.get(mappedType).push(obj)
+        if (Object.hasOwnProperty.call(obj, 'id')) {
+          if (!this._byTypeById.has(mappedType)) this._byTypeById.set(mappedType, new Map)
+          this._byTypeById.get(mappedType).set(obj.id, obj)
+        }
+        if (Object.hasOwnProperty.call(obj, 'abstract')) {
+          if (!this._abstractsByType.has(mappedType)) this._abstractsByType.set(mappedType, new Map)
+          this._abstractsByType.get(mappedType).set(obj.abstract, obj)
+        }
         if (obj.type === 'TOOL' && Object.hasOwnProperty.call(obj, 'sub')) {
           if (!this._toolReplacements.has(obj.sub))
             this._toolReplacements.set(obj.sub, [])
@@ -48,8 +72,11 @@ class CddaData {
     }
   }
   
-  byId(id: string): any {
-    return this._flatten(this._byId.get(id))
+  byId(type: string, id: string): any {
+    if (!id) throw new Error('fix')
+    const obj = this._byTypeById.get(type)?.get(id)
+    if (obj)
+      return this._flatten(obj)
   }
   
   byType(type: string): any[] {
@@ -62,12 +89,15 @@ class CddaData {
   }
   
   all() {
-    return this._byId.values()
+    return this._raw
   }
   
   _flatten(obj: any) {
-    const parent = 'copy-from' in obj ? this._byId.get(obj['copy-from']) ?? this._abstracts.get(obj['copy-from']) : null
-    if (obj.id === 'mon_gasbomb_hack') debugger
+    const parent = 'copy-from' in obj
+      ? this._byTypeById.get(mapType(obj.type))?.get(obj['copy-from']) ??
+        this._abstractsByType.get(mapType(obj.type))?.get(obj['copy-from']) : null
+    if ('copy-from' in obj && !parent)
+      console.error(`Missing parent in ${obj.id ?? obj.abstract}`)
     if (!parent) return obj;
     const ret = {...this._flatten(parent), ...obj}
     for (const k of Object.keys(ret.relative ?? {})) {

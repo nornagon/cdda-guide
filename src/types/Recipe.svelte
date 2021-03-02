@@ -12,7 +12,7 @@
     for (const choice of choices) {
       const [id, count, isList] = choice
       if (isList) {
-        const otherRequirement = $data.byId(id)
+        const otherRequirement = $data.byId('requirement', id)
         if (otherRequirement.type !== 'requirement') {
           console.error(`Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`)
         }
@@ -35,7 +35,7 @@
     return required.map(flattenChoices).map(x => x.flatMap(expandSubstitutes)).filter(x => x.length)
   }
   
-  let result = $data.byId(recipe.result)
+  let result = $data.byId('item', recipe.result)
   let tools = flattenRequirement(recipe.tools ?? [])
 </script>
 <dl>
@@ -51,7 +51,7 @@
   <dd>
     <ul>
       {#each recipe.qualities ?? [] as quality}
-        <li>{quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'} with <a href="#/view/{quality.id}">{$data.byId(quality.id).name.str}</a> of {quality.level} or more.</li>
+        <li>{quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'} with <a href="#/tool_quality/{quality.id}">{$data.byId('tool_quality', quality.id).name.str}</a> of {quality.level} or more.</li>
       {/each}
       {#each tools as toolChoices}
       <li>

@@ -3,10 +3,10 @@
   import Monster from './types/Monster.svelte'
   import Item from './types/Item.svelte'
   import Unknown from './types/Unknown.svelte'
-  export let id: string
+  export let item: { id: string, type: string }
   
   let obj: any;
-  $: obj = $data?.byId(id)
+  $: obj = $data?.byId(item.type, item.id)
   
   const displays = {
     MONSTER: Monster,
@@ -20,7 +20,7 @@
 ...
 {:else}
 {#if !obj}
-Unknown obj: {id}
+Unknown obj: {item.type}/{item.id}
 {:else}
 <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
 

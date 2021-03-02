@@ -4,15 +4,16 @@
 
   import Search from "./Search.svelte";
   
-  let item: string | null = null
+  let item: { type: string, id: string } | null = null
   
   function hashchange() {
     // the poor man's router!
     const path = window.location.hash.slice(1);
 
-    if (path.startsWith('/view')) {
-      const id = path.slice(6);
-      item = id
+    let m: RegExpExecArray | null;
+    if (m = /^\/([^\/]+)\/(.+)$/.exec(path)) {
+      const [, type, id] = m
+      item = { type, id }
 
       window.scrollTo(0,0);
     } else {
@@ -27,7 +28,7 @@
 <main>
 {#if item}
 {#key item}
-<Object id={item} />
+<Object {item} />
 {/key}
 {:else}
 <Search />
