@@ -70,7 +70,7 @@ Moves per attack: {attackTime(item)}
 </ul>
 {/if}
 {#if ammo}
-<p>Ammo: <a href="#/item/{ammo}">{singularName($data.byId('item', ammo))}</a></p>
+<p>Ammo: <a href="#/ammunition_type/{ammo}">{singularName($data.byId('ammunition_type', ammo))}</a></p>
 {/if}
 <p>
   {item.description}
