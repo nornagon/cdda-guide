@@ -42,8 +42,11 @@ const typeMappings = new Map([
 export const mapType = (type: string): string => typeMappings.get(type) ?? type
 
 export const singularName = (obj: any): string => {
-  return obj.name ?
-    obj.name.str_sp ?? obj.name.str : /* fallback to id? */ obj.id ?? obj.abstract
+  return obj?.name
+    ? typeof obj.name === 'string'
+      ? obj.name
+      : obj.name.str_sp ?? obj.name.str
+    : /* fallback to id? */ obj?.id ?? obj?.abstract
 }
 
 class CddaData {
@@ -52,27 +55,32 @@ class CddaData {
   _byTypeById: Map<string, Map<string, any>> = new Map
   _abstractsByType: Map<string, Map<string, any>> = new Map
   _toolReplacements: Map<string, string[]> = new Map
+  _craftingPseudoItems: Map<string, string> = new Map
 
   constructor(raw: any[]) {
     this._raw = raw
     for (const obj of raw) {
-      if (Object.hasOwnProperty.call(obj, 'type')) {
-        const mappedType = mapType(obj.type)
-        if (!this._byType.has(mappedType)) this._byType.set(mappedType, [])
-        this._byType.get(mappedType).push(obj)
-        if (Object.hasOwnProperty.call(obj, 'id')) {
-          if (!this._byTypeById.has(mappedType)) this._byTypeById.set(mappedType, new Map)
-          this._byTypeById.get(mappedType).set(obj.id, obj)
-        }
-        if (Object.hasOwnProperty.call(obj, 'abstract')) {
-          if (!this._abstractsByType.has(mappedType)) this._abstractsByType.set(mappedType, new Map)
-          this._abstractsByType.get(mappedType).set(obj.abstract, obj)
-        }
-        if (obj.type === 'TOOL' && Object.hasOwnProperty.call(obj, 'sub')) {
-          if (!this._toolReplacements.has(obj.sub))
-            this._toolReplacements.set(obj.sub, [])
-          this._toolReplacements.get(obj.sub).push(obj.id)
-        }
+      if (!Object.hasOwnProperty.call(obj, 'type'))
+        continue
+      const mappedType = mapType(obj.type)
+      if (!this._byType.has(mappedType)) this._byType.set(mappedType, [])
+      this._byType.get(mappedType).push(obj)
+      if (Object.hasOwnProperty.call(obj, 'id')) {
+        if (!this._byTypeById.has(mappedType)) this._byTypeById.set(mappedType, new Map)
+        this._byTypeById.get(mappedType).set(obj.id, obj)
+      }
+      if (Object.hasOwnProperty.call(obj, 'abstract')) {
+        if (!this._abstractsByType.has(mappedType)) this._abstractsByType.set(mappedType, new Map)
+        this._abstractsByType.get(mappedType).set(obj.abstract, obj)
+      }
+      if (obj.type === 'TOOL' && Object.hasOwnProperty.call(obj, 'sub')) {
+        if (!this._toolReplacements.has(obj.sub))
+          this._toolReplacements.set(obj.sub, [])
+        this._toolReplacements.get(obj.sub).push(obj.id)
+      }
+      
+      if (Object.hasOwnProperty.call(obj, 'crafting_pseudo_item')) {
+        this._craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id)
       }
     }
   }
@@ -91,6 +99,10 @@ class CddaData {
   
   replacementTools(type: string): string[] {
     return this._toolReplacements.get(type) ?? []
+  }
+  
+  craftingPseudoItem(id: string): string | undefined {
+    return this._craftingPseudoItems.get(id)
   }
   
   all() {

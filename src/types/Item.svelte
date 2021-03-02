@@ -4,6 +4,7 @@
   export let item: any
   
   function parseVolume(string: string | number): number {
+    if (typeof string === 'undefined') return 0
     if (typeof string === 'number')
       return string * 250
     if (string.endsWith('ml'))
@@ -13,6 +14,7 @@
   }
   
   function parseMass(string: string | number): number {
+    if (typeof string === 'undefined') return 0
     if (typeof string === 'number')
       return string
     if (string.endsWith('g'))
@@ -35,7 +37,7 @@
   let techniques = (item.techniques ?? []).map(t => $data.byId('technique', t));
   let qualities = (item.qualities ?? []).map(([id, level]) => ({ quality: $data.byId('tool_quality', id), level }));
   let materials = (item.material ?? []).map(id => $data.byId('material', id));
-  let flags = (item.flags ?? []).map(id => $data.byId('json_flag', id));
+  let flags = (item.flags ?? []).map(id => $data.byId('json_flag', id) ?? {id});
   let ammo = Array.isArray(item.ammo) ? item.ammo[0] : item.ammo
   
   let recipes = $data.byType('recipe').filter(x => x.result === item.id && !x.obsolete)

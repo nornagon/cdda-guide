@@ -57,7 +57,12 @@
       <li>
         {#each toolChoices as tool, i}
           {#if i !== 0}{' OR '}{/if}
+          {#if $data.craftingPseudoItem(tool.id)}
+          <a href='#/furniture/{$data.craftingPseudoItem(tool.id)}'>{singularName($data.byId('item', tool.id))}</a>
+          {:else}
           <a href='#/item/{tool.id}'>{singularName($data.byId('item', tool.id))}</a>
+          {/if}
+          {#if tool.count > 0}({tool.count} charge{#if tool.count !== 1}s{/if}){/if}
         {/each}
       </li>
       {/each}
