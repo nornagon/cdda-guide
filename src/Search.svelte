@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { data, mapType } from './data'
+  import { data, mapType, singularName } from './data'
   import Fuse from 'fuse.js'
   
   let fuse: Fuse<any>
@@ -9,7 +9,7 @@
       if (path[0] === 'id')
         return obj.id ?? obj.abstract ?? ''
       if (path[0] === 'name')
-        return obj.name?.str ?? ''
+        return singularName(obj)
     },
     ignoreFieldNorm: true,
   })

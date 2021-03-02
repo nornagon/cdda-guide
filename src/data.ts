@@ -41,6 +41,11 @@ const typeMappings = new Map([
 
 export const mapType = (type: string): string => typeMappings.get(type) ?? type
 
+export const singularName = (obj: any): string => {
+  return obj.name ?
+    obj.name.str_sp ?? obj.name.str : /* fallback to id? */ obj.id ?? obj.abstract
+}
+
 class CddaData {
   _raw: any[]
   _byType: Map<string, any[]> = new Map

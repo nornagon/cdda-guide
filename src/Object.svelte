@@ -10,9 +10,22 @@
   
   const displays = {
     MONSTER: Monster,
+    AMMO: Item,
+    GUN: Item,
+    ARMOR: Item,
+    PET_ARMOR: Item,
     TOOL: Item,
-    GENERIC: Item,
+    TOOLMOD: Item,
+    TOOL_ARMOR: Item,
+    BOOK: Item,
     COMESTIBLE: Item,
+    ENGINE: Item,
+    WHEEL: Item,
+    GUNMOD: Item,
+    MAGAZINE: Item,
+    BATTERY: Item,
+    GENERIC: Item,
+    BIONIC_ITEM: Item,
   }
 </script>
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { singularName } from '../data'
   export let item
   
   function difficulty(item: any) {
@@ -202,7 +203,7 @@
   }
 </script>
 
-<h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {item.name.str}</h1>
+<h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
 <p>{item.description}</p>
 <p>Difficulty: {difficulty(item)} <span class='c_{difficultyColor(difficulty(item))} fg_only'>({difficultyDescription(difficulty(item))})</span></p>
 <h2>Combat</h2>

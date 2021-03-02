@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { data } from '../data'
+  import { data, singularName } from '../data'
   import Recipe from './Recipe.svelte';
   export let item: any
   
@@ -38,10 +38,10 @@
   let flags = (item.flags ?? []).map(id => $data.byId('json_flag', id));
   let ammo = Array.isArray(item.ammo) ? item.ammo[0] : item.ammo
   
-  let recipes = $data.byType('recipe').filter(x => x.result === item.id)
+  let recipes = $data.byType('recipe').filter(x => x.result === item.id && !x.obsolete)
 </script>
 
-<h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {item.name.str}</h1>
+<h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
 <p>
   Material: <span><ul class="comma-separated">{#each materials as m}<li><a href="#/material/{m.id}">{m.name}</a></li>{/each}</ul></span><br/>
   Volume: {item.volume} Weight: {item.weight} Length: {length(item)}<br/>
@@ -63,12 +63,12 @@ Moves per attack: {attackTime(item)}
 {#if qualities.length}
 <ul class="no-bullets">
 {#each qualities as {quality, level}}
-  <li>Has level <strong>{level} <a href="#/tool_quality/{quality.id}">{quality.name.str}</a></strong> quality.</li>
+  <li>Has level <strong>{level} <a href="#/tool_quality/{quality.id}">{singularName(quality)}</a></strong> quality.</li>
 {/each}
 </ul>
 {/if}
 {#if ammo}
-<p>Ammo: <a href="#/item/{ammo}">{$data.byId('item', ammo).name}</a></p>
+<p>Ammo: <a href="#/item/{ammo}">{singularName($data.byId('item', ammo))}</a></p>
 {/if}
 <p>
   {item.description}

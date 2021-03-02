@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { data } from '../data'
+  import { data, singularName } from '../data'
 
   export let recipe: any
   
@@ -51,13 +51,13 @@
   <dd>
     <ul>
       {#each recipe.qualities ?? [] as quality}
-        <li>{quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'} with <a href="#/tool_quality/{quality.id}">{$data.byId('tool_quality', quality.id).name.str}</a> of {quality.level} or more.</li>
+        <li>{quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'} with <a href="#/tool_quality/{quality.id}">{singularName($data.byId('tool_quality', quality.id))}</a> of {quality.level} or more.</li>
       {/each}
       {#each tools as toolChoices}
       <li>
         {#each toolChoices as tool, i}
           {#if i !== 0}{' OR '}{/if}
-          {tool.id}
+          <a href='#/item/{tool.id}'>{singularName($data.byId('item', tool.id))}</a>
         {/each}
       </li>
       {/each}
