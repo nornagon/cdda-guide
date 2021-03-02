@@ -1,5 +1,6 @@
 <script lang="ts">
   import { data } from '../data'
+  import Recipe from './Recipe.svelte';
   export let item: any
   
   function parseVolume(string: string | number): number {
@@ -36,6 +37,8 @@
   let materials = (item.material ?? []).map(id => $data.byId(id));
   let flags = (item.flags ?? []).map(id => $data.byId(id));
   let ammo = Array.isArray(item.ammo) ? item.ammo[0] : item.ammo
+  
+  let recipes = $data.byType('recipe').filter(x => x.result === item.id)
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {item.name.str}</h1>
@@ -70,3 +73,11 @@ Moves per attack: {attackTime(item)}
 <p>
   {item.description}
 </p>
+{#if recipes.length}
+<section>
+<h1>Recipes</h1>
+{#each recipes as recipe (recipe)}
+<Recipe recipe={recipe} />
+{/each}
+</section>
+{/if}

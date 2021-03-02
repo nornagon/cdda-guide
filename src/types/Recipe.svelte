@@ -1,0 +1,67 @@
+<script lang="ts">
+  import { data } from '../data'
+
+  export let recipe: any
+  
+  type OneRequirement = [string, number] | [string, number, "LIST"]
+  type RequirementChoices = OneRequirement[]
+  type Requirement = RequirementChoices[]
+  
+  function flattenChoices(choices: RequirementChoices): {id: string, count: number}[] {
+    const flatChoices = []
+    for (const choice of choices) {
+      const [id, count, isList] = choice
+      if (isList) {
+        const otherRequirement = $data.byId(id)
+        if (otherRequirement.type !== 'requirement') {
+          console.error(`Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`)
+        }
+        const otherRequirementTools = otherRequirement.tools ?? []
+        const otherRequirementChoices = otherRequirementTools[0] // only take the first
+        flatChoices.push(...flattenChoices(otherRequirementChoices))
+      } else {
+        flatChoices.push({id, count})
+      }
+    }
+    return flatChoices
+  }
+  
+  function expandSubstitutes(r: {id: string, count: number}): {id: string, count: number}[] {
+    const replacements = $data.replacementTools(r.id)
+    return [r, ...replacements.map(o => ({id: o, count: r.count}))]
+  }
+  
+  function flattenRequirement(required: Requirement) {
+    return required.map(flattenChoices).map(x => x.flatMap(expandSubstitutes)).filter(x => x.length)
+  }
+  
+  let result = $data.byId(recipe.result)
+  let tools = flattenRequirement(recipe.tools ?? [])
+</script>
+<dl>
+  <dt>Primary skill:</dt>
+  <dd>{recipe.skill_used} ({recipe.difficulty ?? 0})</dd>
+  <dt>Other skills:</dt>
+  <dd>none<!-- TODO --></dd>
+  <dt>Time to complete:</dt>
+  <dd>{recipe.time}</dd>
+  <dt>Recipe makes:</dt>
+  <dd>{recipe.charges ?? result.initial_charges ?? result.count ?? result.charges}<!-- TODO: properly switch on result type --></dd>
+  <dt>Tools required:</dt>
+  <dd>
+    <ul>
+      {#each recipe.qualities ?? [] as quality}
+        <li>{quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'} with <a href="#/view/{quality.id}">{$data.byId(quality.id).name.str}</a> of {quality.level} or more.</li>
+      {/each}
+      {#each tools as toolChoices}
+      <li>
+        {#each toolChoices as tool, i}
+          {#if i !== 0}{' OR '}{/if}
+          {tool.id}
+        {/each}
+      </li>
+      {/each}
+    </ul>
+  </dd>
+</dl>
+<pre>{JSON.stringify(recipe, null, 2)}</pre>

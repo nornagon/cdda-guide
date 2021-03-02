@@ -22,25 +22,27 @@ const idlessTypes = new Set([
 
 class CddaData {
   _raw: any[]
-  _byId: Map<string, any>
-  _abstracts: Map<string, any>
+  _byId: Map<string, any> = new Map
+  _byType: Map<string, any[]> = new Map
+  _abstracts: Map<string, any> = new Map
+  _toolReplacements: Map<string, string[]> = new Map
+
   constructor(raw: any[]) {
     this._raw = raw
-    this._byId = new Map
-    this._abstracts = new Map
     for (const obj of raw) {
-      if (Object.hasOwnProperty.call(obj, 'id'))
+      if (Object.hasOwnProperty.call(obj, 'id')) {
         this._byId.set(obj.id, obj)
+      }
       if (Object.hasOwnProperty.call(obj, 'abstract'))
         this._abstracts.set(obj.abstract, obj)
-    }
-    for (const obj of this._byId.values()) {
-      const parent = obj['copy-from'] ? this._byId.get(obj['copy-from']) ?? this._abstracts.get(obj['copy-from']) : null
-      if (parent) {
-        if (parent['copy-from']) {
-          //console.log('double copy-from', obj.id)
-          if (obj['relative'] && parent['relative'] && obj['type'] === 'MONSTER')
-            console.log('double relative', obj.id)
+      if (Object.hasOwnProperty.call(obj, 'type')) {
+        if (!this._byType.has(obj.type))
+          this._byType.set(obj.type, [])
+        this._byType.get(obj.type).push(obj)
+        if (obj.type === 'TOOL' && Object.hasOwnProperty.call(obj, 'sub')) {
+          if (!this._toolReplacements.has(obj.sub))
+            this._toolReplacements.set(obj.sub, [])
+          this._toolReplacements.get(obj.sub).push(obj.id)
         }
       }
     }
@@ -48,6 +50,15 @@ class CddaData {
   
   byId(id: string): any {
     return this._flatten(this._byId.get(id))
+  }
+  
+  byType(type: string): any[] {
+    // TODO: flatten...?
+    return this._byType.get(type)
+  }
+  
+  replacementTools(type: string): string[] {
+    return this._toolReplacements.get(type) ?? []
   }
   
   all() {

@@ -12,6 +12,7 @@
     MONSTER: Monster,
     TOOL: Item,
     GENERIC: Item,
+    COMESTIBLE: Item,
   }
 </script>
 

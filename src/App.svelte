@@ -26,7 +26,9 @@
 
 <main>
 {#if item}
+{#key item}
 <Object id={item} />
+{/key}
 {:else}
 <Search />
 {/if}
