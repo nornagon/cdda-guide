@@ -11,6 +11,7 @@
   const displays = {
     MONSTER: Monster,
     TOOL: Item,
+    GENERIC: Item,
   }
 </script>
 

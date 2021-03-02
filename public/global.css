@@ -68,6 +68,17 @@ body { color: var(--cata-color-white); background: var(--cata-color-black); }
 td { vertical-align: top; }
 table table { margin: -2px; }
 
+ul.comma-separated, ul.no-bullets {
+	list-style: none;
+	padding: 0;
+}
+ul.comma-separated, ul.comma-separated > li {
+	display: inline;
+}
+ul.comma-separated > li:not(:last-child)::after {
+	content: ', '
+}
+
 :root {
   --cata-color-black: rgb(0,0,0);
   --cata-color-red: rgb(255,0,0);
