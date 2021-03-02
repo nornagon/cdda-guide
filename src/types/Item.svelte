@@ -34,13 +34,15 @@
   let techniques = (item.techniques ?? []).map(t => $data.byId(t));
   let qualities = (item.qualities ?? []).map(([id, level]) => ({ quality: $data.byId(id), level }));
   let materials = (item.material ?? []).map(id => $data.byId(id));
+  let flags = (item.flags ?? []).map(id => $data.byId(id));
+  let ammo = Array.isArray(item.ammo) ? item.ammo[0] : item.ammo
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {item.name.str}</h1>
 <p>
-  Material: {materials.map(m => m.name).join(', ')}<br/>
+  Material: <span><ul class="comma-separated">{#each materials as m}<li><a href="#/view/{m.id}">{m.name}</a></li>{/each}</ul></span><br/>
   Volume: {item.volume} Weight: {item.weight} Length: {length(item)}<br/>
-  Flags: {(item.flags ?? []).join(', ')}
+  Flags: <span><ul class="comma-separated">{#each flags as f}<li><a href="#/view/{f.id}">{f.id}</a></li>{/each}</ul></span><br/>
 </p>
 {#if item.bashing || item.cutting}
 <p>
@@ -51,16 +53,19 @@ Moves per attack: {attackTime(item)}
 {#if techniques.length}
 <p>
   Techniques: <span><ul class="comma-separated">{#each techniques as technique}
-  <li><strong>{technique.name}</strong>: {technique.description}</li>
+  <li><strong><a href="#/view/{technique.id}">{technique.name}</a></strong>: {technique.description}</li>
   {/each}
   </ul></span>
 {/if}
 {#if qualities.length}
 <ul class="no-bullets">
 {#each qualities as {quality, level}}
-  <li>Has level <strong>{level} {quality.name.str}</strong> quality.</li>
+  <li>Has level <strong>{level} <a href="#/view/{quality.id}">{quality.name.str}</a></strong> quality.</li>
 {/each}
 </ul>
+{/if}
+{#if ammo}
+<p>Ammo: <a href="#/view/{ammo}">{$data.byId(ammo).name}</a></p>
 {/if}
 <p>
   {item.description}
