@@ -64,7 +64,7 @@
 </script>
 <dl>
   <dt>Primary skill:</dt>
-  <dd><a href="#/skill/{recipe.skill_used}">{recipe.skill_used}</a> ({recipe.difficulty ?? 0})</dd>
+  <dd><a href="#/skill/{recipe.skill_used}">{singularName($data.byId('skill', recipe.skill_used))}</a> ({recipe.difficulty ?? 0})</dd>
   <dt>Other skills:</dt>
   <dd>
     {#each skillsRequired as [skill, level], i}
@@ -120,4 +120,7 @@
     </ul>
   </dd>
 </dl>
+<details>
+<summary>Recipe JSON</summary>
 <pre>{JSON.stringify(recipe, null, 2)}</pre>
+</details>
