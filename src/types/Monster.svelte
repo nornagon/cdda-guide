@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { singularName } from '../data'
+  import { singularName, data } from '../data'
   export let item
   
   function difficulty(item: any) {
@@ -201,64 +201,71 @@
       else
         return special_attack.id
   }
+
+  let materials = (item.material ?? []).map(id => $data.byId('material', id));
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
-<p>{item.description}</p>
-<p>Difficulty: {difficulty(item)} <span class='c_{difficultyColor(difficulty(item))} fg_only'>({difficultyDescription(difficulty(item))})</span></p>
-<h2>Combat</h2>
-<div style="display: flex; flex-direction: row">
-<table>
-  <tbody>
-    <tr><td>Speed:</td><td>{item.speed}</td></tr>
-    <tr><td>Melee skill:</td><td>{item.melee_skill ?? 0}</td></tr>
-    <tr><td>Damage:</td><td>{damage(item)}</td></tr>
+<section>
+  <p>{item.description}</p>
+  <p>Difficulty: {difficulty(item)} <span class='c_{difficultyColor(difficulty(item))} fg_only'>({difficultyDescription(difficulty(item))})</span></p>
+</section>
+<section>
+  <h1>Body</h1>
+  <dl>
+    <dt>Body type</dt><dd>{item.bodytype}</dd>
+    <dt>Species</dt><dd>{(item.species ?? []).join(', ')}</dd>
+    <dt>Volume</dt><dd>{item.volume}</dd>
+    <dt>Weight</dt><dd>{item.weight}</dd>
+    <dt>Material</dt>
+    <dd>
+      <ul class="comma-separated">{#each materials as m}<li><a href="#/material/{m.id}">{m.name}</a></li>{/each}</ul>
+    </dd>
+  </dl>
+</section>
+<section>
+  <h1>Combat</h1>
+  <div style="display: flex; flex-direction: row; align-items: start">
+  <dl style="flex: 1">
+    <dt>Speed</dt><dd>{item.speed}</dd>
+    <dt>Melee skill</dt><dd>{item.melee_skill ?? 0}</dd>
+    <dt>Damage</dt><dd>{damage(item)}</dd>
     {#if item.special_attacks}
-    <tr><td>Special attacks:</td><td>
-      <table>
-        <tbody>
-          {#each item.special_attacks as special_attack, i}
-            <tr><td>{specialAttackToString(special_attack)}</td></tr>
-          {/each}
-        </tbody>
-      </table>
-    </td></tr>
+    <dt>Special attacks:</dt><dd>
+      <ul class="no-bullets">
+      {#each item.special_attacks as special_attack, i}
+        <li>{specialAttackToString(special_attack)}</li>
+      {/each}
+      </ul>
+    </dd>
     {/if}
-  </tbody>
-</table>
-<table>
-  <tbody>
-    <tr><td>HP:</td><td>{item.hp}</td></tr>
-    <tr><td>Dodge:</td><td>{item.dodge ?? 0}</td></tr>
-    <tr><td>Armor:</td>
-    <td><table>
-      <tbody>
-        <tr><td>Bash</td><td>{item.armor_bash ?? 0}</td></tr>
-        <tr><td>Cut</td><td>{item.armor_cut ?? 0}</td></tr>
-        <tr><td>Stab</td><td>{item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}</td></tr>
-        <tr><td>Bullet</td><td>{item.armor_bullet ?? 0}</td></tr>
-        <tr><td>Acid</td><td>{item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}</td></tr>
-        <tr><td>Fire</td><td>{item.armor_fire ?? 0}</td></tr>
-      </tbody>
-    </table></td></tr>
-  </tbody>
-</table>
-</div>
-<h2>Body</h2>
-<table>
-  <tbody>
-    <tr><td>Body type:</td><td>{item.bodytype}</td></tr>
-    <tr><td>Species:</td><td>{(item.species ?? []).join(', ')}</td></tr>
-    <tr><td>Volume:</td><td>{item.volume}</td></tr>
-    <tr><td>Weight</td><td>{item.weight}</td></tr>
-    <tr><td>Material:</td><td>{(item.material ?? []).join(', ')}</td></tr>
-  </tbody>
-</table>
-<h2>Behavior</h2>
-<p>Aggression: {item.aggression}</p>
-<p>Morale: {item.morale}</p>
-<p>Default faction: {item.default_faction}</p>
-<p>Anger triggers: {(item.anger_triggers ?? []).join(', ')}</p>
-<p>Placate triggers: {(item.placate_triggers ?? []).join(', ')}</p>
-<p>Flags: {#each item.flags ?? [] as flag, i}<abbr title={mon_flag_descriptions[flag]}>{flag}</abbr>{#if i < item.flags.length - 1}, {/if}{/each}</p>
-<p>On death: {(item.death_function ?? []).join(', ')}</p>
+  </dl>
+  <dl style="flex: 1">
+    <dt>HP</dt><dd>{item.hp}</dd>
+    <dt>Dodge</dt><dd>{item.dodge ?? 0}</dd>
+    <dt>Armor</dt>
+    <dd>
+      <dl>
+        <dt>Bash</dt><dd>{item.armor_bash ?? 0}</dd>
+        <dt>Cut</dt><dd>{item.armor_cut ?? 0}</dd>
+        <dt>Stab</dt><dd>{item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}</dd>
+        <dt>Bullet</dt><dd>{item.armor_bullet ?? 0}</dd>
+        <dt>Acid</dt><dd>{item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}</dd>
+        <dt>Fire</dt><dd>{item.armor_fire ?? 0}</dd>
+      </dl>
+    </dd>
+  </dl>
+  </div>
+</section>
+<section>
+  <h1>Behavior</h1>
+  <dl>
+    <dt>Aggression</dt><dd>{item.aggression}</dd>
+    <dt>Morale</dt><dd>{item.morale}</dd>
+    <dt>Default faction</dt><dd>{item.default_faction}</dd>
+    <dt>Anger triggers</dt><dd>{(item.anger_triggers ?? []).join(', ')}</dd>
+    <dt>Placate triggers</dt><dd>{(item.placate_triggers ?? []).join(', ')}</dd>
+    <dt>Flags</dt><dd>{#each item.flags ?? [] as flag, i}<abbr title={mon_flag_descriptions[flag]}>{flag}</abbr>{#if i < item.flags.length - 1}, {/if}{/each}</dd>
+    <dt>On death</dt><dd>{(item.death_function ?? []).join(', ')}</dd>
+  </dl>
+</section>

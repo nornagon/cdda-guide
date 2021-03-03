@@ -65,10 +65,10 @@
 
 <section class="recipe">
 <dl>
-  <dt>Primary skill:</dt>
+  <dt>Primary skill</dt>
   <dd><a href="#/skill/{recipe.skill_used}">{singularName($data.byId('skill', recipe.skill_used))}</a> ({recipe.difficulty ?? 0})</dd>
   {#if skillsRequired.length}
-  <dt>Other skills:</dt>
+  <dt>Other skills</dt>
   <dd>
     {#each skillsRequired as [skill, level], i}
     <a href="#/skill/{skill}">{skill}</a> ({level}){#if i === skillsRequired.length - 2}{' and '}{:else if i !== skillsRequired.length - 1}{', '}{/if}
@@ -78,7 +78,7 @@
   </dd>
   {/if}
   {#if recipe.proficiencies}
-  <dt>Proficiencies:</dt>
+  <dt>Proficiencies</dt>
   <dd>
     <ul>
     {#each recipe.proficiencies ?? [] as prof}
@@ -87,11 +87,11 @@
     </ul>
   </dd>
   {/if}
-  <dt>Time to complete:</dt>
+  <dt>Time to complete</dt>
   <dd>{recipe.time}</dd>
-  <dt>Recipe makes:</dt>
+  <dt>Recipe makes</dt>
   <dd>{recipe.charges ?? result.initial_charges ?? result.count ?? result.charges}<!-- TODO: properly switch on result type --></dd>
-  <dt>Tools required:</dt>
+  <dt>Tools required</dt>
   <dd>
     <ul>
       {#each qualities ?? [] as quality}
@@ -112,7 +112,7 @@
       {/each}
     </ul>
   </dd>
-  <dt>Components:</dt>
+  <dt>Components</dt>
   <dd>
     <ul>
       {#each components as componentChoices}
@@ -133,13 +133,8 @@
 </section>
 
 <style>
-  .recipe {
-    border-top: 2px solid white;
-    margin-top: 2em;
-  }
-  
   ul {
     margin: 0;
-    padding: 0;
+    padding-left: 1em;
   }
 </style>

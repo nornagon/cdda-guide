@@ -37,6 +37,7 @@ const typeMappings = new Map([
   ["BATTERY", "item"],
   ["GENERIC", "item"],
   ["BIONIC_ITEM", "item"],
+  ["MONSTER", "monster"],
 ])
 
 export const mapType = (type: string): string => typeMappings.get(type) ?? type

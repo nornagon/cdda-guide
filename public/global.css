@@ -79,8 +79,47 @@ ul.comma-separated > li:not(:last-child)::after {
 	content: ', '
 }
 
+dl {
+	display: grid;
+	grid-template-columns: max-content auto;
+	line-height: 1.4;
+}
+dt {
+	grid-column-start: 1;
+	text-align: right;
+	font-weight: bold;
+	color: var(--cata-color-gray);
+}
+dd {
+	margin-inline-start: 1rem;
+	grid-column-start: 2;
+}
+
+dd ul {
+	margin: 0;
+}
+
+section {
+	background: rgba(255, 255, 255, 5%);
+	padding: 1em;
+	box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+	border-radius: 4px;
+}
+section:not(:last-child) {
+	margin-bottom: 1em;
+}
+section > *:last-child { margin-bottom: 0; }
+section > *:first-child { margin-top: 0; }
+section h1 {
+	color: var(--cata-color-dark_gray);
+	text-transform: uppercase;
+	font-size: 1rem;
+	margin: 0;
+}
+
 :root {
-  --cata-color-black: rgb(0,0,0);
+  /*--cata-color-black: rgb(0,0,0);*/
+  --cata-color-black: #121212;
   --cata-color-red: rgb(255,0,0);
   --cata-color-green: rgb(0,110,0);
   --cata-color-brown: rgb(97,56,28);

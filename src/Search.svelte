@@ -16,9 +16,21 @@
 
   let search: string = history.state?.search || '';
   
-  function filter(text: string) {
+  const SEARCHABLE_TYPES = new Set([
+    'item',
+    'monster'
+  ])
+  
+  function filter(text: string): Map<string, any[]> {
     const results = fuse.search(text, { limit: 100 })
-    return results.map(x => x.item)
+    const byType = new Map<string, any[]>()
+    for (const {item} of results) {
+      const mappedType = mapType(item.type)
+      if (!SEARCHABLE_TYPES.has(mappedType)) continue;
+      if (!byType.has(mappedType)) byType.set(mappedType, [])
+      byType.get(mappedType).push(item)
+    }
+    return byType
   }
   
   $: matchingObjects = search && search.length > 1 && $data && filter(search)
@@ -28,11 +40,14 @@
 
 <input bind:value={search} tabindex=0 />
 {#if matchingObjects}
+  {#each [...matchingObjects.keys()] as type}
+  <h1>{type}</h1>
   <ul>
-    {#each matchingObjects as obj}
-    <li><a href="#/{mapType(obj.type)}/{obj.id}">{obj.id}</a></li>
+    {#each matchingObjects.get(type) as obj}
+    <li><a href="#/{mapType(obj.type)}/{obj.id}">{singularName(obj)}</a></li>
     {/each}
   </ul>
+  {/each}
 {:else}
   <pre>...</pre>
 {/if}
