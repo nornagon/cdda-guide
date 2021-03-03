@@ -49,6 +49,14 @@ export const singularName = (obj: any): string => {
     : /* fallback to id? */ obj?.id ?? obj?.abstract
 }
 
+export const pluralName = (obj: any): string => {
+  return obj?.name
+    ? typeof obj.name === 'string'
+      ? obj.name
+      : obj.name.str_sp ?? obj.name.str_pl ?? obj.name.str + 's'
+    : /* fallback to id? */ obj?.id ?? obj?.abstract
+}
+
 class CddaData {
   _raw: any[]
   _byType: Map<string, any[]> = new Map

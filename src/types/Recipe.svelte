@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { data, singularName } from '../data'
+  import { data, singularName, pluralName } from '../data'
 
   export let recipe: any
   
@@ -7,7 +7,7 @@
   type RequirementChoices = OneRequirement[]
   type Requirement = RequirementChoices[]
   
-  function flattenChoices(choices: RequirementChoices): {id: string, count: number}[] {
+  function flattenChoices(choices: RequirementChoices, get: (x: any) => Requirement): {id: string, count: number}[] {
     const flatChoices = []
     for (const choice of choices) {
       const [id, count, isList] = choice
@@ -16,9 +16,9 @@
         if (otherRequirement.type !== 'requirement') {
           console.error(`Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`)
         }
-        const otherRequirementTools = otherRequirement.tools ?? []
+        const otherRequirementTools = get(otherRequirement) ?? []
         const otherRequirementChoices = otherRequirementTools[0] // only take the first
-        flatChoices.push(...flattenChoices(otherRequirementChoices))
+        flatChoices.push(...flattenChoices(otherRequirementChoices, get).map(x => ({...x, count: x.count * count})))
       } else {
         flatChoices.push({id, count})
       }
@@ -31,16 +31,31 @@
     return [r, ...replacements.map(o => ({id: o, count: r.count}))]
   }
   
-  function flattenRequirement(required: Requirement) {
-    return required.map(flattenChoices).map(x => x.flatMap(expandSubstitutes)).filter(x => x.length)
+  function flattenRequirement(required: Requirement, get: (x: any) => Requirement) {
+    return required.map(x => flattenChoices(x, get)).map(x => x.flatMap(expandSubstitutes)).filter(x => x.length)
   }
   
   let result = $data.byId('item', recipe.result)
-  let tools = flattenRequirement(recipe.tools ?? [])
+  
+  let requirements = ((recipe.using ?? [])
+    .map(([id, count]) => [$data.byId('requirement', id), count])).concat([[recipe, 1]])
+  
+  let tools = requirements.flatMap(([req, count]) => {
+    return flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
+  })
+  let components = requirements.flatMap(([req, count]) => {
+    return flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
+  })
+  let qualities = requirements.flatMap(([req, count]) => {
+    return req.qualities ?? []
+  })
+
+  //let tools = flattenRequirement(recipe.tools ?? [], x => x.tools)
+  //let components = flattenRequirement(recipe.components ?? [], x => x.components)
   
   function normalizeSkillsRequired(skills_required: [string, number] | [string, number][] | undefined): [string, number][] {
     if (skills_required === undefined) return []
-    if (Array.isArray(typeof skills_required[0]))
+    if (Array.isArray(skills_required[0]))
       return skills_required as [string, number][]
     return [skills_required as [string, number]]
   }
@@ -73,7 +88,7 @@
   <dt>Tools required:</dt>
   <dd>
     <ul>
-      {#each recipe.qualities ?? [] as quality}
+      {#each qualities ?? [] as quality}
         <li>{quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'} with <a href="#/tool_quality/{quality.id}">{singularName($data.byId('tool_quality', quality.id))}</a> of {quality.level} or more.</li>
       {/each}
       {#each tools as toolChoices}
@@ -86,6 +101,19 @@
           <a href='#/item/{tool.id}'>{singularName($data.byId('item', tool.id))}</a>
           {/if}
           {#if tool.count > 0}({tool.count} charge{#if tool.count !== 1}s{/if}){/if}
+        {/each}
+      </li>
+      {/each}
+    </ul>
+  </dd>
+  <dt>Components:</dt>
+  <dd>
+    <ul>
+      {#each components as componentChoices}
+      <li>
+        {#each componentChoices as comp, i}
+          {#if i !== 0}{' OR '}{/if}
+          {comp.count} <a href='#/item/{comp.id}'>{comp.count === 1 ? singularName($data.byId('item', comp.id)) : pluralName($data.byId('item', comp.id))}</a>
         {/each}
       </li>
       {/each}
