@@ -62,9 +62,12 @@
   
   let skillsRequired = normalizeSkillsRequired(recipe.skills_required)
 </script>
+
+<section class="recipe">
 <dl>
   <dt>Primary skill:</dt>
   <dd><a href="#/skill/{recipe.skill_used}">{singularName($data.byId('skill', recipe.skill_used))}</a> ({recipe.difficulty ?? 0})</dd>
+  {#if skillsRequired.length}
   <dt>Other skills:</dt>
   <dd>
     {#each skillsRequired as [skill, level], i}
@@ -73,6 +76,8 @@
     none
     {/each}
   </dd>
+  {/if}
+  {#if recipe.proficiencies}
   <dt>Proficiencies:</dt>
   <dd>
     <ul>
@@ -81,6 +86,7 @@
     {/each}
     </ul>
   </dd>
+  {/if}
   <dt>Time to complete:</dt>
   <dd>{recipe.time}</dd>
   <dt>Recipe makes:</dt>
@@ -124,3 +130,16 @@
 <summary>Recipe JSON</summary>
 <pre>{JSON.stringify(recipe, null, 2)}</pre>
 </details>
+</section>
+
+<style>
+  .recipe {
+    border-top: 2px solid white;
+    margin-top: 2em;
+  }
+  
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+</style>
