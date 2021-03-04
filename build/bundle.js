@@ -770,7 +770,7 @@ var app = (function () {
     }
 
     // (216:4) {#if item.special_attacks}
-    function create_if_block_1$4(ctx) {
+    function create_if_block_3$2(ctx) {
     	let dt;
     	let dd;
     	let ul;
@@ -841,7 +841,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$4.name,
+    		id: create_if_block_3$2.name,
     		type: "if",
     		source: "(216:4) {#if item.special_attacks}",
     		ctx
@@ -885,7 +885,89 @@ var app = (function () {
     	return block;
     }
 
-    // (251:112) {#if i < item.flags.length - 1}
+    // (249:4) {#if item.anger_triggers}
+    function create_if_block_2$2(ctx) {
+    	let dt;
+    	let dd;
+    	let t1_value = /*item*/ ctx[0].anger_triggers.join(", ") + "";
+    	let t1;
+
+    	const block = {
+    		c: function create() {
+    			dt = element("dt");
+    			dt.textContent = "Anger triggers";
+    			dd = element("dd");
+    			t1 = text(t1_value);
+    			add_location(dt, file$6, 249, 4, 12356);
+    			add_location(dd, file$6, 249, 27, 12379);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dt, anchor);
+    			insert_dev(target, dd, anchor);
+    			append_dev(dd, t1);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*item*/ 1 && t1_value !== (t1_value = /*item*/ ctx[0].anger_triggers.join(", ") + "")) set_data_dev(t1, t1_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dt);
+    			if (detaching) detach_dev(dd);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$2.name,
+    		type: "if",
+    		source: "(249:4) {#if item.anger_triggers}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (252:4) {#if item.placate_triggers}
+    function create_if_block_1$4(ctx) {
+    	let dt;
+    	let dd;
+    	let t1_value = /*item*/ ctx[0].placate_triggers.join(", ") + "";
+    	let t1;
+
+    	const block = {
+    		c: function create() {
+    			dt = element("dt");
+    			dt.textContent = "Placate triggers";
+    			dd = element("dd");
+    			t1 = text(t1_value);
+    			add_location(dt, file$6, 252, 4, 12467);
+    			add_location(dd, file$6, 252, 29, 12492);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dt, anchor);
+    			insert_dev(target, dd, anchor);
+    			append_dev(dd, t1);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*item*/ 1 && t1_value !== (t1_value = /*item*/ ctx[0].placate_triggers.join(", ") + "")) set_data_dev(t1, t1_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dt);
+    			if (detaching) detach_dev(dd);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$4.name,
+    		type: "if",
+    		source: "(252:4) {#if item.placate_triggers}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (255:112) {#if i < item.flags.length - 1}
     function create_if_block$5(ctx) {
     	let t;
 
@@ -905,14 +987,14 @@ var app = (function () {
     		block,
     		id: create_if_block$5.name,
     		type: "if",
-    		source: "(251:112) {#if i < item.flags.length - 1}",
+    		source: "(255:112) {#if i < item.flags.length - 1}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (251:22) {#each item.flags ?? [] as flag, i}
+    // (255:22) {#each item.flags ?? [] as flag, i}
     function create_each_block$3(ctx) {
     	let abbr;
     	let t_value = /*flag*/ ctx[5] + "";
@@ -928,7 +1010,7 @@ var app = (function () {
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
     			attr_dev(abbr, "title", abbr_title_value = /*mon_flag_descriptions*/ ctx[1][/*flag*/ ctx[5]]);
-    			add_location(abbr, file$6, 250, 57, 12537);
+    			add_location(abbr, file$6, 254, 57, 12603);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, abbr, anchor);
@@ -965,7 +1047,7 @@ var app = (function () {
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(251:22) {#each item.flags ?? [] as flag, i}",
+    		source: "(255:22) {#each item.flags ?? [] as flag, i}",
     		ctx
     	});
 
@@ -1094,20 +1176,13 @@ var app = (function () {
     	let dd19;
     	let t59_value = /*item*/ ctx[0].default_faction + "";
     	let t59;
+    	let if_block1_anchor;
     	let dt20;
     	let dd20;
-    	let t61_value = (/*item*/ ctx[0].anger_triggers ?? []).join(", ") + "";
-    	let t61;
     	let dt21;
     	let dd21;
-    	let t63_value = (/*item*/ ctx[0].placate_triggers ?? []).join(", ") + "";
-    	let t63;
-    	let dt22;
-    	let dd22;
-    	let dt23;
-    	let dd23;
-    	let t66_value = (/*item*/ ctx[0].death_function ?? []).join(", ") + "";
-    	let t66;
+    	let t62_value = (/*item*/ ctx[0].death_function ?? []).join(", ") + "";
+    	let t62;
     	let each_value_2 = /*materials*/ ctx[2];
     	validate_each_argument(each_value_2);
     	let each_blocks_1 = [];
@@ -1116,7 +1191,9 @@ var app = (function () {
     		each_blocks_1[i] = create_each_block_2$2(get_each_context_2$2(ctx, each_value_2, i));
     	}
 
-    	let if_block = /*item*/ ctx[0].special_attacks && create_if_block_1$4(ctx);
+    	let if_block0 = /*item*/ ctx[0].special_attacks && create_if_block_3$2(ctx);
+    	let if_block1 = /*item*/ ctx[0].anger_triggers && create_if_block_2$2(ctx);
+    	let if_block2 = /*item*/ ctx[0].placate_triggers && create_if_block_1$4(ctx);
     	let each_value = /*item*/ ctx[0].flags ?? [];
     	validate_each_argument(each_value);
     	let each_blocks = [];
@@ -1195,7 +1272,7 @@ var app = (function () {
     			dt7.textContent = "Damage";
     			dd7 = element("dd");
     			t32 = text(t32_value);
-    			if (if_block) if_block.c();
+    			if (if_block0) if_block0.c();
     			t33 = space();
     			dl3 = element("dl");
     			dt8 = element("dt");
@@ -1252,26 +1329,21 @@ var app = (function () {
     			dt19.textContent = "Default faction";
     			dd19 = element("dd");
     			t59 = text(t59_value);
+    			if (if_block1) if_block1.c();
+    			if_block1_anchor = empty();
+    			if (if_block2) if_block2.c();
     			dt20 = element("dt");
-    			dt20.textContent = "Anger triggers";
+    			dt20.textContent = "Flags";
     			dd20 = element("dd");
-    			t61 = text(t61_value);
-    			dt21 = element("dt");
-    			dt21.textContent = "Placate triggers";
-    			dd21 = element("dd");
-    			t63 = text(t63_value);
-    			dt22 = element("dt");
-    			dt22.textContent = "Flags";
-    			dd22 = element("dd");
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			dt23 = element("dt");
-    			dt23.textContent = "On death";
-    			dd23 = element("dd");
-    			t66 = text(t66_value);
+    			dt21 = element("dt");
+    			dt21.textContent = "On death";
+    			dd21 = element("dd");
+    			t62 = text(t62_value);
     			set_style(span0, "font-family", "monospace");
     			attr_dev(span0, "class", span0_class_value = "c_" + /*item*/ ctx[0].color);
     			add_location(span0, file$6, 190, 4, 10309);
@@ -1338,14 +1410,10 @@ var app = (function () {
     			add_location(dd18, file$6, 246, 19, 12239);
     			add_location(dt19, file$6, 247, 4, 12266);
     			add_location(dd19, file$6, 247, 28, 12290);
-    			add_location(dt20, file$6, 248, 4, 12326);
-    			add_location(dd20, file$6, 248, 27, 12349);
-    			add_location(dt21, file$6, 249, 4, 12403);
-    			add_location(dd21, file$6, 249, 29, 12428);
-    			add_location(dt22, file$6, 250, 4, 12484);
-    			add_location(dd22, file$6, 250, 18, 12498);
-    			add_location(dt23, file$6, 251, 4, 12647);
-    			add_location(dd23, file$6, 251, 21, 12664);
+    			add_location(dt20, file$6, 254, 4, 12550);
+    			add_location(dd20, file$6, 254, 18, 12564);
+    			add_location(dt21, file$6, 255, 4, 12713);
+    			add_location(dd21, file$6, 255, 21, 12730);
     			add_location(dl4, file$6, 244, 2, 12165);
     			add_location(section3, file$6, 242, 0, 12133);
     		},
@@ -1411,7 +1479,7 @@ var app = (function () {
     			append_dev(dl1, dt7);
     			append_dev(dl1, dd7);
     			append_dev(dd7, t32);
-    			if (if_block) if_block.m(dl1, null);
+    			if (if_block0) if_block0.m(dl1, null);
     			append_dev(div, t33);
     			append_dev(div, dl3);
     			append_dev(dl3, dt8);
@@ -1455,22 +1523,19 @@ var app = (function () {
     			append_dev(dl4, dt19);
     			append_dev(dl4, dd19);
     			append_dev(dd19, t59);
+    			if (if_block1) if_block1.m(dl4, null);
+    			append_dev(dl4, if_block1_anchor);
+    			if (if_block2) if_block2.m(dl4, null);
     			append_dev(dl4, dt20);
     			append_dev(dl4, dd20);
-    			append_dev(dd20, t61);
-    			append_dev(dl4, dt21);
-    			append_dev(dl4, dd21);
-    			append_dev(dd21, t63);
-    			append_dev(dl4, dt22);
-    			append_dev(dl4, dd22);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(dd22, null);
+    				each_blocks[i].m(dd20, null);
     			}
 
-    			append_dev(dl4, dt23);
-    			append_dev(dl4, dd23);
-    			append_dev(dd23, t66);
+    			append_dev(dl4, dt21);
+    			append_dev(dl4, dd21);
+    			append_dev(dd21, t62);
     		},
     		p: function update(ctx, [dirty]) {
     			if (dirty & /*item*/ 1 && t0_value !== (t0_value = /*item*/ ctx[0].symbol + "")) set_data_dev(t0, t0_value);
@@ -1522,16 +1587,16 @@ var app = (function () {
     			if (dirty & /*item*/ 1 && t32_value !== (t32_value = damage(/*item*/ ctx[0]) + "")) set_data_dev(t32, t32_value);
 
     			if (/*item*/ ctx[0].special_attacks) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1$4(ctx);
-    					if_block.c();
-    					if_block.m(dl1, null);
+    					if_block0 = create_if_block_3$2(ctx);
+    					if_block0.c();
+    					if_block0.m(dl1, null);
     				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
     			}
 
     			if (dirty & /*item*/ 1 && t35_value !== (t35_value = /*item*/ ctx[0].hp + "")) set_data_dev(t35, t35_value);
@@ -1545,8 +1610,32 @@ var app = (function () {
     			if (dirty & /*item*/ 1 && t55_value !== (t55_value = /*item*/ ctx[0].aggression + "")) set_data_dev(t55, t55_value);
     			if (dirty & /*item*/ 1 && t57_value !== (t57_value = /*item*/ ctx[0].morale + "")) set_data_dev(t57, t57_value);
     			if (dirty & /*item*/ 1 && t59_value !== (t59_value = /*item*/ ctx[0].default_faction + "")) set_data_dev(t59, t59_value);
-    			if (dirty & /*item*/ 1 && t61_value !== (t61_value = (/*item*/ ctx[0].anger_triggers ?? []).join(", ") + "")) set_data_dev(t61, t61_value);
-    			if (dirty & /*item*/ 1 && t63_value !== (t63_value = (/*item*/ ctx[0].placate_triggers ?? []).join(", ") + "")) set_data_dev(t63, t63_value);
+
+    			if (/*item*/ ctx[0].anger_triggers) {
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+    				} else {
+    					if_block1 = create_if_block_2$2(ctx);
+    					if_block1.c();
+    					if_block1.m(dl4, if_block1_anchor);
+    				}
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
+    			}
+
+    			if (/*item*/ ctx[0].placate_triggers) {
+    				if (if_block2) {
+    					if_block2.p(ctx, dirty);
+    				} else {
+    					if_block2 = create_if_block_1$4(ctx);
+    					if_block2.c();
+    					if_block2.m(dl4, dt20);
+    				}
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
+    			}
 
     			if (dirty & /*item, mon_flag_descriptions*/ 3) {
     				each_value = /*item*/ ctx[0].flags ?? [];
@@ -1561,7 +1650,7 @@ var app = (function () {
     					} else {
     						each_blocks[i] = create_each_block$3(child_ctx);
     						each_blocks[i].c();
-    						each_blocks[i].m(dd22, null);
+    						each_blocks[i].m(dd20, null);
     					}
     				}
 
@@ -1572,7 +1661,7 @@ var app = (function () {
     				each_blocks.length = each_value.length;
     			}
 
-    			if (dirty & /*item*/ 1 && t66_value !== (t66_value = (/*item*/ ctx[0].death_function ?? []).join(", ") + "")) set_data_dev(t66, t66_value);
+    			if (dirty & /*item*/ 1 && t62_value !== (t62_value = (/*item*/ ctx[0].death_function ?? []).join(", ") + "")) set_data_dev(t62, t62_value);
     		},
     		i: noop,
     		o: noop,
@@ -1585,9 +1674,11 @@ var app = (function () {
     			destroy_each(each_blocks_1, detaching);
     			if (detaching) detach_dev(t24);
     			if (detaching) detach_dev(section2);
-    			if (if_block) if_block.d();
+    			if (if_block0) if_block0.d();
     			if (detaching) detach_dev(t51);
     			if (detaching) detach_dev(section3);
+    			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
     			destroy_each(each_blocks, detaching);
     		}
     	};
