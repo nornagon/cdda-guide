@@ -135,6 +135,7 @@ class CddaData {
     delete ret.relative
     for (const k of Object.keys(ret.proportional ?? {})) {
       if (typeof ret.proportional[k] === 'number') {
+        if (k === 'attack_cost' && !(k in ret)) ret[k] = 100
         ret[k] *= ret.proportional[k]
       }
       // TODO: damage, mass, volume, time (need to check the base value's type)
