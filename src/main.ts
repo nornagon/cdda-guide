@@ -1,15 +1,17 @@
 import App from './App.svelte';
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('service-worker.js').catch((err) => {
-      console.log('ServiceWorker registration failed: ', err);
-    });
+  navigator.serviceWorker.register('service-worker.js').catch((err) => {
+    console.log('ServiceWorker registration failed: ', err);
+  });
+  navigator.serviceWorker.ready.then(start)
+}
+
+function start() {
+  const app = new App({
+    target: document.body,
   });
 }
 
-const app = new App({
-  target: document.body,
-});
 
-export default app;
+//export default app;

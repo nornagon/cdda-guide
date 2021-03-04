@@ -146,18 +146,22 @@ class CddaData {
   }
 }
 
-const json: Promise<CddaData> = (async () => {
-  const latestBuildRes = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/latest-build.json`)
-  if (!latestBuildRes.ok)
-    throw new Error(`Error ${latestBuildRes.status} (${latestBuildRes.statusText}) fetching data`)
-  const {latest_build} = await latestBuildRes.json()
-  const res = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${latest_build}/all.json`)
+const fetchJson = async () => {
+  const res = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/data/latest/all.json`)
   if (!res.ok)
     throw new Error(`Error ${res.status} (${res.statusText}) fetching data`)
   const json = await res.json()
-  return new CddaData(json)
+  return new CddaData(json.data)
+}
+
+const json = (() => {
+  let promise: Promise<CddaData>
+  return () => {
+    if (!promise) promise = fetchJson()
+    return promise
+  }
 })()
 
 export const data = readable<CddaData>(null, function (set) {
-  json.then(set)
+  json().then(set)
 });
