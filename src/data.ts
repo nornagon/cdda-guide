@@ -137,6 +137,7 @@ class CddaData {
       if (typeof ret.proportional[k] === 'number') {
         if (k === 'attack_cost' && !(k in ret)) ret[k] = 100
         ret[k] *= ret.proportional[k]
+        ret[k] = ret[k] | 0 // most things are ints.. TODO: what keys are float?
       }
       // TODO: damage, mass, volume, time (need to check the base value's type)
     }
