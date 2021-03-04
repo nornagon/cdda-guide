@@ -5,7 +5,8 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public",
-    "validate": "svelte-check"
+    "validate": "svelte-check",
+    "deploy": "gh-pages -d public"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "fuse.js": "^6.4.6",
+    "gh-pages": "^3.1.0",
     "sirv-cli": "^1.0.0"
   }
 }

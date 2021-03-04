@@ -2,8 +2,7 @@ import App from './App.svelte';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-    }, function(err) {
+    navigator.serviceWorker.register('service-worker.js').catch((err) => {
       console.log('ServiceWorker registration failed: ', err);
     });
   });
