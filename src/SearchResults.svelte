@@ -12,9 +12,11 @@
         return singularName(obj)
     },
     ignoreFieldNorm: true,
+    minMatchCharLength: 2,
+    threshold: 0.2
   })
 
-  let search: string = history.state?.search || '';
+  export let search: string
   
   const SEARCHABLE_TYPES = new Set([
     'item',
@@ -38,7 +40,6 @@
   $: history.replaceState({ search }, '')
 </script>
 
-<input bind:value={search} tabindex=0 />
 {#if matchingObjects}
   {#each [...matchingObjects.keys()] as type}
   <h1>{type}</h1>
