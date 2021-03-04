@@ -24,10 +24,11 @@
 // cache, then increment the CACHE_VERSION value. It will kick off the service worker update
 // flow and the old cache(s) will be purged as part of the activate event handler when the
 // updated service worker is activated.
-var CACHE_VERSION = 1;
-var CURRENT_CACHES = {
+const CACHE_VERSION = 1;
+const CURRENT_CACHES = {
   data: 'data-v' + CACHE_VERSION,
   github_misc: 'github-misc-v' + CACHE_VERSION,
+  app: 'app-v' + CACHE_VERSION,
 };
 
 self.addEventListener('activate', function(event) {
@@ -77,8 +78,20 @@ self.addEventListener('fetch', (event) => {
       })())
     }
   } else {
-    // all other urls: network only.
-    // TODO: cache html/css/js.
-    return event.respondWith(fetch(event.request))
+    return event.respondWith((async () => {
+      try {
+        const response = await fetch(event.request.clone());
+        if (response.type === 'basic') {
+          const clonedResponse = response.clone();
+          event.waitUntil(caches.open(CURRENT_CACHES.app).then(cache => {
+            cache.put(event.request, clonedResponse);
+          }));
+        }
+        return response;
+      } catch (err) {
+        const cache = await caches.open(CURRENT_CACHES.app)
+        return await cache.match(event.request)
+      }
+    })())
   }
 });
