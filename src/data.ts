@@ -145,44 +145,14 @@ class CddaData {
 }
 
 const json: Promise<CddaData> = (async () => {
-  const res = await fetch(`/data.json`)
-  if (!res.ok) {
+  const latestBuildRes = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/latest-build.json`)
+  if (!latestBuildRes.ok)
+    throw new Error(`Error ${latestBuildRes.status} (${latestBuildRes.statusText}) fetching data`)
+  const {latest_build} = await latestBuildRes.json()
+  const res = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${latest_build}/all.json`)
+  if (!res.ok)
     throw new Error(`Error ${res.status} (${res.statusText}) fetching data`)
-  }
   const json = await res.json()
-  /*
-  const byId = new Map
-  const abstract = new Map
-  for (const obj of json) {
-    if (obj.id) {
-      byId.set(obj.id, obj)
-    } else if (obj.abstract) {
-      abstract.set(obj.abstract, obj)
-    }
-  }
-  for (const value of byId.values()) {
-    if (Object.hasOwnProperty.call(value, 'copy-from')) {
-      let parent: any = null
-      if (byId.has(value['copy-from'])) {
-        parent = byId.get(value['copy-from'])
-      } else if (abstract.has(value['copy-from'])) {
-        parent = abstract.get(value['copy-from'])
-      } else {
-        console.log('unknown copy-from:', value['copy-from'])
-      }
-      if (parent) {
-        if (parent['copy-from']) {
-          //console.log('double copy', value.id)
-          if (value['relative'] && parent['relative']) {
-            console.log('double relative', value.id)
-          }
-        }
-        Object.setPrototypeOf(value, parent)
-      }
-    }
-  }
-  console.log(byId.get('mon_dog_zombie_brute'))
-  */
   return new CddaData(json)
 })()
 
