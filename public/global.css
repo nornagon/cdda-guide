@@ -25,6 +25,10 @@ a:visited {
 	color: rgb(0,80,160);
 }
 
+a, a:visited {
+	color: hsl(122deg, 44%, 61%);
+}
+
 label {
 	display: block;
 }
