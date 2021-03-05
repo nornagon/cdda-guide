@@ -38,10 +38,10 @@
 
 <header>
   <nav>
-    <div>
+    <div class="title">
       <strong>Hitchhiker's Guide to the Cataclysm</strong>
     </div>
-    <div style="flex: 0.8">
+    <div class="search">
       <input style="margin: 0; width: 100%" placeholder="Search..." bind:value={search} on:input={clearItem} />
     </div>
   </nav>
@@ -67,7 +67,7 @@ It's also <a href="#" on:click={(e) => {e.preventDefault(); deferredPrompt.promp
 so you can pop it out of your browser like a regular app.
 {/if}
 </p>
-<p style="font-style: italic">More popular than the Celestial Home Care
+<p style="font-style: italic; color: var(--cata-color-gray)">More popular than the Celestial Home Care
 Omnibus, better selling than Fifty-three More Things to do in Zero Gravity, and
 more controversial than Oolon Colluphid's trilogy of philosophical blockbusters
 Where God Went Wrong, Some More of God's Greatest Mistakes and Who is this God
@@ -93,6 +93,8 @@ href="https://nornagon.net">nornagon</a>.</p>
     width: 100%;
     height: 4rem;
     background: rgba(33, 33, 33, 0.98);
+    padding: 0 calc(1em + 8px);
+    box-sizing: border-box;
   }
   
   nav {
@@ -102,5 +104,18 @@ href="https://nornagon.net">nornagon</a>.</p>
     align-items: center;
     justify-content: space-between;
     height: 100%;
+  }
+  
+  nav > .search {
+    flex: 0.8;
+  }
+  
+  @media (max-width: 600px) {
+    nav > .title {
+      display: none;
+    }
+    nav > .search {
+      flex: 1;
+    }
   }
 </style>
