@@ -40,6 +40,8 @@
   let flags = (item.flags ?? []).map(id => $data.byId('json_flag', id) ?? {id});
   let ammo = Array.isArray(item.ammo) ? item.ammo[0] : item.ammo
   
+  let faults = (item.faults ?? []).map(f => $data.byId('fault', f));
+  
   let recipes = $data.byType('recipe').filter(x => x.result === item.id && !x.obsolete)
 </script>
 
@@ -90,6 +92,17 @@
   </ul></dd>
 {/if}
 </dl>
+</section>
+{/if}
+{#if faults.length}
+<section>
+  <h1>Possible faults</h1>
+  <dl>
+    {#each faults as fault}
+    <dt><a href="#/fault/{fault.id}">{singularName(fault)}</a></dt>
+    <dd>{fault.description}</dd>
+    {/each}
+  </dl>
 </section>
 {/if}
 {#if recipes.length}
