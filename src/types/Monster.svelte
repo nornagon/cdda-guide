@@ -262,6 +262,7 @@
   <dl>
     <dt>Aggression</dt><dd>{item.aggression}</dd>
     <dt>Morale</dt><dd>{item.morale}</dd>
+    <dt>Vision range</dt><dd>{item.vision_day ?? 40} (day)–{item.vision_night ?? 1} (night)</dd>
     <dt>Default faction</dt><dd>{item.default_faction}</dd>
     {#if item.anger_triggers}
     <dt>Anger triggers</dt><dd>{item.anger_triggers.join(', ')}</dd>

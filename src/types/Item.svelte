@@ -49,10 +49,12 @@
 <section>
 <h1>General</h1>
 <dl>
+  {#if materials.length}
   <dt>Material</dt>
   <dd>
     <ul class="comma-separated">{#each materials as m}<li><a href="#/material/{m.id}">{m.name}</a></li>{/each}</ul>
   </dd>
+  {/if}
   <dt>Volume</dt><dd>{item.volume}</dd>
   <dt>Weight</dt><dd>{item.weight}</dd>
   <dt>Length</dt><dd>{length(item)}</dd>
