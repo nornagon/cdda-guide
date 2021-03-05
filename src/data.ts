@@ -142,6 +142,12 @@ class CddaData {
       // TODO: damage, mass, volume, time (need to check the base value's type)
     }
     delete ret.proportional
+    for (const k of Object.keys(ret.extend ?? {})) {
+      if (Array.isArray(ret.extend[k])) {
+        ret[k] = ret[k].concat(ret.extend[k])
+      }
+    }
+    delete ret.extend
     return ret
   }
 }
