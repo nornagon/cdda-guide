@@ -2,9 +2,9 @@
   import { onMount } from "svelte";
 	import Object from "./Object.svelte";
   import SearchResults from "./SearchResults.svelte";
-  
+
   let item: { type: string, id: string } | null = null
-  
+
   function hashchange() {
     // the poor man's router!
     const path = window.location.hash.slice(1);
@@ -22,11 +22,17 @@
 
   onMount(hashchange)
   let search: string = ''
-  
+
   const clearItem = () => {
     if (item) history.pushState(null, '', location.href.replace(/#.*$/, ''))
     item = null;
   }
+
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    deferredPrompt = e;
+  });
+
 </script>
 <svelte:window on:hashchange={hashchange}/>
 
@@ -55,7 +61,12 @@ Dark Days Ahead</a>. You can search for things in the game, like items and
 monsters, and find useful information about them. The Guide is directly derived
 from the JSON files in the game itself.</p>
 <p>The Guide stores all its data locally and is offline-capable, so you can
-take it with you whereever you go.</p>
+take it with you whereever you go.
+{#if deferredPrompt}
+It's also <a href="#" on:click={(e) => {e.preventDefault(); deferredPrompt.prompt()}}>installable</a>,
+so you can pop it out of your browser like a regular app.
+{/if}
+</p>
 <p style="font-style: italic">More popular than the Celestial Home Care
 Omnibus, better selling than Fifty-three More Things to do in Zero Gravity, and
 more controversial than Oolon Colluphid's trilogy of philosophical blockbusters
