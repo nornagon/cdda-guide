@@ -225,7 +225,7 @@
 </section>
 <section>
   <h1>Combat</h1>
-  <div style="display: flex; flex-direction: row; align-items: start">
+  <div style="display: flex; flex-direction: row; align-items: start; flex-wrap: wrap;">
   <dl style="flex: 1">
     <dt>Speed</dt><dd>{item.speed}</dd>
     <dt>Melee skill</dt><dd>{item.melee_skill ?? 0}</dd>
