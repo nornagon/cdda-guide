@@ -39,7 +39,7 @@
 <header>
   <nav>
     <div class="title">
-      <strong>Hitchhiker's Guide to the Cataclysm</strong>
+      <strong><a href="#" on:click={() => search = ''}>Hitchhiker's Guide to the Cataclysm</a></strong>
     </div>
     <div class="search">
       <input style="margin: 0; width: 100%" placeholder="Search..." bind:value={search} on:input={clearItem} />
@@ -54,12 +54,12 @@
 {:else if search}
 <SearchResults search={search} />
 {:else}
-<h1>DON'T PANIC</h1>
+<img src="dont_panic.png" height="200" style="float:right" alt="The words 'Don't Panic' in big friendly letters" />
 <p><strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
 zombie survival roguelike game <a href="https://cataclysmdda.org/">Cataclysm:
 Dark Days Ahead</a>. You can search for things in the game, like items and
-monsters, and find useful information about them. The Guide is directly derived
-from the JSON files in the game itself.</p>
+monsters, and find useful information about them. The data in the Guide comes
+directly from the JSON files in the game itself.</p>
 <p>The Guide stores all its data locally and is offline-capable, so you can
 take it with you whereever you go.
 {#if deferredPrompt}
@@ -74,7 +74,7 @@ Where God Went Wrong, Some More of God's Greatest Mistakes and Who is this God
 Person Anyway?</p>
 <p>The guide is developed on <a
 href="https://github.com/nornagon/cdda-guide">GitHub</a> by <a
-href="https://nornagon.net">nornagon</a>.</p>
+href="https://www.nornagon.net">nornagon</a>.</p>
 {/if}
 </main>
 
