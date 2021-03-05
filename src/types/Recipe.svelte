@@ -61,6 +61,10 @@
   }
   
   let skillsRequired = normalizeSkillsRequired(recipe.skills_required)
+  
+  const countsByCharges = (item): boolean => {
+    return item.type === 'AMMO' || item.type === 'COMESTIBLE' || item.stackable;
+  }
 </script>
 
 <section class="recipe">
@@ -89,8 +93,10 @@
   {/if}
   <dt>Time to complete</dt>
   <dd>{recipe.time}</dd>
+  {#if recipe.charges ?? result.initial_charges ?? result.count ?? result.charges}
   <dt>Recipe makes</dt>
   <dd>{recipe.charges ?? result.initial_charges ?? result.count ?? result.charges}<!-- TODO: properly switch on result type --></dd>
+  {/if}
   <dt>Tools required</dt>
   <dd>
     <ul>
@@ -117,9 +123,11 @@
     <ul>
       {#each components as componentChoices}
       <li>
-        {#each componentChoices as comp, i}
+        {#each componentChoices.map(c => ({...c, item: $data.byId('item', c.id)})) as {id, item, count}, i}
           {#if i !== 0}{' OR '}{/if}
-          {comp.count} <a href='#/item/{comp.id}'>{comp.count === 1 ? singularName($data.byId('item', comp.id)) : pluralName($data.byId('item', comp.id))}</a>
+          {#if !countsByCharges(item)}{count}{/if}
+          <a href='#/item/{id}'>{count === 1 ? singularName(item) : pluralName(item)}</a>
+          {#if countsByCharges(item)}({count}){/if}
         {/each}
       </li>
       {/each}
