@@ -48,7 +48,22 @@
 {:else if search}
 <SearchResults search={search} />
 {:else}
-DON'T PANIC
+<h1>DON'T PANIC</h1>
+<p><strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
+zombie survival roguelike game <a href="https://cataclysmdda.org/">Cataclysm:
+Dark Days Ahead</a>. You can search for things in the game, like items and
+monsters, and find useful information about them. The Guide is directly derived
+from the JSON files in the game itself.</p>
+<p>The Guide stores all its data locally and is offline-capable, so you can
+take it with you whereever you go.</p>
+<p style="font-style: italic">More popular than the Celestial Home Care
+Omnibus, better selling than Fifty-three More Things to do in Zero Gravity, and
+more controversial than Oolon Colluphid's trilogy of philosophical blockbusters
+Where God Went Wrong, Some More of God's Greatest Mistakes and Who is this God
+Person Anyway?</p>
+<p>The guide is developed on <a
+href="https://github.com/nornagon/cdda-guide">GitHub</a> by <a
+href="https://nornagon.net">nornagon</a>.</p>
 {/if}
 </main>
 
