@@ -78,6 +78,12 @@ class CddaData {
         if (!this._byTypeById.has(mappedType)) this._byTypeById.set(mappedType, new Map)
         this._byTypeById.get(mappedType).set(obj.id, obj)
       }
+      // recipes are id'd by their result
+      if (obj.type === 'recipe' && Object.hasOwnProperty.call(obj, 'result')) {
+        if (!this._byTypeById.has(mappedType)) this._byTypeById.set(mappedType, new Map)
+        const id = obj.result + (obj.id_suffix ? '_' + obj.id_suffix : '')
+        this._byTypeById.get(mappedType).set(obj.result, obj)
+      }
       if (Object.hasOwnProperty.call(obj, 'abstract')) {
         if (!this._abstractsByType.has(mappedType)) this._abstractsByType.set(mappedType, new Map)
         this._abstractsByType.get(mappedType).set(obj.abstract, obj)

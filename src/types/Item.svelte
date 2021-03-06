@@ -79,7 +79,7 @@
   })
   let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL').flatMap(p => p.item_restriction)
   
-  let recipes = $data.byType('recipe').filter(x => x.result === item.id && !x.obsolete)
+  let recipes = $data.byType('recipe').filter(x => x.result === item.id && !x.obsolete).map(r => $data._flatten(r))
   
   function maxCharges(ammo_id: string) {
     let ret = 0
