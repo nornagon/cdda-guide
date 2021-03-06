@@ -185,12 +185,12 @@
     <dd>{item.coverage ?? 0}%</dd>
     <dt>Layer</dt>
     <dd>
-      {#if item.flags.includes('PERSONAL')}Personal aura
-      {:else if item.flags.includes('SKINTIGHT')}Close to skin
-      {:else if item.flags.includes('BELTED')}Strapped
-      {:else if item.flags.includes('OUTER')}Outer
-      {:else if item.flags.includes('WAIST')}Waist
-      {:else if item.flags.includes('AURA')}Outer aura
+      {#if (item.flags ?? []).includes('PERSONAL')}Personal aura
+      {:else if (item.flags ?? []).includes('SKINTIGHT')}Close to skin
+      {:else if (item.flags ?? []).includes('BELTED')}Strapped
+      {:else if (item.flags ?? []).includes('OUTER')}Outer
+      {:else if (item.flags ?? []).includes('WAIST')}Waist
+      {:else if (item.flags ?? []).includes('AURA')}Outer aura
       {:else}Normal
       {/if}
     </dd>
