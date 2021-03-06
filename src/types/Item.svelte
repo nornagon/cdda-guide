@@ -217,7 +217,7 @@
           if (env < 10) resist *= env / 10;
           return resist
         })().toFixed(2)}</dd>
-        <dt>Environmental</dt>
+        <dt title="Environmental">Environ.</dt>
         <dd>{item.environmental_protection ?? 0}</dd>
       </dl>
     </dd>
