@@ -1,7 +1,10 @@
 <script lang="ts">
-  import { data, singularName } from '../data'
+  import { getContext } from 'svelte';
+
+  import { CddaData, singularName } from '../data'
   import Recipe from './Recipe.svelte';
   export let item: any
+  let data: CddaData = getContext('data')
   
   function parseVolume(string: string | number): number {
     if (typeof string === 'undefined') return 0
@@ -34,11 +37,11 @@
     return Math.floor(65 + ( parseVolume(item.volume) / 62.5 + parseMass(item.weight) / 60 ));
   }
   
-  let techniques = (item.techniques ?? []).map(t => $data.byId('technique', t));
-  let qualities = (item.qualities ?? []).map(([id, level]) => ({ quality: $data.byId('tool_quality', id), level }));
-  let materials = (item.material ?? []).map(id => $data.byId('material', id));
-  let flags = (item.flags ?? []).map(id => $data.byId('json_flag', id) ?? {id});
-  let faults = (item.faults ?? []).map(f => $data.byId('fault', f));
+  let techniques = (item.techniques ?? []).map(t => data.byId('technique', t));
+  let qualities = (item.qualities ?? []).map(([id, level]) => ({ quality: data.byId('tool_quality', id), level }));
+  let materials = (typeof item.material === 'string' ? [item.material] : item.material ?? []).map(id => data.byId('material', id));
+  let flags = (item.flags ?? []).map(id => data.byId('json_flag', id) ?? {id});
+  let faults = (item.faults ?? []).map(f => data.byId('fault', f));
   
   type PocketData = {
     pocket_type?: string
@@ -79,7 +82,7 @@
   })
   let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL').flatMap(p => p.item_restriction)
   
-  let recipes = $data.byType('recipe').filter(x => x.result === item.id && !x.obsolete).map(r => $data._flatten(r))
+  let recipes = data.byType('recipe').filter(x => x.result === item.id && !x.obsolete).map(r => data._flatten(r))
   
   function maxCharges(ammo_id: string) {
     let ret = 0
@@ -117,7 +120,7 @@
     <ul class="no-bullets">
       {#each ammo.map(id => ({id, max_charges: maxCharges(id)})) as {id: ammo_id, max_charges}}
       <li>
-        {max_charges} {item.type === 'GUN' ? 'rounds' : 'charges'} of <a href="#/ammunition_type/{ammo_id}">{singularName($data.byId('ammunition_type', ammo_id))}</a>
+        {max_charges} {item.type === 'GUN' ? 'rounds' : 'charges'} of <a href="#/ammunition_type/{ammo_id}">{singularName(data.byId('ammunition_type', ammo_id))}</a>
       </li>
       {/each}
     </ul>
@@ -128,7 +131,7 @@
   <dd>
     <ul class="comma-separated">
       {#each magazine_compatible as item_id}
-      <li><a href="#/item/{item_id}">{singularName($data.byId('item', item_id))}</a></li>
+      <li><a href="#/item/{item_id}">{singularName(data.byId('item', item_id))}</a></li>
       {/each}
     </ul>
   </dd>
@@ -178,7 +181,7 @@
       {#if !covers_anything}Nothing.{/if}
     </dd>
     <dt>Encumbrance</dt>
-    <dd>{item.encumbrance ?? 0}{#if item.max_encumbrance} ({item.max_encumbrance} when full){/if}</dd>
+    <dd>{item.encumbrance ?? 0}{#if item.max_encumbrance}{' '}({item.max_encumbrance} when full){/if}</dd>
     <dt>Warmth</dt>
     <dd>{item.warmth ?? 0}</dd>
     <dt title="This determines how likely it is that an attack hits the item instead of the player.">Coverage</dt>
@@ -270,7 +273,7 @@
     <dd>
       <ul class="comma-separated">
         {#each pocket.item_restriction as item}
-        <li><a href="#/item/{item}">{singularName($data.byId('item', item))}</a></li>
+        <li><a href="#/item/{item}">{singularName(data.byId('item', item))}</a></li>
         {/each}
       </ul>
     </dd>

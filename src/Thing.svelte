@@ -1,12 +1,16 @@
 <script lang="ts">
-  import { data } from './data';
+  import type { CddaData } from './data';
   import Monster from './types/Monster.svelte'
   import Item from './types/Item.svelte'
   import Unknown from './types/Unknown.svelte'
+  import { setContext } from 'svelte';
   export let item: { id: string, type: string }
   
+  export let data: CddaData
+  setContext('data', data)
+  
   let obj: any;
-  $: obj = $data?.byId(item.type, item.id)
+  $: obj = data.byId(item.type, item.id)
   
   const displays = {
     MONSTER: Monster,
@@ -29,9 +33,6 @@
   }
 </script>
 
-{#if !$data}
-...
-{:else}
 {#if !obj}
 Unknown obj: {item.type}/{item.id}
 {:else}
@@ -41,5 +42,4 @@ Unknown obj: {item.type}/{item.id}
 <summary>Raw JSON</summary>
 <pre>{JSON.stringify(obj, null, 2)}</pre>
 </details>
-{/if}
 {/if}

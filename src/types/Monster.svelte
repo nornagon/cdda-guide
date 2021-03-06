@@ -1,6 +1,9 @@
 <script lang="ts">
-  import { singularName, data } from '../data'
+  import { getContext } from 'svelte';
+
+  import { CddaData, singularName } from '../data'
   export let item
+  let data = getContext<CddaData>('data')
   
   function difficulty(item: any) {
     const {
@@ -202,7 +205,7 @@
         return special_attack.id
   }
 
-  let materials = (item.material ?? []).map(id => $data.byId('material', id));
+  let materials = (item.material ?? []).map(id => data.byId('material', id));
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>

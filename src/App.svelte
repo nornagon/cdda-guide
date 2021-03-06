@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-	import Object from "./Object.svelte";
+	import Thing from "./Thing.svelte";
+	import { data } from "./data";
   import SearchResults from "./SearchResults.svelte";
 
   let item: { type: string, id: string } | null = null
@@ -48,9 +49,13 @@
 </header>
 <main>
 {#if item}
+{#if $data}
 {#key item}
-<Object {item} />
+<Thing {item} data={$data} />
 {/key}
+{:else}
+...
+{/if}
 {:else if search}
 <SearchResults search={search} />
 {:else}

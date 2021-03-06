@@ -58,19 +58,27 @@ export const pluralName = (obj: any): string => {
     : /* fallback to id? */ obj?.id ?? obj?.abstract
 }
 
-class CddaData {
+export class CddaData {
   _raw: any[]
   _byType: Map<string, any[]> = new Map
   _byTypeById: Map<string, Map<string, any>> = new Map
   _abstractsByType: Map<string, Map<string, any>> = new Map
   _toolReplacements: Map<string, string[]> = new Map
   _craftingPseudoItems: Map<string, string> = new Map
+  _migrations: Map<string, string> = new Map
 
   constructor(raw: any[]) {
     this._raw = raw
     for (const obj of raw) {
       if (!Object.hasOwnProperty.call(obj, 'type'))
         continue
+      if (obj.type === 'MIGRATION') {
+        for (const id of (typeof obj.id === 'string' ? [obj.id] : obj.id)) {
+          const { replace } = obj
+          this._migrations.set(id, replace)
+        }
+        continue
+      }
       const mappedType = mapType(obj.type)
       if (!this._byType.has(mappedType)) this._byType.set(mappedType, [])
       this._byType.get(mappedType).push(obj)
@@ -82,7 +90,7 @@ class CddaData {
       if (obj.type === 'recipe' && Object.hasOwnProperty.call(obj, 'result')) {
         if (!this._byTypeById.has(mappedType)) this._byTypeById.set(mappedType, new Map)
         const id = obj.result + (obj.id_suffix ? '_' + obj.id_suffix : '')
-        this._byTypeById.get(mappedType).set(obj.result, obj)
+        this._byTypeById.get(mappedType).set(id, obj)
       }
       if (Object.hasOwnProperty.call(obj, 'abstract')) {
         if (!this._abstractsByType.has(mappedType)) this._abstractsByType.set(mappedType, new Map)
@@ -101,7 +109,8 @@ class CddaData {
   }
   
   byId(type: string, id: string): any {
-    if (!id) throw new Error('fix')
+    if (typeof id !== 'string') throw new Error('Requested non-string id')
+    if (type === 'item' && this._migrations.has(id)) return this.byId(type, this._migrations.get(id))
     const obj = this._byTypeById.get(type)?.get(id)
     if (obj)
       return this._flatten(obj)
@@ -109,7 +118,7 @@ class CddaData {
   
   byType(type: string): any[] {
     // TODO: flatten...?
-    return this._byType.get(type)
+    return this._byType.get(type) ?? []
   }
   
   replacementTools(type: string): string[] {
@@ -150,7 +159,7 @@ class CddaData {
     delete ret.proportional
     for (const k of Object.keys(ret.extend ?? {})) {
       if (Array.isArray(ret.extend[k])) {
-        ret[k] = ret[k].concat(ret.extend[k])
+        ret[k] = (ret[k] ?? []).concat(ret.extend[k])
       }
     }
     delete ret.extend
@@ -160,6 +169,7 @@ class CddaData {
 
 const fetchJson = async () => {
   const res = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/data/latest/all.json`)
+  console.log(res)
   if (!res.ok)
     throw new Error(`Error ${res.status} (${res.statusText}) fetching data`)
   const json = await res.json()

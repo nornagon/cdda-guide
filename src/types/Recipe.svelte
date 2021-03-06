@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { data, singularName, pluralName } from '../data'
+  import { getContext } from 'svelte';
+
+  import { singularName, pluralName, CddaData } from '../data'
+  let data = getContext<CddaData>('data')
 
   export let recipe: any
   
@@ -11,8 +14,8 @@
     const flatChoices = []
     for (const choice of choices) {
       const [id, count, isList] = choice
-      if (isList) {
-        const otherRequirement = $data.byId('requirement', id)
+      if (isList === 'LIST') {
+        const otherRequirement = data.byId('requirement', id)
         if (otherRequirement.type !== 'requirement') {
           console.error(`Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`)
         }
@@ -27,7 +30,7 @@
   }
   
   function expandSubstitutes(r: {id: string, count: number}): {id: string, count: number}[] {
-    const replacements = $data.replacementTools(r.id)
+    const replacements = data.replacementTools(r.id)
     return [r, ...replacements.map(o => ({id: o, count: r.count}))]
   }
   
@@ -35,19 +38,17 @@
     return required.map(x => flattenChoices(x, get)).map(x => x.flatMap(expandSubstitutes)).filter(x => x.length)
   }
   
-  let result = $data.byId('item', recipe.result)
-  
   let requirements = ((recipe.using ?? [])
-    .map(([id, count]) => [$data.byId('requirement', id), count])).concat([[recipe, 1]])
+    .map(([id, count]) => [data.byId('requirement', id), count])).concat([[recipe, 1]])
   
-  let tools = requirements.flatMap(([req, count]) => {
+  let tools: any[][] = requirements.flatMap(([req, count]) => {
     return flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
   })
   let components = requirements.flatMap(([req, count]) => {
     return flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
   })
-  let qualities = requirements.flatMap(([req, count]) => {
-    return req.qualities ?? []
+  let qualities: any[] = requirements.flatMap(([req, count]) => {
+    return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])
   })
 
   //let tools = flattenRequirement(recipe.tools ?? [], x => x.tools)
@@ -55,6 +56,7 @@
   
   function normalizeSkillsRequired(skills_required: [string, number] | [string, number][] | undefined): [string, number][] {
     if (skills_required === undefined) return []
+    if (skills_required.length === 0) return []
     if (Array.isArray(skills_required[0]))
       return skills_required as [string, number][]
     return [skills_required as [string, number]]
@@ -70,12 +72,18 @@
 <section class="recipe">
 <dl>
   <dt>Primary skill</dt>
-  <dd><a href="#/skill/{recipe.skill_used}">{singularName($data.byId('skill', recipe.skill_used))}</a> ({recipe.difficulty ?? 0})</dd>
+  <dd>
+    {#if recipe.skill_used}
+    <a href="#/skill/{recipe.skill_used}">{singularName(data.byId('skill', recipe.skill_used))}</a> ({recipe.difficulty ?? 0})
+    {:else}
+    none
+    {/if}
+  </dd>
   {#if skillsRequired.length}
   <dt>Other skills</dt>
   <dd>
     {#each skillsRequired as [skill, level], i}
-    <a href="#/skill/{skill}">{skill}</a> ({level}){#if i === skillsRequired.length - 2}{' and '}{:else if i !== skillsRequired.length - 1}{', '}{/if}
+    <a href="#/skill/{skill}">{singularName(data.byId('skill', skill))}</a> ({level}){#if i === skillsRequired.length - 2}{' and '}{:else if i !== skillsRequired.length - 1}{', '}{/if}
     {:else}
     none
     {/each}
@@ -86,7 +94,7 @@
   <dd>
     <ul>
     {#each recipe.proficiencies ?? [] as prof}
-    <li><a href="#/proficiency/{prof.proficiency}">{singularName($data.byId('proficiency', prof.proficiency))}</a></li>
+    <li><a href="#/proficiency/{prof.proficiency}">{singularName(data.byId('proficiency', prof.proficiency))}</a></li>
     {/each}
     </ul>
   </dd>
@@ -101,17 +109,22 @@
   <dt>Tools required</dt>
   <dd>
     <ul>
-      {#each qualities ?? [] as quality}
-        <li>{quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'} with <a href="#/tool_quality/{quality.id}">{singularName($data.byId('tool_quality', quality.id))}</a> of {quality.level} or more.</li>
+      {#each qualities ?? [] as qualityChoices}
+      <li>
+        {#each qualityChoices as quality, i}
+        {#if i !== 0}{' OR '}{/if}
+        {quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'} with <a href="#/tool_quality/{quality.id}">{singularName(data.byId('tool_quality', quality.id))}</a> of {quality.level} or more{
+        ''}{/each}.
+      </li>
       {/each}
       {#each tools as toolChoices}
       <li>
         {#each toolChoices as tool, i}
           {#if i !== 0}{' OR '}{/if}
-          {#if $data.craftingPseudoItem(tool.id)}
-          <a href='#/furniture/{$data.craftingPseudoItem(tool.id)}'>{singularName($data.byId('item', tool.id))}</a>
+          {#if data.craftingPseudoItem(tool.id)}
+          <a href='#/furniture/{data.craftingPseudoItem(tool.id)}'>{singularName(data.byId('item', tool.id))}</a>
           {:else}
-          <a href='#/item/{tool.id}'>{singularName($data.byId('item', tool.id))}</a>
+          <a href='#/item/{tool.id}'>{singularName(data.byId('item', tool.id))}</a>
           {/if}
           {#if tool.count > 0}({tool.count} charge{#if tool.count !== 1}s{/if}){/if}
         {/each}
@@ -126,7 +139,7 @@
     <ul>
       {#each components as componentChoices}
       <li>
-        {#each componentChoices.map(c => ({...c, item: $data.byId('item', c.id)})) as {id, item, count}, i}
+        {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, item, count}, i}
           {#if i !== 0}{' OR '}{/if}
           {#if !countsByCharges(item)}{count}{/if}
           <a href='#/item/{id}'>{count === 1 || countsByCharges(item) ? singularName(item) : pluralName(item)}</a>
