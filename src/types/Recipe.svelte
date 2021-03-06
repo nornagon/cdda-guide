@@ -93,10 +93,11 @@
   {/if}
   <dt>Time to complete</dt>
   <dd>{recipe.time}</dd>
-  {#if recipe.charges ?? result.initial_charges ?? result.count ?? result.charges}
+  {#if recipe.charges}
   <dt>Recipe makes</dt>
-  <dd>{recipe.charges ?? result.initial_charges ?? result.count ?? result.charges}<!-- TODO: properly switch on result type --></dd>
+  <dd>{recipe.charges}<!-- TODO: properly switch on result type --></dd>
   {/if}
+  {#if (qualities ?? []).length || tools.length}
   <dt>Tools required</dt>
   <dd>
     <ul>
@@ -118,6 +119,8 @@
       {/each}
     </ul>
   </dd>
+  {/if}
+  {#if components.length}
   <dt>Components</dt>
   <dd>
     <ul>
@@ -126,13 +129,14 @@
         {#each componentChoices.map(c => ({...c, item: $data.byId('item', c.id)})) as {id, item, count}, i}
           {#if i !== 0}{' OR '}{/if}
           {#if !countsByCharges(item)}{count}{/if}
-          <a href='#/item/{id}'>{count === 1 ? singularName(item) : pluralName(item)}</a>
+          <a href='#/item/{id}'>{count === 1 || countsByCharges(item) ? singularName(item) : pluralName(item)}</a>
           {#if countsByCharges(item)}({count}){/if}
         {/each}
       </li>
       {/each}
     </ul>
   </dd>
+  {/if}
 </dl>
 <details>
 <summary>Recipe JSON</summary>

@@ -38,11 +38,58 @@
   let qualities = (item.qualities ?? []).map(([id, level]) => ({ quality: $data.byId('tool_quality', id), level }));
   let materials = (item.material ?? []).map(id => $data.byId('material', id));
   let flags = (item.flags ?? []).map(id => $data.byId('json_flag', id) ?? {id});
-  let ammo = Array.isArray(item.ammo) ? item.ammo[0] : item.ammo
-  
   let faults = (item.faults ?? []).map(f => $data.byId('fault', f));
   
+  type PocketData = {
+    pocket_type?: string
+    ammo_restriction?: Record<string, number>
+    item_restriction?: Array<string>
+    min_item_volume?: string
+    max_item_volume?: string
+    max_contains_volume: string
+    max_contains_weight: string
+    max_item_length?: string
+    spoil_multiplier?: number // float
+    weight_multiplier?: number // float
+    volume_multiplier?: number // float
+    magazine_well?: string // volume
+    moves?: number
+    fire_protection?: boolean
+    watertight?: boolean
+    airtight?: boolean
+    open_container?: boolean
+    flag_restriction?: Array<string>
+    rigid?: boolean
+    holster?: boolean
+    sealed_data?: { spoil_multiplier?: number }
+  }
+  const defaultPocketData = {
+    pocket_type: 'CONTAINER',
+    min_item_volume: '0 ml',
+    moves: 100,
+    fire_protection: false,
+    watertight: false,
+    airtight: false,
+    open_container: false,
+    rigid: false,
+    holster: false,
+  }
+  let pockets = ((item.pocket_data ?? []) as PocketData[]).map((pocket) => {
+    return {...defaultPocketData, ...pocket}
+  })
+  let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL').flatMap(p => p.item_restriction)
+  
   let recipes = $data.byType('recipe').filter(x => x.result === item.id && !x.obsolete)
+  
+  function maxCharges(ammo_id: string) {
+    let ret = 0
+    for (const p of pockets)
+      if (p.pocket_type === 'MAGAZINE' && p.ammo_restriction)
+        ret += p.ammo_restriction[ammo_id] ?? 0
+    return ret
+  }
+
+  let ammo = pockets.flatMap(pocket => Object.keys(pocket.ammo_restriction ?? {}))
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
@@ -58,8 +105,27 @@
   <dt>Volume</dt><dd>{item.volume}</dd>
   <dt>Weight</dt><dd>{item.weight}</dd>
   <dt>Length</dt><dd>{length(item)}</dd>
-  {#if ammo}
-  <dt>Ammo</dt><dd><a href="#/ammunition_type/{ammo}">{singularName($data.byId('ammunition_type', ammo))}</a></dd>
+  {#if ammo.length}
+  <dt>Ammo</dt>
+  <dd>
+    <ul class="no-bullets">
+      {#each ammo.map(id => ({id, max_charges: maxCharges(id)})) as {id: ammo_id, max_charges}}
+      <li>
+        {max_charges} {item.type === 'GUN' ? 'rounds' : 'charges'} of <a href="#/ammunition_type/{ammo_id}">{singularName($data.byId('ammunition_type', ammo_id))}</a>
+      </li>
+      {/each}
+    </ul>
+  </dd>
+  {/if}
+  {#if magazine_compatible.length}
+  <dt>Compatible magazines</dt>
+  <dd>
+    <ul class="comma-separated">
+      {#each magazine_compatible as item_id}
+      <li><a href="#/item/{item_id}">{singularName($data.byId('item', item_id))}</a></li>
+      {/each}
+    </ul>
+  </dd>
   {/if}
   <dt>Flags</dt>
   <dd>
@@ -94,6 +160,44 @@
   </ul></dd>
 {/if}
 </dl>
+</section>
+{/if}
+{#if pockets.filter(p => p.pocket_type === 'CONTAINER').length}
+<section>
+  <h1>Pockets</h1>
+  {#each pockets.filter(p => p.pocket_type === 'CONTAINER') as pocket}
+  <dl>
+    <dt>Volume Capacity</dt><dd>{pocket.max_contains_volume}</dd>
+    <dt>Weight Capacity</dt><dd>{pocket.max_contains_weight}</dd>
+    {#if pocket.max_item_length}
+    <dt>Max Item Length</dt><dd>{pocket.max_item_length}</dd>
+    {/if}
+    {#if pocket.min_item_volume !== '0 ml'}
+    <dt>Min Item Volume</dt><dd>{pocket.min_item_volume}</dd>
+    {/if}
+    <dt>Moves To Remove Item</dt><dd>{pocket.moves}</dd>
+    {#if pocket.flag_restriction}
+    <dt>Flag Restriction</dt>
+    <dd>
+      <ul class="comma-separated">
+        {#each pocket.flag_restriction as flag}
+        <li>{flag}</li>
+        {/each}
+      </ul>
+    </dd>
+    {/if}
+    {#if pocket.item_restriction}
+    <dt>Item Restriction</dt>
+    <dd>
+      <ul class="comma-separated">
+        {#each pocket.item_restriction as item}
+        <li><a href="#/item/{item}">{singularName($data.byId('item', item))}</a></li>
+        {/each}
+      </ul>
+    </dd>
+    {/if}
+  </dl>
+  {/each}
 </section>
 {/if}
 {#if faults.length}
