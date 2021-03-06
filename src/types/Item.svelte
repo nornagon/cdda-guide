@@ -90,6 +90,12 @@
   }
 
   let ammo = pockets.flatMap(pocket => Object.keys(pocket.ammo_restriction ?? {}))
+  
+  function covers(body_part_id: string): boolean {
+    // TODO: armor_portion_data
+    return (item.covers ?? []).includes(body_part_id)
+  }
+  let covers_anything = (item.covers ?? []).length
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
@@ -145,6 +151,77 @@
 </dl>
 <p style="color: var(--cata-color-gray)">{item.description}</p>
 </section>
+{#if item.type === 'ARMOR' || item.type === 'TOOL_ARMOR'}
+<section>
+  <h1>Armor</h1>
+  <dl>
+    <dt>Covers</dt>
+    <dd>
+      {#if covers("head")}The <strong>head</strong>.{/if}
+      {#if covers("eyes")}The <strong>eyes</strong>.{/if}
+      {#if covers("mouth")}The <strong>mouth</strong>.{/if}
+      {#if covers("torso")}The <strong>torso</strong>.{/if}
+
+      {#each [["arm", "arms"], ["hand", "hands"], ["leg", "legs"], ["foot", "feet"]] as [sg, pl]}
+      {#if item.sided && (covers(`${sg}_l`) || covers(`${sg}_r`))}
+      Either <strong>{sg}</strong>.
+      {:else if covers(`${sg}_l`) && covers(`${sg}_r`)}
+      The <strong>{pl}</strong>.
+      {:else if covers(`${sg}_l`)}
+      The <strong>left {sg}</strong>.
+      {:else if covers(`${sg}_r`)}
+      The <strong>right {sg}</strong>.
+      {/if}
+      {' '}
+      {/each}
+
+      {#if !covers_anything}Nothing.{/if}
+    </dd>
+    <dt>Encumbrance</dt>
+    <dd>{item.encumbrance ?? 0}{#if item.max_encumbrance} ({item.max_encumbrance} when full){/if}</dd>
+    <dt>Warmth</dt>
+    <dd>{item.warmth ?? 0}</dd>
+    <dt title="This determines how likely it is that an attack hits the item instead of the player.">Coverage</dt>
+    <dd>{item.coverage ?? 0}%</dd>
+    <dt>Layer</dt>
+    <dd>
+      {#if item.flags.includes('PERSONAL')}Personal aura
+      {:else if item.flags.includes('SKINTIGHT')}Close to skin
+      {:else if item.flags.includes('BELTED')}Strapped
+      {:else if item.flags.includes('OUTER')}Outer
+      {:else if item.flags.includes('WAIST')}Waist
+      {:else if item.flags.includes('AURA')}Outer aura
+      {:else}Normal
+      {/if}
+    </dd>
+    <dt>Protection</dt>
+    <dd>
+      <dl>
+        <dt>Bash</dt>
+        <dd>{(materials.reduce((m, o) => m + o.bash_resist ?? 0, 0) * item.material_thickness / materials.length).toFixed(2)}</dd>
+        <dt>Cut</dt>
+        <dd>{(materials.reduce((m, o) => m + o.cut_resist ?? 0, 0) * item.material_thickness / materials.length).toFixed(2)}</dd>
+        <dt>Ballistic</dt>
+        <dd>{(materials.reduce((m, o) => m + o.bullet_resist ?? 0, 0) * item.material_thickness / materials.length).toFixed(2)}</dd>
+        <dt>Acid</dt>
+        <dd>{(() => {
+          let resist = (materials.reduce((m, o) => m + o.acid_resist ?? 0, 0) / materials.length)
+          const env = item.environmental_protection ?? 0
+          if (env < 10) resist *= env / 10;
+          return resist
+        })().toFixed(2)}</dd>
+        <dt>Fire</dt>
+        <dd>{(() => {
+          let resist = (materials.reduce((m, o) => m + o.fire_resist ?? 0, 0) / materials.length)
+          const env = item.environmental_protection ?? 0
+          if (env < 10) resist *= env / 10;
+          return resist
+        })().toFixed(2)}</dd>
+      </dl>
+    </dd>
+  </dl>
+</section>
+{/if}
 {#if item.bashing || item.cutting}
 <section>
 <h1>Melee</h1>
