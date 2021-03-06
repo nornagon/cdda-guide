@@ -106,7 +106,7 @@ dd {
 	grid-column-start: 2;
 }
 
-dd ul {
+dd ul, dd dl {
 	margin: 0;
 }
 
