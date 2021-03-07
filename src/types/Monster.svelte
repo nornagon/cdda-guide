@@ -350,6 +350,28 @@
     : undefined
     
   let deathDropsLimit = 10
+  
+  type HarvestEntry = {
+    drop: string // item id, or group id iff type === "bionic_group"
+    type?: "flesh" | "blood" | "bone" | "skin" | "offal" | "bionic" | "bionic_group"
+    base_num?: [number, number] // default [1, 1]
+    scale_num?: [number, number] // default [0, 0]
+    max?: number // default 1000
+    mass_ratio?: number // default 0
+    flags?: string[] // default []
+    faults?: string[] // default []
+  }
+  
+  type Harvest = {
+    type: "harvest"
+    id: string
+    entries: HarvestEntry[]
+    message?: string
+    leftovers?: string // item_id, default "ruined_chunks"
+    butchery_requirements?: string // butchery_requirement id, default "default"
+  }
+  
+  let harvest: Harvest = item.harvest ? data.byId('harvest', item.harvest) : undefined
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
@@ -425,6 +447,27 @@
     <dt>On death</dt><dd>{(item.death_function ?? []).join(', ')}</dd>
   </dl>
 </section>
+{#if harvest}
+<section>
+  <h1>Harvest</h1>
+  <dl>
+    <dt>Butchering Results</dt>
+    <dd>
+      <ul class="comma-separated">
+        {#each harvest.entries as harvest_entry}
+        {#if harvest_entry.type === "bionic_group"}
+        {#each flattenItemGroup(data.byId('item_group', harvest_entry.drop)) as {id, prob}}
+        <li><ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)</li>
+        {/each}
+        {:else}
+        <li><ThingLink type="item" id={harvest_entry.drop} /></li>
+        {/if}
+        {/each}
+      </ul>
+    </dd>
+  </dl>
+</section>
+{/if}
 {#if deathDrops}
 <section>
   <h1>Drops</h1>
