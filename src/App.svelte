@@ -62,9 +62,11 @@
 <img src="dont_panic.png" height="200" style="float:right" alt="The words 'Don't Panic' in big friendly letters" />
 <p><strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
 zombie survival roguelike game <a href="https://cataclysmdda.org/">Cataclysm:
-Dark Days Ahead</a>. You can search for things in the game, like items and
-monsters, and find useful information about them. The data in the Guide comes
-directly from the JSON files in the game itself.</p>
+Dark Days Ahead</a>. You can search for things in the game, like <a
+href="#/item/guidebook">items</a> and <a
+href="#/monster/mon_zombie">monsters</a>, and find useful information about
+them. The data in the Guide comes directly from the JSON files in the game
+itself.</p>
 <p>The Guide stores all its data locally and is offline-capable, so you can
 take it with you whereever you go.
 {#if deferredPrompt}
