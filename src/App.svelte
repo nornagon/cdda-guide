@@ -81,7 +81,9 @@ Where God Went Wrong, Some More of God's Greatest Mistakes and Who is this God
 Person Anyway?</p>
 <p>The guide is developed on <a
 href="https://github.com/nornagon/cdda-guide">GitHub</a> by <a
-href="https://www.nornagon.net">nornagon</a>.</p>
+href="https://www.nornagon.net">nornagon</a>. If you notice any problems,
+please <a href="https://github.com/nornagon/cdda-guide/issues">file an
+issue</a>!</p>
 {/if}
 </main>
 
