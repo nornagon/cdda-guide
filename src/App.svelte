@@ -60,7 +60,7 @@
 <SearchResults search={search} />
 {:else}
 <img src="dont_panic.png" height="200" style="float:right" alt="The words 'Don't Panic' in big friendly letters" />
-<p><strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
+<p>The <strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
 zombie survival roguelike game <a href="https://cataclysmdda.org/">Cataclysm:
 Dark Days Ahead</a>. You can search for things in the game, like items (e.g. a
 <a href="#/item/flashlight">flashlight</a>), or monsters (e.g. a <a
