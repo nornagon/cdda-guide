@@ -44,6 +44,9 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') {
+    return event.respondWith(fetch(event.request));
+  }
   const url = new URL(event.request.url);
   if (url.hostname === 'raw.githubusercontent.com') {
     if (url.pathname.endsWith('/all.json' && !url.pathname.endsWith('/latest/all.json'))) {
