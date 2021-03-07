@@ -2,6 +2,7 @@
   import { getContext } from 'svelte';
 
   import { singularName, pluralName, CddaData } from '../data'
+import ThingLink from './ThingLink.svelte';
   let data = getContext<CddaData>('data')
 
   export let recipe: any
@@ -74,7 +75,7 @@
   <dt>Primary skill</dt>
   <dd>
     {#if recipe.skill_used}
-    <a href="#/skill/{recipe.skill_used}">{singularName(data.byId('skill', recipe.skill_used))}</a> ({recipe.difficulty ?? 0})
+    <ThingLink type="skill" id={recipe.skill_used} /> ({recipe.difficulty ?? 0})
     {:else}
     none
     {/if}
@@ -83,7 +84,7 @@
   <dt>Other skills</dt>
   <dd>
     {#each skillsRequired as [skill, level], i}
-    <a href="#/skill/{skill}">{singularName(data.byId('skill', skill))}</a> ({level}){#if i === skillsRequired.length - 2}{' and '}{:else if i !== skillsRequired.length - 1}{', '}{/if}
+    <ThingLink type="skill" id={skill} /> ({level}){#if i === skillsRequired.length - 2}{' and '}{:else if i !== skillsRequired.length - 1}{', '}{/if}
     {:else}
     none
     {/each}
@@ -94,7 +95,7 @@
   <dd>
     <ul>
     {#each recipe.proficiencies ?? [] as prof}
-    <li><a href="#/proficiency/{prof.proficiency}">{singularName(data.byId('proficiency', prof.proficiency))}</a></li>
+    <li><ThingLink type="proficiency" id={prof.proficiency} /></li>
     {/each}
     </ul>
   </dd>
@@ -113,8 +114,9 @@
       <li>
         {#each qualityChoices as quality, i}
         {#if i !== 0}{' OR '}{/if}
-        {quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'} with <a href="#/tool_quality/{quality.id}">{singularName(data.byId('tool_quality', quality.id))}</a> of {quality.level} or more{
-        ''}{/each}.
+        {quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'}
+        with <ThingLink type="tool_quality" id={quality.id} /> of {quality.level} or more{''
+        }{/each}.
       </li>
       {/each}
       {#each tools as toolChoices}
@@ -124,7 +126,7 @@
           {#if data.craftingPseudoItem(tool.id)}
           <a href='#/furniture/{data.craftingPseudoItem(tool.id)}'>{singularName(data.byId('item', tool.id))}</a>
           {:else}
-          <a href='#/item/{tool.id}'>{singularName(data.byId('item', tool.id))}</a>
+          <ThingLink type="item" id={tool.id} />
           {/if}
           {#if tool.count > 0}({tool.count} charge{#if tool.count !== 1}s{/if}){/if}
         {/each}
@@ -142,7 +144,7 @@
         {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, item, count}, i}
           {#if i !== 0}{' OR '}{/if}
           {#if !countsByCharges(item)}{count}{/if}
-          <a href='#/item/{id}'>{count === 1 || countsByCharges(item) ? singularName(item) : pluralName(item)}</a>
+          <ThingLink type="item" id={id} plural={count !== 1 && !countsByCharges(item)} />
           {#if countsByCharges(item)}({count}){/if}
         {/each}
       </li>

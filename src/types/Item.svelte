@@ -3,6 +3,7 @@
 
   import { CddaData, singularName } from '../data'
   import Recipe from './Recipe.svelte';
+import ThingLink from './ThingLink.svelte';
   export let item: any
   let data: CddaData = getContext('data')
   
@@ -37,11 +38,11 @@
     return Math.floor(65 + ( parseVolume(item.volume) / 62.5 + parseMass(item.weight) / 60 ));
   }
   
-  let techniques = (item.techniques ?? []).map(t => data.byId('technique', t));
-  let qualities = (item.qualities ?? []).map(([id, level]) => ({ quality: data.byId('tool_quality', id), level }));
-  let materials = (typeof item.material === 'string' ? [item.material] : item.material ?? []).map(id => data.byId('material', id));
-  let flags = (item.flags ?? []).map(id => data.byId('json_flag', id) ?? {id});
-  let faults = (item.faults ?? []).map(f => data.byId('fault', f));
+  let techniques: any[] = (item.techniques ?? []).map(t => data.byId('technique', t));
+  let qualities: any[] = (item.qualities ?? []).map(([id, level]) => ({ quality: data.byId('tool_quality', id), level }));
+  let materials: any[] = (typeof item.material === 'string' ? [item.material] : item.material ?? []).map(id => data.byId('material', id));
+  let flags: any[] = (item.flags ?? []).map(id => data.byId('json_flag', id) ?? {id});
+  let faults: any[] = (item.faults ?? []).map(f => data.byId('fault', f));
   
   type PocketData = {
     pocket_type?: string
@@ -108,7 +109,7 @@
   {#if materials.length}
   <dt>Material</dt>
   <dd>
-    <ul class="comma-separated">{#each materials as m}<li><a href="#/material/{m.id}">{m.name}</a></li>{/each}</ul>
+    <ul class="comma-separated">{#each materials as m}<li><ThingLink type="material" id={m.id} /></li>{/each}</ul>
   </dd>
   {/if}
   <dt>Volume</dt><dd>{item.volume}</dd>
@@ -120,7 +121,8 @@
     <ul class="no-bullets">
       {#each ammo.map(id => ({id, max_charges: maxCharges(id)})) as {id: ammo_id, max_charges}}
       <li>
-        {max_charges} {item.type === 'GUN' ? 'rounds' : 'charges'} of <a href="#/ammunition_type/{ammo_id}">{singularName(data.byId('ammunition_type', ammo_id))}</a>
+        {max_charges} {item.type === 'GUN' ? 'rounds' : 'charges'} of
+        <ThingLink type="ammunition_type" id={ammo_id} />
       </li>
       {/each}
     </ul>
@@ -131,14 +133,14 @@
   <dd>
     <ul class="comma-separated">
       {#each magazine_compatible as item_id}
-      <li><a href="#/item/{item_id}">{singularName(data.byId('item', item_id))}</a></li>
+      <li><ThingLink type="item" id={item_id} /></li>
       {/each}
     </ul>
   </dd>
   {/if}
   <dt>Flags</dt>
   <dd>
-    <ul class="comma-separated">{#each flags as f}<li><a href="#/json_flag/{f.id}">{f.id}</a></li>{:else}<li><em>none</em></li>{/each}</ul>
+    <ul class="comma-separated">{#each flags as f}<li><ThingLink type="json_flag" id={f.id} /></li>{:else}<li><em>none</em></li>{/each}</ul>
   </dd>
 
   {#if qualities.length}
@@ -146,7 +148,7 @@
   <dd>
   <ul class="no-bullets">
   {#each qualities as {quality, level}}
-    <li>Has level <strong>{level} <a href="#/tool_quality/{quality.id}">{singularName(quality)}</a></strong> quality.</li>
+    <li>Has level <strong>{level} <ThingLink type="tool_quality" id={quality.id} /></strong> quality.</li>
   {/each}
   </ul>
   </dd>
@@ -237,7 +239,7 @@
   <dt>Moves per attack</dt><dd>{attackTime(item)}</dd>
 {#if techniques.length}
   <dt>Techniques</dt><dd><ul class="no-bullets">{#each techniques as technique}
-  <li><strong><a href="#/technique/{technique.id}">{technique.name}</a></strong>: {technique.description}</li>
+  <li><strong><ThingLink type="technique" id={technique.id} /></strong>: {technique.description}</li>
   {/each}
   </ul></dd>
 {/if}
@@ -273,7 +275,7 @@
     <dd>
       <ul class="comma-separated">
         {#each pocket.item_restriction as item}
-        <li><a href="#/item/{item}">{singularName(data.byId('item', item))}</a></li>
+        <li><ThingLink type="item" id={item} /></li>
         {/each}
       </ul>
     </dd>
@@ -287,7 +289,7 @@
   <h1>Possible faults</h1>
   <dl>
     {#each faults as fault}
-    <dt><a href="#/fault/{fault.id}">{singularName(fault)}</a></dt>
+    <dt><ThingLink type="fault" id={fault} /></dt>
     <dd>{fault.description}</dd>
     {/each}
   </dl>

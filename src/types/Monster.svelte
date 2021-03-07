@@ -2,6 +2,7 @@
   import { getContext } from 'svelte';
 
   import { CddaData, singularName } from '../data'
+import ThingLink from './ThingLink.svelte';
   export let item
   let data = getContext<CddaData>('data')
   
@@ -222,7 +223,7 @@
     <dt>Weight</dt><dd>{item.weight}</dd>
     <dt>Material</dt>
     <dd>
-      <ul class="comma-separated">{#each materials as m}<li><a href="#/material/{m.id}">{m.name}</a></li>{/each}</ul>
+      <ul class="comma-separated">{#each materials as m}<li><ThingLink {...m} /></li>{/each}</ul>
     </dd>
   </dl>
 </section>
@@ -236,7 +237,7 @@
     {#if item.special_attacks}
     <dt>Special attacks:</dt><dd>
       <ul class="no-bullets">
-      {#each item.special_attacks as special_attack, i}
+      {#each item.special_attacks as special_attack}
         <li>{specialAttackToString(special_attack)}</li>
       {/each}
       </ul>
