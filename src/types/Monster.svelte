@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { CddaData, singularName } from '../data'
+  import { asKilograms, asLiters, CddaData, singularName } from '../data'
 import ThingLink from './ThingLink.svelte';
   export let item
   let data = getContext<CddaData>('data')
@@ -219,8 +219,8 @@ import ThingLink from './ThingLink.svelte';
   <dl>
     <dt>Body type</dt><dd>{item.bodytype}</dd>
     <dt>Species</dt><dd>{(item.species ?? []).join(', ')}</dd>
-    <dt>Volume</dt><dd>{item.volume}</dd>
-    <dt>Weight</dt><dd>{item.weight}</dd>
+    <dt>Volume</dt><dd>{asLiters(item.volume)}</dd>
+    <dt>Weight</dt><dd>{asKilograms(item.weight)}</dd>
     <dt>Material</dt>
     <dd>
       <ul class="comma-separated">{#each materials as m}<li><ThingLink type="material" id={m.id} /></li>{/each}</ul>

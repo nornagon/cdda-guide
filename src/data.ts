@@ -57,6 +57,38 @@ export const pluralName = (obj: any): string => {
       : obj.name.str_sp ?? obj.name.str_pl ?? obj.name.str + 's'
     : /* fallback to id? */ obj?.id ?? obj?.abstract
 }
+  
+export function parseVolume(string: string | number): number {
+  if (typeof string === 'undefined') return 0
+  if (typeof string === 'number')
+    return string * 250
+  if (string.endsWith('ml'))
+    return parseInt(string)
+  else if (string.endsWith('L'))
+    return parseInt(string) * 1000
+}
+
+export function parseMass(string: string | number): number {
+  if (typeof string === 'undefined') return 0
+  if (typeof string === 'number')
+    return string
+  if (string.endsWith('mg'))
+    return parseInt(string) / 1000
+  if (string.endsWith('kg'))
+    return parseInt(string) * 1000
+  if (string.endsWith('g'))
+    return parseInt(string)
+}
+
+export function asLiters(string: string | number): string {
+  const ml = parseVolume(string)
+  return `${(ml / 1000).toFixed(2)} L`
+}
+
+export function asKilograms(string: string | number): string {
+  const g = parseMass(string)
+  return `${(g / 1000).toFixed(2)} kg`
+}
 
 export class CddaData {
   _raw: any[]

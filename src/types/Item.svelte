@@ -1,33 +1,12 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { CddaData, singularName } from '../data'
+  import { asKilograms, asLiters, CddaData, parseMass, parseVolume, singularName } from '../data'
   import Recipe from './Recipe.svelte';
-import ThingLink from './ThingLink.svelte';
+  import ThingLink from './ThingLink.svelte';
+
   export let item: any
   let data: CddaData = getContext('data')
-  
-  function parseVolume(string: string | number): number {
-    if (typeof string === 'undefined') return 0
-    if (typeof string === 'number')
-      return string * 250
-    if (string.endsWith('ml'))
-      return parseInt(string)
-    else if (string.endsWith('L'))
-      return parseInt(string) * 1000
-  }
-  
-  function parseMass(string: string | number): number {
-    if (typeof string === 'undefined') return 0
-    if (typeof string === 'number')
-      return string
-    if (string.endsWith('g'))
-      return parseInt(string)
-    if (string.endsWith('mg'))
-      return parseInt(string) / 1000
-    if (string.endsWith('kg'))
-      return parseInt(string) * 1000
-  }
   
   function length(item) {
     if (item.longest_side) return item.longest_side
@@ -112,8 +91,8 @@ import ThingLink from './ThingLink.svelte';
     <ul class="comma-separated">{#each materials as m}<li><ThingLink type="material" id={m.id} /></li>{/each}</ul>
   </dd>
   {/if}
-  <dt>Volume</dt><dd>{item.volume}</dd>
-  <dt>Weight</dt><dd>{item.weight}</dd>
+  <dt>Volume</dt><dd>{asLiters(item.volume)}</dd>
+  <dt>Weight</dt><dd>{asKilograms(item.weight)}</dd>
   <dt>Length</dt><dd>{length(item)}</dd>
   {#if ammo.length}
   <dt>Ammo</dt>
