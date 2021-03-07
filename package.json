@@ -15,6 +15,8 @@
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-typescript": "^8.0.0",
+    "@sentry/browser": "^6.2.1",
+    "@sentry/tracing": "^6.2.1",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/svelte": "^3.0.3",
     "@tsconfig/svelte": "^1.0.0",
