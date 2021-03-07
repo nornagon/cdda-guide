@@ -208,6 +208,15 @@
   </dl>
 </section>
 {/if}
+{#if item.type === 'ENGINE' && item.displacement}
+<section>
+  <h1>Engine</h1>
+  <dl>
+    <dt>Displacement</dt>
+    <dd>{item.displacement} cc</dd>
+  </dl>
+</section>
+{/if}
 {#if item.bashing || item.cutting}
 <section>
 <h1>Melee</h1>
