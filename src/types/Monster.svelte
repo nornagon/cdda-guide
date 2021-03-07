@@ -223,7 +223,7 @@ import ThingLink from './ThingLink.svelte';
     <dt>Weight</dt><dd>{item.weight}</dd>
     <dt>Material</dt>
     <dd>
-      <ul class="comma-separated">{#each materials as m}<li><ThingLink {...m} /></li>{/each}</ul>
+      <ul class="comma-separated">{#each materials as m}<li><ThingLink type="material" id={m.id} /></li>{/each}</ul>
     </dd>
   </dl>
 </section>

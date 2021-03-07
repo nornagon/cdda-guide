@@ -289,7 +289,7 @@ import ThingLink from './ThingLink.svelte';
   <h1>Possible faults</h1>
   <dl>
     {#each faults as fault}
-    <dt><ThingLink type="fault" id={fault} /></dt>
+    <dt><ThingLink type="fault" id={fault.id} /></dt>
     <dd>{fault.description}</dd>
     {/each}
   </dl>
