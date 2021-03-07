@@ -13,7 +13,9 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js').catch((err) => {
     console.log('ServiceWorker registration failed: ', err);
   });
-  navigator.serviceWorker.ready.then(start)
+  navigator.serviceWorker.ready.then(start, start)
+} else {
+  start()
 }
 
 function start() {
