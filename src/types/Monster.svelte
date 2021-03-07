@@ -372,6 +372,13 @@
   }
   
   let harvest: Harvest = item.harvest ? data.byId('harvest', item.harvest) : undefined
+  
+  function showProbability(prob: number) {
+    const ret = (prob * 100).toFixed(2)
+    if (ret === '0.00')
+      return '< 0.01%'
+    return ret + '%'
+  }
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
@@ -473,7 +480,7 @@
   <h1>Drops</h1>
   <ul>
     {#each deathDrops.slice(0, deathDropsLimit) as {id, prob}}
-    <li><ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)</li>
+    <li><ThingLink type="item" {id} /> ({showProbability(prob)})</li>
     {/each}
   </ul>
   {#if deathDropsLimit !== Infinity}
