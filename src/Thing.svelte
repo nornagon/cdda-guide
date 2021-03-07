@@ -4,6 +4,7 @@
   import Item from './types/Item.svelte'
   import Unknown from './types/Unknown.svelte'
   import Material from './types/Material.svelte';
+  import AmmunitionType from './types/AmmunitionType.svelte';
   import { setContext } from 'svelte';
   export let item: { id: string, type: string }
   
@@ -32,6 +33,7 @@
     GENERIC: Item,
     BIONIC_ITEM: Item,
     material: Material,
+    ammunition_type: AmmunitionType,
   }
 </script>
 
