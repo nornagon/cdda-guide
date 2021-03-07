@@ -203,7 +203,6 @@ const fetchJson = async () => {
   const res = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/data/latest/all.json`, {
     mode: 'cors'
   })
-  console.log(res)
   if (!res.ok)
     throw new Error(`Error ${res.status} (${res.statusText}) fetching data`)
   const json = await res.json()
