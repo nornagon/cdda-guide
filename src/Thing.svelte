@@ -8,6 +8,7 @@
   import Material from './types/Material.svelte';
   import AmmunitionType from './types/AmmunitionType.svelte';
   import ToolQuality from './types/ToolQuality.svelte';
+  import Furniture from './types/Furniture.svelte';
 
   export let item: { id: string, type: string }
   
@@ -38,6 +39,7 @@
     material: Material,
     ammunition_type: AmmunitionType,
     tool_quality: ToolQuality,
+    furniture: Furniture,
   }
 </script>
 

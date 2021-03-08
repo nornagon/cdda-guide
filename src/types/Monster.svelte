@@ -1,7 +1,8 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { asKilograms, asLiters, CddaData, singularName } from '../data'
+  import { asKilograms, asLiters, CddaData, flattenItemGroup, singularName } from '../data'
+  import type { ItemGroup } from '../data'
   import ThingLink from './ThingLink.svelte';
 
   export let item
@@ -209,129 +210,7 @@
   }
 
   let materials: any[] = item.material ?? []
-  
-  type ItemGroupEntry = 
-    (
-      { item: string } |
-      { group: string } |
-      { distribution: ItemGroupEntry[] } |
-      { collection: ItemGroupEntry[] }
-    ) & {
-      prob?: number
-      // TODO: damage, dirt, charges, count, ammo, container, contents, snippets?, sealed, custom-flags
-    }
-  
-  type ItemGroupEntryOrShortcut =
-    ItemGroupEntry |
-    [ string, number ] // item_id, prob (or item_group_id, prob if in 'groups' array)
-    
-  type ItemGroup = {
-    subtype: "collection" | "distribution"
-    entries?: ItemGroupEntryOrShortcut[]
-    items?: (string /* item_id with prob=100 */ | ItemGroupEntryOrShortcut)[]
-    groups?: (string /* item_group_id with prob=100 */ | ItemGroupEntryOrShortcut)[]
-    // TODO: container-item, on_overflow
-  } | {
-    subtype?: "old" // ~= "distribution"
-    items: ItemGroupEntryOrShortcut[]
-  }
-  
-  function flattenItemGroup(group: ItemGroup): {id: string, prob: number}[] {
-    const retMap = new Map<string, number>()
-    
-    function addOne({id, prob}: {id: string, prob: number}) {
-      const prevProb = retMap.get(id) ?? 0
-      const newProb = 1 - (1 - prevProb) * (1 - prob)
-      retMap.set(id, newProb)
-    }
-    
-    function add(...args: {id: string, prob: number}[]) {
-      args.forEach(addOne)
-    }
-    
-    const normalizedEntries: ItemGroupEntry[] = []
-    if (group.subtype === 'old' || !group.subtype) {
-      for (const item of group.items as ItemGroupEntryOrShortcut[])
-        if (Array.isArray(item))
-          normalizedEntries.push({ item: item[0], prob: item[1] })
-        else
-          normalizedEntries.push(item)
-    } else {
-      for (const entry of group.entries ?? [])
-        if (Array.isArray(entry))
-          normalizedEntries.push({ item: entry[0], prob: entry[1] })
-        else
-          normalizedEntries.push(entry)
-      for (const item of group.items ?? [])
-        if (Array.isArray(item))
-          normalizedEntries.push({ item: item[0], prob: item[1] })
-        else if (typeof item === 'string')
-          normalizedEntries.push({ item, prob: 100 })
-        else
-          normalizedEntries.push(item)
-      for (const g of group.groups ?? [])
-        if (Array.isArray(g))
-          normalizedEntries.push({ group: g[0], prob: g[1] })
-        else if (typeof g === 'string')
-          normalizedEntries.push({ group: g, prob: 100 })
-        else
-          normalizedEntries.push(g)
-    }
-    
-    if (group.subtype === 'collection') {
-      for (const entry of normalizedEntries) {
-        const { prob = 100 } = entry
-        const nProb = Math.min(prob, 100) / 100
-        if ('item' in entry) {
-          add({id: entry.item, prob: nProb})
-        } else if ('group' in entry) {
-          add(...flattenItemGroup(
-            data.byId('item_group', entry.group)
-          ).map(p => ({...p, prob: p.prob * nProb})))
-        } else if ('collection' in entry) {
-          add(...flattenItemGroup({
-            subtype: 'collection',
-            entries: entry.collection
-          }).map(p => ({...p, prob: p.prob * nProb})))
-        } else if ('distribution' in entry) {
-          add(...flattenItemGroup({
-            subtype: 'distribution',
-            entries: entry.distribution
-          }).map(p => ({...p, prob: p.prob * nProb})))
-        } else {
-          throw new Error(`unknown item group entry: ${JSON.stringify(entry)}`)
-        }
-      }
-    } else { // distribution
-      let totalProb = 0
-      for (const entry of normalizedEntries)
-        totalProb += entry.prob ?? 100
-      for (const entry of normalizedEntries) {
-        const nProb = (entry.prob ?? 100) / totalProb
-        if ('item' in entry) {
-          add({id: entry.item, prob: nProb})
-        } else if ('group' in entry) {
-          add(...flattenItemGroup(
-            data.byId('item_group', entry.group)
-          ).map(p => ({...p, prob: p.prob * nProb})))
-        } else if ('collection' in entry) {
-          add(...flattenItemGroup({
-            subtype: 'collection',
-            entries: entry.collection
-          }).map(p => ({...p, prob: p.prob * nProb})))
-        } else if ('distribution' in entry) {
-          add(...flattenItemGroup({
-            subtype: 'distribution',
-            entries: entry.distribution
-          }).map(p => ({...p, prob: p.prob * nProb})))
-        } else {
-          throw new Error(`unknown item group entry: ${JSON.stringify(entry)}`)
-        }
-      }
-    }
 
-    return [...retMap.entries()].map(([id, prob]) => ({id, prob}))
-  }
   
   function normalizedDeathDrops(): ItemGroup | undefined {
     if (item.death_drops) {
@@ -346,7 +225,7 @@
   }
   
   let deathDrops = item.death_drops
-    ? flattenItemGroup(normalizedDeathDrops()).sort((a, b) => b.prob - a.prob)
+    ? flattenItemGroup(data, normalizedDeathDrops()).sort((a, b) => b.prob - a.prob)
     : undefined
     
   let deathDropsLimit = 10
@@ -383,7 +262,7 @@
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
 <section>
-  <p>{item.description}</p>
+  <p style="color: var(--cata-color-gray)">{item.description}</p>
   <p>Difficulty: {difficulty(item)} <span class='c_{difficultyColor(difficulty(item))} fg_only'>({difficultyDescription(difficulty(item))})</span></p>
 </section>
 <section>
@@ -463,7 +342,7 @@
       <ul class="comma-separated">
         {#each harvest.entries as harvest_entry}
         {#if harvest_entry.type === "bionic_group"}
-        {#each flattenItemGroup(data.byId('item_group', harvest_entry.drop)) as {id, prob}}
+        {#each flattenItemGroup(data, data.byId('item_group', harvest_entry.drop)) as {id, prob}}
         <li><ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)</li>
         {/each}
         {:else}

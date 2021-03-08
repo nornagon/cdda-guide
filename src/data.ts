@@ -199,6 +199,152 @@ export class CddaData {
   }
 }
 
+export type ItemGroupEntry = 
+  (
+    { item: string } |
+    { group: string } |
+    { distribution: ItemGroupEntry[] } |
+    { collection: ItemGroupEntry[] }
+  ) & {
+    prob?: number
+    count?: number | [number, number]
+    charges?: number | [number, number]
+    // TODO: damage, dirt, charges, ammo, container, contents, snippets?, sealed, custom-flags
+  }
+
+export type ItemGroupEntryOrShortcut =
+  ItemGroupEntry |
+  [ string, number ] // item_id, prob (or item_group_id, prob if in 'groups' array)
+  
+export type ItemGroup = {
+  subtype: "collection" | "distribution"
+  entries?: ItemGroupEntryOrShortcut[]
+  items?: (string /* item_id with prob=100 */ | ItemGroupEntryOrShortcut)[]
+  groups?: (string /* item_group_id with prob=100 */ | ItemGroupEntryOrShortcut)[]
+  // TODO: container-item, on_overflow
+} | {
+  subtype?: "old" // ~= "distribution"
+  items: ItemGroupEntryOrShortcut[]
+}
+
+export function flattenItemGroup(data: CddaData, group: ItemGroup): {id: string, prob: number, count: [number, number]}[] {
+  const retMap = new Map<string, {prob: number, count: [number, number]}>()
+  
+  function addOne({id, prob, count}: {id: string, prob: number, count: [number, number]}) {
+    const {prob: prevProb, count: prevCount} = retMap.get(id) ?? {prob: 0, count: [0, 0]}
+    const newProb = 1 - (1 - prevProb) * (1 - prob)
+    const newCount: [number, number] = [count[0] + prevCount[0], count[1] + prevCount[1]]
+    retMap.set(id, {prob: newProb, count: newCount})
+  }
+  
+  function add(...args: {id: string, prob: number, count: [number, number]}[]) {
+    args.forEach(addOne)
+  }
+  
+  const normalizedEntries: ItemGroupEntry[] = []
+  if (group.subtype === 'old' || !group.subtype) {
+    for (const item of group.items as ItemGroupEntryOrShortcut[])
+      if (Array.isArray(item))
+        normalizedEntries.push({ item: item[0], prob: item[1] })
+      else
+        normalizedEntries.push(item)
+  } else {
+    for (const entry of group.entries ?? [])
+      if (Array.isArray(entry))
+        normalizedEntries.push({ item: entry[0], prob: entry[1] })
+      else
+        normalizedEntries.push(entry)
+    for (const item of group.items ?? [])
+      if (Array.isArray(item))
+        normalizedEntries.push({ item: item[0], prob: item[1] })
+      else if (typeof item === 'string')
+        normalizedEntries.push({ item, prob: 100 })
+      else
+        normalizedEntries.push(item)
+    for (const g of group.groups ?? [])
+      if (Array.isArray(g))
+        normalizedEntries.push({ group: g[0], prob: g[1] })
+      else if (typeof g === 'string')
+        normalizedEntries.push({ group: g, prob: 100 })
+      else
+        normalizedEntries.push(g)
+  }
+  
+  function prod(p: {id: string, prob: number, count: [number, number]}, prob: number, count: [number, number]): {id: string, prob: number, count: [number, number]} {
+    return {id: p.id, prob: p.prob * prob, count: [p.count[0] * count[0], p.count[1] * count[1]]}
+  }
+  
+  function normalizeCount(entry: ItemGroupEntry): [number, number] {
+    if (entry.count)
+      if (typeof entry.count === 'number')
+        return [entry.count, entry.count]
+      else
+        return entry.count
+    else if (entry.charges)
+      if (typeof entry.charges === 'number')
+        return [entry.charges, entry.charges]
+      else
+        return entry.charges
+    return [1, 1]
+  }
+  
+  if (group.subtype === 'collection') {
+    for (const entry of normalizedEntries) {
+      const { prob = 100 } = entry
+      const nProb = Math.min(prob, 100) / 100
+      const nCount = normalizeCount(entry)
+      if ('item' in entry) {
+        add({id: entry.item, prob: nProb, count: nCount})
+      } else if ('group' in entry) {
+        add(...flattenItemGroup(data,
+          data.byId('item_group', entry.group)
+        ).map(p => prod(p, nProb, nCount)))
+      } else if ('collection' in entry) {
+        add(...flattenItemGroup(data, {
+          subtype: 'collection',
+          entries: entry.collection
+        }).map(p => prod(p, nProb, nCount)))
+      } else if ('distribution' in entry) {
+        add(...flattenItemGroup(data, {
+          subtype: 'distribution',
+          entries: entry.distribution
+        }).map(p => prod(p, nProb, nCount)))
+      } else {
+        throw new Error(`unknown item group entry: ${JSON.stringify(entry)}`)
+      }
+    }
+  } else { // distribution
+    let totalProb = 0
+    for (const entry of normalizedEntries)
+      totalProb += entry.prob ?? 100
+    for (const entry of normalizedEntries) {
+      const nProb = (entry.prob ?? 100) / totalProb
+      const nCount = normalizeCount(entry)
+      if ('item' in entry) {
+        add({id: entry.item, prob: nProb, count: nCount})
+      } else if ('group' in entry) {
+        add(...flattenItemGroup(data,
+          data.byId('item_group', entry.group)
+        ).map(p => prod(p, nProb, nCount)))
+      } else if ('collection' in entry) {
+        add(...flattenItemGroup(data, {
+          subtype: 'collection',
+          entries: entry.collection
+        }).map(p => prod(p, nProb, nCount)))
+      } else if ('distribution' in entry) {
+        add(...flattenItemGroup(data, {
+          subtype: 'distribution',
+          entries: entry.distribution
+        }).map(p => prod(p, nProb, nCount)))
+      } else {
+        throw new Error(`unknown item group entry: ${JSON.stringify(entry)}`)
+      }
+    }
+  }
+
+  return [...retMap.entries()].map(([id, v]) => ({id, ...v}))
+}
+
 const fetchJson = async () => {
   const res = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/data/latest/all.json`, {
     mode: 'cors'
