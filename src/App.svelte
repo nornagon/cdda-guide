@@ -70,7 +70,8 @@
 <p>The <strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
 zombie survival roguelike game <a href="https://cataclysmdda.org/">Cataclysm:
 Dark Days Ahead</a>. You can search for things in the game, like items (e.g. a
-<a href="#/item/flashlight">flashlight</a>), or monsters (e.g. a <a
+<a href="#/item/flashlight">flashlight</a>), furniture (e.g. a <a
+href="#/furniture/f_table">table</a>), or monsters (e.g. a <a
 href="#/monster/mon_zombie">zombie</a>), and find useful information about
 them. The data in the Guide comes directly from the JSON files in the game
 itself.</p>

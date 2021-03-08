@@ -27,7 +27,7 @@ type MapBashInfo = {
   // ter_set
   // move_cost
   
-  // items: item_group type collection
+  items: ItemGroupEntry[]
   
   // tent_centers
 }
@@ -101,13 +101,17 @@ const symbol = typeof item.symbol === 'string' ? item.symbol : item.symbol[0]
 const deconstruct = item.deconstruct?.items
   ? flattenItemGroup(data, { subtype: "collection", entries: item.deconstruct.items })
   : []
+  
+const bash = item.bash?.items
+  ? flattenItemGroup(data, { subtype: "collection", entries: item.bash.items })
+  : []
 
-  function showProbability(prob: number) {
-    const ret = (prob * 100).toFixed(2)
-    if (ret === '0.00')
-      return '< 0.01%'
-    return ret + '%'
-  }
+function showProbability(prob: number) {
+  const ret = (prob * 100).toFixed(2)
+  if (ret === '0.00')
+    return '< 0.01%'
+  return ret + '%'
+}
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{color}">{symbol}</span> {singularName(item)}</h1>
@@ -119,11 +123,12 @@ const deconstruct = item.deconstruct?.items
     <dt>Strength Required to Drag</dt><dd>{item.required_str >= 0 ? item.required_str : 'not movable'}</dd>
     <dt>Coverage</dt><dd>{item.coverage ?? 0}%</dd>
     <dt>Comfort</dt><dd>{item.comfort ?? 0}</dd>
-    {#if item.deconstruct && item.deconstruct.items?.length}
-    <dt>Deconstruct</dt>
+    {#each [['Deconstruct', deconstruct], ['Bash', bash]] as [title, arr]}
+    {#if arr.length}
+    <dt>{title}</dt>
     <dd>
       <ul class="comma-separated">
-        {#each deconstruct as {id, prob, count}}
+        {#each arr as {id, prob, count}}
         <li><ThingLink type="item" {id} />{
           ''}{#if count[0] === count[1]}{#if count[0] !== 1}{' '}({count[0]}){/if}{:else}{' '}({count[0]}–{count[1]}){/if}{
           ''}{#if prob !== 1}{' '}({showProbability(prob)}){/if}</li>
@@ -131,6 +136,7 @@ const deconstruct = item.deconstruct?.items
       </ul>
     </dd>
     {/if}
+    {/each}
     <dt>Flags</dt>
     <dd>
       <ul class="comma-separated">
