@@ -33,9 +33,16 @@
   window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
   });
+  
+  function maybeFocusSearch(e: KeyboardEvent) {
+    if (e.key === '/' && document.activeElement.id !== 'search') {
+      document.getElementById('search').focus()
+      e.preventDefault()
+    }
+  }
 
 </script>
-<svelte:window on:hashchange={hashchange}/>
+<svelte:window on:hashchange={hashchange} on:keydown={maybeFocusSearch}/>
 
 <header>
   <nav>
@@ -43,7 +50,7 @@
       <strong><a href="#" on:click={() => search = ''}>Hitchhiker's Guide to the Cataclysm</a></strong>
     </div>
     <div class="search">
-      <input style="margin: 0; width: 100%" placeholder="Search..." bind:value={search} on:input={clearItem} />
+      <input style="margin: 0; width: 100%" placeholder="Search..." bind:value={search} on:input={clearItem} id="search" />
     </div>
   </nav>
 </header>
