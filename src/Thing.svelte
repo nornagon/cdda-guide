@@ -1,11 +1,14 @@
 <script lang="ts">
+  import { setContext } from 'svelte';
+
   import type { CddaData } from './data';
   import Monster from './types/Monster.svelte'
   import Item from './types/Item.svelte'
   import Unknown from './types/Unknown.svelte'
   import Material from './types/Material.svelte';
   import AmmunitionType from './types/AmmunitionType.svelte';
-  import { setContext } from 'svelte';
+  import ToolQuality from './types/ToolQuality.svelte';
+
   export let item: { id: string, type: string }
   
   export let data: CddaData
@@ -34,6 +37,7 @@
     BIONIC_ITEM: Item,
     material: Material,
     ammunition_type: AmmunitionType,
+    tool_quality: ToolQuality,
   }
 </script>
 
