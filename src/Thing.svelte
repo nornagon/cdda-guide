@@ -10,6 +10,7 @@
   import ToolQuality from './types/ToolQuality.svelte';
   import Furniture from './types/Furniture.svelte';
   import Skill from './types/Skill.svelte';
+  import Proficiency from './types/Proficiency.svelte';
 
   export let item: { id: string, type: string }
   
@@ -42,6 +43,7 @@
     tool_quality: ToolQuality,
     furniture: Furniture,
     skill: Skill,
+    proficiency: Proficiency,
   }
 </script>
 
