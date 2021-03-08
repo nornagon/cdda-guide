@@ -115,7 +115,7 @@ const deconstruct = item.deconstruct?.items
 <section>
   <h1>General</h1>
   <dl>
-    <dt>Move Cost</dt><dd>{item.move_cost_mod}</dd>
+    <dt>Move Cost Modifier</dt><dd>{#if item.move_cost_mod < 0}<em>impassable</em>{:else}+{item.move_cost_mod * 50}{/if}</dd>
     <dt>Strength Required to Drag</dt><dd>{item.required_str >= 0 ? item.required_str : 'not movable'}</dd>
     <dt>Coverage</dt><dd>{item.coverage ?? 0}%</dd>
     <dt>Comfort</dt><dd>{item.comfort ?? 0}</dd>
