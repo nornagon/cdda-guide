@@ -132,6 +132,10 @@ h1:first-child {
 	margin-top: 0;
 }
 
+pre {
+	white-space: pre-wrap;
+}
+
 :root {
   /*--cata-color-black: rgb(0,0,0);*/
   --cata-color-black: #121212;
