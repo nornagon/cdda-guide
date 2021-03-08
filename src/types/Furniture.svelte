@@ -1,6 +1,6 @@
 <script lang="ts">
 import { CddaData, flattenItemGroup, singularName } from "../data";
-import type { ItemGroupEntry } from "../data";
+import type { ItemGroupEntry, Name } from "../data";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 
@@ -48,7 +48,7 @@ type MapDataCommon = {
 type Furniture = MapDataCommon & {
   type: "furniture"
   id: string
-  name: string | { str: string, str_pl?: string } | { str_sp: string }
+  name: Name
   move_cost_mod: number
   required_str: number
   color?: string | [string] | [string, string, string, string]

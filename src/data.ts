@@ -40,6 +40,8 @@ const typeMappings = new Map([
   ["MONSTER", "monster"],
 ])
 
+export type Name = string | { str: string, str_pl?: string } | { str_sp: string }
+
 export const mapType = (type: string): string => typeMappings.get(type) ?? type
 
 export const singularName = (obj: any): string => {

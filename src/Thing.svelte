@@ -9,6 +9,7 @@
   import AmmunitionType from './types/AmmunitionType.svelte';
   import ToolQuality from './types/ToolQuality.svelte';
   import Furniture from './types/Furniture.svelte';
+  import Skill from './types/Skill.svelte';
 
   export let item: { id: string, type: string }
   
@@ -40,6 +41,7 @@
     ammunition_type: AmmunitionType,
     tool_quality: ToolQuality,
     furniture: Furniture,
+    skill: Skill,
   }
 </script>
 
