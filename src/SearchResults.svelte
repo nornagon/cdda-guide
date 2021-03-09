@@ -49,6 +49,8 @@
     <li><a href="#/{mapType(obj.type)}/{obj.id}">{singularName(obj)}</a></li>
     {/each}
   </ul>
+  {:else}
+  <em>No results.</em>
   {/each}
 {:else}
   <pre>...</pre>
