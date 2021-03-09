@@ -109,6 +109,9 @@ dd {
 dd ul, dd dl {
 	margin: 0;
 }
+dd ul:not(.comma-separated, .no-bullets) {
+	padding-left: 1em;
+}
 
 section {
 	background: rgba(255, 255, 255, 5%);

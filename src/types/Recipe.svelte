@@ -123,10 +123,3 @@
 <pre>{JSON.stringify(recipe, null, 2)}</pre>
 </details>
 </section>
-
-<style>
-  ul {
-    margin: 0;
-    padding-left: 1em;
-  }
-</style>
