@@ -108,7 +108,7 @@
   </dd>
   {/if}
   {#if magazine_compatible.length}
-  <dt>Compatible magazines</dt>
+  <dt>Compatible Magazines</dt>
   <dd>
     <ul class="comma-separated">
       {#each magazine_compatible as item_id}
@@ -223,8 +223,8 @@
 <dl>
   <dt>Bash</dt><dd>{item.bashing ?? 0}</dd>
   <dt>Cut</dt><dd>{item.cutting ?? 0}</dd>
-  <dt>To hit</dt><dd>{item.to_hit ?? 0}</dd>
-  <dt>Moves per attack</dt><dd>{attackTime(item)}</dd>
+  <dt>To Hit</dt><dd>{item.to_hit ?? 0}</dd>
+  <dt>Moves Per Attack</dt><dd>{attackTime(item)}</dd>
 {#if techniques.length}
   <dt>Techniques</dt><dd><ul class="no-bullets">{#each techniques as technique}
   <li><strong><ThingLink type="technique" id={technique.id} /></strong>: {technique.description}</li>
@@ -247,7 +247,7 @@
     {#if pocket.min_item_volume !== '0 ml'}
     <dt>Min Item Volume</dt><dd>{pocket.min_item_volume}</dd>
     {/if}
-    <dt>Moves To Remove Item</dt><dd>{pocket.moves}</dd>
+    <dt>Moves to Remove Item</dt><dd>{pocket.moves}</dd>
     {#if pocket.flag_restriction}
     <dt>Flag Restriction</dt>
     <dd>
@@ -274,7 +274,7 @@
 {/if}
 {#if faults.length}
 <section>
-  <h1>Possible faults</h1>
+  <h1>Possible Faults</h1>
   <dl>
     {#each faults as fault}
     <dt><ThingLink type="fault" id={fault.id} /></dt>

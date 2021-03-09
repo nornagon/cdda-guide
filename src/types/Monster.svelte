@@ -268,7 +268,7 @@
 <section>
   <h1>Body</h1>
   <dl>
-    <dt>Body type</dt><dd>{item.bodytype}</dd>
+    <dt>Body Type</dt><dd>{item.bodytype}</dd>
     <dt>Species</dt><dd>{(item.species ?? []).join(', ')}</dd>
     <dt>Volume</dt><dd>{asLiters(item.volume)}</dd>
     <dt>Weight</dt><dd>{asKilograms(item.weight)}</dd>
@@ -287,7 +287,7 @@
   <div style="display: flex; flex-direction: row; align-items: start; flex-wrap: wrap;">
   <dl style="flex: 1">
     <dt>Speed</dt><dd>{item.speed}</dd>
-    <dt>Melee skill</dt><dd>{item.melee_skill ?? 0}</dd>
+    <dt>Melee Skill</dt><dd>{item.melee_skill ?? 0}</dd>
     <dt>Damage</dt><dd>{damage(item)}</dd>
     {#if item.special_attacks}
     <dt>Special attacks:</dt><dd>
@@ -321,16 +321,16 @@
   <dl>
     <dt>Aggression</dt><dd>{item.aggression}</dd>
     <dt>Morale</dt><dd>{item.morale}</dd>
-    <dt>Vision range</dt><dd>{item.vision_day ?? 40} (day) / {item.vision_night ?? 1} (night)</dd>
-    <dt>Default faction</dt><dd>{item.default_faction}</dd>
+    <dt>Vision Range</dt><dd>{item.vision_day ?? 40} (day) / {item.vision_night ?? 1} (night)</dd>
+    <dt>Default Faction</dt><dd>{item.default_faction}</dd>
     {#if item.anger_triggers}
-    <dt>Anger triggers</dt><dd>{item.anger_triggers.join(', ')}</dd>
+    <dt>Anger Triggers</dt><dd>{item.anger_triggers.join(', ')}</dd>
     {/if}
     {#if item.placate_triggers}
-    <dt>Placate triggers</dt><dd>{item.placate_triggers.join(', ')}</dd>
+    <dt>Placate Triggers</dt><dd>{item.placate_triggers.join(', ')}</dd>
     {/if}
     <dt>Flags</dt><dd>{#each item.flags ?? [] as flag, i}<abbr title={mon_flag_descriptions[flag]}>{flag}</abbr>{#if i < item.flags.length - 1}, {/if}{/each}</dd>
-    <dt>On death</dt><dd>{(item.death_function ?? []).join(', ')}</dd>
+    <dt>On Death</dt><dd>{(item.death_function ?? []).join(', ')}</dd>
   </dl>
 </section>
 {#if harvest}
