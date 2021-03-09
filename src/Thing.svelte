@@ -13,6 +13,7 @@
   import Proficiency from './types/Proficiency.svelte';
   import Flag from './types/Flag.svelte';
   import Fault from './types/Fault.svelte';
+  import Technique from './types/Technique.svelte';
 
   export let item: { id: string, type: string }
   
@@ -48,6 +49,7 @@
     proficiency: Proficiency,
     json_flag: Flag,
     fault: Fault,
+    technique: Technique,
   }
 </script>
 

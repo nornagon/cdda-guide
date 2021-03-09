@@ -20,9 +20,6 @@
     return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])
   })
 
-  //let tools = flattenRequirement(recipe.tools ?? [], x => x.tools)
-  //let components = flattenRequirement(recipe.components ?? [], x => x.components)
-  
   function normalizeSkillsRequired(skills_required: [string, number] | [string, number][] | undefined): [string, number][] {
     if (skills_required === undefined) return []
     if (skills_required.length === 0) return []
@@ -37,7 +34,7 @@
 
 <section class="recipe">
 <dl>
-  <dt>Primary skill</dt>
+  <dt>Primary Skill</dt>
   <dd>
     {#if recipe.skill_used}
     <ThingLink type="skill" id={recipe.skill_used} /> ({recipe.difficulty ?? 0})
@@ -46,7 +43,7 @@
     {/if}
   </dd>
   {#if skillsRequired.length}
-  <dt>Other skills</dt>
+  <dt>Other Skills</dt>
   <dd>
     {#each skillsRequired as [skill, level], i}
     <ThingLink type="skill" id={skill} /> ({level}){#if i === skillsRequired.length - 2}{' and '}{:else if i !== skillsRequired.length - 1}{', '}{/if}
