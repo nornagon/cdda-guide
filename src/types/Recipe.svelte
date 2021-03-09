@@ -30,6 +30,11 @@
   
   let skillsRequired = normalizeSkillsRequired(recipe.skills_required)
   
+  const writtenIn = Array.isArray(recipe.book_learn)
+    ? [...recipe.book_learn]
+    : [...Object.entries((recipe.book_learn ?? {}) as Record<string, any>)].map(([k, v]) => [k, v.skill_level])
+  writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0))
+  
 </script>
 
 <section class="recipe">
@@ -105,11 +110,23 @@
       <li>
         {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, item, count}, i}
           {#if i !== 0}{' OR '}{/if}
+          <span style="white-space: nowrap">
           {#if !countsByCharges(item)}{count}{/if}
           <ThingLink type="item" id={id} plural={count !== 1 && !countsByCharges(item)} />
           {#if countsByCharges(item)}({count}){/if}
+          </span>
         {/each}
       </li>
+      {/each}
+    </ul>
+  </dd>
+  {/if}
+  {#if writtenIn.length}
+  <dt>Written In</dt>
+  <dd>
+    <ul class="comma-separated">
+      {#each writtenIn as [item_id, level = 0]}
+      <li><span style="white-space: nowrap"><ThingLink id={item_id} type="item" /> ({level})</span></li>
       {/each}
     </ul>
   </dd>

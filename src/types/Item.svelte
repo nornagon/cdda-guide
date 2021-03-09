@@ -4,6 +4,26 @@
   import { asKilograms, asLiters, CddaData, parseMass, parseVolume, singularName } from '../data'
   import Recipe from './Recipe.svelte';
   import ThingLink from './ThingLink.svelte';
+  
+  type BookProficiencyBonus = {
+    id: string // proficiency_id
+    fail_factor?: number // default: 0.5
+    time_factor?: number // default: 0.5
+    include_prereqs?: number // default: true
+  }
+  type BookSlot = {
+    max_level?: number // default: 0
+    required_level?: number // default: 0
+    fun?: number // default: 0
+    intelligence?: number // default: 0
+
+    time?: number /* mins */ | string /* duration */
+
+    skill?: string // skill_id
+    martial_art?: string // matype_id
+    chapters?: number // default: 0
+    proficiencies?: BookProficiencyBonus[]
+  }
 
   export let item: any
   let data: CddaData = getContext('data')
@@ -79,6 +99,24 @@
     return (item.covers ?? []).includes(body_part_id)
   }
   let covers_anything = (item.covers ?? []).length
+  
+  const bookRecipes = new Map<string, number>()
+  if (item.type === 'BOOK') {
+    function add(recipe_id: string, level: number) {
+      bookRecipes.set(recipe_id, Math.min(level, bookRecipes.get(recipe_id) ?? Infinity))
+    }
+    for (const recipe of data.byType('recipe')) {
+      const flattened = data._flatten(recipe)
+      if (Array.isArray(flattened.book_learn))
+        for (const [id, level = 0] of flattened.book_learn)
+          if (id === item.id)
+            add(flattened.result, level)
+      else if (flattened.book_learn)
+        for (const [id, obj] of Object.entries(flattened.book_learn as Record<string, any>))
+          if (id === item.id)
+            add(flattened.result, obj.skill_level ?? 0)
+    }
+  }
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
@@ -135,6 +173,34 @@
 </dl>
 <p style="color: var(--cata-color-gray)">{item.description}</p>
 </section>
+{#if item.type === 'BOOK'}
+<section>
+  <h1>Book</h1>
+  <dl>
+    {#if item.skill}
+    <dt>Skill</dt><dd><ThingLink id={item.skill} type="skill" /></dd>
+    <dt>Required Level</dt><dd>{item.required_level ?? 0}</dd>
+    <dt>Maximum Level</dt><dd>{item.max_level ?? 0}</dd>
+    {/if}
+    <dt>Required Intelligence</dt><dd>{item.intelligence ?? 0}</dd>
+    <dt>Read Time</dt><dd>{item.time ?? 0}</dd>
+    <dt>Fun</dt><dd>{item.fun ?? 0}</dd>
+    {#if bookRecipes.size}
+    <dt>Recipes</dt>
+    <dd>
+      <ul>
+        {#each [...bookRecipes.entries()].sort((a, b) => {
+          if (a[1] !== b[1]) return a[1] - b[1]
+          return a[0].localeCompare(b[0])
+        }) as [id, level]}
+        <li><ThingLink {id} type="item" /> ({level})</li>
+        {/each}
+      </ul>
+    </dd>
+    {/if}
+  </dl>
+</section>
+{/if}
 {#if item.type === 'ARMOR' || item.type === 'TOOL_ARMOR'}
 <section>
   <h1>Armor</h1>
