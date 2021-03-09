@@ -11,7 +11,8 @@
   import Furniture from './types/Furniture.svelte';
   import Skill from './types/Skill.svelte';
   import Proficiency from './types/Proficiency.svelte';
-import Flag from './types/Flag.svelte';
+  import Flag from './types/Flag.svelte';
+  import Fault from './types/Fault.svelte';
 
   export let item: { id: string, type: string }
   
@@ -46,6 +47,7 @@ import Flag from './types/Flag.svelte';
     skill: Skill,
     proficiency: Proficiency,
     json_flag: Flag,
+    fault: Fault,
   }
 </script>
 

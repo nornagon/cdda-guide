@@ -1,52 +1,20 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { singularName, pluralName, CddaData } from '../data'
-import ThingLink from './ThingLink.svelte';
+  import { singularName, CddaData, flattenRequirement, countsByCharges } from '../data'
+  import ThingLink from './ThingLink.svelte';
   let data = getContext<CddaData>('data')
 
   export let recipe: any
-  
-  type OneRequirement = [string, number] | [string, number, "LIST"]
-  type RequirementChoices = OneRequirement[]
-  type Requirement = RequirementChoices[]
-  
-  function flattenChoices(choices: RequirementChoices, get: (x: any) => Requirement): {id: string, count: number}[] {
-    const flatChoices = []
-    for (const choice of choices) {
-      const [id, count, isList] = choice
-      if (isList === 'LIST') {
-        const otherRequirement = data.byId('requirement', id)
-        if (otherRequirement.type !== 'requirement') {
-          console.error(`Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`)
-        }
-        const otherRequirementTools = get(otherRequirement) ?? []
-        const otherRequirementChoices = otherRequirementTools[0] // only take the first
-        flatChoices.push(...flattenChoices(otherRequirementChoices, get).map(x => ({...x, count: x.count * count})))
-      } else {
-        flatChoices.push({id, count})
-      }
-    }
-    return flatChoices
-  }
-  
-  function expandSubstitutes(r: {id: string, count: number}): {id: string, count: number}[] {
-    const replacements = data.replacementTools(r.id)
-    return [r, ...replacements.map(o => ({id: o, count: r.count}))]
-  }
-  
-  function flattenRequirement(required: Requirement, get: (x: any) => Requirement) {
-    return required.map(x => flattenChoices(x, get)).map(x => x.flatMap(expandSubstitutes)).filter(x => x.length)
-  }
   
   let requirements = ((recipe.using ?? [])
     .map(([id, count]) => [data.byId('requirement', id), count])).concat([[recipe, 1]])
   
   let tools: any[][] = requirements.flatMap(([req, count]) => {
-    return flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
+    return flattenRequirement(data, req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
   })
   let components = requirements.flatMap(([req, count]) => {
-    return flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
+    return flattenRequirement(data, req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
   })
   let qualities: any[] = requirements.flatMap(([req, count]) => {
     return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])
@@ -65,9 +33,6 @@ import ThingLink from './ThingLink.svelte';
   
   let skillsRequired = normalizeSkillsRequired(recipe.skills_required)
   
-  const countsByCharges = (item): boolean => {
-    return item.type === 'AMMO' || item.type === 'COMESTIBLE' || item.stackable;
-  }
 </script>
 
 <section class="recipe">

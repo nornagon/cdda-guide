@@ -40,6 +40,7 @@ const typeMappings = new Map([
   ["MONSTER", "monster"],
 ])
 
+// TODO: should be called "Translation"
 export type Name = string | { str: string, str_pl?: string } | { str_sp: string }
 
 export const mapType = (type: string): string => typeMappings.get(type) ?? type
@@ -142,7 +143,7 @@ export class CddaData {
     }
   }
   
-  byId(type: string, id: string): any {
+  byId<T = any>(type: string, id: string): T {
     if (typeof id !== 'string') throw new Error('Requested non-string id')
     if (type === 'item' && this._migrations.has(id)) return this.byId(type, this._migrations.get(id))
     const obj = this._byTypeById.get(type)?.get(id)
@@ -345,6 +346,69 @@ export function flattenItemGroup(data: CddaData, group: ItemGroup): {id: string,
   }
 
   return [...retMap.entries()].map(([id, v]) => ({id, ...v}))
+}
+
+
+export type ItemComponent = [ string /* item_id */, number /* count */, ...('LIST' | 'NO_RECOVER')[] ]
+export type QualityRequirement = {
+  id: string
+  level?: number // default: 1
+  amount?: number // default: 1
+}
+export type ToolComponent = string | [string, number] | [string, number, "LIST"]
+
+export type Requirement = {
+  id: string
+  type: 'requirement'
+  components?: (ItemComponent | ItemComponent[])[]
+  qualities?: (QualityRequirement | QualityRequirement[])[]
+  tools?: (ToolComponent | ToolComponent[])[]
+}
+
+type AnyRequirement = (ItemComponent | ToolComponent)[]
+
+function flattenChoices<T>(data: CddaData, choices: T[], get: (x: Requirement) => T[][]): {id: string, count: number}[] {
+  const flatChoices = []
+  for (const choice of choices) {
+    if (Array.isArray(choice)) {
+      const [id, count, isList] = choice
+      if (isList === 'LIST') {
+        const otherRequirement = data.byId('requirement', id)
+        if (otherRequirement.type !== 'requirement') {
+          console.error(`Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`)
+        }
+        const otherRequirementTools = get(otherRequirement) ?? []
+        const otherRequirementChoices = otherRequirementTools[0] // only take the first
+        flatChoices.push(...flattenChoices(data, otherRequirementChoices, get).map(x => ({...x, count: x.count * count})))
+      } else {
+        flatChoices.push({id, count})
+      }
+    } else if (typeof choice === 'string') {
+      flatChoices.push({id: choice, count: 1})
+    } else {
+      throw new Error('unexpected choice type')
+    }
+  }
+  return flatChoices
+}
+
+function expandSubstitutes(data: CddaData, r: {id: string, count: number}): {id: string, count: number}[] {
+  const replacements = data.replacementTools(r.id)
+  return [r, ...replacements.map(o => ({id: o, count: r.count}))]
+}
+
+export function normalize<T>(xs: (T | T[])[]): T[][] {
+  return xs.map((x: T | T[]) => Array.isArray(x) ? x as T[] : [x])
+}
+
+export function flattenRequirement<T>(data: CddaData, required: (T | T[])[], get: (x: Requirement) => (T | T[])[]) {
+  return normalize(required)
+    .map(x => flattenChoices(data, x, q => normalize(get(q))).flatMap(y => expandSubstitutes(data, y)))
+    .filter(x => x.length)
+}
+
+export const countsByCharges = (item): boolean => {
+  return item.type === 'AMMO' || item.type === 'COMESTIBLE' || item.stackable;
 }
 
 const fetchJson = async () => {
