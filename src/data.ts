@@ -253,7 +253,8 @@ export type ItemGroup = {
   entries?: ItemGroupEntryOrShortcut[]
   items?: (string /* item_id with prob=100 */ | ItemGroupEntryOrShortcut)[]
   groups?: (string /* item_group_id with prob=100 */ | ItemGroupEntryOrShortcut)[]
-  // TODO: container-item, on_overflow
+  "container-item"?: string
+  // TODO: on_overflow
 } | {
   subtype?: "old" // ~= "distribution"
   items: ItemGroupEntryOrShortcut[]
@@ -272,6 +273,9 @@ export function flattenItemGroup(data: CddaData, group: ItemGroup): {id: string,
   function add(...args: {id: string, prob: number, count: [number, number]}[]) {
     args.forEach(addOne)
   }
+  
+  if (group['container-item'])
+    add({id: group['container-item'], prob: 1, count: [1, 1]})
   
   const normalizedEntries: ItemGroupEntry[] = []
   if (group.subtype === 'old' || !group.subtype) {
