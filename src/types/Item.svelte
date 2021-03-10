@@ -185,6 +185,9 @@
     <dt>Required Intelligence</dt><dd>{item.intelligence ?? 0}</dd>
     <dt>Read Time</dt><dd>{item.time ?? 0}</dd>
     <dt>Fun</dt><dd>{item.fun ?? 0}</dd>
+    {#if item.chapters}
+    <dt>Chapters</dt><dd>{item.chapters}</dd>
+    {/if}
     {#if bookRecipes.size}
     <dt>Recipes</dt>
     <dd>
