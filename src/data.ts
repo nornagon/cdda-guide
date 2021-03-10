@@ -178,7 +178,7 @@ export class CddaData {
     const ret = {...this._flatten(parent), ...obj}
     for (const k of Object.keys(ret.relative ?? {})) {
       if (typeof ret.relative[k] === 'number') {
-        ret[k] += ret.relative[k]
+        ret[k] = (ret[k] ?? 0) + ret.relative[k]
       }
       // TODO: damage, vitamins, mass, volume, time
     }

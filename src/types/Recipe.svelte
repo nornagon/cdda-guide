@@ -68,7 +68,7 @@
   </dd>
   {/if}
   <dt>Time to Complete</dt>
-  <dd>{recipe.time}</dd>
+  <dd>{recipe.time ?? '0 m'}</dd>
   {#if recipe.charges}
   <dt>Recipe Makes</dt>
   <dd>{recipe.charges}<!-- TODO: properly switch on result type --></dd>

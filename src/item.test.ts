@@ -11,6 +11,8 @@ let data: CddaData = new CddaData(json.data)
 for (const item of data.byType('item')) {
   if (item.id)
     test(`render item ${item.id}`, () => {
-      render(Thing, { item: { type: 'item', id: item.id}, data })
+      const { container } = render(Thing, { item: { type: 'item', id: item.id}, data })
+      expect(container.textContent).not.toMatch(/undefined/)
+      expect(container.textContent).not.toMatch(/NaN/)
     })
 }

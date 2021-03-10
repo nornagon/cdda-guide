@@ -92,7 +92,7 @@
     return ret
   }
 
-  let ammo = pockets.flatMap(pocket => Object.keys(pocket.ammo_restriction ?? {}))
+  let ammo = pockets.flatMap(pocket => pocket.pocket_type === 'MAGAZINE' ? Object.keys(pocket.ammo_restriction ?? {}) : [])
   
   function covers(body_part_id: string): boolean {
     // TODO: armor_portion_data
@@ -244,15 +244,17 @@
       {:else}Normal
       {/if}
     </dd>
+    {#if materials.length || item.environmental_protection}
     <dt>Protection</dt>
     <dd>
       <dl>
+        {#if materials.length}
         <dt>Bash</dt>
-        <dd>{(materials.reduce((m, o) => m + o.bash_resist ?? 0, 0) * item.material_thickness / materials.length).toFixed(2)}</dd>
+        <dd>{(materials.reduce((m, o) => m + o.bash_resist ?? 0, 0) * (item.material_thickness ?? 0) / materials.length).toFixed(2)}</dd>
         <dt>Cut</dt>
-        <dd>{(materials.reduce((m, o) => m + o.cut_resist ?? 0, 0) * item.material_thickness / materials.length).toFixed(2)}</dd>
+        <dd>{(materials.reduce((m, o) => m + o.cut_resist ?? 0, 0) * (item.material_thickness ?? 0) / materials.length).toFixed(2)}</dd>
         <dt>Ballistic</dt>
-        <dd>{(materials.reduce((m, o) => m + o.bullet_resist ?? 0, 0) * item.material_thickness / materials.length).toFixed(2)}</dd>
+        <dd>{(materials.reduce((m, o) => m + o.bullet_resist ?? 0, 0) * (item.material_thickness ?? 0) / materials.length).toFixed(2)}</dd>
         <dt>Acid</dt>
         <dd>{(() => {
           let resist = (materials.reduce((m, o) => m + o.acid_resist ?? 0, 0) / materials.length)
@@ -267,10 +269,12 @@
           if (env < 10) resist *= env / 10;
           return resist
         })().toFixed(2)}</dd>
+        {/if}
         <dt title="Environmental">Environ.</dt>
         <dd>{item.environmental_protection ?? 0}</dd>
       </dl>
     </dd>
+    {/if}
   </dl>
 </section>
 {/if}
@@ -305,8 +309,22 @@
   <h1>Pockets</h1>
   {#each pockets.filter(p => p.pocket_type === 'CONTAINER') as pocket}
   <dl>
+    {#if pocket.max_contains_volume != null}
     <dt>Volume Capacity</dt><dd>{pocket.max_contains_volume}</dd>
+    {/if}
+    {#if pocket.max_contains_weight != null}
     <dt>Weight Capacity</dt><dd>{pocket.max_contains_weight}</dd>
+    {/if}
+    {#if pocket.ammo_restriction}
+    <dt>Ammo Restriction</dt>
+    <dd>
+      <ul>
+      {#each [...Object.entries(pocket.ammo_restriction)] as [id, count]}
+      <li>{count} rounds of <ThingLink {id} type="ammunition_type" /></li>
+      {/each}
+      </ul>
+    </dd>
+    {/if}
     {#if pocket.max_item_length}
     <dt>Max Item Length</dt><dd>{pocket.max_item_length}</dd>
     {/if}
