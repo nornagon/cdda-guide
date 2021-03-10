@@ -101,6 +101,7 @@ export class CddaData {
   _toolReplacements: Map<string, string[]> = new Map
   _craftingPseudoItems: Map<string, string> = new Map
   _migrations: Map<string, string> = new Map
+  _flattenCache: Map<any, any> = new Map
 
   constructor(raw: any[]) {
     this._raw = raw
@@ -169,12 +170,16 @@ export class CddaData {
   }
   
   _flatten(obj: any) {
+    if (this._flattenCache.has(obj)) return this._flattenCache.get(obj)
     const parent = 'copy-from' in obj
       ? this._byTypeById.get(mapType(obj.type))?.get(obj['copy-from']) ??
         this._abstractsByType.get(mapType(obj.type))?.get(obj['copy-from']) : null
     if ('copy-from' in obj && !parent)
       console.error(`Missing parent in ${obj.id ?? obj.abstract}`)
-    if (!parent) return obj;
+    if (!parent) {
+      this._flattenCache.set(obj, obj)
+      return obj;
+    }
     const ret = {...this._flatten(parent), ...obj}
     for (const k of Object.keys(ret.relative ?? {})) {
       if (typeof ret.relative[k] === 'number') {
@@ -198,6 +203,30 @@ export class CddaData {
       }
     }
     delete ret.extend
+    this._flattenCache.set(obj, ret)
+    return ret
+  }
+  
+  _cachedDeathDrops: Map<string, {id: string, prob: number, count: [number, number]}[]> = new Map
+  flatDeathDrops(mon_id: string): {id: string, prob: number, count: [number, number]}[] {
+    if (this._cachedDeathDrops.has(mon_id)) return this._cachedDeathDrops.get(mon_id)
+    const normalizeDeathDrops = (death_drops): ItemGroup | undefined => {
+      if (death_drops) {
+        if (typeof death_drops === 'string') {
+          return this.byId('item_group', death_drops) as ItemGroup
+        } else if (Array.isArray(death_drops)) {
+          return {subtype: 'distribution', entries: death_drops}
+        } else {
+          return {subtype: 'distribution', ...death_drops}
+        }
+      }
+    }
+    const mon = this.byId('monster', mon_id)
+    const ret = mon.death_drops
+      ? flattenItemGroup(this, normalizeDeathDrops(mon.death_drops))
+      : []
+    ret.sort((a, b) => b.prob - a.prob)
+    this._cachedDeathDrops.set(mon_id, ret)
     return ret
   }
 }

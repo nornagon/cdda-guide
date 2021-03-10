@@ -211,23 +211,8 @@
 
   let materials: any[] = item.material ?? []
 
-  
-  function normalizedDeathDrops(): ItemGroup | undefined {
-    if (item.death_drops) {
-      if (typeof item.death_drops === 'string') {
-        return data.byId('item_group', item.death_drops) as ItemGroup
-      } else if (Array.isArray(item.death_drops)) {
-        return {subtype: 'distribution', entries: item.death_drops}
-      } else {
-        return {subtype: 'distribution', ...item.death_drops}
-      }
-    }
-  }
-  
-  let deathDrops = item.death_drops
-    ? flattenItemGroup(data, normalizedDeathDrops()).sort((a, b) => b.prob - a.prob)
-    : undefined
-    
+  let deathDrops = data.flatDeathDrops(item.id)
+
   let deathDropsLimit = 10
   
   type HarvestEntry = {

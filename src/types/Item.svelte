@@ -1,7 +1,8 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { asKilograms, asLiters, CddaData, parseMass, parseVolume, singularName } from '../data'
+  import { asKilograms, asLiters, CddaData, flattenItemGroup, parseMass, parseVolume, singularName } from '../data'
+  import type { ItemGroup } from '../data'
   import Recipe from './Recipe.svelte';
   import ThingLink from './ThingLink.svelte';
   
@@ -117,6 +118,24 @@
             add(flattened.result, obj.skill_level ?? 0)
     }
   }
+
+  const mons = data.byType('monster').flatMap(mon => {
+    if (!mon.id) return []
+    const deathDrops = data.flatDeathDrops(mon.id)
+    const dd = deathDrops.find(dd => dd.id === item.id)
+    if (dd) return [{id: mon.id, prob: dd.prob}]
+    return []
+  })
+  mons.sort((a, b) => b.prob - a.prob)
+
+  function showProbability(prob: number) {
+    const ret = (prob * 100).toFixed(2)
+    if (ret === '0.00')
+      return '< 0.01%'
+    return ret + '%'
+  }
+
+  let droppedByLimit = 10
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
@@ -368,6 +387,19 @@
     <dd>{fault.description}</dd>
     {/each}
   </dl>
+</section>
+{/if}
+{#if mons.length}
+<section>
+  <h1>Dropped By</h1>
+  <ul>
+    {#each mons.slice(0, droppedByLimit) as {id, prob}}
+    <li><ThingLink {id} type="monster" /> ({showProbability(prob)})</li>
+    {/each}
+  </ul>
+  {#if mons.length > droppedByLimit}
+  <a href="" on:click={(e) => { e.preventDefault(); droppedByLimit = Infinity }}>See all...</a>
+  {/if}
 </section>
 {/if}
 {#if recipes.length}
