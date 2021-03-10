@@ -22,7 +22,7 @@
       special_attacks = [],
       emit_fields = [],
       hp,
-      speed,
+      speed = 0,
       attack_cost = 100,
       morale = 0,
       aggression: agro = 0,
@@ -268,8 +268,12 @@
 <section>
   <h1>Body</h1>
   <dl>
+    {#if item.bodytype}
     <dt>Body Type</dt><dd>{item.bodytype}</dd>
+    {/if}
+    {#if item.species && item.species.length}
     <dt>Species</dt><dd>{(item.species ?? []).join(', ')}</dd>
+    {/if}
     <dt>Volume</dt><dd>{asLiters(item.volume)}</dd>
     <dt>Weight</dt><dd>{asKilograms(item.weight)}</dd>
     <dt>Material</dt>
@@ -286,7 +290,7 @@
   <h1>Combat</h1>
   <div style="display: flex; flex-direction: row; align-items: start; flex-wrap: wrap;">
   <dl style="flex: 1">
-    <dt>Speed</dt><dd>{item.speed}</dd>
+    <dt>Speed</dt><dd>{item.speed ?? 0}</dd>
     <dt>Melee Skill</dt><dd>{item.melee_skill ?? 0}</dd>
     <dt>Damage</dt><dd>{damage(item)}</dd>
     {#if item.special_attacks}
@@ -319,8 +323,8 @@
 <section>
   <h1>Behavior</h1>
   <dl>
-    <dt>Aggression</dt><dd>{item.aggression}</dd>
-    <dt>Morale</dt><dd>{item.morale}</dd>
+    <dt>Aggression</dt><dd>{item.aggression ?? 0}</dd>
+    <dt>Morale</dt><dd>{item.morale ?? 0}</dd>
     <dt>Vision Range</dt><dd>{item.vision_day ?? 40} (day) / {item.vision_night ?? 1} (night)</dd>
     <dt>Default Faction</dt><dd>{item.default_faction}</dd>
     {#if item.anger_triggers}
@@ -333,7 +337,7 @@
     <dt>On Death</dt><dd>{(item.death_function ?? []).join(', ')}</dd>
   </dl>
 </section>
-{#if harvest}
+{#if harvest && (harvest.entries ?? []).length}
 <section>
   <h1>Harvest</h1>
   <dl>
@@ -362,7 +366,7 @@
     <li><ThingLink type="item" {id} /> ({showProbability(prob)})</li>
     {/each}
   </ul>
-  {#if deathDropsLimit !== Infinity}
+  {#if deathDrops.length > deathDropsLimit}
   <a href="" on:click={(e) => { e.preventDefault(); deathDropsLimit = Infinity }}>See all...</a>
   {/if}
 </section>
