@@ -46,7 +46,7 @@
   <h1>{type}</h1>
   <ul>
     {#each matchingObjects.get(type) as obj}
-    <li><a href="#/{mapType(obj.type)}/{obj.id}">{singularName(obj)}</a></li>
+    <li><a href="#/{mapType(obj.type)}/{obj.id}">{singularName($data._flatten(obj))}</a></li>
     {/each}
   </ul>
   {:else}
