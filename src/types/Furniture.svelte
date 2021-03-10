@@ -1,8 +1,9 @@
 <script lang="ts">
 import { CddaData, flattenItemGroup, singularName } from "../data";
-import type { ItemGroupEntry, Name } from "../data";
+import type { ItemGroupEntry, Name, Construction as ConstructionT } from "../data";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
+import Construction from "./Construction.svelte";
 
 const data = getContext<CddaData>('data')
 
@@ -112,6 +113,9 @@ function showProbability(prob: number) {
     return '< 0.01%'
   return ret + '%'
 }
+
+const constructions = data.byType<ConstructionT>('construction').filter(c => c.post_terrain === item.id)
+
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{color}">{symbol}</span> {singularName(item)}</h1>
@@ -148,3 +152,10 @@ function showProbability(prob: number) {
   </dl>
   <p style="color: var(--cata-color-gray)">{item.description}</p>
 </section>
+
+{#if constructions.length}
+<h2>Construction</h2>
+{#each constructions as construction}
+<Construction {construction} />
+{/each}
+{/if}

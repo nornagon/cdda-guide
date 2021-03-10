@@ -76,7 +76,7 @@ const weapons = data.byType('item').filter(it => {
       {#each item.skill_requirements ?? [] as {name, level}, i}
       <ThingLink type="skill" id={name} /> ({level}){#if i === item.skill_requirements.length - 2}{' and '}{:else if i !== item.skill_requirements.length - 1}{', '}{/if}
       {:else}
-      none
+      <em>none</em>
       {/each}
     </dd>
     {#if item.stun_dur}

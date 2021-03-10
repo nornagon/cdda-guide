@@ -151,7 +151,7 @@ export class CddaData {
       return this._flatten(obj)
   }
   
-  byType(type: string): any[] {
+  byType<T = any>(type: string): T[] {
     // TODO: flatten...?
     return this._byType.get(type) ?? []
   }
@@ -348,6 +348,39 @@ export function flattenItemGroup(data: CddaData, group: ItemGroup): {id: string,
   return [...retMap.entries()].map(([id, v]) => ({id, ...v}))
 }
 
+export type Construction = {
+  type: 'construction'
+  id: string
+  group: string // construction_group_id
+  required_skills?: [string /* skill_id */, number /* level */][]
+  
+  // legacy, superceded by required_skills
+  skill?: string
+  difficulty?: number
+  
+  category?: string // construction_category_id, default: OTHER
+  time?: string | number /* minutes */
+  
+  using?: string | [string /* requirement_id */, number /* count */][]
+  pre_note?: string
+  
+  pre_terrain?: string // if starts with f_, then furniture_id, else terrain_id
+  post_terrain?: string // as above
+
+  pre_flags?: string[]
+  post_flags?: string[]
+  
+  byproducts?: ItemGroupEntry[] // subtype collection
+  
+  pre_special?: string
+  post_special?: string
+  explain_failure?: string
+  
+  vehicle_start?: boolean
+  on_display?: boolean // default: true
+  dark_craftable?: boolean
+} & RequirementData
+
 
 export type ItemComponent = [ string /* item_id */, number /* count */, ...('LIST' | 'NO_RECOVER')[] ]
 export type QualityRequirement = {
@@ -360,12 +393,13 @@ export type ToolComponent = string | [string, number] | [string, number, "LIST"]
 export type Requirement = {
   id: string
   type: 'requirement'
+} & RequirementData
+
+export type RequirementData = {
   components?: (ItemComponent | ItemComponent[])[]
   qualities?: (QualityRequirement | QualityRequirement[])[]
   tools?: (ToolComponent | ToolComponent[])[]
 }
-
-type AnyRequirement = (ItemComponent | ToolComponent)[]
 
 function flattenChoices<T>(data: CddaData, choices: T[], get: (x: Requirement) => T[][]): {id: string, count: number}[] {
   const flatChoices = []

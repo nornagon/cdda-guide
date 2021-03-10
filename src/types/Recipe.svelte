@@ -67,14 +67,14 @@
     </ul>
   </dd>
   {/if}
-  <dt>Time to complete</dt>
+  <dt>Time to Complete</dt>
   <dd>{recipe.time}</dd>
   {#if recipe.charges}
-  <dt>Recipe makes</dt>
+  <dt>Recipe Makes</dt>
   <dd>{recipe.charges}<!-- TODO: properly switch on result type --></dd>
   {/if}
   {#if (qualities ?? []).length || tools.length}
-  <dt>Tools required</dt>
+  <dt>Tools Required</dt>
   <dd>
     <ul>
       {#each qualities ?? [] as qualityChoices}
