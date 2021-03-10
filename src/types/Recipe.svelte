@@ -38,6 +38,7 @@
 </script>
 
 <section class="recipe">
+<h1>Craft</h1>
 <dl>
   <dt>Primary Skill</dt>
   <dd>

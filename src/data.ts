@@ -38,6 +38,7 @@ const typeMappings = new Map([
   ["GENERIC", "item"],
   ["BIONIC_ITEM", "item"],
   ["MONSTER", "monster"],
+  ["uncraft", "recipe"],
 ])
 
 // TODO: should be called "Translation"
@@ -153,8 +154,7 @@ export class CddaData {
   }
   
   byType<T = any>(type: string): T[] {
-    // TODO: flatten...?
-    return this._byType.get(type) ?? []
+    return this._byType.get(type).map(x => this._flatten(x)) ?? []
   }
   
   replacementTools(type: string): string[] {
@@ -169,7 +169,8 @@ export class CddaData {
     return this._raw
   }
   
-  _flatten(obj: any) {
+  _flatten<T = any>(_obj: T): T {
+    const obj: any = _obj
     if (this._flattenCache.has(obj)) return this._flattenCache.get(obj)
     const parent = 'copy-from' in obj
       ? this._byTypeById.get(mapType(obj.type))?.get(obj['copy-from']) ??
@@ -228,6 +229,17 @@ export class CddaData {
     ret.sort((a, b) => b.prob - a.prob)
     this._cachedDeathDrops.set(mon_id, ret)
     return ret
+  }
+  
+  uncraftRecipe(item_id: string): Recipe | undefined {
+    let reversed: Recipe
+    for (const recipe of this.byType<Recipe>('recipe')) {
+      if (recipe.result === item_id) {
+        if (recipe.type === 'uncraft') return recipe
+        else if (recipe.reversible) reversed = recipe
+      }
+    }
+    return reversed
   }
 }
 
@@ -433,6 +445,51 @@ export type RequirementData = {
   qualities?: (QualityRequirement | QualityRequirement[])[]
   tools?: (ToolComponent | ToolComponent[])[]
 }
+
+export type Recipe = {
+  result?: string
+  abstract?: string // mutex with result
+  type: 'recipe' | 'uncraft'
+  
+  id_suffix?: string // only for type 'recipe'. not allowed for abstracts
+  obsolete?: boolean
+  
+  time?: number /* moves */ | string /* duration */
+  difficulty?: number // default: 0
+  flags?: string[]
+  
+  contained?: boolean
+  container?: string /* item_id, implies contained */
+  sealed?: boolean
+  
+  batch_time_factors?: [number /* int */, number /* int */][]
+  
+  charges?: number // int, no default
+  result_mult?: number // int, default: 1
+  
+  skill_used?: string // skill_id
+  
+  skills_required?: [string, number] | [string, number][] // skill_id, level
+  
+  proficiencies?: any[] // TODO
+  autolearn?: boolean | [string, number][]
+  never_learn?: boolean
+  decomp_learn?: number | [string, number][]
+  book_learn?: ([string] | [string, number])[] | Record<string, {skill_level?: number, recipe_name?: string, hidden?: boolean}>
+  
+  activity_level?: string
+  
+  delete_flags?: string[] // flag_id
+  using?: string | [string, number][] // requirement_id
+  
+  // for type: 'recipe' only
+  category: string
+  subcategory: string
+  description: string
+  reversible: boolean
+  byproducts?: ([string] | [string, number])[]
+  // TODO: construction_blueprint
+} & RequirementData
 
 function flattenChoices<T>(data: CddaData, choices: T[], get: (x: Requirement) => T[][]): {id: string, count: number}[] {
   const flatChoices = []

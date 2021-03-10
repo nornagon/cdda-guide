@@ -63,7 +63,7 @@ export let item: Technique
 const data = getContext<CddaData>('data')
 
 const weapons = data.byType('item').filter(it => {
-  return it.id && (data._flatten(it).techniques ?? []).includes(item.id)
+  return it.id && (it.techniques ?? []).includes(item.id)
 }).sort((a, b) => a.id.localeCompare(b.id))
 
 </script>

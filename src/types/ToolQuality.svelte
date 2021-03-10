@@ -17,8 +17,7 @@
   let toolsWithQualityByLevel = new Map<number, any>()
   for (const it of data.byType('item')) {
     if (it.type !== 'TOOL' && it.type !== 'TOOL_ARMOR') continue
-    const flattened = data._flatten(it)
-    const q = (flattened.qualities ?? []).find(([id, level]) => id === item.id)
+    const q = (it.qualities ?? []).find(([id, level]) => id === item.id)
     if (q) {
       const [, level] = q
       if (!toolsWithQualityByLevel.has(level)) toolsWithQualityByLevel.set(level, [])

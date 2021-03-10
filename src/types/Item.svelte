@@ -1,8 +1,8 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { asKilograms, asLiters, CddaData, flattenItemGroup, parseMass, parseVolume, singularName } from '../data'
-  import type { ItemGroup } from '../data'
+  import { asKilograms, asLiters, CddaData, countsByCharges, flattenRequirement, parseMass, parseVolume, singularName } from '../data'
+  import type { RequirementData, Recipe as RecipeT } from '../data'
   import Recipe from './Recipe.svelte';
   import ThingLink from './ThingLink.svelte';
   
@@ -83,7 +83,8 @@
   })
   let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL').flatMap(p => p.item_restriction)
   
-  let recipes = data.byType('recipe').filter(x => x.result === item.id && !x.obsolete).map(r => data._flatten(r))
+  let recipes = data.byType<RecipeT>('recipe')
+    .filter(x => x.type === 'recipe' && x.result === item.id && !x.obsolete)
   
   function maxCharges(ammo_id: string) {
     let ret = 0
@@ -107,15 +108,14 @@
       bookRecipes.set(recipe_id, Math.min(level, bookRecipes.get(recipe_id) ?? Infinity))
     }
     for (const recipe of data.byType('recipe')) {
-      const flattened = data._flatten(recipe)
-      if (Array.isArray(flattened.book_learn))
-        for (const [id, level = 0] of flattened.book_learn)
+      if (Array.isArray(recipe.book_learn))
+        for (const [id, level = 0] of recipe.book_learn)
           if (id === item.id)
-            add(flattened.result, level)
-      else if (flattened.book_learn)
-        for (const [id, obj] of Object.entries(flattened.book_learn as Record<string, any>))
+            add(recipe.result, level)
+      else if (recipe.book_learn)
+        for (const [id, obj] of Object.entries(recipe.book_learn as Record<string, any>))
           if (id === item.id)
-            add(flattened.result, obj.skill_level ?? 0)
+            add(recipe.result, obj.skill_level ?? 0)
     }
   }
 
@@ -136,6 +136,37 @@
   }
 
   let droppedByLimit = 10
+  
+  const uncraftableFromSet = new Set<string>()
+  for (const recipe of data.byType<RecipeT>('recipe')) {
+    if (recipe.result && (recipe.reversible || recipe.type === 'uncraft')) {
+      const normalizedUsing = recipe.using ? Array.isArray(recipe.using) ? recipe.using : [[recipe.using, 1] as [string, number]] : []
+      const requirements = (normalizedUsing
+        .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1]])
+      const components = requirements.flatMap(([req, count]) => {
+        return flattenRequirement(data, req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
+      })
+      const defaultComponents = components.map(c => c[0])
+      if (defaultComponents.some(c => c.id === item.id))
+        uncraftableFromSet.add(recipe.result)
+    }
+  }
+  const uncraftableFrom = [...uncraftableFromSet].sort((a, b) => singularName(data.byId('item', a)).localeCompare(singularName(data.byId('item', b))))
+  
+  const uncraft = (() => {
+    const recipe = data.uncraftRecipe(item.id)
+    if (!recipe) return undefined
+    const normalizedUsing = recipe.using ? Array.isArray(recipe.using) ? recipe.using : [[recipe.using, 1] as [string, number]] : []
+    const requirements = (normalizedUsing
+      .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1]])
+    const components = requirements.flatMap(([req, count]) => {
+      return flattenRequirement(data, req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
+    })
+    const defaultComponents = components.map(c => c[0])
+    return {components: defaultComponents}
+  })()
+
+  let uncraftLimit = 10
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
@@ -182,11 +213,25 @@
   {#if qualities.length}
   <dt>Qualities</dt>
   <dd>
-  <ul class="no-bullets">
-  {#each qualities as {quality, level}}
-    <li>Has level <strong>{level} <ThingLink type="tool_quality" id={quality.id} /></strong> quality.</li>
-  {/each}
-  </ul>
+    <ul class="no-bullets">
+    {#each qualities as {quality, level}}
+      <li>Has level <strong>{level} <ThingLink type="tool_quality" id={quality.id} /></strong> quality.</li>
+    {/each}
+    </ul>
+  </dd>
+  {/if}
+  
+  {#if uncraft}
+  <dt>Dissasembles Into</dt>
+  <dd>
+    <ul class="comma-separated">
+      {#each uncraft.components as {id, count}}
+      <li>
+        <span style="white-space: nowrap">
+        {#if !countsByCharges(data.byId('item', id))}{count}{/if}
+        <ThingLink type="item" {id} plural={count !== 1 && !countsByCharges(data.byId('item', id))} />{#if countsByCharges(data.byId('item', id))}{' '}({count}){/if}</span></li>
+      {/each}
+    </ul>
   </dd>
   {/if}
 </dl>
@@ -389,6 +434,14 @@
   </dl>
 </section>
 {/if}
+{#if mons.length || uncraftableFrom.length || recipes.length}
+<h2>Obtaining</h2>
+{#if recipes.length}
+{#each recipes as recipe (recipe)}
+<Recipe recipe={recipe} />
+{/each}
+{/if}
+
 {#if mons.length}
 <section>
   <h1>Dropped By</h1>
@@ -402,9 +455,18 @@
   {/if}
 </section>
 {/if}
-{#if recipes.length}
-<h2>Recipes</h2>
-{#each recipes as recipe (recipe)}
-<Recipe recipe={recipe} />
-{/each}
+
+{#if uncraftableFrom.length}
+<section>
+  <h1>Disassemble</h1>
+  <ul>
+    {#each uncraftableFrom.slice(0, uncraftLimit) as id}
+    <li><ThingLink {id} type="item" /></li>
+    {/each}
+  </ul>
+  {#if uncraftableFrom.length > uncraftLimit}
+  <a href="" on:click={(e) => { e.preventDefault(); uncraftLimit = Infinity }}>See all...</a>
+  {/if}
+</section>
+{/if}
 {/if}
