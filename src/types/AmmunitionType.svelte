@@ -9,9 +9,8 @@
 
   const compatible = data.byType('item').flatMap(x => {
     if (x.type !== 'AMMO' || !x.id) return []
-    const flattened = data._flatten(x)
-    if (flattened.ammo_type === item.id)
-      return [flattened]
+    if (x.ammo_type === item.id)
+      return [x]
     return []
   })
   compatible.sort((a, b) => singularName(a).localeCompare(singularName(b)))
