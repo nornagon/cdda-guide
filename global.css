@@ -113,13 +113,24 @@ dd ul:not(.comma-separated, .no-bullets) {
 	padding-left: 1em;
 }
 
+@media (min-width: 601px) {
+.side-by-side {
+	display: grid;
+	grid-auto-columns: auto;
+	grid-column-gap: 1em;
+	margin-bottom: 1em;
+	justify-content: stretch;
+}
+.side-by-side > section { margin: 0; grid-row: 1; }
+}
+
 section {
 	background: rgba(255, 255, 255, 5%);
 	padding: 1em;
 	box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
 	border-radius: 4px;
 }
-section:not(:last-child) {
+section {
 	margin-bottom: 1em;
 }
 section > *:last-child { margin-bottom: 0; }
