@@ -11,4 +11,4 @@
   let item = data.byId(type, id)
 </script>
 
-<a href="#/{type}/{id}">{(plural ? pluralName : singularName)(item) ?? id}</a>
+<a href="#/{type}/{id}">{item ? (plural ? pluralName : singularName)(item) : id}</a>

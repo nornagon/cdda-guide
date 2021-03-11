@@ -46,21 +46,27 @@ export type Name = string | { str: string, str_pl?: string } | { str_sp: string 
 
 export const mapType = (type: string): string => typeMappings.get(type) ?? type
 
-export const singularName = (obj: any): string => {
-  return obj?.name
-    ? typeof obj.name === 'string'
-      ? obj.name
-      : obj.name.str_sp ?? obj.name.str
-    : /* fallback to id? */ obj?.id ?? obj?.abstract
-}
+export const singular = (name: Name): string =>
+  typeof name === 'string'
+    ? name 
+    : 'str_sp' in name
+      ? name.str_sp
+      : name.str
 
-export const pluralName = (obj: any): string => {
-  return obj?.name
-    ? typeof obj.name === 'string'
-      ? obj.name
-      : obj.name.str_sp ?? obj.name.str_pl ?? obj.name.str + 's'
-    : /* fallback to id? */ obj?.id ?? obj?.abstract
-}
+export const plural = (name: Name): string =>
+  typeof name === 'string'
+    ? name + 's'
+    : 'str_sp' in name
+      ? name.str_sp
+      : 'str_pl' in name
+        ? name.str_pl
+        : name.str + 's'
+
+export const singularName = (obj: any): string =>
+  singular(obj?.name ?? obj?.id ?? obj?.abstract)
+
+export const pluralName = (obj: any): string =>
+  plural(obj?.name ?? obj?.id ?? obj?.abstract)
   
 export function parseVolume(string: string | number): number {
   if (typeof string === 'undefined') return 0
@@ -124,7 +130,7 @@ export class CddaData {
         this._byTypeById.get(mappedType).set(obj.id, obj)
       }
       // recipes are id'd by their result
-      if (obj.type === 'recipe' && Object.hasOwnProperty.call(obj, 'result')) {
+      if (mappedType === 'recipe' && Object.hasOwnProperty.call(obj, 'result')) {
         if (!this._byTypeById.has(mappedType)) this._byTypeById.set(mappedType, new Map)
         const id = obj.result + (obj.id_suffix ? '_' + obj.id_suffix : '')
         this._byTypeById.get(mappedType).set(id, obj)
@@ -176,7 +182,7 @@ export class CddaData {
       ? this._byTypeById.get(mapType(obj.type))?.get(obj['copy-from']) ??
         this._abstractsByType.get(mapType(obj.type))?.get(obj['copy-from']) : null
     if ('copy-from' in obj && !parent)
-      console.error(`Missing parent in ${obj.id ?? obj.abstract}`)
+      console.error(`Missing parent in ${obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)}`)
     if (!parent) {
       this._flattenCache.set(obj, obj)
       return obj;
