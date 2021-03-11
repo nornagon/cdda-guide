@@ -2,7 +2,7 @@
   import { getContext } from 'svelte';
 
   import { asKilograms, asLiters, CddaData, countsByCharges, flattenRequirement, parseMass, parseVolume, singular, singularName } from '../data'
-  import type { RequirementData, Recipe as RecipeT } from '../data'
+  import type { RequirementData, Name, Recipe as RecipeT } from '../data'
   import Recipe from './Recipe.svelte';
   import ThingLink from './ThingLink.svelte';
   
@@ -24,6 +24,47 @@
     martial_art?: string // matype_id
     chapters?: number // default: 0
     proficiencies?: BookProficiencyBonus[]
+  }
+  
+  type DamageUnit = {
+    damage_type: string
+    amount?: number // float, default 0
+    armor_penetration?: number // float, default 0
+    armor_multiplier?: number // float, default 1
+    damage_multiplier?: number // float, default 1
+    constant_armor_multiplier?: number // float, default 1
+    constant_damage_multiplier?: number // float, default 1
+  }
+  type DamageInstance = DamageUnit[] | {values: DamageUnit[]} | DamageUnit
+  
+  type GunSlot = {
+    skill: string // skill_id
+    ammo?: string[] // ammunition_type_id
+    range?: number // int
+    ranged_damage?: DamageInstance
+    dispersion?: number // int
+    sight_dispersion?: number // int, default: 30
+    recoil?: number // int
+    handling?: number // int, default: derived from weapon type. if skill_used is rifle, smg or shotgun, 20, otherwise 10.
+    durability?: number // int
+    burst?: number // int, default: 0
+    loudness?: number // int, default: 0
+    clip_size?: number // int
+    reload?: number // int moves, default 100
+    reload_noise?: Name // default "click."
+    reload_noise_volume?: number // int, default: 0
+    barrel_volume?: string // volume, default: 0 ml
+    built_in_mods?: string[] // item_id
+    default_mods?: string[] // item_id
+    ups_charges?: number // int
+    blackpowder_tolerance?: number // int, default: 8
+    min_cycle_recoil?: number // int, default: 0
+    ammo_effects?: string[]
+    ammo_to_fire?: number // int, default: 1
+    
+    valid_mod_locations?: [string, number][] // [gunmod_location, count]
+    
+    modes?: [string, string, number] | [string, string, number, string[]][]
   }
 
   export let item: any
@@ -214,7 +255,7 @@
     <ul class="no-bullets">
       {#each ammo.map(id => ({id, max_charges: maxCharges(id)})) as {id: ammo_id, max_charges}}
       <li>
-        {max_charges} {item.type === 'GUN' ? 'rounds' : 'charges'} of
+        {max_charges} {item.type === 'GUN' ? 'round' : 'charge'}{max_charges === 1 ? '' : 's'} of
         <ThingLink type="ammunition_type" id={ammo_id} />
       </li>
       {/each}
@@ -380,6 +421,8 @@
   </dl>
 </section>
 {/if}
+{#if item.bashing || item.cutting || item.type === 'GUN'}
+<div class="side-by-side">
 {#if item.bashing || item.cutting}
 <section>
 <h1>Melee</h1>
@@ -397,6 +440,39 @@
 </dl>
 </section>
 {/if}
+{#if item.type === 'GUN'}
+<section>
+  <h1>Ranged</h1>
+  <dl>
+    <dt>Skill</dt>
+    <dd><ThingLink type="skill" id={item.skill} /></dd>
+    <dt>Base Damage</dt>
+    <!-- TODO: handle multiple ranged_damage types-->
+    <dd>{item.ranged_damage?.amount ?? 0} ({item.ranged_damage?.damage_type ?? 'bullet'})</dd>
+    <dt>Armor Penetration</dt>
+    <dd>{item.ranged_damage?.armor_penetration ?? 0}</dd>
+    <!-- TODO: Critical multiplier -->
+    <dt title="Added to ammo range">Range Bonus</dt>
+    <dd>{item.range ?? 0}</dd>
+    <dt title="Added to ammo dispersion">Base Dispersion</dt>
+    <dd>{item.dispersion ?? 0}</dd>
+    <dt>Sight Dispersion</dt>
+    <dd>{(item.flags ?? []).includes('DISABLE_SIGHTS') ? 90 : item.sight_dispersion ?? 30}
+    <dt>Base Recoil</dt>
+    <dd>{item.recoil ?? 0}</dd>
+    <dt>Reload Time</dt>
+    <dd>{item.reload ?? 100} moves</dd>
+    {#if item.valid_mod_locations?.length}
+    <dt>Mod Slots</dt>
+    <dd>{item.valid_mod_locations.map(([loc, num]) => `${loc} (${num})`).join(', ')}</dd>
+    {/if}
+    <dt>Durability</dt>
+    <dd>{item.durability ?? 0}</dd>
+  </dl>
+</section>
+{/if}
+</div>
+{/if}
 {#if pockets.filter(p => p.pocket_type === 'CONTAINER').length}
 <section>
   <h1>Pockets</h1>
@@ -413,7 +489,7 @@
     <dd>
       <ul>
       {#each [...Object.entries(pocket.ammo_restriction)] as [id, count]}
-      <li>{count} rounds of <ThingLink {id} type="ammunition_type" /></li>
+      <li>{count} round{count === 1 ? '' : 's'} of <ThingLink {id} type="ammunition_type" /></li>
       {/each}
       </ul>
     </dd>
