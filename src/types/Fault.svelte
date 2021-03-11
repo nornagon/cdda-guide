@@ -50,6 +50,10 @@ const mendingMethods = (item.mending_methods ?? []).map(mm => {
   <p style="color: var(--cata-color-gray)">{item.description}</p>
 </section>
 
+{#if mendingMethods.length}
+<h2>Mending Methods</h2>
+{/if}
+
 {#each mendingMethods as {tools, components, qualities, mending_method}}
 <section>
   <h1>{singularName(mending_method)}</h1>

@@ -276,6 +276,15 @@
   <dd>
     <ul class="comma-separated">{#each flags as f}<li><ThingLink type="json_flag" id={f.id} /></li>{:else}<li><em>none</em></li>{/each}</ul>
   </dd>
+  {#if faults.length}
+  <dt>Possible Faults</dt>
+  <dd>
+    <ul class="comma-separated">
+    {#each faults as fault}
+    <li><ThingLink type="fault" id={fault.id} /></li>
+    {/each}
+    </ul>
+  {/if}
 
   {#if qualities.length}
   <dt>Qualities</dt>
@@ -523,17 +532,6 @@
     {/if}
   </dl>
   {/each}
-</section>
-{/if}
-{#if faults.length}
-<section>
-  <h1>Possible Faults</h1>
-  <dl>
-    {#each faults as fault}
-    <dt><ThingLink type="fault" id={fault.id} /></dt>
-    <dd>{fault.description}</dd>
-    {/each}
-  </dl>
 </section>
 {/if}
 {#if mons.length || uncraftableFrom.length || recipes.length}
