@@ -472,6 +472,10 @@
   <dl>
     <dt>Skill</dt>
     <dd><ThingLink type="skill" id={item.skill} /></dd>
+    {#if item.min_strength}
+    <dt>Min Strength</dt>
+    <dd>{item.min_strength}</dd>
+    {/if}
     <dt>Base Damage</dt>
     <!-- TODO: handle multiple ranged_damage types-->
     <dd>{item.ranged_damage?.amount ?? 0} ({item.ranged_damage?.damage_type ?? 'bullet'})</dd>
