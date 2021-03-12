@@ -2,7 +2,7 @@
 import { getContext } from "svelte";
 
 import type { CddaData, Construction, RequirementData } from "../data";
-import { flattenRequirement, countsByCharges, singularName } from "../data"
+import { flattenRequirement, singularName } from "../data"
 import ThingLink from "./ThingLink.svelte";
 
 const data = getContext<CddaData>('data')
@@ -84,11 +84,7 @@ const qualities = requirements.flatMap(([req, count]) => {
         <li>
           {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, item, count}, i}
             {#if i !== 0}{' OR '}{/if}
-            <span style="white-space: nowrap">
-            {#if !countsByCharges(item)}{count}{/if}
-            <ThingLink type="item" id={id} plural={count !== 1 && !countsByCharges(item)} />
-            {#if countsByCharges(item)}({count}){/if}
-            </span>
+            <ThingLink {id} {count} type="item" />
           {/each}
         </li>
         {/each}

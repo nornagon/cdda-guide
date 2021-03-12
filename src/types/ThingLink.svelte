@@ -15,9 +15,7 @@
 {#if count != null}
 <span style="white-space: nowrap">
 {#if !countsByCharges(item)}{count}{/if}
-<svelte:self type={type} id={id} plural={count !== 1 && !countsByCharges(item)} />
-{#if countsByCharges(item)}({count}){/if}
-</span>
+<svelte:self type={type} id={id} plural={count !== 1 && !countsByCharges(item)} />{#if countsByCharges(item)}{' '}({count}){/if}</span>
 {:else}
 <a href="#/{type}/{id}">{item ? (plural ? pluralName : singularName)(item) : id}</a>
 {/if}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { asKilograms, asLiters, CddaData, countsByCharges, flattenRequirement, parseMass, parseVolume, singular, singularName } from '../data'
+  import { asKilograms, asLiters, CddaData, flattenRequirement, parseMass, parseVolume, singular, singularName } from '../data'
   import type { RequirementData, Name, Recipe as RecipeT } from '../data'
   import Recipe from './Recipe.svelte';
   import ThingLink from './ThingLink.svelte';
@@ -319,10 +319,7 @@
   <dd>
     <ul class="comma-separated">
       {#each uncraft.components as {id, count}}
-      <li>
-        <span style="white-space: nowrap">
-        {#if !countsByCharges(data.byId('item', id))}{count}{/if}
-        <ThingLink type="item" {id} plural={count !== 1 && !countsByCharges(data.byId('item', id))} />{#if countsByCharges(data.byId('item', id))}{' '}({count}){/if}</span></li>
+      <li><ThingLink {id} {count} type="item" /></li>
       {/each}
     </ul>
   </dd>

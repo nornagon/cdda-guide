@@ -1,5 +1,5 @@
 <script lang="ts">
-import { countsByCharges, flattenRequirement, normalize, singularName } from "../data";
+import { flattenRequirement, normalize, singularName } from "../data";
 import type { CddaData, Name, Requirement } from "../data"
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
@@ -105,9 +105,7 @@ const mendingMethods = (item.mending_methods ?? []).map(mm => {
       <li>
         {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, item, count}, i}
           {#if i !== 0}{' OR '}{/if}
-          {#if !countsByCharges(item)}{count}{/if}
-          <ThingLink type="item" id={id} plural={count !== 1 && !countsByCharges(item)} />
-          {#if countsByCharges(item)}({count}){/if}
+          <ThingLink {id} {count} type="item" />
         {/each}
       </li>
       {/each}

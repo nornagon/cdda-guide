@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { singularName, CddaData, flattenRequirement, countsByCharges } from '../data'
+  import { singularName, CddaData, flattenRequirement } from '../data'
   import type { Recipe, RequirementData } from '../data'
   import ThingLink from './ThingLink.svelte';
   let data = getContext<CddaData>('data')
@@ -77,6 +77,8 @@
   <dd>
     {#if recipe.batch_time_factors}
     {recipe.batch_time_factors[0]}% at >{recipe.batch_time_factors[1]} unit{recipe.batch_time_factors[1] === 1 ? '' : 's'}
+    {:else}
+    <em>none</em>
     {/if}
   </dd>
   {#if recipe.charges}
@@ -120,11 +122,7 @@
       <li>
         {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, item, count}, i}
           {#if i !== 0}{' OR '}{/if}
-          <span style="white-space: nowrap">
-          {#if !countsByCharges(item)}{count}{/if}
-          <ThingLink type="item" id={id} plural={count !== 1 && !countsByCharges(item)} />
-          {#if countsByCharges(item)}({count}){/if}
-          </span>
+          <ThingLink type="item" {id} {count} />
         {/each}
       </li>
       {/each}
