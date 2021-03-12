@@ -360,6 +360,14 @@
     <dd>{comestible.spoils_in ?? 'never'}</dd>
     <dt>Health</dt>
     <dd>{comestible.healthy ?? 0}</dd>
+    {#if comestible.vitamins}
+    <dt>Vitamins (%RDA)</dt>
+    <dd>
+      {#each comestible.vitamins as [vitamin, rdapct], i}
+      <ThingLink id={vitamin} type="vitamin" /> ({rdapct}%){#if i < comestible.vitamins.length - 2}{', '}{:else if i === comestible.vitamins.length - 2}{' and '}{/if}
+      {/each}
+    </dd>
+    {/if}
   </dl>
 </section>
 {/if}
