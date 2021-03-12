@@ -1,33 +1,12 @@
 <script lang="ts">
 import { flattenRequirement, normalize, singularName } from "../data";
-import type { CddaData, Name, Requirement } from "../data"
+import type { CddaData } from "../data"
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
+import type { Fault, Requirement } from "../types";
 
 const data = getContext<CddaData>('data')
 
-type MendingMethod = {
-  id: string
-  name?: Name
-  description?: Name
-  success_msg: Name
-  time: string // duration
-  skills: {id: string, level: number}[]
-  requirements: string | Omit<Requirement, 'id' | 'type'>
-  turns_into?: string // fault_id
-  also_mends?: string // fault_id
-}
-
-type Fault = {
-  type: 'fault'
-  id: string
-  name: Name
-  description: Name
-  
-  mending_methods?: MendingMethod[]
-  
-  flags?: string[]
-}
 export let item: Fault
   
 const mendingMethods = (item.mending_methods ?? []).map(mm => {

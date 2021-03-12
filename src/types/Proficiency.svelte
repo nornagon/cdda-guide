@@ -1,21 +1,7 @@
 <script lang="ts">
 import { singularName } from "../data";
-import type { Name } from "../data"
 import ThingLink from "./ThingLink.svelte";
-
-type Proficiency = {
-  type: "proficiency"
-  id: string
-  description: string
-  name: Name
-  can_learn: boolean
-  time_to_learn?: string // duration, default: 9999 h
-
-  default_time_multiplier?: number // default: 2
-  default_fail_multiplier?: number // default: 2
-  
-  required_proficiencies?: string[] // proficiency_id[]
-}
+import type { Proficiency } from "../types";
 
 export let item: Proficiency
 </script>

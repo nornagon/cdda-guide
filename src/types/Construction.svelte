@@ -1,8 +1,9 @@
 <script lang="ts">
 import { getContext } from "svelte";
 
-import type { CddaData, Construction, RequirementData } from "../data";
+import type { CddaData } from "../data";
 import { flattenRequirement, singularName } from "../data"
+import type { Construction, RequirementData } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 const data = getContext<CddaData>('data')

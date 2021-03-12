@@ -1,89 +1,11 @@
 <script lang="ts">
 import { CddaData, flattenItemGroup, singularName } from "../data";
-import type { ItemGroupEntry, Name, Construction as ConstructionT } from "../data";
+import type { Construction as ConstructionT, Furniture } from "../types";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import Construction from "./Construction.svelte";
 
 const data = getContext<CddaData>('data')
-
-type MapBashInfo = {
-  str_min?: number // default: 0
-  str_max?: number // default: 0
-  str_min_blocked?: number // default: -1
-  str_max_blocked?: number // default: -1
-  str_min_supported?: number // default: -1
-  str_max_supported?: number // default: -1
-  explosive?: number // default: -1
-  sound_vol?: number // default: -1
-  sound_fail_vol?: number // default: -1
-  collapse_radius?: number // default: 1
-  destroy_only?: boolean // default: false
-  bash_below?: boolean // default: false
-  
-  // TODO:
-  // sound
-  // sound_fail
-  // furn_set
-  // ter_set
-  // move_cost
-  
-  items: ItemGroupEntry[]
-  
-  // tent_centers
-}
-
-type MapDeconstructInfo = {
-  furn_set?: string // default: f_null
-  deconstruct_above?: boolean // default: false
-  items?: ItemGroupEntry[]
-}
-
-type MapDataCommon = {
-  description: string
-  // examine_action
-  // harvest_by_season
-  // curtain_transform
-}
-
-type Furniture = MapDataCommon & {
-  type: "furniture"
-  id: string
-  name: Name
-  move_cost_mod: number
-  required_str: number
-  color?: string | [string] | [string, string, string, string]
-  bgcolor?: string | [string] | [string, string, string, string]
-  symbol: string | [string] | [string, string, string, string] // TODO: can be 1-char or LINE_XOXO
-  flags?: string[]
-  
-  coverage?: number
-  comfort?: number
-  floor_bedding_warmth?: number
-  
-  emmissions?: string[]
-  
-  bonus_fire_warmth_feet?: number // default: 300
-  
-  keg_capacity?: number | string // volume, default: 0 ml
-  max_volume?: number | string // volume, default: 1000 L
-  
-  crafting_pseudo_item?: string // item_id
-  deployed_item?: string // item_id
-  
-  light_emitted?: number // default: 0
-  
-  bash?: MapBashInfo
-  deconstruct?: MapDeconstructInfo
-
-  // TODO:
-  // open
-  // close
-  // connects_to
-  // workbench
-  // plant_data
-  // surgery_skill_multiplier
-}
 
 export let item: Furniture
 

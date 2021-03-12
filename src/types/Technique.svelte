@@ -1,62 +1,8 @@
 <script lang="ts">
 import { getContext } from "svelte";
-import type { CddaData, Name } from "../data";
+import type { CddaData } from "../data";
+import type { Technique } from "../types";
 import ThingLink from "./ThingLink.svelte";
-
-type MartialArtRequirements = {
-  unarmed_allowed?: boolean
-  melee_allowed?: boolean
-  unarmed_weapons_allowed?: boolean // default: true
-  strictly_unarmed?: boolean
-  wall_adjacent?: boolean
-  req_bufs?: string[] // mabuff_id[]
-  req_flags?: string[] // flag_id[] (json_flag)
-  skill_requirements?: {name: string, level: number}[]
-  weapon_damage_requirements?: {type: string, min: number}[]
-}
-
-type BonusContainer = {
-  flat_bonuses?: {stat: string, type?: string, "scaling-stat"?: string, scale?: number}[]
-  mult_bonuses?: {stat: string, type?: string, "scaling-stat"?: string, scale?: number}[]
-}
-
-type Technique = {
-  id: string
-  name: Name
-  description?: string
-  
-  messages?: [string, string]
-  
-  crit_tec?: boolean
-  crit_ok?: boolean
-  downed_target?: boolean
-  stunned_target?: boolean
-  wall_adjacent?: boolean
-  human_target?: boolean
-  
-  defensive?: boolean
-  disarms?: boolean
-  take_weapon?: boolean
-  side_switch?: boolean
-  dummy?: boolean
-  dodge_counter?: boolean
-  block_counter?: boolean
-  miss_recovery?: boolean
-  grab_break?: boolean
-
-  weighting?: number // default: 1
-  
-  down_dur?: number // default: 0
-  stun_dur?: number // default: 0
-  knockback_dist?: number // default: 0
-  knockback_spread?: number // default: 0
-  powerful_knockback?: boolean
-  knockback_follow?: boolean
-  
-  aoe?: string
-  
-  flags?: string[]
-} & MartialArtRequirements & BonusContainer
 
 export let item: Technique
 

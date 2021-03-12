@@ -1,13 +1,7 @@
 <script lang="ts">
 import { singularName } from "../data";
-import type { Name } from "../data"
+import type { Skill } from "../types";
 
-type Skill = {
-  type: 'skill'
-  id: string
-  name: Name
-  description: string
-}
 export let item: Skill
 </script>
 

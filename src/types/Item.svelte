@@ -2,88 +2,10 @@
   import { getContext } from 'svelte';
 
   import { asKilograms, asLiters, CddaData, flattenRequirement, parseMass, parseVolume, singular, singularName } from '../data'
-  import type { RequirementData, Name, Recipe as RecipeT } from '../data'
+  import type { RequirementData, Name, Recipe as RecipeT } from '../types'
   import Recipe from './Recipe.svelte';
   import ThingLink from './ThingLink.svelte';
   
-  type BookProficiencyBonus = {
-    id: string // proficiency_id
-    fail_factor?: number // default: 0.5
-    time_factor?: number // default: 0.5
-    include_prereqs?: number // default: true
-  }
-  type BookSlot = {
-    max_level?: number // default: 0
-    required_level?: number // default: 0
-    fun?: number // default: 0
-    intelligence?: number // default: 0
-
-    time?: number /* mins */ | string /* duration */
-
-    skill?: string // skill_id
-    martial_art?: string // matype_id
-    chapters?: number // default: 0
-    proficiencies?: BookProficiencyBonus[]
-  }
-  
-  type DamageUnit = {
-    damage_type: string
-    amount?: number // float, default 0
-    armor_penetration?: number // float, default 0
-    armor_multiplier?: number // float, default 1
-    damage_multiplier?: number // float, default 1
-    constant_armor_multiplier?: number // float, default 1
-    constant_damage_multiplier?: number // float, default 1
-  }
-  type DamageInstance = DamageUnit[] | {values: DamageUnit[]} | DamageUnit
-  
-  type GunSlot = {
-    skill: string // skill_id
-    ammo?: string[] // ammunition_type_id
-    range?: number // int
-    ranged_damage?: DamageInstance
-    dispersion?: number // int
-    sight_dispersion?: number // int, default: 30
-    recoil?: number // int
-    handling?: number // int, default: derived from weapon type. if skill_used is rifle, smg or shotgun, 20, otherwise 10.
-    durability?: number // int
-    burst?: number // int, default: 0
-    loudness?: number // int, default: 0
-    clip_size?: number // int
-    reload?: number // int moves, default 100
-    reload_noise?: Name // default "click."
-    reload_noise_volume?: number // int, default: 0
-    barrel_volume?: string // volume, default: 0 ml
-    built_in_mods?: string[] // item_id
-    default_mods?: string[] // item_id
-    ups_charges?: number // int
-    blackpowder_tolerance?: number // int, default: 8
-    min_cycle_recoil?: number // int, default: 0
-    ammo_effects?: string[]
-    ammo_to_fire?: number // int, default: 1
-    
-    valid_mod_locations?: [string, number][] // [gunmod_location, count]
-    
-    modes?: [string, string, number] | [string, string, number, string[]][]
-  }
-  
-  type AmmoSlot = {
-    ammo_type: string // ammunition_type_id
-    casing?: string // item_id
-    drop?: string // item_id
-    drop_chance?: number // float, default: 1
-    drop_active?: boolean // default: true
-    damage?: DamageInstance
-    range?: number // int
-    dispersion?: number // int
-    recoil?: number // int
-    count?: number // int, default 1
-    loudness?: number // int, default derived
-    effects?: string[]
-    critical_multiplier?: number // float, default: 2
-    show_stats?: boolean
-  }
-
   export let item: any
   let data: CddaData = getContext('data')
   
@@ -128,29 +50,6 @@
   const to_hit: number =
     typeof item.to_hit === 'object' ? computeToHit(item.to_hit) : item.to_hit ?? 0
   
-  type PocketData = {
-    pocket_type?: string
-    ammo_restriction?: Record<string, number>
-    item_restriction?: Array<string>
-    min_item_volume?: string
-    max_item_volume?: string
-    max_contains_volume: string
-    max_contains_weight: string
-    max_item_length?: string
-    spoil_multiplier?: number // float
-    weight_multiplier?: number // float
-    volume_multiplier?: number // float
-    magazine_well?: string // volume
-    moves?: number
-    fire_protection?: boolean
-    watertight?: boolean
-    airtight?: boolean
-    open_container?: boolean
-    flag_restriction?: Array<string>
-    rigid?: boolean
-    holster?: boolean
-    sealed_data?: { spoil_multiplier?: number }
-  }
   const defaultPocketData = {
     pocket_type: 'CONTAINER',
     min_item_volume: '0 ml',

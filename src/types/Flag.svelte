@@ -1,15 +1,5 @@
 <script lang="ts">
-type JsonFlag = {
-  type: "json_flag"
-  id: string
-  
-  info?: string
-  conflicts?: string[]
-  inherit?: boolean // default: true
-  craft_inherit?: boolean // default: false
-  requires_flag?: string
-  taste_mod?: number // default: 0
-}
+import type { JsonFlag } from "../types";
 
 export let item: JsonFlag
 </script>

@@ -1,4 +1,5 @@
 import { readable } from 'svelte/store';
+import type { Name, Requirement, ItemGroup, ItemGroupEntry, ItemGroupEntryOrShortcut, Recipe } from './types';
 
 const idlessTypes = new Set([
   "MONSTER_BLACKLIST",
@@ -40,9 +41,6 @@ const typeMappings = new Map([
   ["MONSTER", "monster"],
   ["uncraft", "recipe"],
 ])
-
-// TODO: should be called "Translation"
-export type Name = string | { str: string, str_pl?: string } | { str_sp: string }
 
 export const mapType = (type: string): string => typeMappings.get(type) ?? type
 
@@ -254,35 +252,6 @@ export class CddaData {
   }
 }
 
-export type ItemGroupEntry = 
-  (
-    { item: string } |
-    { group: string } |
-    { distribution: ItemGroupEntry[] } |
-    { collection: ItemGroupEntry[] }
-  ) & {
-    prob?: number
-    count?: number | [number, number]
-    charges?: number | [number, number]
-    // TODO: damage, dirt, charges, ammo, container, contents, snippets?, sealed, custom-flags
-  }
-
-export type ItemGroupEntryOrShortcut =
-  ItemGroupEntry |
-  [ string, number ] // item_id, prob (or item_group_id, prob if in 'groups' array)
-  
-export type ItemGroup = {
-  subtype: "collection" | "distribution"
-  entries?: ItemGroupEntryOrShortcut[]
-  items?: (string /* item_id with prob=100 */ | ItemGroupEntryOrShortcut)[]
-  groups?: (string /* item_group_id with prob=100 */ | ItemGroupEntryOrShortcut)[]
-  "container-item"?: string
-  // TODO: on_overflow
-} | {
-  subtype?: "old" // ~= "distribution"
-  items: ItemGroupEntryOrShortcut[]
-}
-
 export function flattenItemGroup(data: CddaData, group: ItemGroup): {id: string, prob: number, count: [number, number]}[] {
   const retMap = new Map<string, {prob: number, count: [number, number]}>()
   
@@ -403,104 +372,6 @@ export function flattenItemGroup(data: CddaData, group: ItemGroup): {id: string,
 
   return [...retMap.entries()].map(([id, v]) => ({id, ...v}))
 }
-
-export type Construction = {
-  type: 'construction'
-  id: string
-  group: string // construction_group_id
-  required_skills?: [string /* skill_id */, number /* level */][]
-  
-  // legacy, superceded by required_skills
-  skill?: string
-  difficulty?: number
-  
-  category?: string // construction_category_id, default: OTHER
-  time?: string | number /* minutes */
-  
-  using?: string | [string /* requirement_id */, number /* count */][]
-  pre_note?: string
-  
-  pre_terrain?: string // if starts with f_, then furniture_id, else terrain_id
-  post_terrain?: string // as above
-
-  pre_flags?: string[]
-  post_flags?: string[]
-  
-  byproducts?: ItemGroupEntry[] // subtype collection
-  
-  pre_special?: string
-  post_special?: string
-  explain_failure?: string
-  
-  vehicle_start?: boolean
-  on_display?: boolean // default: true
-  dark_craftable?: boolean
-} & RequirementData
-
-
-export type ItemComponent = [ string /* item_id */, number /* count */, ...('LIST' | 'NO_RECOVER')[] ]
-export type QualityRequirement = {
-  id: string
-  level?: number // default: 1
-  amount?: number // default: 1
-}
-export type ToolComponent = string | [string, number] | [string, number, "LIST"]
-
-export type Requirement = {
-  id: string
-  type: 'requirement'
-} & RequirementData
-
-export type RequirementData = {
-  components?: (ItemComponent | ItemComponent[])[]
-  qualities?: (QualityRequirement | QualityRequirement[])[]
-  tools?: (ToolComponent | ToolComponent[])[]
-}
-
-export type Recipe = {
-  result?: string
-  abstract?: string // mutex with result
-  type: 'recipe' | 'uncraft'
-  
-  id_suffix?: string // only for type 'recipe'. not allowed for abstracts
-  obsolete?: boolean
-  
-  time?: number /* moves */ | string /* duration */
-  difficulty?: number // default: 0
-  flags?: string[]
-  
-  contained?: boolean
-  container?: string /* item_id, implies contained */
-  sealed?: boolean
-  
-  batch_time_factors?: [number /* int */, number /* int */] // [rscale (percentage), rsize]
-  
-  charges?: number // int, no default
-  result_mult?: number // int, default: 1
-  
-  skill_used?: string // skill_id
-  
-  skills_required?: [string, number] | [string, number][] // skill_id, level
-  
-  proficiencies?: any[] // TODO
-  autolearn?: boolean | [string, number][]
-  never_learn?: boolean
-  decomp_learn?: number | [string, number][]
-  book_learn?: ([string] | [string, number])[] | Record<string, {skill_level?: number, recipe_name?: string, hidden?: boolean}>
-  
-  activity_level?: string
-  
-  delete_flags?: string[] // flag_id
-  using?: string | [string, number][] // requirement_id
-  
-  // for type: 'recipe' only
-  category: string
-  subcategory: string
-  description: string
-  reversible: boolean
-  byproducts?: ([string] | [string, number])[]
-  // TODO: construction_blueprint
-} & RequirementData
 
 function flattenChoices<T>(data: CddaData, choices: T[], get: (x: Requirement) => T[][]): {id: string, count: number}[] {
   const flatChoices = []
