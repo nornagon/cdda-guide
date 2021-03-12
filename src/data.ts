@@ -210,6 +210,11 @@ export class CddaData {
       }
     }
     delete ret.extend
+    for (const k of Object.keys(ret.delete ?? {})) {
+      if (Array.isArray(ret.delete[k])) {
+        ret[k] = (ret[k] ?? []).filter(x => !ret.delete[k].includes(x))
+      }
+    }
     this._flattenCache.set(obj, ret)
     return ret
   }

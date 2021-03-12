@@ -66,6 +66,23 @@
     
     modes?: [string, string, number] | [string, string, number, string[]][]
   }
+  
+  type AmmoSlot = {
+    ammo_type: string // ammunition_type_id
+    casing?: string // item_id
+    drop?: string // item_id
+    drop_chance?: number // float, default: 1
+    drop_active?: boolean // default: true
+    damage?: DamageInstance
+    range?: number // int
+    dispersion?: number // int
+    recoil?: number // int
+    count?: number // int, default 1
+    loudness?: number // int, default derived
+    effects?: string[]
+    critical_multiplier?: number // float, default: 2
+    show_stats?: boolean
+  }
 
   export let item: any
   let data: CddaData = getContext('data')
@@ -430,7 +447,7 @@
   </dl>
 </section>
 {/if}
-{#if item.bashing || item.cutting || item.type === 'GUN'}
+{#if item.bashing || item.cutting || item.type === 'GUN' || item.type === 'AMMO'}
 <div class="side-by-side">
 {#if item.bashing || item.cutting}
 <section>
@@ -479,6 +496,36 @@
     <dd>{item.durability ?? 0}</dd>
   </dl>
 </section>
+{:else if item.type === 'AMMO'}
+{#if item.damage || item.show_stats}
+<section>
+  <h1>Ammunition</h1>
+  <dl>
+    <dt>Ammunition Type</dt>
+    <dd><ThingLink type="ammunition_type" id={item.ammo_type} /></dd>
+    <dt>Damage</dt>
+    <dd>{item.damage?.amount ?? 0} ({item.damage?.damage_type ?? 'bullet'})</dd>
+    <dt>Armor Penetration</dt>
+    <dd>{item.damage?.armor_penetration ?? 0}</dd>
+    <dt>Range</dt>
+    <dd>{item.range ?? 0}</dd>
+    <dt>Dispersion</dt>
+    <dd>{item.dispersion ?? 0}</dd>
+    <dt>Recoil</dt>
+    <dd>{item.recoil ?? 0}</dd>
+    <dt>Critical Multiplier</dt>
+    <dd>{item.critical_multiplier ?? 2}</dd>
+    {#if item.casing}
+    <dt>Casing</dt>
+    <dd><ThingLink id={item.casing} type="item" /></dd>
+    {/if}
+    {#if item.effects?.length}
+    <dt>Effects</dt>
+    <dd>{item.effects.join(', ')}</dd>
+    {/if}
+  </dl>
+</section>
+{/if}
 {/if}
 </div>
 {/if}
