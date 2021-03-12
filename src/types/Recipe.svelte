@@ -2,21 +2,24 @@
   import { getContext } from 'svelte';
 
   import { singularName, CddaData, flattenRequirement, countsByCharges } from '../data'
+  import type { Recipe, RequirementData } from '../data'
   import ThingLink from './ThingLink.svelte';
   let data = getContext<CddaData>('data')
 
-  export let recipe: any
+  export let recipe: Recipe
   
-  let requirements = ((recipe.using ?? [])
-    .map(([id, count]) => [data.byId('requirement', id), count])).concat([[recipe, 1]])
+  const using = typeof recipe.using === 'string' ? [[recipe.using, 1]] as const : recipe.using
   
-  let tools: any[][] = requirements.flatMap(([req, count]) => {
+  let requirements = ((using ?? [])
+    .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1] as const])
+  
+  let tools = requirements.flatMap(([req, count]) => {
     return flattenRequirement(data, req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
   })
   let components = requirements.flatMap(([req, count]) => {
     return flattenRequirement(data, req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
   })
-  let qualities: any[] = requirements.flatMap(([req, count]) => {
+  let qualities = requirements.flatMap(([req, count]) => {
     return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])
   })
 
@@ -124,6 +127,16 @@
           </span>
         {/each}
       </li>
+      {/each}
+    </ul>
+  </dd>
+  {/if}
+  {#if recipe.byproducts?.length}
+  <dt>Byproducts</dt>
+  <dd>
+    <ul>
+      {#each recipe.byproducts as c}
+      <li><ThingLink type="item" id={c[0]} count={c[1] ?? 1} /></li>
       {/each}
     </ul>
   </dd>
