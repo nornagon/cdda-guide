@@ -12,6 +12,7 @@
         return singularName(obj)
     },
     ignoreFieldNorm: true,
+    ignoreLocation: true,
     minMatchCharLength: 2,
     threshold: 0.2
   })
