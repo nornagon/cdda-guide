@@ -70,6 +70,12 @@
   {/if}
   <dt>Time to Complete</dt>
   <dd>{recipe.time ?? '0 m'}</dd>
+  <dt>Batch Time Savings</dt>
+  <dd>
+    {#if recipe.batch_time_factors}
+    {recipe.batch_time_factors[0]}% at >{recipe.batch_time_factors[1]} unit{recipe.batch_time_factors[1] === 1 ? '' : 's'}
+    {/if}
+  </dd>
   {#if recipe.charges}
   <dt>Recipe Makes</dt>
   <dd>{recipe.charges}<!-- TODO: properly switch on result type --></dd>

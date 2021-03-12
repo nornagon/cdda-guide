@@ -473,7 +473,7 @@ export type Recipe = {
   container?: string /* item_id, implies contained */
   sealed?: boolean
   
-  batch_time_factors?: [number /* int */, number /* int */][]
+  batch_time_factors?: [number /* int */, number /* int */] // [rscale (percentage), rsize]
   
   charges?: number // int, no default
   result_mult?: number // int, default: 1
