@@ -2,11 +2,12 @@
   import { getContext } from 'svelte';
 
   import { asKilograms, asLiters, CddaData, flattenRequirement, parseMass, parseVolume, singular, singularName } from '../data'
-  import type { RequirementData, Name, Recipe as RecipeT } from '../types'
+  import type { RequirementData, Recipe as RecipeT, PocketData, ComestibleSlot } from '../types'
   import Recipe from './Recipe.svelte';
   import ThingLink from './ThingLink.svelte';
   
   export let item: any
+  const comestible = item.type === 'COMESTIBLE' ? item as ComestibleSlot : null
   let data: CddaData = getContext('data')
   
   function length(item) {
@@ -340,6 +341,25 @@
   <dl>
     <dt>Displacement</dt>
     <dd>{item.displacement} cc</dd>
+  </dl>
+</section>
+{/if}
+{#if comestible}
+<section>
+  <h1>Comestible</h1>
+  <dl>
+    <dt>Calories</dt>
+    <dd>{comestible.calories} kcal</dd>
+    <dt>Quench</dt>
+    <dd>{comestible.quench ?? 0}</dd>
+    <dt>Enjoyability</dt>
+    <dd>{comestible.fun ?? 0}</dd>
+    <dt>Portions</dt>
+    <dd>{comestible.charges ?? 1}</dd>
+    <dt>Spoils In</dt>
+    <dd>{comestible.spoils_in ?? 'never'}</dd>
+    <dt>Health</dt>
+    <dd>{comestible.healthy ?? 0}</dd>
   </dl>
 </section>
 {/if}

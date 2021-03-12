@@ -206,6 +206,33 @@ export type AmmoSlot = {
   show_stats?: boolean
 }
 
+export type ComestibleSlot = {
+  comestible_type: string // DRINK, FOOD or MED
+  tool?: string // item_id, needed to consume
+  charges?: number // int, default charges
+  quench?: number // int, default 0
+  fun?: number // int, default 0
+  stim?: number // int, default 0
+  fatigue_mod?: number // int, default 0
+  healthy?: number // int, default 0
+  parasites?: number // int, default 0
+  radiation?: number // int, default 0
+  freezing_point?: number // int, default 32
+  spoils_in?: string // duration, default 0 (never spoils)
+  cooks_like?: string // item_id
+  smoking_result?: string // item_id
+  contamination?: { disease: string /* diseasetype_id */, probability: number /* int */ }[]
+  primary_material?: string // material_id
+  material?: string[] // material_id
+  monotony_penalty?: number // default 2 unless material is junk, in which case 0
+  addiction_type?: string
+  addiction_potential?: number // int, default 0
+  calories?: number // int
+  vitamins?: [string, number /* int */][]
+  rot_spawn?: string // mongroup_id
+  rot_spawn_chance?: number // int, default 10
+}
+
 export type PocketData = {
   pocket_type?: string
   ammo_restriction?: Record<string, number>
