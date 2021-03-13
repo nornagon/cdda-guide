@@ -82,9 +82,32 @@
   
   function covers(body_part_id: string): boolean {
     // TODO: armor_portion_data
-    return (item.covers ?? []).includes(body_part_id)
+    return (item.covers ?? []).includes(body_part_id) || (item.armor_portion_data ?? []).some(apd => (apd.covers ?? []).includes(body_part_id))
   }
-  let covers_anything = (item.covers ?? []).length
+  let covers_anything = (item.covers ?? []).length || (item.armor_portion_data ?? []).length
+  
+  type ArmorPortionData = {
+    encumbrance?: number | [number, number]
+    coverage?: number
+    covers?: string[] // bp_id
+    sided?: boolean
+  }
+  function coverageLabel(apd: ArmorPortionData): string[] {
+    const covered = new Set
+    const labels = []
+    for (const bp_id of apd.covers ?? []) {
+      if (covered.has(bp_id)) continue
+      const bp = data.byId('body_part', bp_id)
+      if (bp.opposite_part && apd.covers.includes(bp.opposite_part)) {
+        labels.push(bp.heading_multiple)
+        covered.add(bp.opposite_part)
+      } else {
+        labels.push(bp.heading)
+      }
+      covered.add(bp_id)
+    }
+    return labels
+  }
   
   const bookRecipes = new Map<string, number>()
   if (item.type === 'BOOK') {
@@ -284,12 +307,6 @@
 
       {#if !covers_anything}Nothing.{/if}
     </dd>
-    <dt>Encumbrance</dt>
-    <dd>{item.encumbrance ?? 0}{#if item.max_encumbrance}{' '}({item.max_encumbrance} when full){/if}</dd>
-    <dt>Warmth</dt>
-    <dd>{item.warmth ?? 0}</dd>
-    <dt title="This determines how likely it is that an attack hits the item instead of the player.">Coverage</dt>
-    <dd>{item.coverage ?? 0}%</dd>
     <dt>Layer</dt>
     <dd>
       {#if (item.flags ?? []).includes('PERSONAL')}Personal aura
@@ -299,6 +316,43 @@
       {:else if (item.flags ?? []).includes('WAIST')}Waist
       {:else if (item.flags ?? []).includes('AURA')}Outer aura
       {:else}Normal
+      {/if}
+    </dd>
+    <dt>Warmth</dt>
+    <dd>{item.warmth ?? 0}</dd>
+    <dt>Encumbrance</dt>
+    <dd>
+      {#if item.armor_portion_data}
+      <dl>
+        {#each item.armor_portion_data as apd}
+        <dt>{#each coverageLabel(apd) as label, i}{#if i !== 0}{', '}{/if}{label}{/each}</dt>
+        <dd>
+          {#if Array.isArray(apd.encumbrance)}
+          {apd.encumbrance[0]}
+          {#if apd.encumbrance[1] !== apd.encumbrance[0]}
+          ({apd.encumbrance[1]} when full)
+          {/if}
+          {:else}
+          {apd.encumbrance ?? 0}
+          {/if}
+        </dd>
+        {/each}
+      </dl>
+      {:else}
+      {item.encumbrance ?? 0}{#if item.max_encumbrance}{' '}({item.max_encumbrance} when full){/if}
+      {/if}
+    </dd>
+    <dt title="This determines how likely it is that an attack hits the item instead of the player.">Coverage</dt>
+    <dd>
+      {#if item.armor_portion_data}
+      <dl>
+        {#each item.armor_portion_data as apd}
+        <dt>{#each coverageLabel(apd) as label, i}{#if i !== 0}{', '}{/if}{label}{/each}</dt>
+        <dd>{apd.coverage ?? 0}%</dd>
+        {/each}
+      </dl>
+      {:else}
+      {item.coverage ?? 0}%
       {/if}
     </dd>
     {#if materials.length || item.environmental_protection}
