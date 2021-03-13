@@ -403,7 +403,7 @@
   <h1>Comestible</h1>
   <dl>
     <dt>Calories</dt>
-    <dd>{comestible.calories} kcal</dd>
+    <dd>{comestible.calories ?? 0} kcal</dd>
     <dt>Quench</dt>
     <dd>{comestible.quench ?? 0}</dd>
     <dt>Enjoyability</dt>
