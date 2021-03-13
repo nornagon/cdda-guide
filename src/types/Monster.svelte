@@ -2,8 +2,8 @@
   import { getContext } from 'svelte';
 
   import { asKilograms, asLiters, CddaData, flattenItemGroup, singularName } from '../data'
-  import type { ItemGroup } from '../data'
   import ThingLink from './ThingLink.svelte';
+  import type { SpecialAttack } from '../types';
 
   export let item
 
@@ -189,7 +189,7 @@
     RANGED_ATTACKER: "This monster has any sort of ranged attack",
   }
   
-  function specialAttackToString(special_attack: any): string {
+  function specialAttackToString(special_attack: SpecialAttack): string {
     if (Array.isArray(special_attack))
       if (special_attack.length > 1)
         return `${special_attack[0]} (cooldown: ${special_attack[1]})`
@@ -282,7 +282,13 @@
     <dt>Special attacks:</dt><dd>
       <ul class="no-bullets">
       {#each item.special_attacks as special_attack}
-        <li>{specialAttackToString(special_attack)}</li>
+        <li>
+        {#if data.byId('monster_attack', special_attack[0])}
+        <ThingLink type='monster_attack' id={special_attack[0]} />
+        {:else}
+        {specialAttackToString(special_attack)}
+        {/if}
+        </li>
       {/each}
       </ul>
     </dd>

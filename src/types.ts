@@ -460,3 +460,51 @@ export type Vitamin = {
   disease_excess?: [number, number][]
   flags?: string[]
 }
+  
+type LeapAttack = {
+  type: 'leap'
+  max_range: number // float
+  min_range?: number // float, default 1
+  allow_no_target?: boolean
+  move_cost?: number // default 150
+  min_consider_range?: number // default 0
+  max_consider_range?: number // default 200
+}
+type MeleeAttack = {
+  type: 'melee'
+  damage_max_instance?: DamageInstance
+  min_mul?: number // float, default 0
+  max_mul?: number // float, default 1
+  move_cost?: number // int, default 100
+  accuracy?: number // int, default INT_MIN
+  body_parts?: [string /* bp_id */, number /* prob */][]
+  effects?: {id: string, duration?: number /* int */, affect_hit_bp?: boolean, bp?: string /* bp_id */, permanent?: boolean, chance?: number /* int, default 100 */}[]
+}
+type BiteAttack = Omit<MeleeAttack, 'type'> & {
+  type: 'bite'
+  no_infection_chance?: number // int, default 14
+}
+type GunAttack = {
+  type: 'gun'
+  gun_type?: string // item_id
+  ammo_type?: string // item_id
+  fake_skills?: [string /* skill_id */, number /* level */][]
+  fake_str?: number
+  fake_dex?: number
+  fake_int?: number
+  fake_per?: number
+
+  ranges?: ([number, number] | [number, number, string])[]
+  max_ammo?: number // default INT_MAX
+  move_cost?: number
+  description?: Name
+  
+  // TODO: ...
+}
+type GenericMonsterAttack = {
+  type?: 'monster_attack'
+  id: string
+} & (Omit<MeleeAttack, 'type'> & {attack_type: 'melee'})
+
+type MonsterAttack = (GenericMonsterAttack | LeapAttack | MeleeAttack | BiteAttack | GunAttack) & { cooldown?: number }
+export type SpecialAttack = [string, number] | MonsterAttack
