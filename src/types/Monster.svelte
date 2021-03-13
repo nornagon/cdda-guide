@@ -308,8 +308,8 @@
 <section>
   <h1>Behavior</h1>
   <dl>
-    <dt>Aggression</dt><dd>{item.aggression ?? 0}</dd>
-    <dt>Morale</dt><dd>{item.morale ?? 0}</dd>
+    <dt title="Monsters with high aggression are more likely to be hostile. Ranges from -100 to 100">Aggression</dt><dd>{item.aggression ?? 0}</dd>
+    <dt title="Morale at spawn. Monsters with low morale will flee.">Morale</dt><dd>{item.morale ?? 0}</dd>
     <dt>Vision Range</dt><dd>{item.vision_day ?? 40} (day) / {item.vision_night ?? 1} (night)</dd>
     <dt>Default Faction</dt><dd>{item.default_faction}</dd>
     {#if item.anger_triggers}
