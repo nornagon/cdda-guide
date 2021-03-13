@@ -343,7 +343,7 @@
   </dl>
 </section>
 {/if}
-{#if deathDrops}
+{#if deathDrops?.length}
 <section>
   <h1>Drops</h1>
   <ul>
