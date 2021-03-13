@@ -14,6 +14,7 @@
   import Flag from './types/Flag.svelte';
   import Fault from './types/Fault.svelte';
   import Technique from './types/Technique.svelte';
+  import Vitamin from './types/Vitamin.svelte';
 
   export let item: { id: string, type: string }
   
@@ -50,6 +51,7 @@
     json_flag: Flag,
     fault: Fault,
     technique: Technique,
+    vitamin: Vitamin,
   }
 </script>
 

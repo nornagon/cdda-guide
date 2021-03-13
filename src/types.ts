@@ -445,3 +445,18 @@ export type Technique = {
   
   flags?: string[]
 } & MartialArtRequirements & BonusContainer
+
+export type Vitamin = {
+  id: string
+  type: 'vitamin'
+  name: Name
+  deficiency?: string // effect_id
+  excess?: string // effect_id
+  min?: number // int
+  max?: number // int, default 0
+  rate?: string // duration
+  vit_type: 'vitamin' | 'toxin' | 'drug' | 'counter'
+  disease?: [number, number][]
+  disease_excess?: [number, number][]
+  flags?: string[]
+}
