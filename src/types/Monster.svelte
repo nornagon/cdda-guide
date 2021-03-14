@@ -283,7 +283,7 @@
       <ul class="no-bullets">
       {#each item.special_attacks as special_attack}
         <li>
-        {#if data.byId('monster_attack', special_attack[0])}
+        {#if special_attack[0] && data.byId('monster_attack', special_attack[0])}
         <ThingLink type='monster_attack' id={special_attack[0]} />
         {:else}
         {specialAttackToString(special_attack)}
