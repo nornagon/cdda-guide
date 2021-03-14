@@ -355,7 +355,7 @@ function showProbability(prob: number) {
   <h1>Drops</h1>
   <ul>
     {#each deathDrops.slice(0, deathDropsLimit) as {id, prob}}
-    <li><ThingLink type="item" {id} /> ({showProbability(prob)})</li>
+    <li><ItemSymbol item={data.byId('item', id)} /> <ThingLink type="item" {id} /> ({showProbability(prob)})</li>
     {/each}
   </ul>
   {#if deathDrops.length > deathDropsLimit}
