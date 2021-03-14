@@ -1,6 +1,8 @@
 <script lang="ts">
   import { data, mapType, singularName } from './data'
   import Fuse from 'fuse.js'
+import FurnitureSymbol from './types/item/FurnitureSymbol.svelte'
+import ItemSymbol from './types/item/ItemSymbol.svelte'
   
   let fuse: Fuse<any>
   $: fuse = new Fuse([...$data?.all() ?? []].filter(x => typeof x.id === 'string'), {
@@ -47,7 +49,14 @@
   <h1>{type}</h1>
   <ul>
     {#each matchingObjects.get(type) as obj}
-    <li><a href="#/{mapType(obj.type)}/{obj.id}">{singularName($data._flatten(obj))}</a></li>
+    <li>
+      {#if type === 'furniture'}
+      <FurnitureSymbol item={$data._flatten(obj)} />
+      {:else}
+      <ItemSymbol item={$data._flatten(obj)} />
+      {/if}
+      <a href="#/{mapType(obj.type)}/{obj.id}">{singularName($data._flatten(obj))}</a>
+    </li>
     {/each}
   </ul>
   {:else}

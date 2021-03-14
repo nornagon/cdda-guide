@@ -3,10 +3,12 @@ import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import type { Recipe, RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
+import ItemSymbol from "./ItemSymbol.svelte";
 
 export let item_id: string
 
 let data = getContext<CddaData>('data')
+
 const uncraftableFromSet = new Set<string>()
 for (const recipe of data.byType<Recipe>('recipe')) {
   if (recipe.result && (recipe.reversible || recipe.type === 'uncraft')) {
@@ -31,7 +33,7 @@ let uncraftLimit = 10
   <h1>Disassemble</h1>
   <ul>
     {#each uncraftableFrom.slice(0, uncraftLimit) as id}
-    <li><ThingLink {id} type="item" /></li>
+    <li><ItemSymbol item={data.byId('item', id)} /> <ThingLink {id} type="item" /></li>
     {/each}
   </ul>
   {#if uncraftableFrom.length > uncraftLimit}

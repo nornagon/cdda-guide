@@ -2,6 +2,7 @@
 import { getContext } from "svelte";
 import { CddaData, showProbability } from "../../data";
 import ThingLink from "../ThingLink.svelte";
+import ItemSymbol from "./ItemSymbol.svelte";
 
 export let item_id: string
 
@@ -23,7 +24,7 @@ let droppedByLimit = 10
   <h1>Dropped By</h1>
   <ul>
     {#each mons.slice(0, droppedByLimit) as {id, prob}}
-    <li><ThingLink {id} type="monster" /> ({showProbability(prob)})</li>
+    <li><ItemSymbol item={data.byId('monster', id)} /> <ThingLink {id} type="monster" /> ({showProbability(prob)})</li>
     {/each}
   </ul>
   {#if mons.length > droppedByLimit}

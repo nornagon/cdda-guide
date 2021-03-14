@@ -4,6 +4,7 @@
   import { asKilograms, asLiters, CddaData, flattenItemGroup, singularName } from '../data'
   import ThingLink from './ThingLink.svelte';
   import type { SpecialAttack } from '../types';
+import ItemSymbol from './item/ItemSymbol.svelte';
 
   export let item
 
@@ -245,7 +246,7 @@
   }
 </script>
 
-<h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
+<h1><ItemSymbol {item} /> {singularName(item)}</h1>
 <section>
   <p style="color: var(--cata-color-gray)">{item.description}</p>
   <p>Difficulty: {difficulty(item)} <span class='c_{difficultyColor(difficulty(item))} fg_only'>({difficultyDescription(difficulty(item))})</span></p>
