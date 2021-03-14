@@ -11,17 +11,14 @@ export let recipe: Recipe
 const using = typeof recipe.using === 'string' ? [[recipe.using, 1]] as const : recipe.using
 
 let requirements = ((using ?? [])
-  .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1] as const])
+  .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count as number] as const)).concat([[recipe, 1] as const])
 
-let tools = requirements.flatMap(([req, count]) => {
-  return data.flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
-})
-let components = requirements.flatMap(([req, count]) => {
-  return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
-})
-let qualities = requirements.flatMap(([req, count]) => {
-  return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])
-})
+let tools = requirements.flatMap(([req, count]) =>
+  data.flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count}))))
+let components = requirements.flatMap(([req, count]) =>
+  data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count}))))
+let qualities = requirements.flatMap(([req, count]) =>
+  (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x]))
 
 function normalizeSkillsRequired(skills_required: [string, number] | [string, number][] | undefined): [string, number][] {
   if (skills_required === undefined) return []

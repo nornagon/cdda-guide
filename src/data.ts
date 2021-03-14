@@ -473,8 +473,8 @@ export class CddaData {
     return r
   }
 
-  _flatRequirementCache = new WeakMap<any, any>()
-  flattenRequirement<T>(required: (T | T[])[], get: (x: Requirement) => (T | T[])[]) {
+  _flatRequirementCache = new WeakMap<any, {id: string, count: number}[][]>()
+  flattenRequirement<T>(required: (T | T[])[], get: (x: Requirement) => (T | T[])[]): {id: string, count: number}[][] {
     if (this._flatRequirementCache.has(required)) return this._flatRequirementCache.get(required)
     const ret = normalize(required)
       .map(x => flattenChoices(this, x, q => normalize(get(q))).flatMap(y => expandSubstitutes(this, y)))

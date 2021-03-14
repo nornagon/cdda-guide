@@ -27,7 +27,7 @@ for (const mg of mapgens) {
       om_terrains.add(omt)
   })
 }
-const om_terrains_sorted = [...om_terrains].sort((a, b) => singularName(a).localeCompare(singularName(b)))
+const om_terrains_sorted: any[] = [...om_terrains].sort((a, b) => singularName(a).localeCompare(singularName(b)))
 let omTerrainLimit = 10
 </script>
 
