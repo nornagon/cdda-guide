@@ -2,7 +2,7 @@
 import { getContext } from "svelte";
 
 import type { CddaData } from "../data";
-import { flattenRequirement, singularName } from "../data"
+import { singularName } from "../data"
 import type { Construction, RequirementData } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
@@ -16,10 +16,10 @@ const requirements = using.map(([id, count]) =>
   [data.byId<RequirementData>('requirement', id), count] as const).concat([[construction, 1]])
 
 const tools = requirements.flatMap(([req, count]) => {
-  return flattenRequirement(data, req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
+  return data.flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
 })
 const components = requirements.flatMap(([req, count]) => {
-  return flattenRequirement(data, req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
+  return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
 })
 const qualities = requirements.flatMap(([req, count]) => {
   return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])

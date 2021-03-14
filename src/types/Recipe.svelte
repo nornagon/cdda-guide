@@ -1,8 +1,8 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { singularName, CddaData, flattenRequirement } from '../data'
-  import type { Recipe, RequirementData } from '../data'
+  import { singularName, CddaData } from '../data'
+  import type { Recipe, RequirementData } from '../types';
   import ThingLink from './ThingLink.svelte';
   let data = getContext<CddaData>('data')
 
@@ -14,10 +14,10 @@
     .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1] as const])
   
   let tools = requirements.flatMap(([req, count]) => {
-    return flattenRequirement(data, req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
+    return data.flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
   })
   let components = requirements.flatMap(([req, count]) => {
-    return flattenRequirement(data, req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
+    return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
   })
   let qualities = requirements.flatMap(([req, count]) => {
     return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])

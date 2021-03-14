@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { AmmoSlot } from "../../types";
+import type { AmmoSlot, DamageUnit } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
 export let item: AmmoSlot
@@ -7,9 +7,9 @@ export let item: AmmoSlot
 // TODO: handle multiple damage type
 const damage = Array.isArray(item.damage)
   ? item.damage[0]
-  : 'values' in item.damage
+  : item.damage && 'values' in item.damage
     ? item.damage.values[0]
-    : item.damage
+    : item.damage as DamageUnit ?? {amount: 0, damage_type: 'bullet', armor_penetration: 0}
 </script>
 
 {#if item.damage || item.show_stats}

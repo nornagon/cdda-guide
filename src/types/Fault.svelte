@@ -1,5 +1,5 @@
 <script lang="ts">
-import { flattenRequirement, normalize, singularName } from "../data";
+import { normalize, singularName } from "../data";
 import type { CddaData } from "../data"
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
@@ -13,8 +13,8 @@ const mendingMethods = (item.mending_methods ?? []).map(mm => {
   const requirement = typeof mm.requirements === 'string'
     ? data.byId<Requirement>('requirement', mm.requirements)
     : mm.requirements
-  const tools = flattenRequirement(data, requirement.tools ?? [], r => r.tools)
-  const components = flattenRequirement(data, requirement.components ?? [], r => r.components)
+  const tools = data.flattenRequirement(requirement.tools ?? [], r => r.tools)
+  const components = data.flattenRequirement(requirement.components ?? [], r => r.components)
   const qualities = normalize(requirement.qualities ?? []) // TODO: flatten...?
   return { mending_method: mm, tools, components, qualities }
 })

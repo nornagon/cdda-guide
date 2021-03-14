@@ -472,6 +472,16 @@ export class CddaData {
     this._flattenItemGroupCache.set(group, r)
     return r
   }
+
+  _flatRequirementCache = new WeakMap<any, any>()
+  flattenRequirement<T>(required: (T | T[])[], get: (x: Requirement) => (T | T[])[]) {
+    if (this._flatRequirementCache.has(required)) return this._flatRequirementCache.get(required)
+    const ret = normalize(required)
+      .map(x => flattenChoices(this, x, q => normalize(get(q))).flatMap(y => expandSubstitutes(this, y)))
+      .filter(x => x.length)
+    this._flatRequirementCache.set(required, ret)
+    return ret
+  }
 }
 
 export function flattenItemGroup(data: CddaData, group: ItemGroup): {id: string, prob: number, count: [number, number]}[] {
@@ -510,12 +520,6 @@ function expandSubstitutes(data: CddaData, r: {id: string, count: number}): {id:
 
 export function normalize<T>(xs: (T | T[])[]): T[][] {
   return xs.map((x: T | T[]) => Array.isArray(x) ? x as T[] : [x])
-}
-
-export function flattenRequirement<T>(data: CddaData, required: (T | T[])[], get: (x: Requirement) => (T | T[])[]) {
-  return normalize(required)
-    .map(x => flattenChoices(data, x, q => normalize(get(q))).flatMap(y => expandSubstitutes(data, y)))
-    .filter(x => x.length)
 }
 
 export const countsByCharges = (item): boolean => {

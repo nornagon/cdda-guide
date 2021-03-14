@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getContext } from 'svelte';
 
-  import { asKilograms, asLiters, CddaData, flattenRequirement, parseVolume, singular, singularName } from '../data'
+  import { asKilograms, asLiters, CddaData, parseVolume, singular, singularName } from '../data'
   import type { RequirementData, PocketData } from '../types'
   import AmmoInfo from './item/AmmoInfo.svelte';
   import ArmorInfo from './item/ArmorInfo.svelte';
@@ -62,7 +62,7 @@
     const requirements = (normalizedUsing
       .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1]])
     const components = requirements.flatMap(([req, count]) => {
-      return flattenRequirement(data, req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
+      return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
     })
     const defaultComponents = components.map(c => c[0])
     return {components: defaultComponents}
