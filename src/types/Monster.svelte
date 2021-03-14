@@ -331,23 +331,18 @@ function showProbability(prob: number) {
 </section>
 {#if harvest && (harvest.entries ?? []).length}
 <section>
-  <h1>Harvest</h1>
-  <dl>
-    <dt>Butchering Results</dt>
-    <dd>
-      <ul class="comma-separated">
-        {#each harvest.entries as harvest_entry}
-        {#if harvest_entry.type === "bionic_group"}
-        {#each flattenItemGroup(data, data.byId('item_group', harvest_entry.drop)) as {id, prob}}
-        <li><ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)</li>
-        {/each}
-        {:else}
-        <li><ThingLink type="item" id={harvest_entry.drop} /></li>
-        {/if}
-        {/each}
-      </ul>
-    </dd>
-  </dl>
+  <h1>Butchering Results</h1>
+  <ul>
+    {#each harvest.entries as harvest_entry}
+    {#if harvest_entry.type === "bionic_group"}
+    {#each flattenItemGroup(data, data.byId('item_group', harvest_entry.drop)) as {id, prob}}
+    <li><ItemSymbol item={data.byId('item', id)} /> <ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)</li>
+    {/each}
+    {:else}
+    <li><ItemSymbol item={data.byId('item', harvest_entry.drop)} /> <ThingLink type="item" id={harvest_entry.drop} /></li>
+    {/if}
+    {/each}
+  </ul>
 </section>
 {/if}
 {#if deathDrops?.length}
