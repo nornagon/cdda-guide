@@ -2,8 +2,11 @@
   import { getContext } from 'svelte';
 
   import { asKilograms, asLiters, CddaData, flattenRequirement, parseMass, parseVolume, singular, singularName } from '../data'
-  import type { RequirementData, Recipe as RecipeT, PocketData, ComestibleSlot, Mapgen } from '../types'
-  import Recipe from './Recipe.svelte';
+  import type { RequirementData, PocketData, ComestibleSlot, Mapgen } from '../types'
+  import Dissassembly from './item/Dissassembly.svelte';
+  import DroppedBy from './item/DroppedBy.svelte';
+  import Recipes from './item/Recipes.svelte';
+  import SpawnedIn from './item/SpawnedIn.svelte';
   import ThingLink from './ThingLink.svelte';
   
   export let item: any
@@ -67,9 +70,6 @@
   })
   let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL').flatMap(p => p.item_restriction)
   
-  let recipes = data.byType<RecipeT>('recipe')
-    .filter(x => x.type === 'recipe' && x.result === item.id && !x.obsolete)
-  
   function maxCharges(ammo_id: string) {
     let ret = 0
     for (const p of pockets)
@@ -126,40 +126,6 @@
     }
   }
 
-  const mons = data.byType('monster').flatMap(mon => {
-    if (!mon.id) return []
-    const deathDrops = data.flatDeathDrops(mon.id)
-    const dd = deathDrops.find(dd => dd.id === item.id)
-    if (dd) return [{id: mon.id, prob: dd.prob}]
-    return []
-  })
-  mons.sort((a, b) => b.prob - a.prob)
-
-  function showProbability(prob: number) {
-    const ret = (prob * 100).toFixed(2)
-    if (ret === '0.00')
-      return '< 0.01%'
-    return ret + '%'
-  }
-
-  let droppedByLimit = 10
-  
-  const uncraftableFromSet = new Set<string>()
-  for (const recipe of data.byType<RecipeT>('recipe')) {
-    if (recipe.result && (recipe.reversible || recipe.type === 'uncraft')) {
-      const normalizedUsing = recipe.using ? Array.isArray(recipe.using) ? recipe.using : [[recipe.using, 1] as [string, number]] : []
-      const requirements = (normalizedUsing
-        .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1]])
-      const components = requirements.flatMap(([req, count]) => {
-        return flattenRequirement(data, req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
-      })
-      const defaultComponents = components.map(c => c[0])
-      if (defaultComponents.some(c => c.id === item.id))
-        uncraftableFromSet.add(recipe.result)
-    }
-  }
-  const uncraftableFrom = [...uncraftableFromSet].sort((a, b) => singularName(data.byId('item', a)).localeCompare(singularName(data.byId('item', b))))
-  
   const uncraft = (() => {
     const recipe = data.uncraftRecipe(item.id)
     if (!recipe) return undefined
@@ -172,31 +138,6 @@
     const defaultComponents = components.map(c => c[0])
     return {components: defaultComponents}
   })()
-
-  let uncraftLimit = 10
-  
-  const mapgens = data.byType<Mapgen>('mapgen').filter(mapgen => data.mapgenSpawnItems(mapgen).includes(item.id))
-  const om_terrains = new Set
-  for (const mg of mapgens) {
-    if (!mg.om_terrain) continue;
-    let mg_omts: string[]
-    if (typeof mg.om_terrain === 'string') {
-      mg_omts = [mg.om_terrain]
-    } else if (typeof mg.om_terrain[0] === 'string') {
-      mg_omts = mg.om_terrain as string[]
-    } else {
-      mg_omts = (mg.om_terrain as string[][]).flatMap(t => t)
-    }
-    const n = (x) => typeof x === 'string' ? [x] : x
-    mg_omts.forEach(mo => {
-      const omt = data.byId('overmap_terrain', mo)
-      // let's keep some things secret :)
-      if (omt && omt.id && !n(omt.id).some(x => /necropolis|ranch_camp|robofachq|mapgen-test/.test(x)))
-        om_terrains.add(omt)
-    })
-  }
-  const om_terrains_sorted = [...om_terrains].sort((a, b) => singularName(a).localeCompare(singularName(b)))
-  let omTerrainLimit = 10
 </script>
 
 <h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
@@ -586,55 +527,17 @@
   {/each}
 </section>
 {/if}
-{#if mons.length || uncraftableFrom.length || recipes.length || om_terrains_sorted.length}
+
+<div class="hide-header-if-no-sections">
 <h2>Obtaining</h2>
-{#if recipes.length}
-{#each recipes as recipe (recipe)}
-<Recipe recipe={recipe} />
-{/each}
-{/if}
+<Recipes item_id={item.id} />
+<DroppedBy item_id={item.id} />
+<Dissassembly item_id={item.id} />
+<SpawnedIn item_id={item.id} />
+</div>
 
-{#if mons.length}
-<section>
-  <h1>Dropped By</h1>
-  <ul>
-    {#each mons.slice(0, droppedByLimit) as {id, prob}}
-    <li><ThingLink {id} type="monster" /> ({showProbability(prob)})</li>
-    {/each}
-  </ul>
-  {#if mons.length > droppedByLimit}
-  <a href="" on:click={(e) => { e.preventDefault(); droppedByLimit = Infinity }}>See all...</a>
-  {/if}
-</section>
-{/if}
-
-{#if uncraftableFrom.length}
-<section>
-  <h1>Disassemble</h1>
-  <ul>
-    {#each uncraftableFrom.slice(0, uncraftLimit) as id}
-    <li><ThingLink {id} type="item" /></li>
-    {/each}
-  </ul>
-  {#if uncraftableFrom.length > uncraftLimit}
-  <a href="" on:click={(e) => { e.preventDefault(); uncraftLimit = Infinity }}>See all...</a>
-  {/if}
-</section>
-{/if}
-
-{#if om_terrains_sorted.length}
-<section>
-  <h1>Loot</h1>
-  <ul>
-    {#each om_terrains_sorted.slice(0, omTerrainLimit) as omt}
-    <li>
-      <span style="font-family: monospace;" class="c_{omt.color}">{omt.sym}</span>
-      <span title={omt.id}>{singularName(omt)}</span></li>
-    {/each}
-  </ul>
-  {#if om_terrains_sorted.length > omTerrainLimit}
-  <a href="" on:click={(e) => { e.preventDefault(); omTerrainLimit = Infinity }}>See all...</a>
-  {/if}
-</section>
-{/if}
-{/if}
+<style>
+.hide-header-if-no-sections > h2:last-child {
+  display: none;
+}
+</style>

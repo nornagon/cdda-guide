@@ -65,6 +65,14 @@ export const singularName = (obj: any): string =>
 
 export const pluralName = (obj: any): string =>
   plural(obj?.name ?? obj?.id ?? obj?.abstract)
+
+export function showProbability(prob: number) {
+  const ret = (prob * 100).toFixed(2)
+  if (ret === '0.00')
+    return '< 0.01%'
+  return ret + '%'
+}
+
   
 export function parseVolume(string: string | number): number {
   if (typeof string === 'undefined') return 0
