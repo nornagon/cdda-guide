@@ -508,3 +508,161 @@ type GenericMonsterAttack = {
 
 type MonsterAttack = (GenericMonsterAttack | LeapAttack | MeleeAttack | BiteAttack | GunAttack) & { cooldown?: number }
 export type SpecialAttack = [string, number] | MonsterAttack
+export interface Mapgen {
+  type: 'mapgen';
+  method: 'json';
+  om_terrain?: string | string[] | string[][];
+  weight?: number;
+  object: MapgenObject;
+  nested_mapgen_id?: string;
+  update_mapgen_id?: string;
+}
+
+type PlaceMapping<T> = Record<string, T | T[]>;
+type PlaceList<T> = (MapgenPlace & T)[]
+
+interface MapgenPlace {
+  x: MapgenInt
+  y: MapgenInt
+  repeat?: MapgenInt
+}
+
+export interface MapgenObject {
+  fill_ter?: string;
+  rows?: string[];
+  //terrain?: any; // TODO:
+  //place_terrain?: PlaceTerrain[];
+  //furniture?: any; // TODO:
+
+  items?: PlaceMapping<MapgenItemGroup>;
+  place_items?: PlaceList<MapgenItemGroup>;
+  item?: PlaceMapping<MapgenSpawnItem>;
+  place_item?: PlaceList<MapgenSpawnItem>;
+  add?: PlaceList<MapgenSpawnItem>; // deprecated in favor of place_item
+  place_loot?: PlaceList<MapgenLoot>;
+  sealed_item?: PlaceMapping<MapgenSealedItem>;
+
+  //place_monsters?: FluffyPlaceMonster[];
+  //place_monster?: PurplePlaceMonster[];
+  //monster?: MonsterClass;
+  //monsters?: Monsters;
+  palettes?: string[];
+  //place_vehicles?: PlaceVehicle[];
+  //vehicles?: ObjectVehicles;
+  place_nested?: PlaceList<MapgenNested>;
+  nested?: PlaceMapping<MapgenNested>;
+  set?: MapgenSet[];
+  //place_rubble?: PlaceFurnitureElement[];
+  //place_furniture?: PlaceFurnitureElement[];
+  //gaspumps?: Gaspumps;
+  //place_gaspumps?: PlaceGaspumpElement[];
+  //place_npcs?: PlaceNpc[];
+  //npcs?: Npcs;
+  //computers?: Computers;
+  mapgensize?: [number, number];
+  //liquids?: LiquidsClass;
+  //place_liquids?: PlaceLiquid[];
+  rotation?: [number, number] | number;
+  mapping?: any; // TODO:
+  //place_fields?: PlaceField[];
+  //fields?: Fields;
+  //vendingmachines?: { [key: string]: Vendingmachine };
+  //place_vendingmachines?: PlaceVendingmachine[];
+  //traps?: Traps;
+  //place_traps?: PlaceTrap[];
+  //signs?: Signs;
+  //place_signs?: PlaceGraffitiElement[];
+  //place_toilets?: PlaceGaspumpElement[];
+  //faction_owner?: FactionOwner[];
+  predecessor_mapgen?: 'field' | 'forest' | 'forest_thick' | 'forest_water' | 'lake_shore' | 'lake_surface';
+  //place_graffiti?: PlaceGraffitiElement[];
+  //place_ter_furn_transforms?: PlaceTerFurnTransform[];
+  //ter_furn_transforms?: TerFurnTransforms;
+  //place_zones?: PlaceZone[];
+}
+
+type MapgenInt = number | [number, number]
+export interface MapgenItemGroup {
+  item: string | ItemGroup | ItemGroupEntry[] /* subtype collection */
+  chance?: MapgenInt
+  repeat?: MapgenInt
+}
+
+export interface MapgenSpawnItem {
+  item: string
+  amount?: MapgenInt
+  chance?: MapgenInt
+  repeat?: MapgenInt
+  "custom-flags"?: string[]
+}
+
+export interface MapgenSealedItem {
+  furniture: string;
+  chance: MapgenInt;
+  item?: MapgenSpawnItem
+  items?: MapgenItemGroup
+}
+
+export interface MapgenLoot {
+  ammo?: number // int
+  magazine?: number // int
+  chance?: number // int, default 100
+  group?: string // item_group_id
+  item?: string // item_id
+}
+
+export interface MapgenNested {
+  neighbors: any // TODO:
+  chunks?: Array<[string, number] | string>;
+  else_chunks?: Array<[string, number] | string>;
+}
+
+export interface MapgenSet {
+  point?: 'bash' | 'furniture' | 'terrain' | 'trap';
+  line?: 'bash' | 'furniture' | 'terrain' | 'trap';
+  square?: 'radiation' | 'terrain';
+  id?: string; // ter/furn/trap id
+  x: [number, number] | number;
+  y: [number, number] | number;
+  repeat?: [number, number]
+  chance?: number;
+  x2?: number;
+  y2?: number;
+  amount?: [number, number] | number;
+}
+
+export interface PaletteData {
+  items?: PlaceMapping<MapgenItemGroup>;
+  item?: PlaceMapping<MapgenSpawnItem>;
+  sealed_item?: PlaceMapping<MapgenSealedItem>;
+}
+
+export interface Palette {
+  id: string;
+  type: 'palette';
+  terrain?: any;
+  furniture?: any;
+  nested?: any;
+  //toilets?: ToiletsClass;
+  items?: PlaceMapping<MapgenItemGroup>;
+  //vendingmachines?: Vendingmachines;
+  mapping?: Record<string, MapgenMapping>;
+  //computers?: Computers;
+  //liquids?: Liquids;
+  //monster?: MonsterClass;
+  item?: PlaceMapping<MapgenSpawnItem>;
+  sealed_item?: PlaceMapping<MapgenSealedItem>;
+  //vehicles?: Vehicles;
+  //monsters?: Monsters;
+  //gaspumps?: Gaspumps;
+  //signs?: Signs;
+}
+
+export interface MapgenMapping {
+  items?: MapgenItemGroup | MapgenItemGroup[];
+  item?: MapgenSpawnItem | MapgenSpawnItem[]
+  //furniture?: string;
+  //terrain?: string;
+  //traps?: string;
+  //fields?: Fields;
+}
