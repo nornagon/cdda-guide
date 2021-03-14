@@ -4,22 +4,11 @@ import type { Construction as ConstructionT, Furniture } from "../types";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import Construction from "./Construction.svelte";
+import FurnitureSymbol from "./item/FurnitureSymbol.svelte";
 
 const data = getContext<CddaData>('data')
 
 export let item: Furniture
-
-function colorFromBgcolor(color: string | [string] | [string, string, string, string]) {
-  return typeof color === 'string' ? `i_${color}` : colorFromBgcolor(color[0])
-}
-
-const color = item.color
-  ? item.color
-  : item.bgcolor
-    ? colorFromBgcolor(item.bgcolor)
-    : null
-    
-const symbol = typeof item.symbol === 'string' ? item.symbol : item.symbol[0]
 
 const deconstruct = item.deconstruct?.items
   ? flattenItemGroup(data, { subtype: "collection", entries: item.deconstruct.items })
@@ -40,7 +29,7 @@ const constructions = data.byType<ConstructionT>('construction').filter(c => c.p
 
 </script>
 
-<h1><span style="font-family: monospace;" class="c_{color}">{symbol}</span> {singularName(item)}</h1>
+<h1><FurnitureSymbol {item} /> {singularName(item)}</h1>
 
 <section>
   <h1>General</h1>
@@ -68,6 +57,8 @@ const constructions = data.byType<ConstructionT>('construction').filter(c => c.p
       <ul class="comma-separated">
         {#each item.flags ?? [] as flag}
         <li>{flag}</li>
+        {:else}
+        <li><em>none</em></li>
         {/each}
       </ul>
     </dd>
