@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { getContext } from "svelte";
-  import { CddaData, singularName } from "../data";
-  import ThingLink from "./ThingLink.svelte";
+import { getContext } from "svelte";
+import { CddaData, singularName } from "../data";
+import ThingLink from "./ThingLink.svelte";
 
-  export let item: any
+export let item: any
 
-  const data = getContext<CddaData>('data')
+const data = getContext<CddaData>('data')
 
-  const compatible = data.byType('item').flatMap(x => {
-    if (x.type !== 'AMMO' || !x.id) return []
-    if (x.ammo_type === item.id)
-      return [x]
-    return []
-  })
-  compatible.sort((a, b) => singularName(a).localeCompare(singularName(b)))
+const compatible = data.byType('item').flatMap(x => {
+  if (x.type !== 'AMMO' || !x.id) return []
+  if (x.ammo_type === item.id)
+    return [x]
+  return []
+})
+compatible.sort((a, b) => singularName(a).localeCompare(singularName(b)))
 </script>
 
 <h1>Ammunition Type: {singularName(item)}</h1>

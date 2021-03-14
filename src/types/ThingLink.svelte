@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { getContext } from "svelte"
-  import { CddaData, countsByCharges, pluralName, singularName } from "../data"
+import { getContext } from "svelte"
+import { CddaData, countsByCharges, pluralName, singularName } from "../data"
 
-  export let type: string
-  export let id: string
-  export let plural: boolean = false
-  export let count: number | undefined = undefined
-  
-  const data = getContext<CddaData>('data')
-  
-  let item = data.byId(type, id)
+export let type: string
+export let id: string
+export let plural: boolean = false
+export let count: number | undefined = undefined
+
+const data = getContext<CddaData>('data')
+
+let item = data.byId(type, id)
 </script>
 
 {#if count != null}

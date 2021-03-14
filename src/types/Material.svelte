@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { getContext } from "svelte";
-  import type { CddaData } from "../data";
-  import ThingLink from "./ThingLink.svelte";
+import { getContext } from "svelte";
+import type { CddaData } from "../data";
+import ThingLink from "./ThingLink.svelte";
 
-  export let item: any
-  const data = getContext<CddaData>('data')
+export let item: any
 </script>
 <h1>Material: {item.name}</h1>
 <section>

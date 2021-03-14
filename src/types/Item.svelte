@@ -1,75 +1,76 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
+import { getContext } from 'svelte';
 
-  import { asKilograms, asLiters, CddaData, parseVolume, singular, singularName } from '../data'
-  import type { RequirementData, PocketData } from '../types'
-  import AmmoInfo from './item/AmmoInfo.svelte';
-  import ArmorInfo from './item/ArmorInfo.svelte';
-  import BookInfo from './item/BookInfo.svelte';
-  import ComestibleInfo from './item/ComestibleInfo.svelte';
-  import Deconstruct from './item/Deconstruct.svelte';
-  import Dissassembly from './item/Dissassembly.svelte';
-  import DroppedBy from './item/DroppedBy.svelte';
-  import GunInfo from './item/GunInfo.svelte';
-  import MeleeInfo from './item/MeleeInfo.svelte';
-  import Recipes from './item/Recipes.svelte';
-  import SpawnedIn from './item/SpawnedIn.svelte';
-  import ThingLink from './ThingLink.svelte';
-  
-  export let item: any
-  let data: CddaData = getContext('data')
-  
-  function length(item) {
-    if (item.longest_side) return item.longest_side
-    return `${Math.round(Math.cbrt(parseVolume(item.volume)))} cm`
-  }
-  
-  let qualities: any[] = (item.qualities ?? []).map(([id, level]) => ({ quality: data.byId('tool_quality', id), level }));
-  let materials: any[] = (typeof item.material === 'string' ? [item.material] : item.material ?? []).map(id => data.byId('material', id));
-  let flags: any[] = (item.flags ?? []).map(id => data.byId('json_flag', id) ?? {id});
-  let faults: any[] = (item.faults ?? []).map(f => data.byId('fault', f));
-  
-  const defaultPocketData = {
-    pocket_type: 'CONTAINER',
-    min_item_volume: '0 ml',
-    moves: 100,
-    fire_protection: false,
-    watertight: false,
-    airtight: false,
-    open_container: false,
-    rigid: false,
-    holster: false,
-  }
-  let pockets = ((item.pocket_data ?? []) as PocketData[]).map((pocket) => {
-    return {...defaultPocketData, ...pocket}
+import { asKilograms, asLiters, CddaData, parseVolume, singular, singularName } from '../data'
+import type { RequirementData, PocketData } from '../types'
+import AmmoInfo from './item/AmmoInfo.svelte';
+import ArmorInfo from './item/ArmorInfo.svelte';
+import BookInfo from './item/BookInfo.svelte';
+import ComestibleInfo from './item/ComestibleInfo.svelte';
+import Deconstruct from './item/Deconstruct.svelte';
+import Dissassembly from './item/Dissassembly.svelte';
+import DroppedBy from './item/DroppedBy.svelte';
+import GunInfo from './item/GunInfo.svelte';
+import ItemSymbol from './item/ItemSymbol.svelte';
+import MeleeInfo from './item/MeleeInfo.svelte';
+import Recipes from './item/Recipes.svelte';
+import SpawnedIn from './item/SpawnedIn.svelte';
+import ThingLink from './ThingLink.svelte';
+
+export let item: any
+let data: CddaData = getContext('data')
+
+function length(item) {
+  if (item.longest_side) return item.longest_side
+  return `${Math.round(Math.cbrt(parseVolume(item.volume)))} cm`
+}
+
+let qualities: any[] = (item.qualities ?? []).map(([id, level]) => ({ quality: data.byId('tool_quality', id), level }));
+let materials: any[] = (typeof item.material === 'string' ? [item.material] : item.material ?? []).map(id => data.byId('material', id));
+let flags: any[] = (item.flags ?? []).map(id => data.byId('json_flag', id) ?? {id});
+let faults: any[] = (item.faults ?? []).map(f => data.byId('fault', f));
+
+const defaultPocketData = {
+  pocket_type: 'CONTAINER',
+  min_item_volume: '0 ml',
+  moves: 100,
+  fire_protection: false,
+  watertight: false,
+  airtight: false,
+  open_container: false,
+  rigid: false,
+  holster: false,
+}
+let pockets = ((item.pocket_data ?? []) as PocketData[]).map((pocket) => {
+  return {...defaultPocketData, ...pocket}
+})
+let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL').flatMap(p => p.item_restriction)
+
+function maxCharges(ammo_id: string) {
+  let ret = 0
+  for (const p of pockets)
+    if (p.pocket_type === 'MAGAZINE' && p.ammo_restriction)
+      ret += p.ammo_restriction[ammo_id] ?? 0
+  return ret
+}
+
+let ammo = pockets.flatMap(pocket => pocket.pocket_type === 'MAGAZINE' ? Object.keys(pocket.ammo_restriction ?? {}) : [])
+
+const uncraft = (() => {
+  const recipe = data.uncraftRecipe(item.id)
+  if (!recipe) return undefined
+  const normalizedUsing = recipe.using ? Array.isArray(recipe.using) ? recipe.using : [[recipe.using, 1] as [string, number]] : []
+  const requirements = (normalizedUsing
+    .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1]])
+  const components = requirements.flatMap(([req, count]) => {
+    return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
   })
-  let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL').flatMap(p => p.item_restriction)
-  
-  function maxCharges(ammo_id: string) {
-    let ret = 0
-    for (const p of pockets)
-      if (p.pocket_type === 'MAGAZINE' && p.ammo_restriction)
-        ret += p.ammo_restriction[ammo_id] ?? 0
-    return ret
-  }
-
-  let ammo = pockets.flatMap(pocket => pocket.pocket_type === 'MAGAZINE' ? Object.keys(pocket.ammo_restriction ?? {}) : [])
-  
-  const uncraft = (() => {
-    const recipe = data.uncraftRecipe(item.id)
-    if (!recipe) return undefined
-    const normalizedUsing = recipe.using ? Array.isArray(recipe.using) ? recipe.using : [[recipe.using, 1] as [string, number]] : []
-    const requirements = (normalizedUsing
-      .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1]])
-    const components = requirements.flatMap(([req, count]) => {
-      return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
-    })
-    const defaultComponents = components.map(c => c[0])
-    return {components: defaultComponents}
-  })()
+  const defaultComponents = components.map(c => c[0])
+  return {components: defaultComponents}
+})()
 </script>
 
-<h1><span style="font-family: monospace;" class="c_{item.color}">{item.symbol}</span> {singularName(item)}</h1>
+<h1><ItemSymbol {item} /> {singularName(item)}</h1>
 <section>
 <h1>General</h1>
 <dl>

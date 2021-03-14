@@ -1,42 +1,42 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
+import { getContext } from 'svelte';
 
-  import { singularName, CddaData } from '../data'
-  import type { Recipe, RequirementData } from '../types';
-  import ThingLink from './ThingLink.svelte';
-  let data = getContext<CddaData>('data')
+import { singularName, CddaData } from '../data'
+import type { Recipe, RequirementData } from '../types';
+import ThingLink from './ThingLink.svelte';
+let data = getContext<CddaData>('data')
 
-  export let recipe: Recipe
-  
-  const using = typeof recipe.using === 'string' ? [[recipe.using, 1]] as const : recipe.using
-  
-  let requirements = ((using ?? [])
-    .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1] as const])
-  
-  let tools = requirements.flatMap(([req, count]) => {
-    return data.flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
-  })
-  let components = requirements.flatMap(([req, count]) => {
-    return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
-  })
-  let qualities = requirements.flatMap(([req, count]) => {
-    return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])
-  })
+export let recipe: Recipe
 
-  function normalizeSkillsRequired(skills_required: [string, number] | [string, number][] | undefined): [string, number][] {
-    if (skills_required === undefined) return []
-    if (skills_required.length === 0) return []
-    if (Array.isArray(skills_required[0]))
-      return skills_required as [string, number][]
-    return [skills_required as [string, number]]
-  }
-  
-  let skillsRequired = normalizeSkillsRequired(recipe.skills_required)
-  
-  const writtenIn = Array.isArray(recipe.book_learn)
-    ? [...recipe.book_learn]
-    : [...Object.entries((recipe.book_learn ?? {}) as Record<string, any>)].map(([k, v]) => [k, v.skill_level])
-  writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0))
+const using = typeof recipe.using === 'string' ? [[recipe.using, 1]] as const : recipe.using
+
+let requirements = ((using ?? [])
+  .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1] as const])
+
+let tools = requirements.flatMap(([req, count]) => {
+  return data.flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count})))
+})
+let components = requirements.flatMap(([req, count]) => {
+  return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
+})
+let qualities = requirements.flatMap(([req, count]) => {
+  return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])
+})
+
+function normalizeSkillsRequired(skills_required: [string, number] | [string, number][] | undefined): [string, number][] {
+  if (skills_required === undefined) return []
+  if (skills_required.length === 0) return []
+  if (Array.isArray(skills_required[0]))
+    return skills_required as [string, number][]
+  return [skills_required as [string, number]]
+}
+
+let skillsRequired = normalizeSkillsRequired(recipe.skills_required)
+
+const writtenIn = Array.isArray(recipe.book_learn)
+  ? [...recipe.book_learn]
+  : [...Object.entries((recipe.book_learn ?? {}) as Record<string, any>)].map(([k, v]) => [k, v.skill_level])
+writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0))
   
 </script>
 
