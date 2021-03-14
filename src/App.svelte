@@ -47,6 +47,7 @@
 <header>
   <nav>
     <div class="title">
+      <!-- svelte-ignore a11y-invalid-attribute -->
       <strong><a href="#" on:click={() => search = ''}>Hitchhiker's Guide to the Cataclysm</a></strong>
     </div>
     <div class="search">
@@ -78,7 +79,7 @@ itself.</p>
 <p>The Guide stores all its data locally and is offline-capable, so you can
 take it with you whereever you go.
 {#if deferredPrompt}
-It's also <a href="#" on:click={(e) => {e.preventDefault(); deferredPrompt.prompt()}}>installable</a>,
+It's also <button class="disclosure" on:click={(e) => {e.preventDefault(); deferredPrompt.prompt()}}>installable</button>,
 so you can pop it out of your browser like a regular app.
 {/if}
 </p>

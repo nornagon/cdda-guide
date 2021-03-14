@@ -42,7 +42,7 @@ let omTerrainLimit = 10
     {/each}
   </ul>
   {#if om_terrains_sorted.length > omTerrainLimit}
-  <a href="" on:click={(e) => { e.preventDefault(); omTerrainLimit = Infinity }}>See all...</a>
+  <button class="disclosure" on:click={(e) => { e.preventDefault(); omTerrainLimit = Infinity }}>See all...</button>
   {/if}
 </section>
 {/if}

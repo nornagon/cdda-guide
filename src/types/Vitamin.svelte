@@ -41,6 +41,6 @@ let limit = 10
   {/each}
   </ul>
   {#if containingComestibles.length > limit}
-  <a href="" on:click={(e) => { e.preventDefault(); limit = Infinity }}>See all...</a>
+  <button class="disclosure" on:click={(e) => { e.preventDefault(); limit = Infinity }}>See all...</button>
   {/if}
 </section>

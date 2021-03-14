@@ -28,7 +28,7 @@ let droppedByLimit = 10
     {/each}
   </ul>
   {#if mons.length > droppedByLimit}
-  <a href="" on:click={(e) => { e.preventDefault(); droppedByLimit = Infinity }}>See all...</a>
+  <button class="disclosure" on:click={(e) => { e.preventDefault(); droppedByLimit = Infinity }}>See all...</button>
   {/if}
 </section>
 {/if}

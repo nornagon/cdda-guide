@@ -354,7 +354,7 @@ function showProbability(prob: number) {
     {/each}
   </ul>
   {#if deathDrops.length > deathDropsLimit}
-  <a href="" on:click={(e) => { e.preventDefault(); deathDropsLimit = Infinity }}>See all...</a>
+  <button class="disclosure" on:click={(e) => { e.preventDefault(); deathDropsLimit = Infinity }}>See all...</button>
   {/if}
 </section>
 {/if}

@@ -37,7 +37,7 @@ let uncraftLimit = 10
     {/each}
   </ul>
   {#if uncraftableFrom.length > uncraftLimit}
-  <a href="" on:click={(e) => { e.preventDefault(); uncraftLimit = Infinity }}>See all...</a>
+  <button class="disclosure" on:click={(e) => { e.preventDefault(); uncraftLimit = Infinity }}>See all...</button>
   {/if}
 </section>
 {/if}
