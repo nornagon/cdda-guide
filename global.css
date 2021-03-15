@@ -13,7 +13,6 @@ body {
 }
 
 a {
-	color: rgb(0,100,200);
 	text-decoration: none;
 }
 
@@ -122,6 +121,25 @@ dd ul:not(.comma-separated, .no-bullets) {
 	justify-content: stretch;
 }
 .side-by-side > section { margin: 0; grid-row: 1; }
+}
+
+button.disclosure {
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+	font-family: inherit;
+	color: hsl(122deg, 44%, 61%);
+	cursor: pointer;
+}
+button.disclosure:hover {
+	text-decoration: underline;
+}
+button.disclosure:active {
+	background: none;
+}
+button.disclosure:focus {
+	border: none;
 }
 
 section {
