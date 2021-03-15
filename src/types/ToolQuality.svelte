@@ -16,7 +16,6 @@ let data = getContext<CddaData>('data')
 
 let toolsWithQualityByLevel = new Map<number, any>()
 for (const it of data.byType('item')) {
-  if (it.type !== 'TOOL' && it.type !== 'TOOL_ARMOR') continue
   const q = (it.qualities ?? []).find(([id, level]) => id === item.id)
   if (q) {
     const [, level] = q
