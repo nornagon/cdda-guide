@@ -111,7 +111,7 @@ export class CddaData {
   _byType: Map<string, any[]> = new Map
   _byTypeById: Map<string, Map<string, any>> = new Map
   _abstractsByType: Map<string, Map<string, any>> = new Map
-  _toolReplacements: Map<string, string[]> = new Map
+  _toolReplacements: Map<string, string[]>
   _craftingPseudoItems: Map<string, string> = new Map
   _migrations: Map<string, string> = new Map
   _flattenCache: Map<any, any> = new Map
@@ -149,11 +149,6 @@ export class CddaData {
         if (!this._abstractsByType.has(mappedType)) this._abstractsByType.set(mappedType, new Map)
         this._abstractsByType.get(mappedType).set(obj.abstract, obj)
       }
-      if (obj.type === 'TOOL' && Object.hasOwnProperty.call(obj, 'sub')) {
-        if (!this._toolReplacements.has(obj.sub))
-          this._toolReplacements.set(obj.sub, [])
-        this._toolReplacements.get(obj.sub).push(obj.id)
-      }
       
       if (Object.hasOwnProperty.call(obj, 'crafting_pseudo_item')) {
         this._craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id)
@@ -174,6 +169,16 @@ export class CddaData {
   }
   
   replacementTools(type: string): string[] {
+    if (!this._toolReplacements) {
+      this._toolReplacements = new Map
+      for (const obj of this.byType('item')) {
+        if (obj.type === 'TOOL' && Object.hasOwnProperty.call(obj, 'sub')) {
+          if (!this._toolReplacements.has(obj.sub))
+            this._toolReplacements.set(obj.sub, [])
+          this._toolReplacements.get(obj.sub).push(obj.id)
+        }
+      }
+    }
     return this._toolReplacements.get(type) ?? []
   }
   
