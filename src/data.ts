@@ -1,5 +1,5 @@
 import { readable } from 'svelte/store';
-import type { Name, Requirement, ItemGroup, ItemGroupEntry, ItemGroupEntryOrShortcut, Recipe, Mapgen, PaletteData, Palette } from './types';
+import type { Translation, Requirement, ItemGroup, ItemGroupEntry, ItemGroupEntryOrShortcut, Recipe, Mapgen, PaletteData, Palette } from './types';
 
 const idlessTypes = new Set([
   "MONSTER_BLACKLIST",
@@ -44,14 +44,14 @@ const typeMappings = new Map([
 
 export const mapType = (type: string): string => typeMappings.get(type) ?? type
 
-export const singular = (name: Name): string =>
+export const singular = (name: Translation): string =>
   typeof name === 'string'
     ? name 
     : 'str_sp' in name
       ? name.str_sp
       : name.str
 
-export const plural = (name: Name): string =>
+export const plural = (name: Translation): string =>
   typeof name === 'string'
     ? name + 's'
     : 'str_sp' in name

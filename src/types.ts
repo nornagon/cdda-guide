@@ -1,5 +1,4 @@
-// TODO: should be called "Translation"
-export type Name = string | { str: string, str_pl?: string } | { str_sp: string }
+export type Translation = string | { str: string, str_pl?: string } | { str_sp: string }
 
 export type ItemGroupEntry = 
   (
@@ -173,7 +172,7 @@ export type GunSlot = {
   loudness?: number // int, default: 0
   clip_size?: number // int
   reload?: number // int moves, default 100
-  reload_noise?: Name // default "click."
+  reload_noise?: Translation // default "click."
   reload_noise_volume?: number // int, default: 0
   barrel_volume?: string // volume, default: 0 ml
   built_in_mods?: string[] // item_id
@@ -259,9 +258,9 @@ export type PocketData = {
 
 export type MendingMethod = {
   id: string
-  name?: Name
-  description?: Name
-  success_msg: Name
+  name?: Translation
+  description?: Translation
+  success_msg: Translation
   time: string // duration
   skills: {id: string, level: number}[]
   requirements: string | Omit<Requirement, 'id' | 'type'>
@@ -272,8 +271,8 @@ export type MendingMethod = {
 export type Fault = {
   type: 'fault'
   id: string
-  name: Name
-  description: Name
+  name: Translation
+  description: Translation
   
   mending_methods?: MendingMethod[]
   
@@ -334,7 +333,7 @@ export type MapDataCommon = {
 export type Furniture = MapDataCommon & {
   type: "furniture"
   id: string
-  name: Name
+  name: Translation
   move_cost_mod: number
   required_str: number
   color?: string | [string] | [string, string, string, string]
@@ -374,7 +373,7 @@ export type Proficiency = {
   type: "proficiency"
   id: string
   description: string
-  name: Name
+  name: Translation
   can_learn: boolean
   time_to_learn?: string // duration, default: 9999 h
 
@@ -387,7 +386,7 @@ export type Proficiency = {
 export type Skill = {
   type: 'skill'
   id: string
-  name: Name
+  name: Translation
   description: string
 }
 
@@ -410,7 +409,7 @@ export type BonusContainer = {
 
 export type Technique = {
   id: string
-  name: Name
+  name: Translation
   description?: string
   
   messages?: [string, string]
@@ -449,7 +448,7 @@ export type Technique = {
 export type Vitamin = {
   id: string
   type: 'vitamin'
-  name: Name
+  name: Translation
   deficiency?: string // effect_id
   excess?: string // effect_id
   min?: number // int
@@ -497,7 +496,7 @@ type GunAttack = {
   ranges?: ([number, number] | [number, number, string])[]
   max_ammo?: number // default INT_MAX
   move_cost?: number
-  description?: Name
+  description?: Translation
   
   // TODO: ...
 }
