@@ -27,6 +27,7 @@ function showProbability(prob: number) {
 
 const constructions = data.byType<ConstructionT>('construction').filter(c => c.post_terrain === item.id)
 
+const bits = [['Deconstruct', deconstruct], ['Bash', bash]] as const
 </script>
 
 <h1><FurnitureSymbol {item} /> {singularName(item)}</h1>
@@ -38,7 +39,7 @@ const constructions = data.byType<ConstructionT>('construction').filter(c => c.p
     <dt>Strength Required to Drag</dt><dd>{item.required_str >= 0 ? item.required_str : 'not movable'}</dd>
     <dt>Coverage</dt><dd>{item.coverage ?? 0}%</dd>
     <dt>Comfort</dt><dd>{item.comfort ?? 0}</dd>
-    {#each [['Deconstruct', deconstruct], ['Bash', bash]] as [title, arr]}
+    {#each bits as [title, arr]}
     {#if arr.length}
     <dt>{title}</dt>
     <dd>

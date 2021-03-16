@@ -19,7 +19,7 @@ for (const mg of mapgens) {
   } else {
     mg_omts = (mg.om_terrain as string[][]).flatMap(t => t)
   }
-  const n = (x) => typeof x === 'string' ? [x] : x
+  function n(x: string | string[]): string[] { return typeof x === 'string' ? [x] : x }
   mg_omts.forEach(mo => {
     const omt = data.byId('overmap_terrain', mo)
     // let's keep some things secret :)

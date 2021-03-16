@@ -29,7 +29,7 @@
     item = null;
   }
 
-  let deferredPrompt;
+  let deferredPrompt: any;
   window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
   });

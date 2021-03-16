@@ -21,7 +21,7 @@ const tools = requirements.flatMap(([req, count]) => {
 const components = requirements.flatMap(([req, count]) => {
   return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
 })
-const qualities = requirements.flatMap(([req, count]) => {
+const qualities = requirements.flatMap(([req, _count]) => {
   return (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x])
 })
 
@@ -83,7 +83,7 @@ const qualities = requirements.flatMap(([req, count]) => {
       <ul>
         {#each components as componentChoices}
         <li>
-          {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, item, count}, i}
+          {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, count}, i}
             {#if i !== 0}{' OR '}{/if}
             <ThingLink {id} {count} type="item" />
           {/each}

@@ -82,7 +82,7 @@ const mendingMethods = (item.mending_methods ?? []).map(mm => {
     <ul>
       {#each components as componentChoices}
       <li>
-        {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, item, count}, i}
+        {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, count}, i}
           {#if i !== 0}{' OR '}{/if}
           <ThingLink {id} {count} type="item" />
         {/each}

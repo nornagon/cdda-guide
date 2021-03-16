@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
-import type { Recipe as RecipeT, RequirementData } from "../../types";
+import type { Recipe as RecipeT } from "../../types";
 import Recipe from "../Recipe.svelte";
 
 export let item_id: string

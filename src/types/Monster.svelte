@@ -3,10 +3,33 @@ import { getContext } from 'svelte';
 
 import { asKilograms, asLiters, CddaData, flattenItemGroup, singularName } from '../data'
 import ThingLink from './ThingLink.svelte';
-import type { SpecialAttack } from '../types';
+import type { DamageUnit, ItemBasicInfo, SpecialAttack } from '../types';
 import ItemSymbol from './item/ItemSymbol.svelte';
 
-export let item
+export let item: ItemBasicInfo & {
+  harvest?: string
+  bodytype?: string
+  species?: string[]
+  speed?: number
+  melee_skill?: number
+  special_attacks?: SpecialAttack[]
+  hp?: number
+  dodge?: number
+  armor_bash?: number
+  armor_stab?: number
+  armor_cut?: number
+  armor_bullet?: number
+  armor_acid?: number
+  armor_fire?: number
+  vision_day?: number
+  vision_night?: number
+  default_faction?: string
+  anger_triggers?: string[]
+  placate_triggers?: string[]
+  morale?: number
+  aggression?: number
+  death_function?: string[]
+}
 
 let data = getContext<CddaData>('data')
 
@@ -70,7 +93,7 @@ function difficultyColor(diff: number) {
 }
 
 function damage(item: any) {
-  let { melee_dice = 0, melee_dice_sides = 0, melee_damage, melee_cut } = item
+  let { melee_dice = 0, melee_dice_sides = 0/*, melee_damage, melee_cut*/ } = item
   //melee_damage = melee_damage ?? [ { damage_type: "bash", amount: `${melee_dice}d${melee_dice_sides}` } ]
   return `${melee_dice}d${melee_dice_sides}`
 }
@@ -203,14 +226,14 @@ function specialAttackToString(special_attack: SpecialAttack): string {
       return special_attack.type
   if ('id' in special_attack)
     if ('damage_max_instance' in special_attack)
-      return `${special_attack.id}: ${special_attack.damage_max_instance.map(inst => {
+      return `${special_attack.id}: ${(special_attack.damage_max_instance as DamageUnit[]).map(inst => {
         return `(${inst.damage_type} for ${inst.amount} damage)`
       }).join(' ')}`
     else
       return special_attack.id
 }
 
-let materials: any[] = item.material ?? []
+let materials = item.material ?? []
 
 let deathDrops = data.flatDeathDrops(item.id)
 

@@ -17,7 +17,7 @@ let tools = requirements.flatMap(([req, count]) =>
   data.flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count}))))
 let components = requirements.flatMap(([req, count]) =>
   data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count}))))
-let qualities = requirements.flatMap(([req, count]) =>
+let qualities = requirements.flatMap(([req, _count]) =>
   (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x]))
 
 function normalizeSkillsRequired(skills_required: [string, number] | [string, number][] | undefined): [string, number][] {
@@ -117,7 +117,7 @@ writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0))
     <ul>
       {#each components as componentChoices}
       <li>
-        {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, item, count}, i}
+        {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, count}, i}
           {#if i !== 0}{' OR '}{/if}
           <ThingLink type="item" {id} {count} />
         {/each}
