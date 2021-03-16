@@ -8,6 +8,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: '55 */12 * * *'
 
 jobs:
   build:
@@ -26,4 +28,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: yarn install --frozen-lockfile
-    - run: yarn test
+    - run: |
+        echo $GITHUB_EVENT_NAME
+        yarn test
