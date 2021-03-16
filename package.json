@@ -6,8 +6,8 @@
     "dev": "rollup -c -w",
     "start": "sirv public",
     "validate": "svelte-check",
-    "test": "node fetch-fixtures.js && jest src",
-    "test:latest": "node fetch-fixtures.js latest && jest src",
+    "test": "node fetch-fixtures.js && npm run validate && jest src",
+    "test:latest": "node fetch-fixtures.js latest && npm run validate && jest src",
     "test:watch": "npm run test -- --watch",
     "update-test-data": "node fetch-fixtures.js latest",
     "deploy": "npm run build && gh-pages -d public"
