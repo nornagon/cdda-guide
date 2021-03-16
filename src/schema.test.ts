@@ -15,10 +15,19 @@ const id = x => {
 }
 const all = data.map((x, i) => [x.type, id(x) ?? i, x])
 
+const skipped = new Set([
+  'sleeveless_duster_faux_fur', // https://github.com/CleverRaven/Cataclysm-DDA/pull/48066
+  'leather_armor_horse', // https://github.com/CleverRaven/Cataclysm-DDA/pull/48068
+])
+
 const ajv = new Ajv
 const validate = ajv.compile(schema)
 
 test.each(all)("schema matches %s %s", (type, id, obj) => {
+  if (skipped.has(id)) {
+    pending()
+    return;
+  }
   const valid = validate(obj)
   if (!valid) {
     expect(validate.errors.filter(e => e.dataPath !== '/type')).toHaveLength(0)
