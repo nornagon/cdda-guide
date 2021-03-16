@@ -1,16 +1,9 @@
 <script lang="ts">
-import type { DamageUnit, GunSlot } from "../../types";
+import type { DamageUnit, GunSlot, ItemBasicInfo } from "../../types";
 
 import ThingLink from "../ThingLink.svelte";
 
-
-export let item: GunSlot & {
-  id: string
-  type: 'GUN'
-  // from load_basic_info
-  min_strength?: number
-  flags?: string[]
-}
+export let item: GunSlot & ItemBasicInfo
 
 // TODO: handle multiple ranged_damage type
 const ranged_damage = Array.isArray(item.ranged_damage)

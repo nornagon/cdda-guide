@@ -2,7 +2,7 @@
 import { getContext } from 'svelte';
 
 import { asKilograms, asLiters, CddaData, parseVolume, singular, singularName } from '../data'
-import type { RequirementData, PocketData } from '../types'
+import type { RequirementData, ItemBasicInfo, Item, Fault, JsonFlag } from '../types'
 import AmmoInfo from './item/AmmoInfo.svelte';
 import ArmorInfo from './item/ArmorInfo.svelte';
 import BookInfo from './item/BookInfo.svelte';
@@ -17,18 +17,18 @@ import Recipes from './item/Recipes.svelte';
 import SpawnedIn from './item/SpawnedIn.svelte';
 import ThingLink from './ThingLink.svelte';
 
-export let item: any
+export let item: Item
 let data: CddaData = getContext('data')
 
-function length(item) {
+function length(item: ItemBasicInfo) {
   if (item.longest_side) return item.longest_side
   return `${Math.round(Math.cbrt(parseVolume(item.volume)))} cm`
 }
 
-let qualities: any[] = (item.qualities ?? []).map(([id, level]) => ({ quality: data.byId('tool_quality', id), level }));
-let materials: any[] = (typeof item.material === 'string' ? [item.material] : item.material ?? []).map(id => data.byId('material', id));
-let flags: any[] = (item.flags ?? []).map(id => data.byId('json_flag', id) ?? {id});
-let faults: any[] = (item.faults ?? []).map(f => data.byId('fault', f));
+let qualities = (item.qualities ?? []).map(([id, level]) => ({ quality: data.byId('tool_quality', id), level }));
+let materials = (typeof item.material === 'string' ? [item.material] : item.material ?? []).map(id => data.byId('material', id));
+let flags = (item.flags ?? []).map(id => data.byId<JsonFlag>('json_flag', id) ?? {id});
+let faults = (item.faults ?? []).map(f => data.byId<Fault>('fault', f));
 
 const defaultPocketData = {
   pocket_type: 'CONTAINER',
@@ -41,7 +41,7 @@ const defaultPocketData = {
   rigid: false,
   holster: false,
 }
-let pockets = ((item.pocket_data ?? []) as PocketData[]).map((pocket) => {
+let pockets = (item.pocket_data ?? []).map((pocket) => {
   return {...defaultPocketData, ...pocket}
 })
 let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL').flatMap(p => p.item_restriction)

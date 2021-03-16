@@ -1,20 +1,14 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
+import type { Item, ToolQuality } from "../types";
 import ThingLink from "./ThingLink.svelte";
-
-type ToolQuality = {
-  type: "tool_quality"
-  id: string
-  name: string | { str: string, str_pl?: string } | { str_sp: string }
-  usages?: [number, string[]][]
-}
 
 export let item: ToolQuality
 
 let data = getContext<CddaData>('data')
 
-let toolsWithQualityByLevel = new Map<number, any>()
+let toolsWithQualityByLevel = new Map<number, Item[]>()
 for (const it of data.byType('item')) {
   if (!it.id) continue;
   const q = (it.qualities ?? []).find(([id, level]) => id === item.id)

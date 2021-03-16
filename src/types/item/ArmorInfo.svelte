@@ -1,22 +1,9 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
+import type { ArmorPortionData, ArmorSlot } from "../../types";
 
-export let item: {
-  id: string
-  type: 'ARMOR' | 'TOOL_ARMOR'
-  covers?: string[]
-  armor_portion_data?: ArmorPortionData[]
-  sided?: boolean
-  flags?: string[]
-  warmth?: number
-  encumbrance?: number
-  max_encumbrance?: number
-  coverage?: number
-  environmental_protection?: number
-  material_thickness?: number
-  material?: string | string[]
-}
+export let item: ArmorSlot
 let data = getContext<CddaData>('data')
 
 let materials: any[] = (typeof item.material === 'string' ? [item.material] : item.material ?? []).map(id => data.byId('material', id));
@@ -26,12 +13,6 @@ function covers(body_part_id: string): boolean {
 }
 let covers_anything = (item.covers ?? []).length || (item.armor_portion_data ?? []).length
 
-type ArmorPortionData = {
-  encumbrance?: number | [number, number]
-  coverage?: number
-  covers?: string[] // bp_id
-  sided?: boolean
-}
 function coverageLabel(apd: ArmorPortionData): string[] {
   const covered = new Set
   const labels = []

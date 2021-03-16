@@ -1,6 +1,4 @@
 <script lang="ts">
-import { getContext } from "svelte";
-import type { CddaData } from "../data";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: any

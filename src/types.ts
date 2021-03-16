@@ -222,7 +222,6 @@ export type ComestibleSlot = {
   smoking_result?: string // item_id
   contamination?: { disease: string /* diseasetype_id */, probability: number /* int */ }[]
   primary_material?: string // material_id
-  material?: string | string[] // material_id
   monotony_penalty?: number // default 2 unless material is junk, in which case 0
   addiction_type?: string
   addiction_potential?: number // int, default 0
@@ -232,11 +231,48 @@ export type ComestibleSlot = {
   rot_spawn_chance?: number // int, default 10
 }
 
+export type ArmorPortionData = {
+  encumbrance?: number | [number, number]
+  coverage?: number
+  covers?: string[] // bp_id
+  sided?: boolean
+}
+
+export type ArmorSlot = {
+  covers?: string[]
+  armor_portion_data?: ArmorPortionData[]
+  sided?: boolean
+  flags?: string[]
+  warmth?: number
+  encumbrance?: number
+  max_encumbrance?: number
+  coverage?: number
+  environmental_protection?: number
+  material_thickness?: number
+  material?: string | string[]
+}
+
+export type EngineSlot = {
+  displacement?: number
+}
+
 export type ItemBasicInfo = {
   id: string
+  type: AllItemTypes
+  description?: Translation
   qualities?: [string, number][]
   volume?: string
+  weight?: string
   longest_side?: string
+  material?: string | string[] // material_id
+  flags?: string[]
+  faults?: string[]
+  pocket_data?: PocketData[]
+  bashing?: number
+  cutting?: number
+  min_strength?: number
+  techniques?: string[]
+  to_hit?: number | {grip?: string, length?: string, surface?: string, balance?: string}
 }
 
 const itemTypes = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","MAGAZINE","PET_ARMOR","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL"] as const
@@ -247,6 +283,8 @@ type TypedItems =
   | ({ type: 'BOOK' } & BookSlot)
   | ({ type: 'GUN' } & GunSlot)
   | ({ type: 'COMESTIBLE' } & ComestibleSlot)
+  | ({ type: 'ARMOR' | 'TOOL_ARMOR' } & ArmorSlot)
+  | ({ type: 'ENGINE' } & EngineSlot)
 type UntypedItemType = Exclude<AllItemTypes, TypedItems['type']>
 
 export type Item = ItemBasicInfo & (
@@ -432,7 +470,7 @@ export type BonusContainer = {
 export type Technique = {
   id: string
   name: Translation
-  description?: string
+  description?: Translation
   
   messages?: [string, string]
   
@@ -688,6 +726,13 @@ export interface MapgenMapping {
   //fields?: Fields;
 }
 
+export type ToolQuality = {
+  type: "tool_quality"
+  id: string
+  name: string | { str: string, str_pl?: string } | { str_sp: string }
+  usages?: [number, string[]][]
+}
+
 const types = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","ITEM_CATEGORY","LOOT_ZONE","MAGAZINE","MIGRATION","MONSTER","MONSTER_BLACKLIST","MONSTER_FACTION","PET_ARMOR","SPECIES","SPELL","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL","achievement","activity_type","ammo_effect","ammunition_type","anatomy","ascii_art","behavior","bionic","body_part","butchery_requirement","charge_removal_blacklist","city_building","clothing_mod","conduct","construction","construction_category","construction_group","disease_type","dream","effect_type","emit","enchantment","event_statistic","event_transformation","faction","fault","field_type","furniture","gate","harvest","hit_range","item_action","item_group","json_flag","map_extra","mapgen","martial_art","material","mission_definition","monster_attack","monstergroup","morale_type","movement_mode","mutation","mutation_category","mutation_type","npc","npc_class","obsolete_terrain","overlay_order","overmap_connection","overmap_land_use_code","overmap_location","overmap_special","overmap_terrain","palette","profession","profession_item_substitutions","proficiency","recipe","recipe_category","recipe_group","region_settings","relic_procgen_data","requirement","rotatable_symbol","scenario","scent_type","score","skill","skill_display_type","snippet","speech","start_location","talk_topic","technique","ter_furn_transform","terrain","tool_quality","trait_group","trap","uncraft","vehicle","vehicle_group","vehicle_part","vehicle_part_category","vehicle_placement","vehicle_spawn","vitamin","weather_type"] as const
 type AllTypes = typeof types[Exclude<keyof typeof types, keyof []>]
 
@@ -704,6 +749,7 @@ type SupportedThing
   | Vitamin
   | Fault
   | Recipe
+  | ToolQuality
 
 type UnsupportedType = Exclude<AllTypes, SupportedThing['type']>
 
