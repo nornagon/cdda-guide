@@ -48,7 +48,7 @@ export type Construction = {
   pre_terrain?: string // if starts with f_, then furniture_id, else terrain_id
   post_terrain?: string // as above
 
-  pre_flags?: string[]
+  pre_flags?: string | string[]
   post_flags?: string[]
   
   byproducts?: ItemGroupEntry[] // subtype collection
@@ -561,7 +561,7 @@ export interface MapgenObject {
   mapgensize?: [number, number];
   //liquids?: LiquidsClass;
   //place_liquids?: PlaceLiquid[];
-  rotation?: [number, number] | number;
+  rotation?: [number, number] | [number] | number;
   mapping?: any; // TODO:
   //place_fields?: PlaceField[];
   //fields?: Fields;
@@ -580,7 +580,7 @@ export interface MapgenObject {
   //place_zones?: PlaceZone[];
 }
 
-type MapgenInt = number | [number, number]
+type MapgenInt = number | [number] | [number, number]
 export interface MapgenItemGroup {
   item: string | ItemGroup | ItemGroupEntry[] /* subtype collection */
   chance?: MapgenInt
@@ -666,7 +666,7 @@ export interface MapgenMapping {
   //fields?: Fields;
 }
 
-const types = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","ITEM_CATEGORY","LOOT_ZONE","MAGAZINE","MIGRATION","MONSTER","MONSTER_BLACKLIST","MONSTER_FACTION","PET_ARMOR","SPECIES","SPELL","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL","achievement","activity_type","ammo_effect","ammunition_type","anatomy","ascii_art","behavior","bionic","body_part","butchery_requirement","charge_removal_blacklist","city_building","clothing_mod","conduct","construction","construction_category","construction_group","disease_type","dream","effect_type","emit","enchantment","event_statistic","event_transformation","faction","fault","field_type","furniture","gate","harvest","hit_range","item_action","item_group","json_flag","map_extra","mapgen","martial_art","material","mission_definition","monster_attack","monstergroup","morale_type","movement_mode","mutation","mutation_category","mutation_type","npc","npc_class","obsolete_terrain","overlay_order","overmap_connection","overmap_land_use_code","overmap_location","overmap_special","overmap_terrain","palette","profession","profession_item_substitutions","proficiency","recipe","recipe_category","recipe_group","region_settings","relic_procgen_data","requirement","rotatable_symbol","scenario","scent_type","score","skill","skill_display_type","snippet","speech","start_location","talk_topic","technique","ter_furn_transform","terrain","tool_quality","trait_group","trap","uncraft","vehicle","vehicle_group","vehicle_part","vehicle_part_category","vehicle_placement","vehicle_spawn","vitamin","weather_type"]
+const types = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","ITEM_CATEGORY","LOOT_ZONE","MAGAZINE","MIGRATION","MONSTER","MONSTER_BLACKLIST","MONSTER_FACTION","PET_ARMOR","SPECIES","SPELL","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL","achievement","activity_type","ammo_effect","ammunition_type","anatomy","ascii_art","behavior","bionic","body_part","butchery_requirement","charge_removal_blacklist","city_building","clothing_mod","conduct","construction","construction_category","construction_group","disease_type","dream","effect_type","emit","enchantment","event_statistic","event_transformation","faction","fault","field_type","furniture","gate","harvest","hit_range","item_action","item_group","json_flag","map_extra","mapgen","martial_art","material","mission_definition","monster_attack","monstergroup","morale_type","movement_mode","mutation","mutation_category","mutation_type","npc","npc_class","obsolete_terrain","overlay_order","overmap_connection","overmap_land_use_code","overmap_location","overmap_special","overmap_terrain","palette","profession","profession_item_substitutions","proficiency","recipe","recipe_category","recipe_group","region_settings","relic_procgen_data","requirement","rotatable_symbol","scenario","scent_type","score","skill","skill_display_type","snippet","speech","start_location","talk_topic","technique","ter_furn_transform","terrain","tool_quality","trait_group","trap","uncraft","vehicle","vehicle_group","vehicle_part","vehicle_part_category","vehicle_placement","vehicle_spawn","vitamin","weather_type"] as const
 type AllTypes = typeof types[Exclude<keyof typeof types, keyof []>]
 
 type SupportedThing
@@ -682,6 +682,15 @@ type SupportedThing
   | Fault
   | Recipe
 
+type UnsupportedType = Exclude<AllTypes, SupportedThing['type']>
+
+// https://stackoverflow.com/a/53808212/216728
+type IfEquals<T, U, Y=unknown, N=never> =
+  (<G>() => G extends T ? 1 : 2) extends
+  (<G>() => G extends U ? 1 : 2) ? Y : N;
+
+let unsupportedTypeMustNotBeString: IfEquals<string, UnsupportedType, true, false> = false
+
 export type Thing
   = SupportedThing
   // I would make this extra one just Exclude<string, SupportedThing['type']>, but
@@ -689,6 +698,6 @@ export type Thing
   // non-conforming object to pass the schema.
   // This _could_ be rendered in JSON-Schema using the 'not' operator, but
   // typescript-json-schema doesn't support it.
-  | { type: Exclude<AllTypes, SupportedThing['type']> }
+  | { type: UnsupportedType }
 
 export type All = {data: Thing[]}

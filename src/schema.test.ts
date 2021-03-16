@@ -6,12 +6,23 @@ const program = TJS.programFromConfig(
   __dirname + '/../tsconfig.json',
 );
 
-const schema = TJS.generateSchema(program, "All")
+const schema = TJS.generateSchema(program, "Thing")
+const data = JSON.parse(fs.readFileSync(__dirname + '/../_test/all.json', 'utf8')).data
+const id = x => {
+  if (x.id) return x.id
+  if (x.result) return x.result
+  if (x.om_terrain) return JSON.stringify(x.om_terrain)
+}
+const all = data.map((x, i) => [x.type, id(x) ?? i, x])
 
-test("data matches schema", async () => {
-  const json = JSON.parse(await fs.promises.readFile(__dirname + '/../_test/all.json', 'utf8'))
-  const ajv = new Ajv
-  const validate = ajv.compile(schema)
-  const valid = validate(json)
-  expect(valid)
+const ajv = new Ajv
+const validate = ajv.compile(schema)
+
+test.each(all)("schema matches %s %s", (type, id, obj) => {
+  const valid = validate(obj)
+  if (!valid) {
+    expect(validate.errors.filter(e => e.dataPath !== '/type')).toHaveLength(0)
+    expect(validate.errors).toHaveLength(0)
+  }
+  expect(valid).toBe(true)
 })
