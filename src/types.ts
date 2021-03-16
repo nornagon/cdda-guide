@@ -131,7 +131,7 @@ export type BookProficiencyBonus = {
   id: string // proficiency_id
   fail_factor?: number // default: 0.5
   time_factor?: number // default: 0.5
-  include_prereqs?: number // default: true
+  include_prereqs?: boolean // default: true
 }
 export type BookSlot = {
   max_level?: number // default: 0
@@ -160,7 +160,7 @@ export type DamageInstance = DamageUnit[] | {values: DamageUnit[]} | DamageUnit
 
 export type GunSlot = {
   skill: string // skill_id
-  ammo?: string[] // ammunition_type_id
+  ammo?: string | string[] // ammunition_type_id
   range?: number // int
   ranged_damage?: DamageInstance
   dispersion?: number // int
@@ -185,7 +185,7 @@ export type GunSlot = {
   
   valid_mod_locations?: [string, number][] // [gunmod_location, count]
   
-  modes?: [string, string, number] | [string, string, number, string[]][]
+  modes?: ([string, string, number] | [string, string, number, string[] | string])[]
 }
 
 export type AmmoSlot = {
@@ -217,12 +217,12 @@ export type ComestibleSlot = {
   parasites?: number // int, default 0
   radiation?: number // int, default 0
   freezing_point?: number // int, default 32
-  spoils_in?: string // duration, default 0 (never spoils)
+  spoils_in?: string | number // duration, default 0 (never spoils)
   cooks_like?: string // item_id
   smoking_result?: string // item_id
   contamination?: { disease: string /* diseasetype_id */, probability: number /* int */ }[]
   primary_material?: string // material_id
-  material?: string[] // material_id
+  material?: string | string[] // material_id
   monotony_penalty?: number // default 2 unless material is junk, in which case 0
   addiction_type?: string
   addiction_potential?: number // int, default 0
@@ -231,6 +231,28 @@ export type ComestibleSlot = {
   rot_spawn?: string // mongroup_id
   rot_spawn_chance?: number // int, default 10
 }
+
+export type ItemBasicInfo = {
+  id: string
+  qualities?: [string, number][]
+  volume?: string
+  longest_side?: string
+}
+
+const itemTypes = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","MAGAZINE","PET_ARMOR","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL"] as const
+type AllItemTypes = typeof itemTypes[Exclude<keyof typeof itemTypes, keyof []>]
+
+type TypedItems = 
+  ({ type: 'AMMO' } & AmmoSlot)
+  | ({ type: 'BOOK' } & BookSlot)
+  | ({ type: 'GUN' } & GunSlot)
+  | ({ type: 'COMESTIBLE' } & ComestibleSlot)
+type UntypedItemType = Exclude<AllItemTypes, TypedItems['type']>
+
+export type Item = ItemBasicInfo & (
+  TypedItems
+  | ({ type: UntypedItemType })
+)
 
 export type PocketData = {
   pocket_type?: string
@@ -670,7 +692,8 @@ const types = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGIN
 type AllTypes = typeof types[Exclude<keyof typeof types, keyof []>]
 
 type SupportedThing
-  = Palette
+  = Item
+  | Palette
   | Mapgen
   | Skill
   | Proficiency
