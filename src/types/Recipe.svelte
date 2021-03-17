@@ -136,6 +136,29 @@ writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0))
     </ul>
   </dd>
   {/if}
+  <dt title="Learned at these skill levels, otherwise only learnable from a book">Autolearn</dt>
+  <dd>
+    {#if recipe.autolearn}
+    <ul class="comma-separated">
+      {#if Array.isArray(recipe.autolearn)}
+        {#each recipe.autolearn as [skill, level]}
+        <li><ThingLink type="skill" id={skill} /> ({level})</li>
+        {/each}
+      {:else}
+        {#if recipe.skill_used}
+        <li><ThingLink type="skill" id={recipe.skill_used} /> ({recipe.difficulty ?? 0})</li>
+        {/if}
+        {#if skillsRequired.length}
+          {#each skillsRequired as [skill, level]}
+          <li><ThingLink type="skill" id={skill} /> ({level})</li>
+          {/each}
+        {/if}
+      {/if}
+    </ul>
+    {:else}
+    no
+    {/if}
+  </dd>
   {#if writtenIn.length}
   <dt>Written In</dt>
   <dd>
