@@ -14,7 +14,7 @@ let requirements = ((using ?? [])
   .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count as number] as const)).concat([[recipe, 1] as const])
 
 let tools = requirements.flatMap(([req, count]) =>
-  data.flattenRequirement(req.tools ?? [], x => x.tools).map(x => x.map(x => ({...x, count: x.count * count}))))
+  data.flattenRequirement(req.tools ?? [], x => x.tools, true /* expandSubstitutes */).map(x => x.map(x => ({...x, count: x.count * count}))))
 let components = requirements.flatMap(([req, count]) =>
   data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count}))))
 let qualities = requirements.flatMap(([req, _count]) =>
@@ -70,6 +70,8 @@ writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0))
   {/if}
   <dt>Time to Complete</dt>
   <dd>{recipe.time ?? '0 m'}</dd>
+  <dt>Activity Level</dt>
+  <dd>{recipe.activity_level ?? 'MODERATE_EXERCISE'}</dd>
   <dt>Batch Time Savings</dt>
   <dd>
     {#if recipe.batch_time_factors}

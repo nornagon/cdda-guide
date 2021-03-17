@@ -479,10 +479,13 @@ export class CddaData {
   }
 
   _flatRequirementCache = new WeakMap<any, {id: string, count: number}[][]>()
-  flattenRequirement<T>(required: (T | T[])[], get: (x: Requirement) => (T | T[])[]): {id: string, count: number}[][] {
+  flattenRequirement<T>(required: (T | T[])[], get: (x: Requirement) => (T | T[])[], doExpandSubstitutes: boolean = false): {id: string, count: number}[][] {
     if (this._flatRequirementCache.has(required)) return this._flatRequirementCache.get(required)
+    const maybeExpandSubstitutes = doExpandSubstitutes
+      ? x => x.flatMap(y => expandSubstitutes(this, y))
+      : x => x
     const ret = normalize(required)
-      .map(x => flattenChoices(this, x, q => normalize(get(q))).flatMap(y => expandSubstitutes(this, y)))
+      .map(x => maybeExpandSubstitutes(flattenChoices(this, x, q => normalize(get(q)))))
       .filter(x => x.length)
     this._flatRequirementCache.set(required, ret)
     return ret
