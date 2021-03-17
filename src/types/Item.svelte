@@ -7,6 +7,7 @@ import AmmoInfo from './item/AmmoInfo.svelte';
 import ArmorInfo from './item/ArmorInfo.svelte';
 import BookInfo from './item/BookInfo.svelte';
 import ComestibleInfo from './item/ComestibleInfo.svelte';
+import ComponentOf from './item/ComponentOf.svelte';
 import Deconstruct from './item/Deconstruct.svelte';
 import Dissassembly from './item/Dissassembly.svelte';
 import DroppedBy from './item/DroppedBy.svelte';
@@ -224,6 +225,7 @@ const uncraft = (() => {
   {/each}
 </section>
 {/if}
+<ComponentOf item_id={item.id} />
 
 <div class="hide-header-if-no-sections">
 <h2>Obtaining</h2>
