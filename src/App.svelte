@@ -94,6 +94,15 @@ href="https://www.nornagon.net">nornagon</a>. If you notice any problems,
 please <a href="https://github.com/nornagon/cdda-guide/issues">file an
 issue</a>!</p>
 {/if}
+
+<p>Build number:
+  {#if $data}
+  <a href="{$data.release.html_url}">{$data.build_number}</a>
+  {:else}
+  <em style="color: var(--cata-color-gray)">(loading...)</em>
+  {/if}
+  (Experimental)
+</p>
 </main>
 
 <style>

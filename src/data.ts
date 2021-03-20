@@ -46,7 +46,7 @@ export const mapType = (type: string): string => typeMappings.get(type) ?? type
 
 export const singular = (name: Translation): string =>
   typeof name === 'string'
-    ? name 
+    ? name
     : 'str_sp' in name
       ? name.str_sp
       : name.str
@@ -73,7 +73,7 @@ export function showProbability(prob: number) {
   return ret + '%'
 }
 
-  
+
 export function parseVolume(string: string | number): number {
   if (typeof string === 'undefined') return 0
   if (typeof string === 'number')
@@ -116,7 +116,12 @@ export class CddaData {
   _migrations: Map<string, string> = new Map
   _flattenCache: Map<any, any> = new Map
 
-  constructor(raw: any[]) {
+  release: any
+  build_number: string
+
+  constructor(raw: any[], build_number: string, release: any) {
+    this.release = release
+    this.build_number = build_number
     this._raw = raw
     for (const obj of raw) {
       if (!Object.hasOwnProperty.call(obj, 'type'))
@@ -149,13 +154,13 @@ export class CddaData {
         if (!this._abstractsByType.has(mappedType)) this._abstractsByType.set(mappedType, new Map)
         this._abstractsByType.get(mappedType).set(obj.abstract, obj)
       }
-      
+
       if (Object.hasOwnProperty.call(obj, 'crafting_pseudo_item')) {
         this._craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id)
       }
     }
   }
-  
+
   byId<T = any>(type: string, id: string): T {
     if (typeof id !== 'string') throw new Error('Requested non-string id')
     if (type === 'item' && this._migrations.has(id)) return this.byId(type, this._migrations.get(id))
@@ -163,11 +168,11 @@ export class CddaData {
     if (obj)
       return this._flatten(obj)
   }
-  
+
   byType<T = any>(type: string): T[] {
     return this._byType.get(type).map(x => this._flatten(x)) ?? []
   }
-  
+
   replacementTools(type: string): string[] {
     if (!this._toolReplacements) {
       this._toolReplacements = new Map
@@ -181,15 +186,15 @@ export class CddaData {
     }
     return this._toolReplacements.get(type) ?? []
   }
-  
+
   craftingPseudoItem(id: string): string | undefined {
     return this._craftingPseudoItems.get(id)
   }
-  
+
   all() {
     return this._raw
   }
-  
+
   _flatten<T = any>(_obj: T): T {
     const obj: any = _obj
     if (this._flattenCache.has(obj)) return this._flattenCache.get(obj)
@@ -233,7 +238,7 @@ export class CddaData {
     this._flattenCache.set(obj, ret)
     return ret
   }
-  
+
   _cachedDeathDrops: Map<string, {id: string, prob: number, count: [number, number]}[]> = new Map
   flatDeathDrops(mon_id: string): {id: string, prob: number, count: [number, number]}[] {
     if (this._cachedDeathDrops.has(mon_id)) return this._cachedDeathDrops.get(mon_id)
@@ -256,7 +261,7 @@ export class CddaData {
     this._cachedDeathDrops.set(mon_id, ret)
     return ret
   }
-  
+
   uncraftRecipe(item_id: string): Recipe | undefined {
     let reversed: Recipe
     for (const recipe of this.byType<Recipe>('recipe')) {
@@ -267,7 +272,7 @@ export class CddaData {
     }
     return reversed
   }
-  
+
   _cachedMapgenSpawnItems = new Map<Mapgen, string[]>()
   mapgenSpawnItems(mapgen: Mapgen): string[] {
     if (this._cachedMapgenSpawnItems.has(mapgen)) return this._cachedMapgenSpawnItems.get(mapgen)
@@ -276,7 +281,7 @@ export class CddaData {
       if (!palette.has(c)) palette.set(c, new Set)
       palette.get(c).add(item_id)
     }
-    
+
     const addGroup = (c: string, v: string | ItemGroup | ItemGroupEntry[]) => {
       const group =
         typeof v === 'string'
@@ -311,10 +316,10 @@ export class CddaData {
     }
 
     addPalette(mapgen.object)
-    
+
     for (const p_id of mapgen.object.palettes ?? [])
       addPalette(this.byId<Palette>('palette', p_id))
-      
+
     const ret = new Set<string>()
 
     const usedChars = new Set<string>()
@@ -328,10 +333,10 @@ export class CddaData {
       for (const x of v)
         ret.add(x)
     }
-    
+
     for (const v of mapgen.object.place_item ?? [])
       ret.add(v.item)
-      
+
     for (const v of mapgen.object.place_items ?? []) {
       const group =
         typeof v.item === 'string'
@@ -342,38 +347,38 @@ export class CddaData {
       for (const {id} of flattenItemGroup(this, group))
         ret.add(id)
     }
-    
+
     for (const v of mapgen.object.place_loot ?? [])
       ret.add(v.item)
-      
+
     for (const v of mapgen.object.add ?? [])
       ret.add(v.item)
-    
+
     const r = [...ret]
     this._cachedMapgenSpawnItems.set(mapgen, r)
     return r
   }
-  
+
   // This is a WeakMap because flattenItemGroup is sometimes called with temporary objects
   _flattenItemGroupCache = new WeakMap<ItemGroup, {id: string, prob: number, count: [number, number]}[]>()
   flattenItemGroup(group: ItemGroup): {id: string, prob: number, count: [number, number]}[] {
     if (this._flattenItemGroupCache.has(group)) return this._flattenItemGroupCache.get(group)
     const retMap = new Map<string, {prob: number, count: [number, number]}>()
-    
+
     function addOne({id, prob, count}: {id: string, prob: number, count: [number, number]}) {
       const {prob: prevProb, count: prevCount} = retMap.get(id) ?? {prob: 0, count: [0, 0]}
       const newProb = 1 - (1 - prevProb) * (1 - prob)
       const newCount: [number, number] = [count[0] + prevCount[0], count[1] + prevCount[1]]
       retMap.set(id, {prob: newProb, count: newCount})
     }
-    
+
     function add(...args: {id: string, prob: number, count: [number, number]}[]) {
       args.forEach(addOne)
     }
-    
+
     if (group['container-item'])
       add({id: group['container-item'], prob: 1, count: [1, 1]})
-    
+
     const normalizedEntries: ItemGroupEntry[] = []
     if (group.subtype === 'old' || !group.subtype) {
       for (const item of group.items as ItemGroupEntryOrShortcut[])
@@ -402,11 +407,11 @@ export class CddaData {
         else
           normalizedEntries.push(g)
     }
-    
+
     function prod(p: {id: string, prob: number, count: [number, number]}, prob: number, count: [number, number]): {id: string, prob: number, count: [number, number]} {
       return {id: p.id, prob: p.prob * prob, count: [p.count[0] * count[0], p.count[1] * count[1]]}
     }
-    
+
     function normalizeCount(entry: ItemGroupEntry): [number, number] {
       if (entry.count)
         if (typeof entry.count === 'number')
@@ -420,7 +425,7 @@ export class CddaData {
           return entry.charges
       return [1, 1]
     }
-    
+
     if (group.subtype === 'collection') {
       for (const entry of normalizedEntries) {
         const { prob = 100 } = entry
@@ -541,7 +546,7 @@ const fetchJson = async () => {
   if (!res.ok)
     throw new Error(`Error ${res.status} (${res.statusText}) fetching data`)
   const json = await res.json()
-  return new CddaData(json.data)
+  return new CddaData(json.data, json.build_number, json.release)
 }
 
 const json = (() => {
