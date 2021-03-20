@@ -13,7 +13,7 @@
     let m: RegExpExecArray | null;
     if (m = /^\/([^\/]+)\/(.+)$/.exec(path)) {
       const [, type, id] = m
-      item = { type, id }
+      item = { type, id: decodeURIComponent(id) }
 
       window.scrollTo(0,0);
     } else {
@@ -33,7 +33,7 @@
   window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
   });
-  
+
   function maybeFocusSearch(e: KeyboardEvent) {
     if (e.key === '/' && document.activeElement.id !== 'search') {
       document.getElementById('search').focus()
@@ -114,7 +114,7 @@ issue</a>!</p>
     padding: 0 calc(1em + 8px);
     box-sizing: border-box;
   }
-  
+
   nav {
     max-width: 980px;
     margin: 0 auto;
@@ -123,11 +123,11 @@ issue</a>!</p>
     justify-content: space-between;
     height: 100%;
   }
-  
+
   nav > .search {
     flex: 0.8;
   }
-  
+
   @media (max-width: 600px) {
     nav > .title {
       display: none;
