@@ -119,7 +119,7 @@ export class CddaData {
   release: any
   build_number: string
 
-  constructor(raw: any[], build_number: string, release: any) {
+  constructor(raw: any[], build_number?: string, release?: any) {
     this.release = release
     this.build_number = build_number
     this._raw = raw
