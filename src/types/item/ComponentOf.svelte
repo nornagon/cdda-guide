@@ -18,20 +18,21 @@ const recipes = data.byType<Recipe>('recipe').filter(recipe => {
   const components = requirements.flatMap(([req, count]) =>
     data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count}))))
   return components.some(c => c.some(d => d.id === item_id))
-}).sort((a, b) => singularName(data.byId('item', a.result)).localeCompare(singularName(data.byId('item', b.result))))
+})
+const results = [...new Set(recipes.map(r => r.result))].sort((a, b) => singularName(data.byId('item', a)).localeCompare(singularName(data.byId('item', b))))
 
 let limit = 10
 </script>
 
-{#if recipes.length}
+{#if results.length}
 <section>
   <h1>Component Of</h1>
   <ul>
-    {#each recipes.slice(0, limit) as r}
-    <li><ItemSymbol item={data.byId('item', r.result)} /> <ThingLink type="item" id={r.result} /></li>
+    {#each results.slice(0, limit) as r}
+    <li><ItemSymbol item={data.byId('item', r)} /> <ThingLink type="item" id={r} /></li>
     {/each}
   </ul>
-  {#if recipes.length > limit}
+  {#if results.length > limit}
   <button class="disclosure" on:click={(e) => { e.preventDefault(); limit = Infinity }}>See all...</button>
   {/if}
 </section>
