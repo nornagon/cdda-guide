@@ -131,7 +131,7 @@ const uncraft = (() => {
     </ul>
   </dd>
   {/if}
-  
+
   {#if uncraft}
   <dt>Dissasembles Into</dt>
   <dd>

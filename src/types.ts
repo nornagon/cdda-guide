@@ -1,6 +1,6 @@
 export type Translation = string | { str: string, str_pl?: string } | { str_sp: string }
 
-export type ItemGroupEntry = 
+export type ItemGroupEntry =
   (
     { item: string } |
     { group: string } |
@@ -16,7 +16,7 @@ export type ItemGroupEntry =
 export type ItemGroupEntryOrShortcut =
   ItemGroupEntry |
   [ string, number ] // item_id, prob (or item_group_id, prob if in 'groups' array)
-  
+
 export type ItemGroup = {
   subtype: "collection" | "distribution"
   entries?: ItemGroupEntryOrShortcut[]
@@ -34,29 +34,29 @@ export type Construction = {
   id: string
   group: string // construction_group_id
   required_skills?: [string /* skill_id */, number /* level */][]
-  
+
   // legacy, superceded by required_skills
   skill?: string
   difficulty?: number
-  
+
   category?: string // construction_category_id, default: OTHER
   time?: string | number /* minutes */
-  
+
   using?: string | [string /* requirement_id */, number /* count */][]
   pre_note?: string
-  
+
   pre_terrain?: string // if starts with f_, then furniture_id, else terrain_id
   post_terrain?: string // as above
 
   pre_flags?: string | string[]
   post_flags?: string[]
-  
+
   byproducts?: ItemGroupEntry[] // subtype collection
-  
+
   pre_special?: string
   post_special?: string
   explain_failure?: string
-  
+
   vehicle_start?: boolean
   on_display?: boolean // default: true
   dark_craftable?: boolean
@@ -86,38 +86,38 @@ export type Recipe = {
   result?: string
   abstract?: string // mutex with result
   type: 'recipe' | 'uncraft'
-  
+
   id_suffix?: string // only for type 'recipe'. not allowed for abstracts
   obsolete?: boolean
-  
+
   time?: number /* moves */ | string /* duration */
   difficulty?: number // default: 0
   flags?: string[]
-  
+
   contained?: boolean
   container?: string /* item_id, implies contained */
   sealed?: boolean
-  
+
   batch_time_factors?: [number /* int */, number /* int */] // [rscale (percentage), rsize]
-  
+
   charges?: number // int, no default
   result_mult?: number // int, default: 1
-  
+
   skill_used?: string // skill_id
-  
+
   skills_required?: [string, number] | [string, number][] // skill_id, level
-  
+
   proficiencies?: any[] // TODO
   autolearn?: boolean | [string, number][]
   never_learn?: boolean
   decomp_learn?: number | [string, number][]
   book_learn?: ([string] | [string, number])[] | Record<string, {skill_level?: number, recipe_name?: string, hidden?: boolean}>
-  
+
   activity_level?: string
-  
+
   delete_flags?: string[] // flag_id
   using?: string | [string, number][] // requirement_id
-  
+
   // for type: 'recipe' only
   category: string
   subcategory: string
@@ -182,9 +182,9 @@ export type GunSlot = {
   min_cycle_recoil?: number // int, default: 0
   ammo_effects?: string[]
   ammo_to_fire?: number // int, default: 1
-  
+
   valid_mod_locations?: [string, number][] // [gunmod_location, count]
-  
+
   modes?: ([string, string, number] | [string, string, number, string[] | string])[]
 }
 
@@ -278,7 +278,7 @@ export type ItemBasicInfo = {
 const itemTypes = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","MAGAZINE","PET_ARMOR","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL"] as const
 type AllItemTypes = typeof itemTypes[Exclude<keyof typeof itemTypes, keyof []>]
 
-type TypedItems = 
+type TypedItems =
   ({ type: 'AMMO' } & AmmoSlot)
   | ({ type: 'BOOK' } & BookSlot)
   | ({ type: 'GUN' } & GunSlot)
@@ -333,16 +333,16 @@ export type Fault = {
   id: string
   name: Translation
   description: Translation
-  
+
   mending_methods?: MendingMethod[]
-  
+
   flags?: string[]
 }
 
 export type JsonFlag = {
   type: "json_flag"
   id: string
-  
+
   info?: string
   conflicts?: string[]
   inherit?: boolean // default: true
@@ -364,16 +364,16 @@ export type MapBashInfo = {
   collapse_radius?: number // default: 1
   destroy_only?: boolean // default: false
   bash_below?: boolean // default: false
-  
+
   // TODO:
   // sound
   // sound_fail
   // furn_set
   // ter_set
   // move_cost
-  
+
   items: ItemGroupEntry[]
-  
+
   // tent_centers
 }
 
@@ -400,23 +400,23 @@ export type Furniture = MapDataCommon & {
   bgcolor?: string | [string] | [string, string, string, string]
   symbol: string | [string] | [string, string, string, string] // TODO: can be 1-char or LINE_XOXO
   flags?: string[]
-  
+
   coverage?: number
   comfort?: number
   floor_bedding_warmth?: number
-  
+
   emmissions?: string[]
-  
+
   bonus_fire_warmth_feet?: number // default: 300
-  
+
   keg_capacity?: number | string // volume, default: 0 ml
   max_volume?: number | string // volume, default: 1000 L
-  
+
   crafting_pseudo_item?: string // item_id
   deployed_item?: string // item_id
-  
+
   light_emitted?: number // default: 0
-  
+
   bash?: MapBashInfo
   deconstruct?: MapDeconstructInfo
 
@@ -439,7 +439,7 @@ export type Proficiency = {
 
   default_time_multiplier?: number // default: 2
   default_fail_multiplier?: number // default: 2
-  
+
   required_proficiencies?: string[] // proficiency_id[]
 }
 
@@ -471,16 +471,16 @@ export type Technique = {
   id: string
   name: Translation
   description?: Translation
-  
+
   messages?: [string, string]
-  
+
   crit_tec?: boolean
   crit_ok?: boolean
   downed_target?: boolean
   stunned_target?: boolean
   wall_adjacent?: boolean
   human_target?: boolean
-  
+
   defensive?: boolean
   disarms?: boolean
   take_weapon?: boolean
@@ -492,16 +492,16 @@ export type Technique = {
   grab_break?: boolean
 
   weighting?: number // default: 1
-  
+
   down_dur?: number // default: 0
   stun_dur?: number // default: 0
   knockback_dist?: number // default: 0
   knockback_spread?: number // default: 0
   powerful_knockback?: boolean
   knockback_follow?: boolean
-  
+
   aoe?: string
-  
+
   flags?: string[]
 } & MartialArtRequirements & BonusContainer
 
@@ -519,7 +519,7 @@ export type Vitamin = {
   disease_excess?: [number, number][]
   flags?: string[]
 }
-  
+
 type LeapAttack = {
   type: 'leap'
   max_range: number // float
@@ -557,7 +557,7 @@ type GunAttack = {
   max_ammo?: number // default INT_MAX
   move_cost?: number
   description?: Translation
-  
+
   // TODO: ...
 }
 type GenericMonsterAttack = {
