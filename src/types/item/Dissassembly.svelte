@@ -16,7 +16,12 @@ for (const recipe of data.byType<Recipe>('recipe')) {
     const requirements = (normalizedUsing
       .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count] as const)).concat([[recipe, 1]])
     const components = requirements.flatMap(([req, count]) => {
-      return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
+      return data.flattenRequirement(
+        req.components ?? [],
+        x => x.components,
+        { onlyRecoverable: true }
+      )
+        .map(x => x.map(x => ({...x, count: x.count * count})))
     })
     const defaultComponents = components.map(c => c[0])
     if (defaultComponents.some(c => c.id === item_id))
@@ -24,7 +29,7 @@ for (const recipe of data.byType<Recipe>('recipe')) {
   }
 }
 const uncraftableFrom = [...uncraftableFromSet].sort((a, b) => singularName(data.byId('item', a)).localeCompare(singularName(data.byId('item', b))))
-  
+
 let uncraftLimit = 10
 </script>
 

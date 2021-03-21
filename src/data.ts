@@ -1,5 +1,5 @@
 import { readable } from 'svelte/store';
-import type { Translation, Requirement, ItemGroup, ItemGroupEntry, ItemGroupEntryOrShortcut, Recipe, Mapgen, PaletteData, Palette } from './types';
+import type { Translation, Requirement, ItemGroup, ItemGroupEntry, ItemGroupEntryOrShortcut, Recipe, Mapgen, PaletteData, Palette, Item } from './types';
 
 const idlessTypes = new Set([
   "MONSTER_BLACKLIST",
@@ -484,15 +484,33 @@ export class CddaData {
   }
 
   _flatRequirementCache = new WeakMap<any, {id: string, count: number}[][]>()
-  flattenRequirement<T>(required: (T | T[])[], get: (x: Requirement) => (T | T[])[], doExpandSubstitutes: boolean = false): {id: string, count: number}[][] {
-    if (this._flatRequirementCache.has(required)) return this._flatRequirementCache.get(required)
-    const maybeExpandSubstitutes = doExpandSubstitutes
-      ? x => x.flatMap(y => expandSubstitutes(this, y))
-      : x => x
+  _flatRequirementCacheExpandSubs = new WeakMap<any, {id: string, count: number}[][]>()
+  _flatRequirementCacheOnlyRecoverable = new WeakMap<any, {id: string, count: number}[][]>()
+  _flatRequirementCacheForOpts(opts?: { expandSubstitutes?: boolean, onlyRecoverable?: boolean }): WeakMap<any, {id: string, count: number}[][]> {
+    if (opts?.expandSubstitutes && opts?.onlyRecoverable)
+      throw new Error("didn't expect to see expandSubstitutes && onlyRecoverable")
+    if (opts?.expandSubstitutes)
+      return this._flatRequirementCacheExpandSubs
+    if (opts?.onlyRecoverable)
+      return this._flatRequirementCacheOnlyRecoverable
+    return this._flatRequirementCache
+  }
+  flattenRequirement<T>(required: (T | T[])[], get: (x: Requirement) => (T | T[])[], opts?: { expandSubstitutes?: boolean, onlyRecoverable?: boolean }): {id: string, count: number}[][] {
+    const cache = this._flatRequirementCacheForOpts(opts)
+    if (cache.has(required)) return cache.get(required)
+    const { expandSubstitutes: doExpandSubstitutes = false, onlyRecoverable = false } = opts ?? {}
+    const maybeExpandSubstitutes: (x: {id: string, count: number}[]) => {id: string, count: number}[] =
+      doExpandSubstitutes
+        ? x => x.flatMap(y => expandSubstitutes(this, y))
+        : x => x
     const ret = normalize(required)
-      .map(x => maybeExpandSubstitutes(flattenChoices(this, x, q => normalize(get(q)))))
+      .map(x => maybeExpandSubstitutes(flattenChoices(this, x, q => normalize(get(q)), onlyRecoverable)))
+      .map(x =>
+        onlyRecoverable
+          ? x.filter(c => !(this.byId<Item>('item', c.id).flags ?? []).includes('UNRECOVERABLE'))
+          : x)
       .filter(x => x.length)
-    this._flatRequirementCache.set(required, ret)
+    cache.set(required, ret)
     return ret
   }
 }
@@ -501,19 +519,23 @@ export function flattenItemGroup(data: CddaData, group: ItemGroup): {id: string,
   return data.flattenItemGroup(group)
 }
 
-function flattenChoices<T>(data: CddaData, choices: T[], get: (x: Requirement) => T[][]): {id: string, count: number}[] {
+function flattenChoices<T>(data: CddaData, choices: T[], get: (x: Requirement) => T[][], onlyRecoverable: boolean = false): {id: string, count: number}[] {
   const flatChoices = []
   for (const choice of choices) {
     if (Array.isArray(choice)) {
-      const [id, count, isList] = choice
-      if (isList === 'LIST') {
+      const [id, count, ...rest] = choice
+      const isList = rest.includes('LIST')
+      const noRecover = rest.includes('NO_RECOVER')
+      if (noRecover && onlyRecoverable)
+        continue
+      if (isList) {
         const otherRequirement = data.byId('requirement', id)
         if (otherRequirement.type !== 'requirement') {
           console.error(`Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`)
         }
         const otherRequirementTools = get(otherRequirement) ?? []
         const otherRequirementChoices = otherRequirementTools[0] // only take the first
-        flatChoices.push(...flattenChoices(data, otherRequirementChoices, get).map(x => ({...x, count: x.count * count})))
+        flatChoices.push(...flattenChoices(data, otherRequirementChoices, get, onlyRecoverable).map(x => ({...x, count: x.count * count})))
       } else {
         flatChoices.push({id, count})
       }

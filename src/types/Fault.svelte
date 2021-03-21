@@ -13,7 +13,7 @@ const mendingMethods = (item.mending_methods ?? []).map(mm => {
   const requirement = typeof mm.requirements === 'string'
     ? data.byId<Requirement>('requirement', mm.requirements)
     : mm.requirements
-  const tools = data.flattenRequirement(requirement.tools ?? [], r => r.tools, true)
+  const tools = data.flattenRequirement(requirement.tools ?? [], r => r.tools, {expandSubstitutes: true})
   const components = data.flattenRequirement(requirement.components ?? [], r => r.components)
   const qualities = normalize(requirement.qualities ?? []) // TODO: flatten...?
   return { mending_method: mm, tools, components, qualities }

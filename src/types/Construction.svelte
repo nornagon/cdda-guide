@@ -16,7 +16,7 @@ const requirements = using.map(([id, count]) =>
   [data.byId<RequirementData>('requirement', id), count] as const).concat([[construction, 1]])
 
 const tools = requirements.flatMap(([req, count]) => {
-  return data.flattenRequirement(req.tools ?? [], x => x.tools, true).map(x => x.map(x => ({...x, count: x.count * count})))
+  return data.flattenRequirement(req.tools ?? [], x => x.tools, {expandSubstitutes: true}).map(x => x.map(x => ({...x, count: x.count * count})))
 })
 const components = requirements.flatMap(([req, count]) => {
   return data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count})))
