@@ -560,12 +560,25 @@ type GunAttack = {
 
   // TODO: ...
 }
+
+type SpellData = {
+  id: string
+
+  // TODO: ...
+}
+
+type SpellAttack = {
+  type: 'spell'
+  spell_data: SpellData
+  monster_message: Translation
+}
+
 type GenericMonsterAttack = {
   type?: 'monster_attack'
   id: string
 } & (Omit<MeleeAttack, 'type'> & {attack_type: 'melee'})
 
-type MonsterAttack = (GenericMonsterAttack | LeapAttack | MeleeAttack | BiteAttack | GunAttack) & { cooldown?: number }
+type MonsterAttack = (GenericMonsterAttack | LeapAttack | MeleeAttack | BiteAttack | GunAttack | SpellAttack) & { cooldown?: number }
 export type SpecialAttack = [string, number] | MonsterAttack
 export interface Mapgen {
   type: 'mapgen';
@@ -733,6 +746,58 @@ export type ToolQuality = {
   usages?: [number, string[]][]
 }
 
+export type HarvestEntry = {
+  drop: string // item id, or group id iff type === "bionic_group"
+  type?: "flesh" | "blood" | "bone" | "skin" | "offal" | "bionic" | "bionic_group"
+  base_num?: [number, number] // default [1, 1]
+  scale_num?: [number, number] // default [0, 0]
+  max?: number // default 1000
+  mass_ratio?: number // default 0
+  flags?: string[] // default []
+  faults?: string[] // default []
+}
+
+export type Harvest = {
+  type: "harvest"
+  id: string
+  entries: HarvestEntry[]
+  message?: string
+  leftovers?: string // item_id, default "ruined_chunks"
+  butchery_requirements?: string // butchery_requirement id, default "default"
+}
+
+export type Monster = {
+  id: string
+  type: 'MONSTER'
+  material: string | string[]
+  description?: Translation
+  volume?: string
+  weight?: string
+  flags?: string[]
+  harvest?: string
+  bodytype?: string
+  species?: string[]
+  speed?: number
+  melee_skill?: number
+  special_attacks?: SpecialAttack[]
+  hp?: number
+  dodge?: number
+  armor_bash?: number
+  armor_stab?: number
+  armor_cut?: number
+  armor_bullet?: number
+  armor_acid?: number
+  armor_fire?: number
+  vision_day?: number
+  vision_night?: number
+  default_faction?: string
+  anger_triggers?: string[]
+  placate_triggers?: string[]
+  morale?: number
+  aggression?: number
+  death_function?: string[]
+}
+
 const types = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","ITEM_CATEGORY","LOOT_ZONE","MAGAZINE","MIGRATION","MONSTER","MONSTER_BLACKLIST","MONSTER_FACTION","PET_ARMOR","SPECIES","SPELL","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL","achievement","activity_type","ammo_effect","ammunition_type","anatomy","ascii_art","behavior","bionic","body_part","butchery_requirement","charge_removal_blacklist","city_building","clothing_mod","conduct","construction","construction_category","construction_group","disease_type","dream","effect_type","emit","enchantment","event_statistic","event_transformation","faction","fault","field_type","furniture","gate","harvest","hit_range","item_action","item_group","json_flag","map_extra","mapgen","martial_art","material","mission_definition","monster_attack","monstergroup","morale_type","movement_mode","mutation","mutation_category","mutation_type","npc","npc_class","obsolete_terrain","overlay_order","overmap_connection","overmap_land_use_code","overmap_location","overmap_special","overmap_terrain","palette","profession","profession_item_substitutions","proficiency","recipe","recipe_category","recipe_group","region_settings","relic_procgen_data","requirement","rotatable_symbol","scenario","scent_type","score","skill","skill_display_type","snippet","speech","start_location","talk_topic","technique","ter_furn_transform","terrain","tool_quality","trait_group","trap","uncraft","vehicle","vehicle_group","vehicle_part","vehicle_part_category","vehicle_placement","vehicle_spawn","vitamin","weather_type"] as const
 type AllTypes = typeof types[Exclude<keyof typeof types, keyof []>]
 
@@ -750,6 +815,8 @@ type SupportedThing
   | Fault
   | Recipe
   | ToolQuality
+  | Harvest
+  | Monster
 
 type UnsupportedType = Exclude<AllTypes, SupportedThing['type']>
 

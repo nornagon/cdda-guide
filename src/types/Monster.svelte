@@ -3,33 +3,10 @@ import { getContext } from 'svelte';
 
 import { asKilograms, asLiters, CddaData, flattenItemGroup, singularName } from '../data'
 import ThingLink from './ThingLink.svelte';
-import type { DamageUnit, ItemBasicInfo, SpecialAttack } from '../types';
+import type { DamageUnit, Harvest, Monster, SpecialAttack } from '../types';
 import ItemSymbol from './item/ItemSymbol.svelte';
 
-export let item: ItemBasicInfo & {
-  harvest?: string
-  bodytype?: string
-  species?: string[]
-  speed?: number
-  melee_skill?: number
-  special_attacks?: SpecialAttack[]
-  hp?: number
-  dodge?: number
-  armor_bash?: number
-  armor_stab?: number
-  armor_cut?: number
-  armor_bullet?: number
-  armor_acid?: number
-  armor_fire?: number
-  vision_day?: number
-  vision_night?: number
-  default_faction?: string
-  anger_triggers?: string[]
-  placate_triggers?: string[]
-  morale?: number
-  aggression?: number
-  death_function?: string[]
-}
+export let item: Monster
 
 let data = getContext<CddaData>('data')
 
@@ -238,26 +215,6 @@ let materials = item.material ?? []
 let deathDrops = data.flatDeathDrops(item.id)
 
 let deathDropsLimit = 10
-
-type HarvestEntry = {
-  drop: string // item id, or group id iff type === "bionic_group"
-  type?: "flesh" | "blood" | "bone" | "skin" | "offal" | "bionic" | "bionic_group"
-  base_num?: [number, number] // default [1, 1]
-  scale_num?: [number, number] // default [0, 0]
-  max?: number // default 1000
-  mass_ratio?: number // default 0
-  flags?: string[] // default []
-  faults?: string[] // default []
-}
-
-type Harvest = {
-  type: "harvest"
-  id: string
-  entries: HarvestEntry[]
-  message?: string
-  leftovers?: string // item_id, default "ruined_chunks"
-  butchery_requirements?: string // butchery_requirement id, default "default"
-}
 
 let harvest: Harvest = item.harvest ? data.byId('harvest', item.harvest) : undefined
 
