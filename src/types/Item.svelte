@@ -11,6 +11,7 @@ import ComponentOf from './item/ComponentOf.svelte';
 import Deconstruct from './item/Deconstruct.svelte';
 import Dissassembly from './item/Dissassembly.svelte';
 import DroppedBy from './item/DroppedBy.svelte';
+import GrownFrom from './item/GrownFrom.svelte';
 import GunInfo from './item/GunInfo.svelte';
 import ItemSymbol from './item/ItemSymbol.svelte';
 import MeleeInfo from './item/MeleeInfo.svelte';
@@ -163,6 +164,23 @@ const uncraft = (() => {
 {#if item.type === 'COMESTIBLE'}
 <ComestibleInfo {item} />
 {/if}
+{#if item.seed_data}
+<section>
+  <h1>Grows Into</h1>
+  <dl>
+    <dt>Harvest Results</dt>
+    <dd>
+      <ul class="comma-separated">
+        {#each [item.seed_data.fruit].concat(item.seed_data.byproducts ?? []) as id}
+        <li><ThingLink type="item" {id} /></li>
+        {/each}
+      </ul>
+    </dd>
+    <dt>Growing Time</dt>
+    <dd>{item.seed_data.grow}</dd>
+  </dl>
+</section>
+{/if}
 {#if item.bashing || item.cutting || item.type === 'GUN' || item.type === 'AMMO'}
 <div class="side-by-side">
 <MeleeInfo {item} />
@@ -231,6 +249,7 @@ const uncraft = (() => {
 <h2>Obtaining</h2>
 <Recipes item_id={item.id} />
 <DroppedBy item_id={item.id} />
+<GrownFrom item_id={item.id} />
 <Dissassembly item_id={item.id} />
 <Deconstruct item_id={item.id} />
 <SpawnedIn item_id={item.id} />

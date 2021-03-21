@@ -273,6 +273,14 @@ export type ItemBasicInfo = {
   min_strength?: number
   techniques?: string[]
   to_hit?: number | {grip?: string, length?: string, surface?: string, balance?: string}
+  seed_data?: {
+    grow?: string // duration, default 1 day
+    plant_name: Translation
+    fruit: string // item_id
+    fruit_div?: number // int (NB. only used for pumpkin?)
+    seeds?: boolean // default true (NB. never present in json)
+    byproducts?: string[] // item_id
+  }
 }
 
 const itemTypes = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","MAGAZINE","PET_ARMOR","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL"] as const

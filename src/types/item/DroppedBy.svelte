@@ -8,7 +8,7 @@ import ItemSymbol from "./ItemSymbol.svelte";
 export let item_id: string
 
 let data = getContext<CddaData>('data')
-const mons = data.byType('monster').flatMap(mon => {
+const mons = data.byType<Monster>('monster').flatMap(mon => {
   if (!mon.id) return []
   const deathDrops = data.flatDeathDrops(mon.id)
   const dd = deathDrops.find(dd => dd.id === item_id)
