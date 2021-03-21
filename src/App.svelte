@@ -1,45 +1,45 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-	import Thing from "./Thing.svelte";
-	import { data } from "./data";
-  import SearchResults from "./SearchResults.svelte";
+import { onMount } from "svelte";
+import Thing from "./Thing.svelte";
+import { data } from "./data";
+import SearchResults from "./SearchResults.svelte";
 
-  let item: { type: string, id: string } | null = null
+let item: { type: string, id: string } | null = null
 
-  function hashchange() {
-    // the poor man's router!
-    const path = window.location.hash.slice(1);
+function hashchange() {
+  // the poor man's router!
+  const path = window.location.hash.slice(1);
 
-    let m: RegExpExecArray | null;
-    if (m = /^\/([^\/]+)\/(.+)$/.exec(path)) {
-      const [, type, id] = m
-      item = { type, id: decodeURIComponent(id) }
+  let m: RegExpExecArray | null;
+  if (m = /^\/([^\/]+)\/(.+)$/.exec(path)) {
+    const [, type, id] = m
+    item = { type, id: decodeURIComponent(id) }
 
-      window.scrollTo(0,0);
-    } else {
-      item = null
-    }
+    window.scrollTo(0,0);
+  } else {
+    item = null
   }
+}
 
-  onMount(hashchange)
-  let search: string = ''
+onMount(hashchange)
+let search: string = ''
 
-  const clearItem = () => {
-    if (item) history.pushState(null, '', location.href.replace(/#.*$/, ''))
-    item = null;
+const clearItem = () => {
+  if (item) history.pushState(null, '', location.href.replace(/#.*$/, ''))
+  item = null;
+}
+
+let deferredPrompt: any;
+window.addEventListener('beforeinstallprompt', (e) => {
+  deferredPrompt = e;
+});
+
+function maybeFocusSearch(e: KeyboardEvent) {
+  if (e.key === '/' && document.activeElement.id !== 'search') {
+    document.getElementById('search').focus()
+    e.preventDefault()
   }
-
-  let deferredPrompt: any;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    deferredPrompt = e;
-  });
-
-  function maybeFocusSearch(e: KeyboardEvent) {
-    if (e.key === '/' && document.activeElement.id !== 'search') {
-      document.getElementById('search').focus()
-      e.preventDefault()
-    }
-  }
+}
 
 </script>
 <svelte:window on:hashchange={hashchange} on:keydown={maybeFocusSearch}/>
@@ -56,53 +56,53 @@
   </nav>
 </header>
 <main>
-{#if item}
-{#if $data}
-{#key item}
-<Thing {item} data={$data} />
-{/key}
-{:else}
-...
-{/if}
-{:else if search}
-<SearchResults search={search} />
-{:else}
-<img src="dont_panic.png" height="200" width="343" style="float:right" alt="The words 'Don't Panic' in big friendly letters" />
-<p>The <strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
-zombie survival roguelike game <a href="https://cataclysmdda.org/">Cataclysm:
-Dark Days Ahead</a>. You can search for things in the game, like items (e.g. a
-<a href="#/item/flashlight">flashlight</a>), furniture (e.g. a <a
-href="#/furniture/f_table">table</a>), or monsters (e.g. a <a
-href="#/monster/mon_zombie">zombie</a>), and find useful information about
-them. The data in the Guide comes directly from the JSON files in the game
-itself.</p>
-<p>The Guide stores all its data locally and is offline-capable, so you can
-take it with you whereever you go.
-{#if deferredPrompt}
-It's also <button class="disclosure" on:click={(e) => {e.preventDefault(); deferredPrompt.prompt()}}>installable</button>,
-so you can pop it out of your browser like a regular app.
-{/if}
-</p>
-<p style="font-style: italic; color: var(--cata-color-gray)">More popular than the Celestial Home Care
-Omnibus, better selling than Fifty-three More Things to do in Zero Gravity, and
-more controversial than Oolon Colluphid's trilogy of philosophical blockbusters
-Where God Went Wrong, Some More of God's Greatest Mistakes and Who is this God
-Person Anyway?</p>
-<p>The guide is developed on <a
-href="https://github.com/nornagon/cdda-guide">GitHub</a> by <a
-href="https://www.nornagon.net">nornagon</a>. If you notice any problems,
-please <a href="https://github.com/nornagon/cdda-guide/issues">file an
-issue</a>!</p>
-{/if}
-
-<p>Build number:
-  {#if $data}
-  <a href="{$data.release.html_url}">{$data.build_number}</a>
+  {#if item}
+    {#if $data}
+    {#key item}
+    <Thing {item} data={$data} />
+    {/key}
+    {:else}
+    ...
+    {/if}
+  {:else if search}
+    <SearchResults search={search} />
   {:else}
-  <em style="color: var(--cata-color-gray)">(loading...)</em>
+    <img src="dont_panic.png" height="200" width="343" style="float:right" alt="The words 'Don't Panic' in big friendly letters" />
+    <p>The <strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
+    zombie survival roguelike game <a href="https://cataclysmdda.org/">Cataclysm:
+    Dark Days Ahead</a>. You can search for things in the game, like items (e.g. a
+    <a href="#/item/flashlight">flashlight</a>), furniture (e.g. a <a
+    href="#/furniture/f_table">table</a>), or monsters (e.g. a <a
+    href="#/monster/mon_zombie">zombie</a>), and find useful information about
+    them. The data in the Guide comes directly from the JSON files in the game
+    itself.</p>
+    <p>The Guide stores all its data locally and is offline-capable, so you can
+    take it with you whereever you go.
+    {#if deferredPrompt}
+    It's also <button class="disclosure" on:click={(e) => {e.preventDefault(); deferredPrompt.prompt()}}>installable</button>,
+    so you can pop it out of your browser like a regular app.
+    {/if}
+    </p>
+    <p style="font-style: italic; color: var(--cata-color-gray)">More popular than the Celestial Home Care
+    Omnibus, better selling than Fifty-three More Things to do in Zero Gravity, and
+    more controversial than Oolon Colluphid's trilogy of philosophical blockbusters
+    Where God Went Wrong, Some More of God's Greatest Mistakes and Who is this God
+    Person Anyway?</p>
+    <p>The guide is developed on <a
+    href="https://github.com/nornagon/cdda-guide">GitHub</a> by <a
+    href="https://www.nornagon.net">nornagon</a>. If you notice any problems,
+    please <a href="https://github.com/nornagon/cdda-guide/issues">file an
+    issue</a>!</p>
   {/if}
-  (Experimental)
-</p>
+
+  <p>Build number:
+    {#if $data}
+    <a href="{$data.release.html_url}">{$data.build_number}</a>
+    {:else}
+    <em style="color: var(--cata-color-gray)">(loading...)</em>
+    {/if}
+    (Experimental)
+  </p>
 </main>
 
 <style>
