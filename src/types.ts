@@ -1,3 +1,5 @@
+type integer = number
+
 export type Translation = string | { str: string, str_pl?: string } | { str_sp: string }
 
 export type ItemGroupEntry =
@@ -147,8 +149,20 @@ export type BookSlot = {
   proficiencies?: BookProficiencyBonus[]
 }
 
+export type DamageType =
+    "pure" |
+    "biological" |
+    "bash" |
+    "cut" |
+    "acid" |
+    "stab" |
+    "bullet" |
+    "heat" |
+    "cold" |
+    "electric"
+
 export type DamageUnit = {
-  damage_type: string
+  damage_type: DamageType
   amount?: number // float, default 0
   armor_penetration?: number // float, default 0
   armor_multiplier?: number // float, default 1
@@ -786,7 +800,14 @@ export type Monster = {
   bodytype?: string
   species?: string[]
   speed?: number
-  melee_skill?: number
+  melee_skill?: integer
+  melee_dice?: integer
+  melee_dice_sides?: integer
+  melee_cut?: integer
+  melee_damage?: DamageInstance
+  diff?: integer
+  emit_fields?: {emit_id: string, delay: string}[]
+  attack_cost?: integer // default: 100
   special_attacks?: SpecialAttack[]
   hp?: number
   dodge?: number

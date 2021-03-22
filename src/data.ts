@@ -1,5 +1,5 @@
 import { readable } from 'svelte/store';
-import type { Translation, Requirement, ItemGroup, ItemGroupEntry, ItemGroupEntryOrShortcut, Recipe, Mapgen, PaletteData, Palette, Item } from './types';
+import type { Translation, Requirement, ItemGroup, ItemGroupEntry, ItemGroupEntryOrShortcut, Recipe, Mapgen, PaletteData, Palette, Item, DamageInstance, DamageUnit } from './types';
 
 const idlessTypes = new Set([
   "MONSTER_BLACKLIST",
@@ -559,6 +559,12 @@ export function normalize<T>(xs: (T | T[])[]): T[][] {
 
 export const countsByCharges = (item): boolean => {
   return item.type === 'AMMO' || item.type === 'COMESTIBLE' || item.stackable;
+}
+
+export function normalizeDamageInstance(damageInstance: DamageInstance): DamageUnit[] {
+  if (Array.isArray(damageInstance)) return damageInstance
+  else if ('values' in damageInstance) return damageInstance.values
+  else return [damageInstance]
 }
 
 const fetchJson = async () => {

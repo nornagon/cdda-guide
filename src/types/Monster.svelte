@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from 'svelte';
 
-import { asKilograms, asLiters, CddaData, flattenItemGroup, singularName } from '../data'
+import { asKilograms, asLiters, CddaData, flattenItemGroup, normalizeDamageInstance, singularName } from '../data'
 import ThingLink from './ThingLink.svelte';
 import type { DamageUnit, Harvest, Monster, SpecialAttack } from '../types';
 import ItemSymbol from './item/ItemSymbol.svelte';
@@ -10,7 +10,7 @@ export let item: Monster
 
 let data = getContext<CddaData>('data')
 
-function difficulty(item: any) {
+function difficulty(item: Monster): number {
   const {
     melee_skill = 0,
     melee_dice = 0,
@@ -69,10 +69,17 @@ function difficultyColor(diff: number) {
   return "red";
 }
 
-function damage(item: any) {
-  let { melee_dice = 0, melee_dice_sides = 0/*, melee_damage, melee_cut*/ } = item
+function damage(mon: Monster) {
+  let { melee_dice = 0, melee_dice_sides = 0, melee_damage = [], melee_cut } = mon
+  const du = normalizeDamageInstance(melee_damage)
+  if (melee_cut) {
+    du.push({
+      damage_type: 'cut',
+      amount: melee_cut
+    })
+  }
   //melee_damage = melee_damage ?? [ { damage_type: "bash", amount: `${melee_dice}d${melee_dice_sides}` } ]
-  return `${melee_dice}d${melee_dice_sides}`
+  return `${melee_dice}d${melee_dice_sides} bash` + du.map(u => ` + ${u.amount} ${u.damage_type}`).join('')
 }
 
 // From mtype.h. See also http://cddawiki.chezzo.com/cdda_wiki/index.php?title=Template:Enemyflags&action=edit.
@@ -260,7 +267,7 @@ function showProbability(prob: number) {
     <dt>Melee Skill</dt><dd>{item.melee_skill ?? 0}</dd>
     <dt>Damage</dt><dd>{damage(item)}</dd>
     {#if item.special_attacks}
-    <dt>Special attacks:</dt><dd>
+    <dt>Special Attacks</dt><dd>
       <ul class="no-bullets">
       {#each item.special_attacks as special_attack}
         <li>
