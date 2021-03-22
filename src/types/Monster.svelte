@@ -235,11 +235,6 @@ function showProbability(prob: number) {
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
 <section>
-  <p style="color: var(--cata-color-gray)">{item.description}</p>
-  <p>Difficulty: {difficulty(item)} <span class='c_{difficultyColor(difficulty(item))} fg_only'>({difficultyDescription(difficulty(item))})</span></p>
-</section>
-<section>
-  <h1>Body</h1>
   <dl>
     {#if item.bodytype}
     <dt>Body Type</dt><dd>{item.bodytype}</dd>
@@ -257,48 +252,54 @@ function showProbability(prob: number) {
         {/each}
       </ul>
     </dd>
+    <dt>Difficulty</dt>
+    <dd>{difficulty(item)} <span class='c_{difficultyColor(difficulty(item))} fg_only'>({difficultyDescription(difficulty(item))})</span></dd>
   </dl>
+  <p style="color: var(--cata-color-gray)">{item.description}</p>
 </section>
-<section>
-  <h1>Combat</h1>
-  <div style="display: flex; flex-direction: row; align-items: start; flex-wrap: wrap;">
-  <dl style="flex: 1">
-    <dt>Speed</dt><dd>{item.speed ?? 0}</dd>
-    <dt>Melee Skill</dt><dd>{item.melee_skill ?? 0}</dd>
-    <dt>Damage</dt><dd>{damage(item)}</dd>
-    {#if item.special_attacks}
-    <dt>Special Attacks</dt><dd>
-      <ul class="no-bullets">
-      {#each item.special_attacks as special_attack}
-        <li>
-        {#if special_attack[0] && data.byId('monster_attack', special_attack[0])}
-        <ThingLink type='monster_attack' id={special_attack[0]} />
-        {:else}
-        {specialAttackToString(special_attack)}
-        {/if}
-        </li>
-      {/each}
-      </ul>
-    </dd>
-    {/if}
-  </dl>
-  <dl style="flex: 1">
-    <dt>HP</dt><dd>{item.hp}</dd>
-    <dt>Dodge</dt><dd>{item.dodge ?? 0}</dd>
-    <dt>Armor</dt>
-    <dd>
-      <dl>
-        <dt>Bash</dt><dd>{item.armor_bash ?? 0}</dd>
-        <dt>Cut</dt><dd>{item.armor_cut ?? 0}</dd>
-        <dt>Stab</dt><dd>{item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}</dd>
-        <dt>Bullet</dt><dd>{item.armor_bullet ?? 0}</dd>
-        <dt>Acid</dt><dd>{item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}</dd>
-        <dt>Fire</dt><dd>{item.armor_fire ?? 0}</dd>
-      </dl>
-    </dd>
-  </dl>
-  </div>
-</section>
+<div class="side-by-side">
+  <section>
+    <h1>Attack</h1>
+    <dl>
+      <dt>Speed</dt><dd>{item.speed ?? 0}</dd>
+      <dt>Melee Skill</dt><dd>{item.melee_skill ?? 0}</dd>
+      <dt>Damage</dt><dd>{damage(item)}</dd>
+      {#if item.special_attacks}
+      <dt>Special Attacks</dt><dd>
+        <ul class="no-bullets">
+        {#each item.special_attacks as special_attack}
+          <li>
+          {#if special_attack[0] && data.byId('monster_attack', special_attack[0])}
+          <ThingLink type='monster_attack' id={special_attack[0]} />
+          {:else}
+          {specialAttackToString(special_attack)}
+          {/if}
+          </li>
+        {/each}
+        </ul>
+      </dd>
+      {/if}
+    </dl>
+  </section>
+  <section>
+    <h1>Defense</h1>
+    <dl style="flex: 1">
+      <dt>HP</dt><dd>{item.hp}</dd>
+      <dt>Dodge</dt><dd>{item.dodge ?? 0}</dd>
+      <dt>Armor</dt>
+      <dd>
+        <dl>
+          <dt>Bash</dt><dd>{item.armor_bash ?? 0}</dd>
+          <dt>Cut</dt><dd>{item.armor_cut ?? 0}</dd>
+          <dt>Stab</dt><dd>{item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}</dd>
+          <dt>Bullet</dt><dd>{item.armor_bullet ?? 0}</dd>
+          <dt>Acid</dt><dd>{item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}</dd>
+          <dt>Fire</dt><dd>{item.armor_fire ?? 0}</dd>
+        </dl>
+      </dd>
+    </dl>
+  </section>
+</div>
 <section>
   <h1>Behavior</h1>
   <dl>
@@ -316,6 +317,19 @@ function showProbability(prob: number) {
     <dt>On Death</dt><dd>{(item.death_function ?? []).join(', ')}</dd>
   </dl>
 </section>
+{#if deathDrops?.length}
+<section>
+  <h1>Drops</h1>
+  <ul>
+    {#each deathDrops.slice(0, deathDropsLimit) as {id, prob}}
+    <li><ItemSymbol item={data.byId('item', id)} /> <ThingLink type="item" {id} /> ({showProbability(prob)})</li>
+    {/each}
+  </ul>
+  {#if deathDrops.length > deathDropsLimit}
+  <button class="disclosure" on:click={(e) => { e.preventDefault(); deathDropsLimit = Infinity }}>See all...</button>
+  {/if}
+</section>
+{/if}
 {#if harvest && (harvest.entries ?? []).length}
 <section>
   <h1>Butchering Results</h1>
@@ -330,18 +344,5 @@ function showProbability(prob: number) {
     {/if}
     {/each}
   </ul>
-</section>
-{/if}
-{#if deathDrops?.length}
-<section>
-  <h1>Drops</h1>
-  <ul>
-    {#each deathDrops.slice(0, deathDropsLimit) as {id, prob}}
-    <li><ItemSymbol item={data.byId('item', id)} /> <ThingLink type="item" {id} /> ({showProbability(prob)})</li>
-    {/each}
-  </ul>
-  {#if deathDrops.length > deathDropsLimit}
-  <button class="disclosure" on:click={(e) => { e.preventDefault(); deathDropsLimit = Infinity }}>See all...</button>
-  {/if}
 </section>
 {/if}
