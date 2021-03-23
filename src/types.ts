@@ -1,4 +1,6 @@
 type integer = number
+type volume = number | string
+type mass = number | string
 
 export type Translation = string | { str: string, str_pl?: string } | { str_sp: string }
 
@@ -121,16 +123,16 @@ export type Recipe = {
   using?: string | [string, number][] // requirement_id
 
   // for type: 'recipe' only
-  category: string
-  subcategory: string
-  description: string
-  reversible: boolean
+  category?: string
+  subcategory?: string
+  description?: string
+  reversible?: boolean
   byproducts?: ([string] | [string, number])[]
   // TODO: construction_blueprint
 } & RequirementData
 
 export type BookProficiencyBonus = {
-  id: string // proficiency_id
+  proficiency: string // proficiency_id
   fail_factor?: number // default: 0.5
   time_factor?: number // default: 0.5
   include_prereqs?: boolean // default: true
@@ -220,17 +222,17 @@ export type AmmoSlot = {
 }
 
 export type ComestibleSlot = {
-  comestible_type: string // DRINK, FOOD or MED
+  comestible_type?: string // DRINK, FOOD or MED
   tool?: string // item_id, needed to consume
-  charges?: number // int, default charges
-  quench?: number // int, default 0
-  fun?: number // int, default 0
-  stim?: number // int, default 0
-  fatigue_mod?: number // int, default 0
-  healthy?: number // int, default 0
-  parasites?: number // int, default 0
-  radiation?: number // int, default 0
-  freezing_point?: number // int, default 32
+  charges?: integer // int, default 1
+  quench?: integer // int, default 0
+  fun?: integer // int, default 0
+  stim?: integer // int, default 0
+  fatigue_mod?: integer // int, default 0
+  healthy?: integer // int, default 0
+  parasites?: integer // int, default 0
+  radiation?: integer // int, default 0
+  freezing_point?: integer // int, default 32
   spoils_in?: string | number // duration, default 0 (never spoils)
   cooks_like?: string // item_id
   smoking_result?: string // item_id
@@ -280,8 +282,8 @@ export type ItemBasicInfo = {
   type: AllItemTypes
   description?: Translation
   qualities?: [string, number][]
-  volume?: string
-  weight?: string
+  volume?: volume
+  weight?: mass
   longest_side?: string
   material?: string | string[] // material_id
   flags?: string[]
@@ -326,8 +328,8 @@ export type PocketData = {
   item_restriction?: Array<string>
   min_item_volume?: string
   max_item_volume?: string
-  max_contains_volume: string
-  max_contains_weight: string
+  max_contains_volume?: string
+  max_contains_weight?: string
   max_item_length?: string
   spoil_multiplier?: number // float
   weight_multiplier?: number // float
@@ -400,7 +402,7 @@ export type MapBashInfo = {
   // ter_set
   // move_cost
 
-  items: ItemGroupEntry[]
+  items?: ItemGroupEntry[]
 
   // tent_centers
 }
@@ -598,13 +600,13 @@ type SpellData = {
 type SpellAttack = {
   type: 'spell'
   spell_data: SpellData
-  monster_message: Translation
+  monster_message?: Translation
 }
 
 type GenericMonsterAttack = {
   type?: 'monster_attack'
   id: string
-} & (Omit<MeleeAttack, 'type'> & {attack_type: 'melee'})
+} & (Omit<MeleeAttack, 'type'>)
 
 type MonsterAttack = (GenericMonsterAttack | LeapAttack | MeleeAttack | BiteAttack | GunAttack | SpellAttack) & { cooldown?: number }
 export type SpecialAttack = [string, number] | MonsterAttack
@@ -712,7 +714,7 @@ export interface MapgenLoot {
 }
 
 export interface MapgenNested {
-  neighbors: any // TODO:
+  neighbors?: any // TODO:
   chunks?: Array<[string, number] | string>;
   else_chunks?: Array<[string, number] | string>;
 }
@@ -797,9 +799,9 @@ export type Harvest = {
 export type Monster = {
   id: string
   type: 'MONSTER'
-  material: string | string[]
+  material?: string | string[]
   description?: Translation
-  volume?: string
+  volume?: string | number
   weight?: string
   flags?: string[]
   harvest?: string
@@ -841,7 +843,7 @@ export type VehiclePartRequirements = {
 
 export type VehiclePart = {
   type: 'vehicle_part'
-  name: Translation
+  name?: Translation
   id?: string
   abstract?: string
   item?: string // item_id
@@ -855,13 +857,13 @@ export type VehiclePart = {
   exhaust?: string[] // emit_id
   fuel_type?: string // item_id
   default_ammo?: string // item_id
-  folded_volume?: string
-  size?: string
+  folded_volume?: volume
+  size?: volume
   bonus?: integer /** seatbelt (str), muffler (%), horn (vol), light (intensity), recharging (power) */
   cargo_weight_modifier?: integer // percentage, default 100
   categories?: string[]
   flags?: string[]
-  description: Translation
+  description?: Translation
   comfort?: integer
   floor_bedding_warmth?: integer
   bonus_fire_warmth_feet?: integer // default 300
@@ -891,7 +893,7 @@ export type VehiclePart = {
   // when has_flag(WHEEL)
   rolling_resistance?: number
   contact_area?: integer // default 1
-  wheel_type?: 'rigid' | 'off-road' | 'racing' | 'treads' | 'rail'
+  wheel_type?: 'rigid' | 'off-road' | 'racing' | 'treads' | 'rail' | 'standard'
 
   // when has_flag(ROTOR) || has_flag(ROTOR_SIMPLE)
   rotor_diameter?: integer // default 1
@@ -899,8 +901,8 @@ export type VehiclePart = {
   // when has_flag(WORKBENCH)
   workbench?: {
     multiplier?: number
-    mass?: string
-    volume?: string
+    mass?: mass
+    volume?: volume
   }
 
   // TODO:

@@ -244,6 +244,7 @@ function showProbability(prob: number) {
     {/if}
     <dt>Volume</dt><dd>{asLiters(item.volume)}</dd>
     <dt>Weight</dt><dd>{asKilograms(item.weight)}</dd>
+    {#if materials.length}
     <dt>Material</dt>
     <dd>
       <ul class="comma-separated">
@@ -252,6 +253,7 @@ function showProbability(prob: number) {
         {/each}
       </ul>
     </dd>
+    {/if}
     <dt>Difficulty</dt>
     <dd>{difficulty(item)} <span class='c_{difficultyColor(difficulty(item))} fg_only'>({difficultyDescription(difficulty(item))})</span></dd>
   </dl>
