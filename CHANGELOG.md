@@ -1,0 +1,11 @@
+- Added vehicle part info
+- Added seed info
+- Added vitamin info
+- Show monster melee damage bonuses
+- Show what monsters can be butchered to obtain an item
+- Show what furniture can be deconstructed to obtain an item
+- Show what map areas an item spawns in
+- Show what recipes an item is a component of
+- Show recipe autolearn info
+- Show build number
+- Lots of style and layout tweaks to make things easier to read
