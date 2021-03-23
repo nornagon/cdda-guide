@@ -9,7 +9,7 @@ import BookInfo from './item/BookInfo.svelte';
 import ComestibleInfo from './item/ComestibleInfo.svelte';
 import ComponentOf from './item/ComponentOf.svelte';
 import Deconstruct from './item/Deconstruct.svelte';
-import Dissassembly from './item/Dissassembly.svelte';
+import Disassembly from './item/Disassembly.svelte';
 import DroppedBy from './item/DroppedBy.svelte';
 import GrownFrom from './item/GrownFrom.svelte';
 import GunInfo from './item/GunInfo.svelte';
@@ -148,7 +148,7 @@ const vparts = data.byType<VehiclePart>('vehicle_part').filter(vp => vp.id && vp
   {/if}
 
   {#if uncraft}
-  <dt>Dissasembles Into</dt>
+  <dt>Disassembles Into</dt>
   <dd>
     <ul class="comma-separated">
       {#each uncraft.components as {id, count}}
@@ -267,7 +267,7 @@ const vparts = data.byType<VehiclePart>('vehicle_part').filter(vp => vp.id && vp
 <Recipes item_id={item.id} />
 <DroppedBy item_id={item.id} />
 <GrownFrom item_id={item.id} />
-<Dissassembly item_id={item.id} />
+<Disassembly item_id={item.id} />
 <Deconstruct item_id={item.id} />
 <SpawnedIn item_id={item.id} />
 </div>
