@@ -270,6 +270,11 @@ export type EngineSlot = {
   displacement?: number
 }
 
+export type WheelSlot = {
+  diameter: integer
+  width: integer
+}
+
 export type ItemBasicInfo = {
   id: string
   type: AllItemTypes
@@ -307,6 +312,7 @@ type TypedItems =
   | ({ type: 'COMESTIBLE' } & ComestibleSlot)
   | ({ type: 'ARMOR' | 'TOOL_ARMOR' } & ArmorSlot)
   | ({ type: 'ENGINE' } & EngineSlot)
+  | ({ type: 'WHEEL' } & WheelSlot)
 type UntypedItemType = Exclude<AllItemTypes, TypedItems['type']>
 
 export type Item = ItemBasicInfo & (
@@ -827,6 +833,81 @@ export type Monster = {
   death_function?: string[]
 }
 
+export type VehiclePartRequirements = {
+  skills?: ([string, number] | [string])[]
+  time?: number /* moves */ | string /* duration */
+  using?: string | [string, number][]
+} & RequirementData
+
+export type VehiclePart = {
+  type: 'vehicle_part'
+  name: Translation
+  id?: string
+  abstract?: string
+  item?: string // item_id
+  location?: string
+  durability?: integer
+  damage_modifier?: integer // percentage, default 100
+  energy_consumption?: integer // watts, default 0
+  power?: integer // watts, default 0
+  epower?: integer // watts, default 0
+  emissions?: string[] // emit_id
+  exhaust?: string[] // emit_id
+  fuel_type?: string // item_id
+  default_ammo?: string // item_id
+  folded_volume?: string
+  size?: string
+  bonus?: integer /** seatbelt (str), muffler (%), horn (vol), light (intensity), recharging (power) */
+  cargo_weight_modifier?: integer // percentage, default 100
+  categories?: string[]
+  flags?: string[]
+  description: Translation
+  comfort?: integer
+  floor_bedding_warmth?: integer
+  bonus_fire_warmth_feet?: integer // default 300
+  requirements?: {
+    install?: VehiclePartRequirements
+    repair?: VehiclePartRequirements
+    removal?: VehiclePartRequirements
+  }
+  breaks_into?: string | ItemGroup | ItemGroupEntry[] // collection
+  qualities?: [string, number][]
+  pseudo_tools?: {
+    id: string
+    hotkey?: string
+  }[]
+  damage_reduction?: {/* TODO */}
+
+  // when has_flag(ENGINE)
+  backfire_threshold?: number
+  backfire_freq?: integer // default 1
+  noise_factor?: integer
+  damaged_power_factor?: number
+  m2c?: integer // default 1
+  muscle_power_factor?: integer
+  exclusions?: string[]
+  fuel_options?: string[]
+
+  // when has_flag(WHEEL)
+  rolling_resistance?: number
+  contact_area?: integer // default 1
+  wheel_type?: 'rigid' | 'off-road' | 'racing' | 'treads' | 'rail'
+
+  // when has_flag(ROTOR) || has_flag(ROTOR_SIMPLE)
+  rotor_diameter?: integer // default 1
+
+  // when has_flag(WORKBENCH)
+  workbench?: {
+    multiplier?: number
+    mass?: string
+    volume?: string
+  }
+
+  // TODO:
+  // transform_terrain
+  // symbol, color, etc
+}
+
 const types = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","ITEM_CATEGORY","LOOT_ZONE","MAGAZINE","MIGRATION","MONSTER","MONSTER_BLACKLIST","MONSTER_FACTION","PET_ARMOR","SPECIES","SPELL","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL","achievement","activity_type","ammo_effect","ammunition_type","anatomy","ascii_art","behavior","bionic","body_part","butchery_requirement","charge_removal_blacklist","city_building","clothing_mod","conduct","construction","construction_category","construction_group","disease_type","dream","effect_type","emit","enchantment","event_statistic","event_transformation","faction","fault","field_type","furniture","gate","harvest","hit_range","item_action","item_group","json_flag","map_extra","mapgen","martial_art","material","mission_definition","monster_attack","monstergroup","morale_type","movement_mode","mutation","mutation_category","mutation_type","npc","npc_class","obsolete_terrain","overlay_order","overmap_connection","overmap_land_use_code","overmap_location","overmap_special","overmap_terrain","palette","profession","profession_item_substitutions","proficiency","recipe","recipe_category","recipe_group","region_settings","relic_procgen_data","requirement","rotatable_symbol","scenario","scent_type","score","skill","skill_display_type","snippet","speech","start_location","talk_topic","technique","ter_furn_transform","terrain","tool_quality","trait_group","trap","uncraft","vehicle","vehicle_group","vehicle_part","vehicle_part_category","vehicle_placement","vehicle_spawn","vitamin","weather_type"] as const
 type AllTypes = typeof types[Exclude<keyof typeof types, keyof []>]
 
@@ -846,6 +927,7 @@ type SupportedThing
   | ToolQuality
   | Harvest
   | Monster
+  | VehiclePart
 
 type UnsupportedType = Exclude<AllTypes, SupportedThing['type']>
 

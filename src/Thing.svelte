@@ -15,15 +15,16 @@
   import Fault from './types/Fault.svelte';
   import Technique from './types/Technique.svelte';
   import Vitamin from './types/Vitamin.svelte';
+import VehiclePart from './types/VehiclePart.svelte';
 
   export let item: { id: string, type: string }
-  
+
   export let data: CddaData
   setContext('data', data)
-  
+
   let obj: any;
   $: obj = data.byId(item.type, item.id)
-  
+
   const displays = {
     MONSTER: Monster,
     AMMO: Item,
@@ -52,6 +53,7 @@
     fault: Fault,
     technique: Technique,
     vitamin: Vitamin,
+    vehicle_part: VehiclePart,
   }
 </script>
 

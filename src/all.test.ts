@@ -20,6 +20,7 @@ const types = [
   'proficiency',
   'tool_quality',
   'skill',
+  'vehicle_part',
 ]
 
 const all = data._raw.filter(x => x.id && types.includes(mapType(x.type))).map(x => [mapType(x.type), x.id])

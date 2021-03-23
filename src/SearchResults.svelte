@@ -25,6 +25,7 @@ const SEARCHABLE_TYPES = new Set([
   'item',
   'monster',
   'furniture',
+  'vehicle_part',
 ])
 
 function filter(text: string): Map<string, any[]> {
@@ -46,13 +47,13 @@ $: history.replaceState({ search }, '')
 
 {#if matchingObjects}
   {#each [...matchingObjects.keys()] as type}
-  <h1>{type}</h1>
+  <h1>{type.replace(/_/g, ' ')}</h1>
   <ul>
     {#each matchingObjects.get(type) as obj}
     <li>
       {#if type === 'furniture'}
       <FurnitureSymbol item={$data._flatten(obj)} />
-      {:else}
+      {:else if type === 'item' || type === 'monster'}
       <ItemSymbol item={$data._flatten(obj)} />
       {/if}
       <a href="#/{mapType(obj.type)}/{obj.id}">{singularName($data._flatten(obj))}</a>

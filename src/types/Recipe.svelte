@@ -1,24 +1,9 @@
 <script lang="ts">
-import { getContext } from 'svelte';
-
-import { singularName, CddaData } from '../data'
-import type { Recipe, RequirementData } from '../types';
+import type { Recipe } from '../types';
+import RequirementData from './item/RequirementData.svelte';
 import ThingLink from './ThingLink.svelte';
-let data = getContext<CddaData>('data')
 
 export let recipe: Recipe
-
-const using = typeof recipe.using === 'string' ? [[recipe.using, 1]] as const : recipe.using
-
-let requirements = ((using ?? [])
-  .map(([id, count]) => [data.byId<RequirementData>('requirement', id), count as number] as const)).concat([[recipe, 1] as const])
-
-let tools = requirements.flatMap(([req, count]) =>
-  data.flattenRequirement(req.tools ?? [], x => x.tools, {expandSubstitutes: true}).map(x => x.map(x => ({...x, count: x.count * count}))))
-let components = requirements.flatMap(([req, count]) =>
-  data.flattenRequirement(req.components ?? [], x => x.components).map(x => x.map(x => ({...x, count: x.count * count}))))
-let qualities = requirements.flatMap(([req, _count]) =>
-  (req.qualities ?? []).map(x => Array.isArray(x) ? x : [x]))
 
 function normalizeSkillsRequired(skills_required: [string, number] | [string, number][] | undefined): [string, number][] {
   if (skills_required === undefined) return []
@@ -84,50 +69,7 @@ writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0))
   <dt>Recipe Makes</dt>
   <dd>{recipe.charges}<!-- TODO: properly switch on result type --></dd>
   {/if}
-  {#if (qualities ?? []).length || tools.length}
-  <dt>Tools Required</dt>
-  <dd>
-    <ul>
-      {#each qualities ?? [] as qualityChoices}
-      <li>
-        {#each qualityChoices as quality, i}
-        {#if i !== 0}{' OR '}{/if}
-        {quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? '' : 's'}
-        with <ThingLink type="tool_quality" id={quality.id} /> of {quality.level} or more{''
-        }{/each}.
-      </li>
-      {/each}
-      {#each tools as toolChoices}
-      <li>
-        {#each toolChoices as tool, i}
-          {#if i !== 0}{' OR '}{/if}
-          {#if data.craftingPseudoItem(tool.id)}
-          <a href='#/furniture/{data.craftingPseudoItem(tool.id)}'>{singularName(data.byId('item', tool.id))}</a>
-          {:else}
-          <ThingLink type="item" id={tool.id} />
-          {/if}
-          {#if tool.count > 0}({tool.count} charge{#if tool.count !== 1}s{/if}){/if}
-        {/each}
-      </li>
-      {/each}
-    </ul>
-  </dd>
-  {/if}
-  {#if components.length}
-  <dt>Components</dt>
-  <dd>
-    <ul>
-      {#each components as componentChoices}
-      <li>
-        {#each componentChoices.map(c => ({...c, item: data.byId('item', c.id)})) as {id, count}, i}
-          {#if i !== 0}{' OR '}{/if}
-          <ThingLink type="item" {id} {count} />
-        {/each}
-      </li>
-      {/each}
-    </ul>
-  </dd>
-  {/if}
+  <RequirementData requirement={recipe} />
   {#if recipe.byproducts?.length}
   <dt>Byproducts</dt>
   <dd>

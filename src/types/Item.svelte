@@ -2,7 +2,7 @@
 import { getContext } from 'svelte';
 
 import { asKilograms, asLiters, CddaData, parseVolume, singular, singularName } from '../data'
-import type { RequirementData, ItemBasicInfo, Item, Fault, JsonFlag } from '../types'
+import type { RequirementData, ItemBasicInfo, Item, Fault, JsonFlag, VehiclePart } from '../types'
 import AmmoInfo from './item/AmmoInfo.svelte';
 import ArmorInfo from './item/ArmorInfo.svelte';
 import BookInfo from './item/BookInfo.svelte';
@@ -17,6 +17,7 @@ import ItemSymbol from './item/ItemSymbol.svelte';
 import MeleeInfo from './item/MeleeInfo.svelte';
 import Recipes from './item/Recipes.svelte';
 import SpawnedIn from './item/SpawnedIn.svelte';
+import WheelInfo from './item/WheelInfo.svelte';
 import ThingLink from './ThingLink.svelte';
 
 export let item: Item
@@ -70,6 +71,8 @@ const uncraft = (() => {
   const defaultComponents = components.map(c => c[0])
   return {components: defaultComponents}
 })()
+
+const vparts = data.byType<VehiclePart>('vehicle_part').filter(vp => vp.id && vp.item === item.id)
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -133,6 +136,17 @@ const uncraft = (() => {
   </dd>
   {/if}
 
+  {#if vparts.length}
+  <dt>Vehicle Parts</dt>
+  <dd>
+    <ul class="comma-separated">
+      {#each vparts as vpart}
+      <li><ThingLink type="vehicle_part" id={vpart.id} /></li>
+      {/each}
+    </ul>
+  </dd>
+  {/if}
+
   {#if uncraft}
   <dt>Dissasembles Into</dt>
   <dd>
@@ -163,6 +177,9 @@ const uncraft = (() => {
 {/if}
 {#if item.type === 'COMESTIBLE'}
 <ComestibleInfo {item} />
+{/if}
+{#if item.type === 'WHEEL'}
+<WheelInfo {item} />
 {/if}
 {#if item.seed_data}
 <section>
