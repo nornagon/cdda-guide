@@ -294,17 +294,17 @@ export class CddaData {
     }
 
     const addPalette = (palette: PaletteData) => {
-      for (const [c, v] of Object.entries(mapgen.object.item ?? {})) {
+      for (const [c, v] of Object.entries(palette.item ?? {})) {
         const va = Array.isArray(v) ? v : [v]
         for (const s of va)
           add(c, s.item)
       }
-      for (const [c, v] of Object.entries(mapgen.object.items ?? {})) {
+      for (const [c, v] of Object.entries(palette.items ?? {})) {
         const va = Array.isArray(v) ? v : [v]
         for (const s of va)
           addGroup(c, s.item)
       }
-      for (const [c, v] of Object.entries(mapgen.object.sealed_item ?? {})) {
+      for (const [c, v] of Object.entries(palette.sealed_item ?? {})) {
         const va = Array.isArray(v) ? v : [v]
         for (const s of va) {
           if (s.item?.item)
@@ -348,8 +348,13 @@ export class CddaData {
         ret.add(id)
     }
 
-    for (const v of mapgen.object.place_loot ?? [])
-      ret.add(v.item)
+    for (const v of mapgen.object.place_loot ?? []) {
+      if (v.item)
+        ret.add(v.item)
+      if (v.group)
+        for (const {id} of flattenItemGroup(this, this.byId<ItemGroup>('item_group', v.group)))
+          ret.add(id)
+    }
 
     for (const v of mapgen.object.add ?? [])
       ret.add(v.item)
