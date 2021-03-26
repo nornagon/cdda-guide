@@ -3,6 +3,7 @@ import { onMount } from "svelte";
 import Thing from "./Thing.svelte";
 import { data } from "./data";
 import SearchResults from "./SearchResults.svelte";
+import Catalog from "./Catalog.svelte";
 
 let item: { type: string, id: string } | null = null
 
@@ -11,9 +12,12 @@ function hashchange() {
   const path = window.location.hash.slice(1);
 
   let m: RegExpExecArray | null;
-  if (m = /^\/([^\/]+)\/(.+)$/.exec(path)) {
+  if (m = /^\/([^\/]+)(?:\/(.+))?$/.exec(path)) {
     const [, type, id] = m
-    item = { type, id: decodeURIComponent(id) }
+    if (id)
+      item = { type, id: decodeURIComponent(id) }
+    else
+      item = { type, id: '' }
 
     window.scrollTo(0,0);
   } else {
@@ -59,7 +63,11 @@ function maybeFocusSearch(e: KeyboardEvent) {
   {#if item}
     {#if $data}
     {#key item}
+    {#if item.id}
     <Thing {item} data={$data} />
+    {:else}
+    <Catalog type={item.type} data={$data} />
+    {/if}
     {/key}
     {:else}
     ...
