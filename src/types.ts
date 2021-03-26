@@ -67,7 +67,7 @@ export type Construction = {
 } & RequirementData
 
 
-export type ItemComponent = [ string /* item_id */, number /* count */, ...('LIST' | 'NO_RECOVER')[] ]
+export type ItemComponent = [ string /* item_id */, number /* count */, 'LIST' | 'NO_RECOVER' ] | [ string, number ]
 export type QualityRequirement = {
   id: string
   level?: number // default: 1
