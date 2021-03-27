@@ -30,6 +30,8 @@ const groupingFn = {
 
 const groups = groupBy(things, groupingFn)
 const groupKeys = [...groups.keys()].sort()
+
+let limits = new Map([...groupKeys.map(k => [k, 10] as [string, number])])
 </script>
 
 <h1>{type}</h1>
@@ -39,9 +41,12 @@ const groupKeys = [...groups.keys()].sort()
   <h1>{groupName}</h1>
   {/if}
   <ul>
-    {#each groups.get(groupName) as thing}
+    {#each groups.get(groupName).slice(0, limits.get(groupName)) as thing}
     <li><ThingLink {type} id={thing.id} /></li>
     {/each}
   </ul>
+  {#if groups.get(groupName).length > limits.get(groupName)}
+  <button class="disclosure" on:click={(e) => { e.preventDefault(); limits.set(groupName, Infinity); limits = limits }}>See all...</button>
+  {/if}
 </section>
 {/each}

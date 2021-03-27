@@ -70,7 +70,7 @@ function maybeFocusSearch(e: KeyboardEvent) {
     {/if}
     {/key}
     {:else}
-    ...
+    <em style="color: var(--cata-color-gray)">Loading...</em>
     {/if}
   {:else if search}
     <SearchResults search={search} />
@@ -101,6 +101,14 @@ function maybeFocusSearch(e: KeyboardEvent) {
     href="https://www.nornagon.net">nornagon</a>. If you notice any problems,
     please <a href="https://github.com/nornagon/cdda-guide/issues">file an
     issue</a>!</p>
+
+    <h2>Catalogs</h2>
+    <ul>
+      <li><a href="#/item">Items</a></li>
+      <li><a href="#/monster">Monsters</a></li>
+      <li><a href="#/furniture">Furniture</a></li>
+      <li><a href="#/tool_quality">Qualities</a></li>
+    </ul>
   {/if}
 
   <p>Build number:
