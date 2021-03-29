@@ -15,8 +15,8 @@ const containingComestibles = data.byType<ComestibleSlot & {id: string, type: st
   })
 containingComestibles.sort((a, b) => b.pct - a.pct)
 
-const excessNames: any[] = data.byId('effect_type', item.excess).name
-const deficiencyNames: any[] = data.byId('effect_type', item.deficiency).name
+const excessNames: any[] = item.excess ? data.byId('effect_type', item.excess).name : []
+const deficiencyNames: any[] = item.deficiency ? data.byId('effect_type', item.deficiency).name : []
 
 let limit = 10
 </script>
