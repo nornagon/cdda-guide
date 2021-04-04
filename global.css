@@ -85,8 +85,11 @@ ul.comma-separated, ul.no-bullets {
 ul.comma-separated, ul.comma-separated > li {
 	display: inline;
 }
-ul.comma-separated > li:not(:last-child)::after {
+ul.comma-separated > li:not(:first-child)::before {
 	content: ', '
+}
+ul.comma-separated.or > li:last-child:not(:first-child)::before {
+	content: ' or '
 }
 
 dl {
