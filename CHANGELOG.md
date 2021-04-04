@@ -1,12 +1,14 @@
-- Added vehicle part info
-- Added seed info
-- Added vitamin info
-- Show monster melee damage bonuses
-- Show what monsters can be butchered to obtain an item
-- Show what furniture can be deconstructed to obtain an item
-- Show what map areas an item spawns in
-- Show what recipes an item is a component of
-- Show recipe autolearn info
-- Show monster upgrade info
-- Show build number
+- New types supported: vehicle parts and vitamins
+- Seed items now show what they grow into, and items grown from seeds show
+  their related seed item
+- Comestibles now show vitamin content details
+- Monsters now show melee damage bonuses
+- Monsters now show upgrade information
+- New obtaining sections:
+  - butchery
+  - deconstruction
+  - map spawn locations
+- Items now show what recipes they are components of
+- Recipes show what level they are autolearned at, if any
+- The build number used for the data is now shown at the bottom of the page
 - Lots of style and layout tweaks to make things easier to read
