@@ -7,5 +7,6 @@
 - Show what map areas an item spawns in
 - Show what recipes an item is a component of
 - Show recipe autolearn info
+- Show monster upgrade info
 - Show build number
 - Lots of style and layout tweaks to make things easier to read

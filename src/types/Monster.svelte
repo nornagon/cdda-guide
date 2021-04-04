@@ -3,7 +3,7 @@ import { getContext } from 'svelte';
 
 import { asKilograms, asLiters, CddaData, flattenItemGroup, normalizeDamageInstance, singularName } from '../data'
 import ThingLink from './ThingLink.svelte';
-import type { DamageUnit, Harvest, Monster, SpecialAttack } from '../types';
+import type { DamageUnit, Harvest, Monster, MonsterGroup, SpecialAttack } from '../types';
 import ItemSymbol from './item/ItemSymbol.svelte';
 
 export let item: Monster
@@ -231,6 +231,15 @@ function showProbability(prob: number) {
     return '< 0.01%'
   return ret + '%'
 }
+
+function flattenGroup(mg: MonsterGroup): string[] {
+  return [mg.default].concat(mg.monsters.map(m => m.monster).filter(x => x !== mg.default))
+}
+
+let upgrades = item.upgrades && (item.upgrades.into || item.upgrades.into_group) ? {
+  ...item.upgrades,
+  monsters: item.upgrades.into ? [item.upgrades.into] : flattenGroup(data.byId('monstergroup', item.upgrades.into_group))
+} : null
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -317,6 +326,19 @@ function showProbability(prob: number) {
     {/if}
     <dt>Flags</dt><dd>{#each item.flags ?? [] as flag, i}<abbr title={mon_flag_descriptions[flag]}>{flag}</abbr>{#if i < item.flags.length - 1}, {/if}{/each}</dd>
     <dt>On Death</dt><dd>{(item.death_function ?? []).join(', ')}</dd>
+    {#if upgrades}
+    <dt>Upgrades Into</dt>
+    <dd>
+      <ul class="comma-separated or">
+      {#each upgrades.monsters as mon}<li><ThingLink type="monster" id={mon} /></li>{/each}
+      </ul>
+      {#if upgrades.age_grow}
+      in {upgrades.age_grow} day{#if upgrades.age_grow !== 1}s{/if}
+      {:else if upgrades.half_life}
+      with a half-life of {upgrades.half_life} day{#if upgrades.half_life !== 1}s{/if}
+      {/if}
+    </dd>
+    {/if}
   </dl>
 </section>
 {#if deathDrops?.length}

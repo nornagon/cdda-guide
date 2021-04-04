@@ -150,6 +150,11 @@ export class CddaData {
         const id = obj.result + (obj.id_suffix ? '_' + obj.id_suffix : '')
         this._byTypeById.get(mappedType).set(id, obj)
       }
+      if (mappedType === 'monstergroup' && Object.hasOwnProperty.call(obj, 'name')) {
+        if (!this._byTypeById.has(mappedType)) this._byTypeById.set(mappedType, new Map)
+        const id = obj.name
+        this._byTypeById.get(mappedType).set(id, obj)
+      }
       if (Object.hasOwnProperty.call(obj, 'abstract')) {
         if (!this._abstractsByType.has(mappedType)) this._abstractsByType.set(mappedType, new Map)
         this._abstractsByType.get(mappedType).set(obj.abstract, obj)

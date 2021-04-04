@@ -1,6 +1,7 @@
 type integer = number
 type volume = number | string
 type mass = number | string
+type duration = number | string
 
 export type Translation = string | { str: string, str_pl?: string } | { str_sp: string }
 
@@ -833,6 +834,35 @@ export type Monster = {
   morale?: number
   aggression?: number
   death_function?: string[]
+  upgrades?: false | {
+    half_life?: integer
+    age_grow?: integer
+    into_group?: string
+    into?: string
+  }
+}
+
+export type MonsterGroup = {
+  type: 'monstergroup'
+  name: string
+  default?: string
+  is_animal?: boolean
+  monsters?: {
+    monster: string
+    freq: integer
+    cost_multiplier: integer
+    pack_size?: [integer, integer]
+    starts?: integer
+    ends?: integer
+    spawn_data?: {
+      ammo?: {ammo_id: string, qty: integer}[]
+    }
+    conditions?: string[]
+  }[]
+  replacement_time?: duration
+  is_safe?: boolean
+  freq_total?: integer  // default 1000
+  auto_total?: boolean
 }
 
 export type VehiclePartRequirements = {
