@@ -14,22 +14,35 @@ function hashchange() {
   let m: RegExpExecArray | null;
   if (m = /^\/([^\/]+)(?:\/(.+))?$/.exec(path)) {
     const [, type, id] = m
-    if (id)
-      item = { type, id: decodeURIComponent(id) }
-    else
-      item = { type, id: '' }
+    if (type === 'search') {
+      item = null
+      search = id ?? ''
+    } else {
+      if (id)
+        item = { type, id: decodeURIComponent(id) }
+      else
+        item = { type, id: '' }
+    }
 
     window.scrollTo(0,0);
   } else {
     item = null
+    search = ''
   }
 }
 
 onMount(hashchange)
 let search: string = ''
 
+function urlWithHash(newHash: string) {
+  const url = new URL(location.href)
+  url.hash = newHash
+  return url.toString()
+}
+
 const clearItem = () => {
   if (item) history.pushState(null, '', location.href.replace(/#.*$/, ''))
+  else history.replaceState(null, '', urlWithHash('/search/' + search))
   item = null;
 }
 
@@ -73,7 +86,9 @@ function maybeFocusSearch(e: KeyboardEvent) {
     <em style="color: var(--cata-color-gray)">Loading...</em>
     {/if}
   {:else if search}
+    {#key search}
     <SearchResults search={search} />
+    {/key}
   {:else}
     <img src="dont_panic.png" height="200" width="343" style="float:right" alt="The words 'Don't Panic' in big friendly letters" />
     <p>The <strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
