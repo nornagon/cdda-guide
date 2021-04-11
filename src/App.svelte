@@ -16,7 +16,7 @@ function hashchange() {
     const [, type, id] = m
     if (type === 'search') {
       item = null
-      search = id ?? ''
+      search = decodeURIComponent(id ?? '')
     } else {
       if (id)
         item = { type, id: decodeURIComponent(id) }
