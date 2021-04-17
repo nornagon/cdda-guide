@@ -6,14 +6,14 @@ import ThingLink from "../ThingLink.svelte";
 
 let data = getContext<CddaData>('data')
 export let item: Item
-  
+
 let techniques = (item.techniques ?? []).map(t => data.byId<Technique>('technique', t));
 
 const gripVal = { bad: 0, none: 1, solid: 2, weapon: 3 }
 const lengthVal = { hand: 0, short: 1, long: 2 }
 const surfaceVal = { point: 0, line: 1, any: 2, every: 3 }
 const balanceVal = { clumsy: 0, uneven: 1, neutral: 2, good: 3 }
-  
+
 const computeToHit = ({grip = 'weapon', length = 'hand', surface = 'any', balance = 'neutral'}: {grip?: string, length?: string, surface?: string, balance?: string}) => {
   const g = gripVal[grip]
   const l = lengthVal[length]
@@ -31,7 +31,7 @@ const computeToHit = ({grip = 'weapon', length = 'hand', surface = 'any', balanc
   const acc_offset = base_acc + grip_offset + surface_offset + balance_offset;
   return acc_offset + g + l + s + b;
 }
-  
+
 const to_hit: number = typeof item.to_hit === 'object'
   ? computeToHit(item.to_hit)
   : item.to_hit ?? 0
@@ -39,6 +39,8 @@ const to_hit: number = typeof item.to_hit === 'object'
 function attackTime(item: Item) {
   return Math.floor(65 + ( Math.floor(parseVolume(item.volume) / 62.5) + Math.floor(parseMass(item.weight) / 60) ));
 }
+
+const piercing = (item.flags ?? []).includes('SPEAR') || (item.flags ?? []).includes('STAB')
 </script>
 
 {#if item.bashing || item.cutting}
@@ -46,7 +48,7 @@ function attackTime(item: Item) {
 <h1>Melee</h1>
 <dl>
   <dt>Bash</dt><dd>{item.bashing ?? 0}</dd>
-  <dt>Cut</dt><dd>{item.cutting ?? 0}</dd>
+  <dt>{#if piercing}Pierce{:else}Cut{/if}</dt><dd>{item.cutting ?? 0}</dd>
   <dt>To Hit</dt><dd>{to_hit}</dd>
   <dt>Moves Per Attack</dt><dd>{attackTime(item)}</dd>
 {#if techniques.length}
