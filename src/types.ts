@@ -960,6 +960,7 @@ type SupportedThing
   | Harvest
   | Monster
   | VehiclePart
+  | MonsterGroup
 
 type UnsupportedType = Exclude<AllTypes, SupportedThing['type']>
 
