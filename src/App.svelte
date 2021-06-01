@@ -124,6 +124,7 @@ function maybeFocusSearch(e: KeyboardEvent) {
       <li><a href="#/furniture">Furniture</a></li>
       <li><a href="#/vehicle_part">Vehicle Parts</a></li>
       <li><a href="#/tool_quality">Qualities</a></li>
+      <li><a href="#/json_flag">Flags</a></li>
     </ul>
   {/if}
 
