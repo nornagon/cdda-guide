@@ -22,8 +22,16 @@ export let item: { id: string, type: string }
 export let data: CddaData
 setContext('data', data)
 
+function defaultItem(id : string, type : string) {
+  if (type == 'json_flag') {
+    return { id: id, type: type }
+  } else {
+    return null
+  }
+}
+
 let obj: any;
-$: obj = data.byId(item.type, item.id)
+$: obj = data.byId(item.type, item.id) ?? defaultItem(item.id, item.type)
 
 const displays = {
   MONSTER: Monster,
