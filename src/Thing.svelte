@@ -22,9 +22,9 @@ export let item: { id: string, type: string }
 export let data: CddaData
 setContext('data', data)
 
-function defaultItem(id : string, type : string) {
-  if (type == 'json_flag') {
-    return { id: id, type: type }
+function defaultItem(id: string, type: string) {
+  if (type === 'json_flag') {
+    return { id, type }
   } else {
     return null
   }
