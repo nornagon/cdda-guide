@@ -19,8 +19,8 @@ for (const it of data.byType('item')) {
   }
 }
 
-let vpartsWithQualityByLevel = new Map<number, VehiclePart[]>()
-for (const it of data.byType('vehicle_part')) {
+const vpartsWithQualityByLevel = new Map<number, VehiclePart[]>()
+for (const it of data.byType<VehiclePart>('vehicle_part')) {
   if (!it.id) continue;
   const q = (it.qualities ?? []).find(([id, _level]) => id === item.id)
   if (q) {
