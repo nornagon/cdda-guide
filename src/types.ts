@@ -303,6 +303,7 @@ export type ItemBasicInfo = {
     seeds?: boolean // default true (NB. never present in json)
     byproducts?: string[] // item_id
   }
+  ascii_picture?: string
 }
 
 const itemTypes = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","MAGAZINE","PET_ARMOR","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL"] as const
@@ -840,6 +841,7 @@ export type Monster = {
     into_group?: string
     into?: string
   }
+  ascii_picture?: string
 }
 
 export type MonsterGroup = {
@@ -940,6 +942,12 @@ export type VehiclePart = {
   // symbol, color, etc
 }
 
+export type AsciiArt = {
+  type: 'ascii_art'
+  id: string
+  picture: string[]
+}
+
 const types = ["AMMO","ARMOR","BATTERY","BIONIC_ITEM","BOOK","COMESTIBLE","ENGINE","GENERIC","GUN","GUNMOD","ITEM_CATEGORY","LOOT_ZONE","MAGAZINE","MIGRATION","MONSTER","MONSTER_BLACKLIST","MONSTER_FACTION","PET_ARMOR","SPECIES","SPELL","TOOL","TOOLMOD","TOOL_ARMOR","WHEEL","achievement","activity_type","ammo_effect","ammunition_type","anatomy","ascii_art","behavior","bionic","body_part","butchery_requirement","charge_removal_blacklist","city_building","clothing_mod","conduct","construction","construction_category","construction_group","disease_type","dream","effect_type","emit","enchantment","event_statistic","event_transformation","faction","fault","field_type","furniture","gate","harvest","hit_range","item_action","item_group","json_flag","map_extra","mapgen","martial_art","material","mission_definition","monster_attack","monstergroup","morale_type","movement_mode","mutation","mutation_category","mutation_type","npc","npc_class","obsolete_terrain","overlay_order","overmap_connection","overmap_land_use_code","overmap_location","overmap_special","overmap_terrain","palette","profession","profession_item_substitutions","proficiency","recipe","recipe_category","recipe_group","region_settings","relic_procgen_data","requirement","rotatable_symbol","scenario","scent_type","score","skill","skill_display_type","snippet","speech","start_location","talk_topic","technique","ter_furn_transform","terrain","tool_quality","trait_group","trap","uncraft","vehicle","vehicle_group","vehicle_part","vehicle_part_category","vehicle_placement","vehicle_spawn","vitamin","weather_type"] as const
 type AllTypes = typeof types[Exclude<keyof typeof types, keyof []>]
 
@@ -961,6 +969,7 @@ type SupportedThing
   | Monster
   | VehiclePart
   | MonsterGroup
+  | AsciiArt
 
 type UnsupportedType = Exclude<AllTypes, SupportedThing['type']>
 

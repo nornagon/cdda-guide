@@ -2,7 +2,8 @@
 import { getContext } from 'svelte';
 
 import { asKilograms, asLiters, CddaData, parseVolume, singular, singularName } from '../data'
-import type { RequirementData, ItemBasicInfo, Item, Fault, JsonFlag, VehiclePart } from '../types'
+import type { RequirementData, ItemBasicInfo, Item, Fault, JsonFlag, VehiclePart, AsciiArt } from '../types'
+import AsciiPicture from './AsciiPicture.svelte';
 import AmmoInfo from './item/AmmoInfo.svelte';
 import ArmorInfo from './item/ArmorInfo.svelte';
 import BookInfo from './item/BookInfo.svelte';
@@ -73,11 +74,15 @@ const uncraft = (() => {
 })()
 
 const vparts = data.byType<VehiclePart>('vehicle_part').filter(vp => vp.id && vp.item === item.id)
+
+const ascii_picture = item.ascii_picture && data.byId<AsciiArt>('ascii_art', item.ascii_picture)
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
 <section>
 <h1>General</h1>
+<div class="side-by-side no-margin">
+<div>
 <dl>
   {#if materials.length}
   <dt>Material</dt>
@@ -158,7 +163,14 @@ const vparts = data.byType<VehiclePart>('vehicle_part').filter(vp => vp.id && vp
   </dd>
   {/if}
 </dl>
-<p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
+<p style="color: var(--cata-color-gray); margin-bottom: 0;">{singular(item.description)}</p>
+</div>
+<div>
+{#if ascii_picture}
+  <AsciiPicture picture={ascii_picture} />
+{/if}
+</div>
+</div>
 </section>
 {#if item.type === 'BOOK'}
 <BookInfo {item} />
