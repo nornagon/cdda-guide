@@ -9,6 +9,7 @@ const appUrls = [
   './favicon.png',
   './global.css',
   './dont_panic.png',
+  './unifont.woff',
   './',
 ]
 

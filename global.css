@@ -120,10 +120,12 @@ dd ul:not(.comma-separated, .no-bullets) {
 	display: grid;
 	grid-auto-columns: auto;
 	grid-column-gap: 1em;
-	margin-bottom: 1em;
 	justify-content: stretch;
 }
-.side-by-side > section { margin: 0; grid-row: 1; }
+.side-by-side:not(.no-margin) {
+	margin-bottom: 1em;
+}
+.side-by-side > * { margin: 0; grid-row: 1; }
 }
 
 button.disclosure {
@@ -335,3 +337,8 @@ pre {
 .c_pink_cyan { color: var(--cata-color-light_magenta); background: var(--cata-color-cyan); }
 .c_cyan_cyan { color: var(--cata-color-cyan); background: var(--cata-color-cyan); }
 .c_light_cyan_cyan { color: var(--cata-color-light_cyan); background: var(--cata-color-cyan); }
+
+@font-face {
+	font-family: 'Unifont';
+	src: url('unifont.woff') format('woff');
+}
