@@ -4,7 +4,7 @@ import type { AsciiArt } from "../types";
 export let picture: AsciiArt
 
 let color = ['white']
-const parsed = []
+const parsed: {string: string, color: string}[][] = []
 for (const line of picture.picture) {
   const spans: {string: string, color: string}[] = []
   let remaining = line
