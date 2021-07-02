@@ -25,12 +25,46 @@ for (const it of data.byType<VehiclePart>('vehicle_part')) {
     vpartsWithFlag.push(it)
   }
 }
+
+let color = ['gray']
+const spans: {string: string, color: string}[] = []
+let remaining = item.info ?? ''
+while (true) {
+  const nextColorTag = remaining.match(/<\/?(info|good|bad)>/)
+  if (nextColorTag) {
+    if (nextColorTag.index > 0)
+      spans.push({string: remaining.substr(0, nextColorTag.index), color: color[0]})
+    if (nextColorTag[0][1] === '/' && color.length > 1) {
+      color.shift()
+    } else {
+      color.unshift(nextColorTag[1])
+    }
+    remaining = remaining.substr(nextColorTag.index + nextColorTag[0].length)
+  } else break
+}
+if (remaining.length) {
+  spans.push({string: remaining, color: color[0]})
+}
+
+const colorLookup = (color: string): string => {
+  if (color === 'info')
+    return 'cyan'
+  else if (color === 'good')
+    return 'green'
+  else if (color === 'bad')
+    return 'red'
+  return 'gray'
+}
 </script>
 
 <h1>Flag: {item.id}</h1>
 {#if item.info}
 <section>
-  <p style="color: var(--cata-color-gray)">{item.info}</p>
+  <p>
+    {#each spans as {color, string}}
+    <span style="color: var(--cata-color-{colorLookup(color)})">{string}</span>
+    {/each}
+  </p>
 </section>
 {/if}
 {#if itemsWithFlag.length}
