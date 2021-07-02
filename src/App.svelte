@@ -100,10 +100,12 @@ function maybeFocusSearch(e: KeyboardEvent) {
     them. The data in the Guide comes directly from the JSON files in the game
     itself.</p>
     <p>The Guide stores all its data locally and is offline-capable, so you can
-    take it with you whereever you go.
+    take it with you whereever you go. There's nothing to do to make the Guide
+    work offline, just visit the page and it will work even without internet
+    access, as long as you've visited it once before.
     {#if deferredPrompt}
     It's also <button class="disclosure" on:click={(e) => {e.preventDefault(); deferredPrompt.prompt()}}>installable</button>,
-    so you can pop it out of your browser like a regular app.
+    so you can pop it out of your browser and use it like a regular app.
     {/if}
     </p>
     <p style="font-style: italic; color: var(--cata-color-gray)">More popular than the Celestial Home Care
