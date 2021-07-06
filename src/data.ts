@@ -294,8 +294,15 @@ export class CddaData {
         : Array.isArray(v)
           ? { subtype: 'collection' as const, entries: v }
           : v
-      for (const {id} of flattenItemGroup(this, group))
-        add(c, id)
+      if (group) {
+        for (const {id} of flattenItemGroup(this, group))
+          add(c, id)
+      } else {
+        if (typeof v === 'string') {
+          const item = this.byId<Item>('item', v)
+          if (item) add(c, v)
+        }
+      }
     }
 
     const addPalette = (palette: PaletteData) => {
