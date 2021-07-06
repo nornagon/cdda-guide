@@ -224,8 +224,11 @@ export class CddaData {
       if (typeof ret.proportional[k] === 'number') {
         if (k === 'attack_cost' && !(k in ret)) ret[k] = 100
         if (typeof ret[k] === 'string') {
-          const [num, unit] = ret[k].split(/\s+/)
-          ret[k] = `${num * ret.proportional[k]} ${unit}`
+          const m = /^\s*(\d+)\s*(.+)$/.exec(ret[k])
+          if (m) {
+            const [, num, unit] = m
+            ret[k] = `${Number(num) * ret.proportional[k]} ${unit}`
+          }
         } else {
           ret[k] *= ret.proportional[k]
           ret[k] = ret[k] | 0 // most things are ints.. TODO: what keys are float?
