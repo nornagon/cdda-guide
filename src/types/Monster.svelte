@@ -325,7 +325,9 @@ let upgrades = item.upgrades && (item.upgrades.into || item.upgrades.into_group)
     <dt>Placate Triggers</dt><dd>{item.placate_triggers.join(', ')}</dd>
     {/if}
     <dt>Flags</dt><dd>{#each item.flags ?? [] as flag, i}<abbr title={mon_flag_descriptions[flag]}>{flag}</abbr>{#if i < item.flags.length - 1}, {/if}{/each}</dd>
-    <dt>On Death</dt><dd>{(item.death_function ?? []).join(', ')}</dd>
+    {#if item.death_function}
+    <dt>On Death</dt><dd>{item.death_function.corpse_type ?? "NORMAL"}</dd>
+    {/if}
     {#if upgrades}
     <dt>Upgrades Into</dt>
     <dd>

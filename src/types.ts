@@ -834,7 +834,11 @@ export type Monster = {
   placate_triggers?: string[]
   morale?: number
   aggression?: number
-  death_function?: string[]
+  death_function?: {
+    message?: Translation,
+    effect?: SpellData,
+    corpse_type?: 'NORMAL' | 'SPLATTER' | 'BROKEN' | 'NO_CORPSE'
+  }
   upgrades?: false | {
     half_life?: integer
     age_grow?: integer
