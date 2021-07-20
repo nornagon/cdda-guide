@@ -364,8 +364,15 @@ export class CddaData {
         : Array.isArray(v.item)
           ? { subtype: 'collection' as const, entries: v.item }
           : v.item
-      for (const {id} of flattenItemGroup(this, group))
-        ret.add(id)
+      if (group) {
+        for (const {id} of flattenItemGroup(this, group))
+          ret.add(id)
+      } else {
+        if (typeof v === 'string') {
+          const item = this.byId<Item>('item', v)
+          if (item) ret.add(v)
+        }
+      }
     }
 
     for (const v of mapgen.object.place_loot ?? []) {
