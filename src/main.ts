@@ -6,7 +6,7 @@ if (location.hostname !== 'localhost')
   Sentry.init({
     dsn: "https://e7e132477a2844118b8f6d045a507e10@o318291.ingest.sentry.io/5665093",
     integrations: [new Integrations.BrowserTracing()],
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 0.2,
   });
 
 if ('serviceWorker' in navigator) {
