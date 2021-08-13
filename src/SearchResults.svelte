@@ -4,8 +4,16 @@ import Fuse from 'fuse.js'
 import FurnitureSymbol from './types/item/FurnitureSymbol.svelte'
 import ItemSymbol from './types/item/ItemSymbol.svelte'
 
+const SEARCHABLE_TYPES = new Set([
+  'item',
+  'monster',
+  'furniture',
+  'vehicle_part',
+  'tool_quality',
+])
+
 let fuse: Fuse<any>
-$: fuse = new Fuse([...$data?.all() ?? []].filter(x => typeof x.id === 'string'), {
+$: fuse = new Fuse([...$data?.all() ?? []].filter(x => typeof x.id === 'string' && SEARCHABLE_TYPES.has(x.type)), {
   keys: ['id', 'name'],
   getFn: (obj: any, path: string | string[]): string | string[] => {
     if (path[0] === 'id')
@@ -20,14 +28,6 @@ $: fuse = new Fuse([...$data?.all() ?? []].filter(x => typeof x.id === 'string')
 })
 
 export let search: string
-
-const SEARCHABLE_TYPES = new Set([
-  'item',
-  'monster',
-  'furniture',
-  'vehicle_part',
-  'tool_quality',
-])
 
 function filter(text: string): Map<string, any[]> {
   const results = fuse.search(text, { limit: 100 })
