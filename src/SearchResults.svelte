@@ -13,7 +13,7 @@ const SEARCHABLE_TYPES = new Set([
 ])
 
 let fuse: Fuse<any>
-$: fuse = new Fuse([...$data?.all() ?? []].filter(x => typeof x.id === 'string' && SEARCHABLE_TYPES.has(x.type)), {
+$: fuse = new Fuse([...$data?.all() ?? []].filter(x => typeof x.id === 'string' && SEARCHABLE_TYPES.has(mapType(x.type))), {
   keys: ['id', 'name'],
   getFn: (obj: any, path: string | string[]): string | string[] => {
     if (path[0] === 'id')
