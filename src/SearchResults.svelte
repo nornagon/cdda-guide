@@ -26,6 +26,7 @@ const SEARCHABLE_TYPES = new Set([
   'monster',
   'furniture',
   'vehicle_part',
+  'tool_quality',
 ])
 
 function filter(text: string): Map<string, any[]> {
