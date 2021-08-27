@@ -337,8 +337,17 @@ export class CddaData {
 
     addPalette(mapgen.object)
 
-    for (const p_id of mapgen.object.palettes ?? [])
-      addPalette(this.byId<Palette>('palette', p_id))
+    for (const p of mapgen.object.palettes ?? []) {
+      if (typeof p === "string") { 
+        addPalette(this.byId<Palette>('palette', p))
+      } else if ('distribution' in p) {
+        for (const [id, _] of p.distribution) {
+          addPalette(this.byId<Palette>('palette', id))
+        }
+      } else {
+        throw new Error(`unknown palette entry: ${JSON.stringify(p)}`)
+      }
+    }
 
     const ret = new Set<string>()
 
