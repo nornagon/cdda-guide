@@ -257,7 +257,7 @@ export type ArmorPortionData = {
 
 export type ArmorSlot = {
   covers?: string[]
-  armor_portion_data?: ArmorPortionData[]
+  armor?: ArmorPortionData[]
   sided?: boolean
   flags?: string[]
   warmth?: number

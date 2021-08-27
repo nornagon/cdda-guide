@@ -9,9 +9,9 @@ let data = getContext<CddaData>('data')
 let materials: any[] = (typeof item.material === 'string' ? [item.material] : item.material ?? []).map(id => data.byId('material', id));
 
 function covers(body_part_id: string): boolean {
-  return (item.covers ?? []).includes(body_part_id) || (item.armor_portion_data ?? []).some(apd => (apd.covers ?? []).includes(body_part_id))
+  return (item.covers ?? []).includes(body_part_id) || (item.armor ?? []).some(apd => (apd.covers ?? []).includes(body_part_id))
 }
-let covers_anything = (item.covers ?? []).length || (item.armor_portion_data ?? []).length
+let covers_anything = (item.covers ?? []).length || (item.armor ?? []).length
 
 function coverageLabel(apd: ArmorPortionData): string[] {
   const covered = new Set
@@ -71,9 +71,9 @@ function coverageLabel(apd: ArmorPortionData): string[] {
     <dd>{item.warmth ?? 0}</dd>
     <dt>Encumbrance</dt>
     <dd>
-      {#if item.armor_portion_data}
+      {#if item.armor}
       <dl>
-        {#each item.armor_portion_data as apd}
+        {#each item.armor as apd}
         <dt>{#each coverageLabel(apd) as label, i}{#if i !== 0}{', '}{/if}{label}{/each}</dt>
         <dd>
           {#if Array.isArray(apd.encumbrance)}
@@ -93,9 +93,9 @@ function coverageLabel(apd: ArmorPortionData): string[] {
     </dd>
     <dt title="This determines how likely it is that an attack hits the item instead of the player.">Coverage</dt>
     <dd>
-      {#if item.armor_portion_data}
+      {#if item.armor}
       <dl>
-        {#each item.armor_portion_data as apd}
+        {#each item.armor as apd}
         <dt>{#each coverageLabel(apd) as label, i}{#if i !== 0}{', '}{/if}{label}{/each}</dt>
         <dd>{apd.coverage ?? 0}%</dd>
         {/each}
