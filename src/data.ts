@@ -338,7 +338,11 @@ export class CddaData {
     addPalette(mapgen.object)
 
     for (const p_id of mapgen.object.palettes ?? [])
-      addPalette(this.byId<Palette>('palette', p_id))
+      if (typeof p_id === 'string')
+        addPalette(this.byId<Palette>('palette', p_id))
+      else {
+        // TODO: handle param/distribution/switch
+      }
 
     const ret = new Set<string>()
 

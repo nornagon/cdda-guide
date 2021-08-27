@@ -650,7 +650,8 @@ export interface MapgenObject {
   //place_monster?: PurplePlaceMonster[];
   //monster?: MonsterClass;
   //monsters?: Monsters;
-  palettes?: string[];
+  // TODO: handle param/distribution/switch
+  palettes?: (string | {param: any} | {distribution: any} | {switch: any})[];
   //place_vehicles?: PlaceVehicle[];
   //vehicles?: ObjectVehicles;
   place_nested?: PlaceList<MapgenNested>;
