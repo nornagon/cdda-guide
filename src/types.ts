@@ -56,7 +56,7 @@ export type Construction = {
   pre_flags?: string | string[]
   post_flags?: string[]
 
-  byproducts?: ItemGroupEntry[] // subtype collection
+  byproducts?: string | ItemGroup | ItemGroupEntry[] // subtype collection
 
   pre_special?: string
   post_special?: string

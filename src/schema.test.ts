@@ -16,7 +16,7 @@ const id = x => {
 }
 const all = data._raw.filter(x => id(x)).map((x, i) => [x.type, id(x) ?? i, data._flatten(x)])
 
-const skipped = new Set([
+const skipped = new Set<string>([
 ])
 
 const ajv = new Ajv({ allowUnionTypes: true })
@@ -29,7 +29,7 @@ test.each(all)("schema matches %s %s", (type, id, obj) => {
   }
   const valid = validate(obj)
   if (!valid) {
-    expect(validate.errors.filter(e => e.dataPath !== '/type')).toHaveLength(0)
+    expect(validate.errors.filter(e => e.instancePath !== '/type')).toHaveLength(0)
     expect(validate.errors).toHaveLength(0)
   }
   expect(valid).toBe(true)
