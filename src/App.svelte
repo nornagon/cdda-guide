@@ -7,6 +7,9 @@ import Catalog from "./Catalog.svelte";
 
 let item: { type: string, id: string } | null = null
 
+const url = new URL(location.href)
+data.setVersion(url.searchParams.get('v') ?? 'latest')
+
 function hashchange() {
   // the poor man's router!
   const path = window.location.hash.slice(1);
@@ -130,13 +133,15 @@ function maybeFocusSearch(e: KeyboardEvent) {
     </ul>
   {/if}
 
-  <p>Build number:
+  <p>Build:
     {#if $data}
     <a href="{$data.release.html_url}">{$data.build_number}</a>
+    {#if $data.release.prerelease}
+    (Experimental)
+    {/if}
     {:else}
     <em style="color: var(--cata-color-gray)">(loading...)</em>
     {/if}
-    (Experimental)
   </p>
 </main>
 

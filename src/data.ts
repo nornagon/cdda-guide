@@ -1,4 +1,4 @@
-import { readable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { Translation, Requirement, ItemGroup, ItemGroupEntry, ItemGroupEntryOrShortcut, Recipe, Mapgen, PaletteData, Palette, Item, DamageInstance, DamageUnit } from './types';
 
 const idlessTypes = new Set([
@@ -603,8 +603,8 @@ export function normalizeDamageInstance(damageInstance: DamageInstance): DamageU
   else return [damageInstance]
 }
 
-const fetchJson = async () => {
-  const res = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/data/latest/all.json`, {
+const fetchJson = async (version: string) => {
+  const res = await fetch(`https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/all.json`, {
     mode: 'cors'
   })
   if (!res.ok)
@@ -613,14 +613,13 @@ const fetchJson = async () => {
   return new CddaData(json.data, json.build_number, json.release)
 }
 
-const json = (() => {
-  let promise: Promise<CddaData>
-  return () => {
-    if (!promise) promise = fetchJson()
-    return promise
+let _hasSetVersion = false
+const { subscribe, set } = writable(null)
+export const data = {
+  subscribe,
+  setVersion(version: string) {
+    if (_hasSetVersion) throw new Error('can only set version once')
+    _hasSetVersion = true
+    fetchJson(version).then(set)
   }
-})()
-
-export const data = readable<CddaData>(null, function (set) {
-  json().then(set)
-});
+}
