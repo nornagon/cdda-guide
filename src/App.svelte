@@ -7,8 +7,15 @@ import Catalog from "./Catalog.svelte";
 
 let item: { type: string, id: string } | null = null
 
+let builds: {build_number: string, prerelease: boolean, created_at: string}[] | null = null
+
+fetch('https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json').then(d => d.json()).then(b => {
+  builds = b
+})
+
 const url = new URL(location.href)
-data.setVersion(url.searchParams.get('v') ?? 'latest')
+const version = url.searchParams.get('v') ?? 'latest'
+data.setVersion(version)
 
 function hashchange() {
   // the poor man's router!
@@ -134,10 +141,33 @@ function maybeFocusSearch(e: KeyboardEvent) {
   {/if}
 
   <p>Build:
-    {#if $data}
-    <a href="{$data.release.html_url}">{$data.build_number}</a>
-    {#if $data.release.prerelease}
-    (Experimental)
+    {#if $data || builds}
+    {#if builds}
+    <!-- svelte-ignore a11y-no-onchange -->
+    <select value="{$data?.build_number ?? (version === 'latest' ? builds[0].build_number : version)}" on:change={(e) => {
+      const url = new URL(location.href)
+      const buildNumber = e.currentTarget.value
+      if (buildNumber === builds[0].build_number)
+        url.searchParams.delete('v')
+      else
+        url.searchParams.set('v', buildNumber)
+      location.href = url.toString()
+    }}>
+    <optgroup label="Stable">
+      {#each builds.filter(b => !b.prerelease) as build}
+      <option value="{build.build_number}">{build.build_number}</option>
+      {/each}
+    </optgroup>
+    <optgroup label="Experimental">
+      {#each builds.filter(b => b.prerelease) as build, i}
+      <option value="{build.build_number}">{build.build_number}{#if i === 0}&nbsp;(latest){/if}</option>
+      {/each}
+    </optgroup>
+    </select>
+    {:else if $data}
+    <select disabled>
+      <option>{$data.build_number}</option>
+    </select>
     {/if}
     {:else}
     <em style="color: var(--cata-color-gray)">(loading...)</em>

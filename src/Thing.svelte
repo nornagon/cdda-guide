@@ -16,11 +16,13 @@ import Fault from './types/Fault.svelte';
 import Technique from './types/Technique.svelte';
 import Vitamin from './types/Vitamin.svelte';
 import VehiclePart from './types/VehiclePart.svelte';
+import ErrorBoundary from './ErrorBoundary';
 
 export let item: { id: string, type: string }
 
 export let data: CddaData
 setContext('data', data)
+let error: Error = null
 
 function defaultItem(id: string, type: string) {
   if (type === 'json_flag') {
@@ -68,7 +70,30 @@ const displays = {
 {#if !obj}
 Unknown obj: {item.type}/{item.id}
 {:else}
+{#if error}
+<section>
+<h1>Error</h1>
+<p>
+There was a problem displaying this page.
+
+Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build.
+</p>
+<p>
+<details>
+<summary>{error.message}</summary>
+<pre>{error.stack}</pre>
+</details>
+</p>
+</section>
+{:else}
+{#if process.env.NODE_ENV === 'production'}
+<ErrorBoundary onError={(e) => error = e}>
 <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
+</ErrorBoundary>
+{:else}
+<svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
+{/if}
+{/if}
 
 <details>
 <summary>Raw JSON</summary>
