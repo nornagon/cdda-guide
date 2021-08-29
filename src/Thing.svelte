@@ -86,13 +86,9 @@ Not all versions of Cataclysm are supported by the Guide currently. Try selectin
 </p>
 </section>
 {:else}
-{#if process.env.NODE_ENV === 'production'}
 <ErrorBoundary onError={(e) => error = e}>
 <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
 </ErrorBoundary>
-{:else}
-<svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
-{/if}
 {/if}
 
 <details>
