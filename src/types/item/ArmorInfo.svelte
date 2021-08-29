@@ -13,6 +13,8 @@ function covers(body_part_id: string): boolean {
 }
 let covers_anything = (item.covers ?? []).length || (item.armor ?? []).length
 
+const armor = item.armor ?? ((item as any).armor_portion_data as ArmorPortionData[])
+
 function coverageLabel(apd: ArmorPortionData): string[] {
   const covered = new Set
   const labels = []
@@ -71,9 +73,9 @@ function coverageLabel(apd: ArmorPortionData): string[] {
     <dd>{item.warmth ?? 0}</dd>
     <dt>Encumbrance</dt>
     <dd>
-      {#if item.armor}
+      {#if armor}
       <dl>
-        {#each item.armor as apd}
+        {#each armor as apd}
         <dt>{#each coverageLabel(apd) as label, i}{#if i !== 0}{', '}{/if}{label}{/each}</dt>
         <dd>
           {#if Array.isArray(apd.encumbrance)}
