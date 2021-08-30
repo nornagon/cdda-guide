@@ -24,6 +24,10 @@ export let data: CddaData
 setContext('data', data)
 let error: Error = null
 
+function onError(e: Error) {
+  error = e
+}
+
 function defaultItem(id: string, type: string) {
   if (type === 'json_flag') {
     return { id, type }
@@ -86,9 +90,14 @@ Not all versions of Cataclysm are supported by the Guide currently. Try selectin
 </p>
 </section>
 {:else}
-<ErrorBoundary onError={(e) => error = e}>
+{#if globalThis?.process}
+<!-- running in tests -->
+<svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
+{:else}
+<ErrorBoundary onError={onError}>
 <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
 </ErrorBoundary>
+{/if}
 {/if}
 
 <details>
