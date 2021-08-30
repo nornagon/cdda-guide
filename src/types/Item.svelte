@@ -48,7 +48,8 @@ const defaultPocketData = {
 let pockets = (item.pocket_data ?? []).map((pocket) => {
   return {...defaultPocketData, ...pocket}
 })
-let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL').flatMap(p => p.item_restriction)
+let magazine_compatible = pockets.filter(p => p.pocket_type === 'MAGAZINE_WELL')
+  .flatMap(p => p.item_restriction?.map(id => ({type: 'item', id})) ?? p.flag_restriction.map(id => ({type: 'json_flag', id})))
 
 function maxCharges(ammo_id: string) {
   let ret = 0
@@ -110,8 +111,8 @@ const ascii_picture = item.ascii_picture && data.byId<AsciiArt>('ascii_art', ite
   <dt>Compatible Magazines</dt>
   <dd>
     <ul class="comma-separated">
-      {#each magazine_compatible as item_id}
-      <li><ThingLink type="item" id={item_id} /></li>
+      {#each magazine_compatible as {type, id}}
+      <li><ThingLink {type} {id} /></li>
       {/each}
     </ul>
   </dd>
