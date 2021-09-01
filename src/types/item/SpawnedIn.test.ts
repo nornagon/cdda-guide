@@ -1,7 +1,7 @@
 import { render } from '@testing-library/svelte'
-
-import IsolatedSpawnedIn from './IsolatedSpawnedIn.svelte'
+import SpawnedIn from './SpawnedIn.svelte'
+import WithData from '../../WithData.svelte'
 
 test('TODO', () => {
-  render(IsolatedSpawnedIn, {item_id: "fake_item"})
+  render(WithData, {Component: SpawnedIn, item_id: "fake_item"})
 })
