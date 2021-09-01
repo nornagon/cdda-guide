@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getContext } from "svelte";
   import { CddaData, getItemSpawnLocations } from "../../data";
+  import { showProbability } from "./utils.ts";
 
   export let item_id: string;
 
@@ -12,9 +13,7 @@
   <h1>Loot</h1>
   <ul>
     {#each spawnLocations as loc}
-      <li>
-        <span>{loc.singularName}</span>
-      </li>
+      <li>{loc.singularName} ({showProbability(loc.chance)})</li>
     {/each}
   </ul>
 </section>
