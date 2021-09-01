@@ -1,7 +1,20 @@
+import "@testing-library/jest-dom";
 import { render } from "@testing-library/svelte";
 import SpawnedIn from "./SpawnedIn.svelte";
 import WithData from "../../WithData.svelte";
+import { getItemSpawnLocations } from "../../data";
 
-test("TODO", () => {
-  render(WithData, { Component: SpawnedIn, item_id: "fake_item" });
+jest.mock("../../data");
+
+describe("the loot section", () => {
+  it("displays the name of the spawn location", () => {
+    const spawnLocations = [{ singularName: "fake place", chance: 0.5 }];
+    (getItemSpawnLocations as jest.Mock).mockReturnValue(spawnLocations);
+    const item_id = "fake_item";
+
+    const { getByText } = render(WithData, { Component: SpawnedIn, item_id });
+
+    expect(getByText("fake place")).toBeInTheDocument();
+  });
 });
+//getItemSpawnLocations
