@@ -2,9 +2,8 @@ import "@testing-library/jest-dom";
 import { render } from "@testing-library/svelte";
 import SpawnedIn from "./SpawnedIn.svelte";
 import WithData from "../../WithData.svelte";
-import { getItemSpawnLocations } from "../../data";
-
-jest.mock("../../data");
+import { getItemSpawnLocations } from "./spawnLocations";
+jest.mock("./spawnLocations");
 
 describe("the loot section", () => {
   it("displays the name of the spawn location and chance", () => {

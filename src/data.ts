@@ -623,11 +623,3 @@ export const data = {
     fetchJson(version).then(set)
   }
 }
-
-type SpawnLocation = {
-  singularName: string;
-  chance: number;
-};
-export function getItemSpawnLocations(data: CddaData, item_id: string): SpawnLocation[] {
-  throw "not implemented";
-}

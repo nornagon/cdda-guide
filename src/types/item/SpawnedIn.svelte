@@ -1,7 +1,8 @@
 <script lang="ts">
   import { getContext } from "svelte";
-  import { CddaData, getItemSpawnLocations } from "../../data";
-  import { showProbability } from "./utils.ts";
+  import type { CddaData } from "../../data";
+  import { getItemSpawnLocations } from "./spawnLocations";
+  import { showProbability } from "./utils";
 
   export let item_id: string;
 
