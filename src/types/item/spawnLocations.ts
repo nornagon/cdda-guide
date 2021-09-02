@@ -25,7 +25,7 @@ export function getItemSpawnLocations(
 ): SpawnLocation[] {
   // This is to allow tests to mock getAllLocationsAndLoot()
   const x = exports.getAllLocationsAndLoot(data);
-  return x.flatMap(({ omt: { singularName }, loot }) =>
-    loot.has(item_id) ? [{ singularName, chance: loot.get(item_id) }] : []
+  return x.flatMap(({ omt, loot }) =>
+    loot.has(item_id) ? [{ chance: loot.get(item_id), ...omt }] : []
   );
 }
