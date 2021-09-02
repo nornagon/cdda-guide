@@ -17,6 +17,9 @@ export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
 
 type SpawnLocation = {
   singularName: string;
+  // id: string[]
+  // sym: string
+  // color: string
   chance: number;
 };
 export function getItemSpawnLocations(
