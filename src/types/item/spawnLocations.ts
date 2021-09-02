@@ -10,7 +10,9 @@ export function collection(
 ): Loot {
   const x = [...items];
   if (x.length)
-    return new Map([...x[0].loot.keys()].map((k) => [k, x[0].chance]));
+    return new Map(
+      [...x[0].loot.entries()].map(([k, v]) => [k, v * x[0].chance])
+    );
   return new Map();
 }
 /** Choose based on weight */
