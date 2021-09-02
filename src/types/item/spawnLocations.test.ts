@@ -100,4 +100,21 @@ describe("getAllLocationsAndLoot()", () => {
 
     expect(got).toStrictEqual([{ loot, mapgen }]);
   });
+  it("handles multiple palletes", () => {
+    const loot = new Map([["fake_item", 0.5]]);
+    const pallete = new Map([["X", loot]]);
+    const mapgen = {
+      additional_items: new Map(),
+      overmap_terrains: [],
+      rows: ["X"],
+      palettes: [pallete, pallete],
+    };
+    const given = [mapgen];
+    jest.spyOn(spawnLocations, "getAllMapgens").mockReturnValue(given);
+
+    const got = getAllLocationsAndLoot(null as CddaData);
+
+    const expectedLoot = new Map([["fake_item", 0.75]]);
+    expect(got).toStrictEqual([{ loot: expectedLoot, mapgen }]);
+  });
 });
