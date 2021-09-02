@@ -1,5 +1,9 @@
 import * as spawnLocations from "./spawnLocations";
-import { getItemSpawnLocations, collection } from "./spawnLocations";
+import {
+  getItemSpawnLocations,
+  collection,
+  getAllLocationsAndLoot,
+} from "./spawnLocations";
 import type { CddaData } from "../../data";
 
 beforeEach(() => jest.restoreAllMocks());
@@ -62,5 +66,23 @@ describe("collection()", () => {
     const got = collection(given);
 
     expect(got).toStrictEqual(new Map([["fake_item", 0.75]]));
+  });
+});
+
+describe("getAllLocationsAndLoot()", () => {
+  it("knows about additional_items", () => {
+    const additional_items = new Map([["fake_item", 1.0]]);
+    const mapgen = {
+      additional_items,
+      overmap_terrains: [],
+      rows: [],
+      palettes: [],
+    };
+    const given = [mapgen];
+    jest.spyOn(spawnLocations, "getAllMapgens").mockReturnValue(given);
+
+    const got = getAllLocationsAndLoot(null as CddaData);
+
+    expect(got).toStrictEqual([{ loot: additional_items, mapgen }]);
   });
 });

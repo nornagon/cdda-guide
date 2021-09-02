@@ -57,7 +57,9 @@ type LocationAndLoot = {
   loot: Loot;
 };
 export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
-  throw "not implemented";
+  return exports
+    .getAllMapgens(data)
+    .map((mapgen) => ({ loot: mapgen.additional_items, mapgen }));
 }
 
 type SpawnLocation = {
