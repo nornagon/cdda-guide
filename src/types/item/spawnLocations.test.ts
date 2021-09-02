@@ -85,4 +85,19 @@ describe("getAllLocationsAndLoot()", () => {
 
     expect(got).toStrictEqual([{ loot: additional_items, mapgen }]);
   });
+  it("knows about rows", () => {
+    const loot = new Map([["fake_item", 1.0]]);
+    const mapgen = {
+      additional_items: new Map(),
+      overmap_terrains: [],
+      rows: ["X"],
+      palettes: [new Map([["X", loot]])],
+    };
+    const given = [mapgen];
+    jest.spyOn(spawnLocations, "getAllMapgens").mockReturnValue(given);
+
+    const got = getAllLocationsAndLoot(null as CddaData);
+
+    expect(got).toStrictEqual([{ loot, mapgen }]);
+  });
 });

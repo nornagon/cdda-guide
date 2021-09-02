@@ -57,9 +57,16 @@ type LocationAndLoot = {
   loot: Loot;
 };
 export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
-  return exports
-    .getAllMapgens(data)
-    .map((mapgen) => ({ loot: mapgen.additional_items, mapgen }));
+  return exports.getAllMapgens(data).map((mapgen) => {
+    const pallete = mapgen.palettes[0] || new Map();
+    const items = mapgen.rows
+      .flatMap((r) => Array.from(r))
+      .map((sym) => ({ loot: pallete.get(sym), chance: 1.0 }));
+    items.push({ loot: mapgen.additional_items, chance: 1.0 });
+    const loot = collection(items);
+    return { mapgen, loot };
+  });
+  //.map((mapgen) => ({ loot: mapgen.additional_items, mapgen }));
 }
 
 type SpawnLocation = {
