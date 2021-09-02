@@ -41,4 +41,11 @@ describe("collection()", () => {
 
     expect(got).toStrictEqual(loot);
   });
+  it("knowns about item chance", () => {
+    const given = [{ chance: 0.5, loot: new Map([["fake_item", 1.0]]) }];
+
+    const got = collection(given);
+
+    expect(got).toStrictEqual(new Map([["fake_item", 0.5]]));
+  });
 });

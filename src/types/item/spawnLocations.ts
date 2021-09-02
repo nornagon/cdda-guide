@@ -9,7 +9,8 @@ export function collection(
   items: Iterable<{ loot: Loot; chance: chance }>
 ): Loot {
   const x = [...items];
-  if (x.length) return x[0].loot;
+  if (x.length)
+    return new Map([...x[0].loot.keys()].map((k) => [k, x[0].chance]));
   return new Map();
 }
 /** Choose based on weight */
