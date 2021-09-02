@@ -1,14 +1,15 @@
 import type { CddaData } from "../../data";
 
 type OMT = {
-  // id: string[]
+  singularName: string;
   // sym: string
   // color: string
-  singularName: string;
 };
-
+type Mapgen = {
+  overmap_terrains: OMT[];
+};
 type LocationAndLoot = {
-  omt: OMT;
+  mapgen: Mapgen;
   loot: Map</*item_id*/ string, /*chance*/ number>;
 };
 export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
@@ -17,7 +18,6 @@ export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
 
 type SpawnLocation = {
   singularName: string;
-  // id: string[]
   // sym: string
   // color: string
   chance: number;
@@ -26,9 +26,12 @@ export function getItemSpawnLocations(
   data: CddaData,
   item_id: string
 ): SpawnLocation[] {
-  // This is to allow tests to mock getAllLocationsAndLoot()
-  const x = exports.getAllLocationsAndLoot(data);
-  return x.flatMap(({ omt, loot }) =>
-    loot.has(item_id) ? [{ chance: loot.get(item_id), ...omt }] : []
-  );
+  return exports // This is to allow tests to mock getAllLocationsAndLoot()
+    .getAllLocationsAndLoot(data)
+    .flatMap(({ mapgen, loot }) => {
+      if (!loot.has(item_id)) return [];
+      const chance = loot.get(item_id);
+      const omt = mapgen.overmap_terrains[0];
+      return { chance: chance, ...omt };
+    });
 }

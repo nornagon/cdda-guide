@@ -8,7 +8,7 @@ describe("getItemSpawnLocations()", () => {
   it("finds a one spawn location", () => {
     let loot = [
       {
-        omt: { singularName: "fake loc" },
+        mapgen: { overmap_terrains: [{ singularName: "fake loc" }] },
         loot: new Map([["fake_item", 0.25]]),
       },
     ];
