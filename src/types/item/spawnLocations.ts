@@ -8,12 +8,16 @@ type Loot = Map</**item_id*/ string, chance>;
 export function collection(
   items: Iterable<{ loot: Loot; chance: chance }>
 ): Loot {
-  const x = [...items];
-  if (x.length)
-    return new Map(
-      [...x[0].loot.entries()].map(([k, v]) => [k, v * x[0].chance])
-    );
-  return new Map();
+  const ret = new Map();
+  for (const { loot, chance } of items) {
+    for (const [item_id, item_chance] of loot.entries()) {
+      const current_chance = ret.get(item_id) || 0;
+      const add_chance = item_chance * chance;
+      const result = 1 - (1 - current_chance) * (1 - add_chance);
+      ret.set(item_id, result);
+    }
+  }
+  return ret;
 }
 /** Choose based on weight */
 export function distribution(
