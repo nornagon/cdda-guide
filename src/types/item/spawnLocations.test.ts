@@ -33,4 +33,12 @@ describe("collection()", () => {
 
     expect(got).toStrictEqual(new Map());
   });
+  it("given one item, returns it", () => {
+    const loot = new Map([["fake_item", 1.0]]);
+    const given = [{ chance: 1.0, loot }];
+
+    const got = collection(given);
+
+    expect(got).toStrictEqual(loot);
+  });
 });
