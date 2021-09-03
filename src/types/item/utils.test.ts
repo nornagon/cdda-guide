@@ -12,3 +12,22 @@ describe("Maybe.getOrDefault()", () => {
     expect(given.getOrDefault(321)).toBe(321);
   });
 });
+
+describe("Maybe.map()", () => {
+  it("passes undefined forvard", () => {
+    const given = new Maybe(undefined);
+
+    const got = given.map(() => 123);
+
+    expect(got.getOrDefault(321)).toBe(321);
+    expect(got.getOrDefault(456)).toBe(456);
+  });
+  it("does not call the callback if empty", () => {
+    const given = new Maybe(undefined);
+    const callback = jest.fn(() => 123);
+
+    given.map(callback);
+
+    expect(callback).toHaveBeenCalledTimes(0);
+  });
+});
