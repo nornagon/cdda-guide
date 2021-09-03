@@ -7,8 +7,8 @@ describe("Maybe.getOrDefault()", () => {
   ])("ignores the default when it already has a value", (given, expected) => {
     expect(given.getOrDefault(-100)).toBe(expected);
   });
-  it("returns the default when there is no value", () => {
-    const given = new Maybe(undefined);
+  it.each([undefined, null])("returns the default when %p", (value) => {
+    const given = new Maybe(value);
     expect(given.getOrDefault(321)).toBe(321);
   });
 });
@@ -22,8 +22,8 @@ describe("Maybe.map()", () => {
     expect(got.getOrDefault(123)).toBe(123);
     expect(got.getOrDefault(456)).toBe(456);
   });
-  it("does not call the callback if empty", () => {
-    const given = new Maybe(undefined);
+  it.each([undefined, null])("does not call the callback if %p", (value) => {
+    const given = new Maybe(value);
     const callback = jest.fn(() => 123);
 
     given.map(callback);
