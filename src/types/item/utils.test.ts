@@ -30,11 +30,14 @@ describe("Maybe.map()", () => {
 
     expect(callback).toHaveBeenCalledTimes(0);
   });
-  it("transforms the value using callback", () => {
+  it.each([
+    [() => 456, 456],
+    [(n) => n * 2, 246],
+  ])("transforms the value using the callback", (callback, expected) => {
     const given = new Maybe(123);
 
-    const got = given.map(() => 456);
+    const got = given.map(callback);
 
-    expect(got.getOrDefault(-100)).toBe(456);
+    expect(got.getOrDefault(-100)).toBe(expected);
   });
 });

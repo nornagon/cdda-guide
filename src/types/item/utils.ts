@@ -14,6 +14,7 @@ export class Maybe<T> {
   }
   map<X>(f: (value: T) => X): Maybe<X> {
     if (this.value === undefined) return this;
-    return new Maybe(f());
+    const value = f(this.value);
+    return new Maybe(value);
   }
 }
