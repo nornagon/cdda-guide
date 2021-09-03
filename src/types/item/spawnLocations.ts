@@ -42,10 +42,10 @@ type Mapgen = {
 export function getAllMapgens(data: CddaData): Mapgen[] {
   return data.byType<raw.Mapgen>("mapgen").map((mapgen) => {
     const overmap_terrains = new Maybe(mapgen.om_terrain)
-      .map((id) => [id])
-      .getOrDefault([])
       .map((id) => data.byId("overmap_terrain", id))
-      .map((ter) => ({ singularName: ter.name }));
+      .map((ter) => [{ singularName: ter.name }])
+      .getOrDefault([]);
+
     return {
       overmap_terrains,
       rows: [],
