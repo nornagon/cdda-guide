@@ -148,13 +148,17 @@ describe("getAllMapgens()", () => {
       },
     ]);
   });
-  it("knows about om_terrain", () => {
+  it.each([
+    ["fake_terrain" /* :string */],
+    [["fake_terrain"] /* :string[] */],
+    [[["fake_terrain"]] /* :string[][] */],
+  ])("understands om_terrain %j", (om_terrain) => {
     const given = new CddaData([
       {
         type: "mapgen",
         method: "json",
         object: {},
-        om_terrain: "fake_terrain",
+        om_terrain,
       },
       {
         type: "overmap_terrain",
