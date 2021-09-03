@@ -50,13 +50,12 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
 
     return {
       overmap_terrains,
-      rows: [],
+      rows: mapgen.object.rows ?? [],
       palettes: [],
       additional_items: new Map(),
     };
   });
   /*
-  mapgen.object
   mapgen.object.palettes
   mapgen.object.rows
   mapgen.object.place_item

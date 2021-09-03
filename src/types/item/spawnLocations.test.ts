@@ -204,4 +204,24 @@ describe("getAllMapgens()", () => {
       },
     ]);
   });
+  it("knows about rows", () => {
+    const given = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        object: { rows: ["X"] },
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+
+    expect(got).toStrictEqual([
+      {
+        overmap_terrains: [],
+        rows: ["X"],
+        palettes: [],
+        additional_items: new Map(),
+      },
+    ]);
+  });
 });
