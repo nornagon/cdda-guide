@@ -13,6 +13,7 @@ export class Maybe<T> {
     return this.value ?? default_;
   }
   map<X>(f: (value: T) => X): Maybe<X> {
-    return new Maybe(undefined);
+    if (this.value === undefined) return this;
+    return new Maybe(f());
   }
 }
