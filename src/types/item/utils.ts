@@ -5,12 +5,14 @@ export function showProbability(prob: number) {
 }
 
 export class Maybe<T> {
-  constructor(value: T) {
+  private readonly value: T | undefined;
+  constructor(value: T | undefined) {
+    this.value = value;
   }
-  getOrDefault() {
-    return 123;
+  getOrDefault(default_: T): T {
+    return this.value ?? 123;
   }
-  map<X>(f: T => X): Maybe<X> {
+  map<X>(f: (value: T) => X): Maybe<X> {
     throw "not implemented";
   }
 }
