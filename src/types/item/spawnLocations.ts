@@ -1,5 +1,6 @@
 import type { CddaData } from "../../data";
 import type * as raw from "../../types";
+import { Maybe } from "./utils";
 
 /** 0.0 < chance < 1.0 */
 type chance = number;
@@ -39,14 +40,23 @@ type Mapgen = {
   additional_items: Loot;
 };
 export function getAllMapgens(data: CddaData): Mapgen[] {
-  return data.byType<raw.Mapgen>("mapgen").map((_) => ({
-    overmap_terrains: [],
-    rows: [],
-    palettes: [],
-    additional_items: new Map(),
-  }));
+  return data.byType<raw.Mapgen>("mapgen").map((mapgen) => {
+    const overmap_terrains = new Maybe(mapgen.om_terrain)
+      .map((id) => [id])
+      .getOrDefault([])
+      .map((id) => data.byId("overmap_terrain", id))
+      .map((ter) => ({ singularName: ter.name }));
+    return {
+      overmap_terrains,
+      rows: [],
+      palettes: [],
+      additional_items: new Map(),
+    };
+  });
   /*
   mg.om_terrain
+  data.byId('overmap_terrain', mo)
+  import { singularName } from "../../data";
   mapgen.object
   mapgen.object.palettes
   mapgen.object.rows
