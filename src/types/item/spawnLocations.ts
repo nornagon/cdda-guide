@@ -12,7 +12,7 @@ export function collection(
   const ret = new Map();
   for (const { loot, chance } of items) {
     for (const [item_id, item_chance] of loot.entries()) {
-      const current_chance = ret.get(item_id) || 0;
+      const current_chance = ret.get(item_id) ?? 0;
       const add_chance = item_chance * chance;
       const result = 1 - (1 - current_chance) * (1 - add_chance);
       ret.set(item_id, result);
