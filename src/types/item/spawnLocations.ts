@@ -39,8 +39,13 @@ type Mapgen = {
   additional_items: Loot;
 };
 export function getAllMapgens(data: CddaData): Mapgen[] {
+  return data.byType<raw.Mapgen>("mapgen").map((_) => ({
+    overmap_terrains: [],
+    rows: [],
+    palettes: [],
+    additional_items: new Map(),
+  }));
   /*
-  data.byType<Mapgen>('mapgen');
   mg.om_terrain
   mapgen.object
   mapgen.object.palettes

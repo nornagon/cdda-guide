@@ -175,7 +175,7 @@ export class CddaData {
   }
 
   byType<T = any>(type: string): T[] {
-    return this._byType.get(type).map(x => this._flatten(x)) ?? []
+    return this._byType.get(type)?.map(x => this._flatten(x)) ?? []
   }
 
   replacementTools(type: string): string[] {

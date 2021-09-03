@@ -128,4 +128,24 @@ describe("getAllMapgens()", () => {
 
     expect(got).toStrictEqual([]);
   });
+  it("finds one mapgen if there is only one", () => {
+    const given = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        object: {},
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+
+    expect(got).toStrictEqual([
+      {
+        overmap_terrains: [],
+        rows: [],
+        palettes: [],
+        additional_items: new Map(),
+      },
+    ]);
+  });
 });
