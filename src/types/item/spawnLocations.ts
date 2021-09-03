@@ -1,4 +1,5 @@
 import type { CddaData } from "../../data";
+import { singularName } from "../../data";
 import type * as raw from "../../types";
 import { Maybe } from "./utils";
 
@@ -45,7 +46,7 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
       .map((om_terrain) => [om_terrain].flat(2))
       .getOrDefault([])
       .map((id) => data.byId("overmap_terrain", id))
-      .map((ter) => ({ singularName: ter.name }));
+      .map((ter) => ({ singularName: singularName(ter) }));
 
     return {
       overmap_terrains,
@@ -55,9 +56,6 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
     };
   });
   /*
-  mg.om_terrain
-  data.byId('overmap_terrain', mo)
-  import { singularName } from "../../data";
   mapgen.object
   mapgen.object.palettes
   mapgen.object.rows

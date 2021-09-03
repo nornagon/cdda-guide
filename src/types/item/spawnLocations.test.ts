@@ -178,4 +178,30 @@ describe("getAllMapgens()", () => {
       },
     ]);
   });
+  it("understands name objects", () => {
+    const given = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        object: {},
+        om_terrain: "fake_terrain",
+      },
+      {
+        type: "overmap_terrain",
+        id: "fake_terrain",
+        name: { str: "fake terrain" },
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+
+    expect(got).toStrictEqual([
+      {
+        overmap_terrains: [{ singularName: "fake terrain" }],
+        rows: [],
+        palettes: [],
+        additional_items: new Map(),
+      },
+    ]);
+  });
 });
