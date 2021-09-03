@@ -122,9 +122,9 @@ describe("getAllLocationsAndLoot()", () => {
 
 describe("getAllMapgens()", () => {
   it("returns [] if there are no mapgens", () => {
-    const d = new CddaData([]);
+    const given = new CddaData([]);
 
-    const got = getAllMapgens(d);
+    const got = getAllMapgens(given);
 
     expect(got).toStrictEqual([]);
   });
