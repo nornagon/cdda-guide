@@ -3,8 +3,9 @@ import {
   getItemSpawnLocations,
   collection,
   getAllLocationsAndLoot,
+  getAllMapgens,
 } from "./spawnLocations";
-import type { CddaData } from "../../data";
+import { CddaData } from "../../data";
 
 beforeEach(() => jest.restoreAllMocks());
 
@@ -116,5 +117,15 @@ describe("getAllLocationsAndLoot()", () => {
 
     const expectedLoot = new Map([["fake_item", 0.75]]);
     expect(got).toStrictEqual([{ loot: expectedLoot, mapgen }]);
+  });
+});
+
+describe("getAllMapgens()", () => {
+  it("returns [] if there are no mapgens", () => {
+    const d = new CddaData([]);
+
+    const got = getAllMapgens(d);
+
+    expect(got).toStrictEqual([]);
   });
 });

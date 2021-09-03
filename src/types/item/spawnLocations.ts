@@ -1,4 +1,5 @@
 import type { CddaData } from "../../data";
+import type * as raw from "../../types";
 
 /** 0.0 < chance < 1.0 */
 type chance = number;
@@ -49,7 +50,7 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
   mapgen.object.place_loot
   mapgen.object.add
   */
-  throw "not implemented";
+  return [];
 }
 
 type LocationAndLoot = {
