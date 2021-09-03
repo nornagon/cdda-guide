@@ -7,4 +7,8 @@ describe("Maybe.getOrDefault()", () => {
   ])("ignores the default when it already has a value", (given, expected) => {
     expect(given.getOrDefault(321)).toBe(expected);
   });
+  it("returns the default when there is no value", () => {
+    const given = new Maybe(undefined);
+    expect(given.getOrDefault(321)).toBe(321);
+  });
 });

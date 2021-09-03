@@ -10,7 +10,7 @@ export class Maybe<T> {
     this.value = value;
   }
   getOrDefault(default_: T): T {
-    return this.value ?? 123;
+    return this.value ?? default_;
   }
   map<X>(f: (value: T) => X): Maybe<X> {
     throw "not implemented";
