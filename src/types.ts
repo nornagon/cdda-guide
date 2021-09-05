@@ -233,7 +233,7 @@ export type ComestibleSlot = {
   healthy?: integer // int, default 0
   parasites?: integer // int, default 0
   radiation?: integer // int, default 0
-  freezing_point?: integer // int, default 32
+  freezing_point?: number // float, default 32
   spoils_in?: string | number // duration, default 0 (never spoils)
   cooks_like?: string // item_id
   smoking_result?: string // item_id
