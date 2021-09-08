@@ -10,6 +10,13 @@ const damage = Array.isArray(item.damage)
   : item.damage && 'values' in item.damage
     ? item.damage.values[0]
     : item.damage as DamageUnit ?? {amount: 0, damage_type: 'bullet', armor_penetration: 0}
+
+function computeLoudness(item: AmmoSlot): number {
+  // https://github.com/CleverRaven/Cataclysm-DDA/blob/5612551d1e4e4babfe4ae0dab81f8d8b49991783/src/item_factory.cpp#L264-L271
+  if ((item.loudness ?? -1) >= 0)
+    return item.loudness ?? 0
+  return (item.range ?? 0) * 2 + (damage.amount ?? 0) * (damage.armor_penetration ?? 0)
+}
 </script>
 
 {#if item.damage || item.show_stats}
@@ -28,6 +35,8 @@ const damage = Array.isArray(item.damage)
     <dd>{item.dispersion ?? 0}</dd>
     <dt>Recoil</dt>
     <dd>{item.recoil ?? 0}</dd>
+    <dt>Loudness</dt>
+    <dd>{computeLoudness(item)}</dd>
     <dt>Critical Multiplier</dt>
     <dd>{item.critical_multiplier ?? 2}</dd>
     {#if item.casing}

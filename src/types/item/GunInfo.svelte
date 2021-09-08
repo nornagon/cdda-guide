@@ -35,8 +35,12 @@ const ranged_damage = Array.isArray(item.ranged_damage)
     <dd>{(item.flags ?? []).includes('DISABLE_SIGHTS') ? 90 : item.sight_dispersion ?? 30}
     <dt>Base Recoil</dt>
     <dd>{item.recoil ?? 0}</dd>
+    <dt title="Modifies base loudness as provided by the currently loaded ammo">Loudness Modifier</dt>
+    <dd>{item.loudness ?? 0}</dd>
     <dt>Reload Time</dt>
     <dd>{item.reload ?? 100} moves</dd>
+    <dt title="Volume of the noise made when reloading this weapon">Reload Noise Volume</dt>
+    <dd>{item.reload_noise_volume ?? 0}</dd>
     {#if item.valid_mod_locations?.length}
     <dt>Mod Slots</dt>
     <dd>{item.valid_mod_locations.map(([loc, num]) => `${loc} (${num})`).join(', ')}</dd>
