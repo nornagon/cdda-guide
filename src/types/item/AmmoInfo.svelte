@@ -35,7 +35,7 @@ function computeLoudness(item: AmmoSlot): number {
     <dd>{item.dispersion ?? 0}</dd>
     <dt>Recoil</dt>
     <dd>{item.recoil ?? 0}</dd>
-    <dt>Loudness</dt>
+    <dt title="Base loudness of ammo (possibly modified by gun/gunmods)">Loudness</dt>
     <dd>{computeLoudness(item)}</dd>
     <dt>Critical Multiplier</dt>
     <dd>{item.critical_multiplier ?? 2}</dd>
