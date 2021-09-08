@@ -296,6 +296,9 @@ let upgrades = item.upgrades && (item.upgrades.into || item.upgrades.into_group)
     <h1>Defense</h1>
     <dl style="flex: 1">
       <dt>HP</dt><dd>{item.hp}</dd>
+      {#if item.regenerates}
+      <dt>Regenerates</dt><dd>{item.regenerates} hp/turn</dd>
+      {/if}
       <dt>Dodge</dt><dd>{item.dodge ?? 0}</dd>
       <dt>Armor</dt>
       <dd>

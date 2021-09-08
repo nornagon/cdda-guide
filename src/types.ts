@@ -820,7 +820,8 @@ export type Monster = {
   emit_fields?: {emit_id: string, delay: string}[]
   attack_cost?: integer // default: 100
   special_attacks?: SpecialAttack[]
-  hp?: number
+  hp?: integer
+  regenerates?: integer
   dodge?: number
   armor_bash?: number
   armor_stab?: number
