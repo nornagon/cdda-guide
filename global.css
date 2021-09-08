@@ -337,8 +337,3 @@ pre {
 .c_pink_cyan { color: var(--cata-color-light_magenta); background: var(--cata-color-cyan); }
 .c_cyan_cyan { color: var(--cata-color-cyan); background: var(--cata-color-cyan); }
 .c_light_cyan_cyan { color: var(--cata-color-light_cyan); background: var(--cata-color-cyan); }
-
-@font-face {
-	font-family: 'Unifont';
-	src: url('unifont.woff') format('woff');
-}
