@@ -1,6 +1,7 @@
 import App from './App.svelte';
 import * as Sentry from "@sentry/browser";
 import { Integrations } from "@sentry/tracing";
+import '@fontsource/unifont';
 
 if (location.hostname !== 'localhost')
   Sentry.init({
