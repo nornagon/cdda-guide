@@ -6,11 +6,13 @@
     "dev": "rollup -c -w",
     "start": "sirv public",
     "validate": "svelte-check",
-    "test": "node fetch-fixtures.js && npm run validate && jest src",
+    "test": "node fetch-fixtures.js && npm run lint && npm run validate && jest src",
     "test:latest": "node fetch-fixtures.js latest && npm run validate && jest src",
     "test:watch": "npm run test -- --watch",
     "update-test-data": "node fetch-fixtures.js latest",
-    "deploy": "npm run build && gh-pages -d public"
+    "deploy": "npm run build && gh-pages -d public",
+    "lint": "prettier -c src",
+    "lint:fix": "prettier -w src"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
@@ -31,6 +33,8 @@
     "node-fetch": "^2.6.1",
     "postcss": "^8.3.6",
     "postcss-url": "^10.1.3",
+    "prettier": "^2.3.2",
+    "prettier-plugin-svelte": "^2.4.0",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",

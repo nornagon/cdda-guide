@@ -4,21 +4,33 @@ import { CddaData, parseMass, parseVolume, singular } from "../../data";
 import type { Item, Technique } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
-let data = getContext<CddaData>('data')
-export let item: Item
+let data = getContext<CddaData>("data");
+export let item: Item;
 
-let techniques = (item.techniques ?? []).map(t => data.byId<Technique>('technique', t));
+let techniques = (item.techniques ?? []).map((t) =>
+  data.byId<Technique>("technique", t)
+);
 
-const gripVal = { bad: 0, none: 1, solid: 2, weapon: 3 }
-const lengthVal = { hand: 0, short: 1, long: 2 }
-const surfaceVal = { point: 0, line: 1, any: 2, every: 3 }
-const balanceVal = { clumsy: 0, uneven: 1, neutral: 2, good: 3 }
+const gripVal = { bad: 0, none: 1, solid: 2, weapon: 3 };
+const lengthVal = { hand: 0, short: 1, long: 2 };
+const surfaceVal = { point: 0, line: 1, any: 2, every: 3 };
+const balanceVal = { clumsy: 0, uneven: 1, neutral: 2, good: 3 };
 
-const computeToHit = ({grip = 'weapon', length = 'hand', surface = 'any', balance = 'neutral'}: {grip?: string, length?: string, surface?: string, balance?: string}) => {
-  const g = gripVal[grip]
-  const l = lengthVal[length]
-  const s = surfaceVal[surface]
-  const b = balanceVal[balance]
+const computeToHit = ({
+  grip = "weapon",
+  length = "hand",
+  surface = "any",
+  balance = "neutral",
+}: {
+  grip?: string;
+  length?: string;
+  surface?: string;
+  balance?: string;
+}) => {
+  const g = gripVal[grip];
+  const l = lengthVal[length];
+  const s = surfaceVal[surface];
+  const b = balanceVal[balance];
   // all items have a basic accuracy of -2, per GAME_BALANCE.md
   const base_acc = -2;
   // grip val should go from -1 to 2 but enum_to_string wants to start at 0
@@ -30,33 +42,52 @@ const computeToHit = ({grip = 'weapon', length = 'hand', surface = 'any', balanc
   // all the constant offsets and the base accuracy together
   const acc_offset = base_acc + grip_offset + surface_offset + balance_offset;
   return acc_offset + g + l + s + b;
-}
+};
 
-const to_hit: number = typeof item.to_hit === 'object'
-  ? computeToHit(item.to_hit)
-  : item.to_hit ?? 0
+const to_hit: number =
+  typeof item.to_hit === "object"
+    ? computeToHit(item.to_hit)
+    : item.to_hit ?? 0;
 
 function attackTime(item: Item) {
-  return Math.floor(65 + ( Math.floor(parseVolume(item.volume) / 62.5) + Math.floor(parseMass(item.weight) / 60) ));
+  return Math.floor(
+    65 +
+      (Math.floor(parseVolume(item.volume) / 62.5) +
+        Math.floor(parseMass(item.weight) / 60))
+  );
 }
 
-const piercing = (item.flags ?? []).includes('SPEAR') || (item.flags ?? []).includes('STAB')
+const piercing =
+  (item.flags ?? []).includes("SPEAR") || (item.flags ?? []).includes("STAB");
 </script>
 
 {#if item.bashing || item.cutting}
-<section>
-<h1>Melee</h1>
-<dl>
-  <dt>Bash</dt><dd>{item.bashing ?? 0}</dd>
-  <dt>{#if piercing}Pierce{:else}Cut{/if}</dt><dd>{item.cutting ?? 0}</dd>
-  <dt>To Hit</dt><dd>{to_hit}</dd>
-  <dt>Moves Per Attack</dt><dd>{attackTime(item)}</dd>
-{#if techniques.length}
-  <dt>Techniques</dt><dd><ul class="no-bullets">{#each techniques as technique}
-  <li><strong><ThingLink type="technique" id={technique.id} /></strong>: {singular(technique.description)}</li>
-  {/each}
-  </ul></dd>
-{/if}
-</dl>
-</section>
+  <section>
+    <h1>Melee</h1>
+    <dl>
+      <dt>Bash</dt>
+      <dd>{item.bashing ?? 0}</dd>
+      <dt>
+        {#if piercing}Pierce{:else}Cut{/if}
+      </dt>
+      <dd>{item.cutting ?? 0}</dd>
+      <dt>To Hit</dt>
+      <dd>{to_hit}</dd>
+      <dt>Moves Per Attack</dt>
+      <dd>{attackTime(item)}</dd>
+      {#if techniques.length}
+        <dt>Techniques</dt>
+        <dd>
+          <ul class="no-bullets">
+            {#each techniques as technique}
+              <li>
+                <strong><ThingLink type="technique" id={technique.id} /></strong
+                >: {singular(technique.description)}
+              </li>
+            {/each}
+          </ul>
+        </dd>
+      {/if}
+    </dl>
+  </section>
 {/if}

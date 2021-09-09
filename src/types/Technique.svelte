@@ -4,14 +4,16 @@ import type { CddaData } from "../data";
 import type { Technique } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
-export let item: Technique
+export let item: Technique;
 
-const data = getContext<CddaData>('data')
+const data = getContext<CddaData>("data");
 
-const weapons = data.byType('item').filter(it => {
-  return it.id && (it.techniques ?? []).includes(item.id)
-}).sort((a, b) => a.id.localeCompare(b.id))
-
+const weapons = data
+  .byType("item")
+  .filter((it) => {
+    return it.id && (it.techniques ?? []).includes(item.id);
+  })
+  .sort((a, b) => a.id.localeCompare(b.id));
 </script>
 
 <h1>Technique: {item.name}</h1>
@@ -19,38 +21,43 @@ const weapons = data.byType('item').filter(it => {
   <dl>
     <dt>Required Skills</dt>
     <dd>
-      {#each item.skill_requirements ?? [] as {name, level}, i}
-      <ThingLink type="skill" id={name} /> ({level}){#if i === item.skill_requirements.length - 2}{' and '}{:else if i !== item.skill_requirements.length - 1}{', '}{/if}
+      {#each item.skill_requirements ?? [] as { name, level }, i}
+        <ThingLink type="skill" id={name} /> ({level}){#if i === item.skill_requirements.length - 2}{" and "}{:else if i !== item.skill_requirements.length - 1}{", "}{/if}
       {:else}
-      <em>none</em>
+        <em>none</em>
       {/each}
     </dd>
     {#if item.stun_dur}
-    <dt>Stun Duration</dt><dd>{item.stun_dur}</dd>
+      <dt>Stun Duration</dt>
+      <dd>{item.stun_dur}</dd>
     {/if}
     {#if item.down_dur}
-    <dt>Down Duration</dt><dd>{item.down_dur}</dd>
+      <dt>Down Duration</dt>
+      <dd>{item.down_dur}</dd>
     {/if}
     {#if item.knockback_dist}
-    <dt>Knockback Distance</dt><dd>{item.knockback_dist}</dd>
+      <dt>Knockback Distance</dt>
+      <dd>{item.knockback_dist}</dd>
     {/if}
     {#if item.weighting}
-    <dt>Weighting</dt><dd>{item.weighting}</dd>
+      <dt>Weighting</dt>
+      <dd>{item.weighting}</dd>
     {/if}
     {#if item.aoe}
-    <dt>AoE Shape</dt><dd>{item.aoe}</dd>
+      <dt>AoE Shape</dt>
+      <dd>{item.aoe}</dd>
     {/if}
   </dl>
   <p style="color: var(--cata-color-gray)">{item.description}</p>
 </section>
 
 {#if weapons.length}
-<section>
-<h1>Weapons</h1>
-<ul>
-{#each weapons as weapon}
-<li><ThingLink type="item" id={weapon.id} /></li>
-{/each}
-</ul>
-</section>
+  <section>
+    <h1>Weapons</h1>
+    <ul>
+      {#each weapons as weapon}
+        <li><ThingLink type="item" id={weapon.id} /></li>
+      {/each}
+    </ul>
+  </section>
 {/if}
