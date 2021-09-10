@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
-import type { Item, VehiclePart, ToolQuality } from "../types";
+import type { Item, VehiclePart, ToolQuality, Recipe } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: ToolQuality;
@@ -31,6 +31,21 @@ for (const it of data.byType<VehiclePart>("vehicle_part")) {
     vpartsWithQualityByLevel.get(level).push(it);
   }
 }
+
+const recipesUsingQuality: Recipe[] = [];
+for (const it of data.byType<Recipe>("recipe")) {
+  const { qualities } = data.normalizeRequirements(it);
+  if (qualities.some((qs) => qs.some((q) => q.id === item.id))) {
+    recipesUsingQuality.push(it);
+  }
+}
+recipesUsingQuality.sort((a, b) =>
+  singularName(data.byId("item", a.result)).localeCompare(
+    singularName(data.byId("item", b.result))
+  )
+);
+
+let recipesUsingQualityLimit = 10;
 </script>
 
 <h1>Quality: {singularName(item)}</h1>
@@ -85,5 +100,23 @@ for (const it of data.byType<VehiclePart>("vehicle_part")) {
         </dd>
       {/each}
     </dl>
+  </section>
+{/if}
+{#if recipesUsingQuality.length > 0}
+  <section>
+    <h1>Recipes</h1>
+    <ul>
+      {#each recipesUsingQuality.slice(0, recipesUsingQualityLimit) as recipe}
+        <li><ThingLink type="item" id={recipe.result} /></li>
+      {/each}
+    </ul>
+    {#if recipesUsingQuality.length > recipesUsingQualityLimit}
+      <button
+        class="disclosure"
+        on:click={(e) => {
+          e.preventDefault();
+          recipesUsingQualityLimit = Infinity;
+        }}>See all...</button>
+    {/if}
   </section>
 {/if}

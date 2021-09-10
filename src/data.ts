@@ -12,6 +12,7 @@ import type {
   Item,
   DamageInstance,
   DamageUnit,
+  RequirementData,
 } from "./types";
 
 const idlessTypes = new Set([
@@ -627,6 +628,41 @@ export class CddaData {
       .filter((x) => x.length);
     cache.set(required, ret);
     return ret;
+  }
+
+  normalizeRequirements(
+    requirement: RequirementData & { using?: Recipe["using"] }
+  ) {
+    const using =
+      typeof requirement.using === "string"
+        ? ([[requirement.using, 1]] as const)
+        : requirement.using;
+
+    const requirements = (using ?? [])
+      .map(
+        ([id, count]) =>
+          [
+            this.byId<RequirementData>("requirement", id),
+            count as number,
+          ] as const
+      )
+      .concat([[requirement, 1] as const])
+      .filter((x) => x[0]); // NB. to cope with some data errors in obsolete parts
+
+    const tools = requirements.flatMap(([req, count]) =>
+      this.flattenRequirement(req.tools ?? [], (x) => x.tools, {
+        expandSubstitutes: true,
+      }).map((x) => x.map((x) => ({ ...x, count: x.count * count })))
+    );
+    const qualities = requirements.flatMap(([req, _count]) =>
+      (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x]))
+    );
+    const components = requirements.flatMap(([req, count]) =>
+      this.flattenRequirement(req.components ?? [], (x) => x.components).map(
+        (x) => x.map((x) => ({ ...x, count: x.count * count }))
+      )
+    );
+    return { tools, qualities, components };
   }
 }
 

@@ -9,34 +9,7 @@ export let requirement: RequirementData & { using?: Recipe["using"] };
 
 const data = getContext<CddaData>("data");
 
-const using =
-  typeof requirement.using === "string"
-    ? ([[requirement.using, 1]] as const)
-    : requirement.using;
-
-let requirements = (using ?? [])
-  .map(
-    ([id, count]) =>
-      [data.byId<RequirementData>("requirement", id), count as number] as const
-  )
-  .concat([[requirement, 1] as const])
-  .filter((x) => x[0]); // NB. to cope with some data errors in obsolete parts
-
-let tools = requirements.flatMap(([req, count]) =>
-  data
-    .flattenRequirement(req.tools ?? [], (x) => x.tools, {
-      expandSubstitutes: true,
-    })
-    .map((x) => x.map((x) => ({ ...x, count: x.count * count })))
-);
-let components = requirements.flatMap(([req, count]) =>
-  data
-    .flattenRequirement(req.components ?? [], (x) => x.components)
-    .map((x) => x.map((x) => ({ ...x, count: x.count * count })))
-);
-let qualities = requirements.flatMap(([req, _count]) =>
-  (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x]))
-);
+let { tools, qualities, components } = data.normalizeRequirements(requirement);
 </script>
 
 {#if (qualities ?? []).length || tools.length}
