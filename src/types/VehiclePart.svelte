@@ -162,10 +162,8 @@ function asMinutes(duration: string | number) {
       <dd>
         <ul class="comma-separated">
           {#each data.flattenItemGroup(breaksIntoGroup) as { id, count, prob }}
-            <li>
-              <ThingLink {id} {count} type="item" />{#if prob !== 1}
-                ({showProbability(prob)}){/if}
-            </li>
+            <!-- prettier-ignore -->
+            <li><ThingLink {id} {count} type="item" />{#if prob !== 1} ({showProbability(prob)}){/if}</li>
           {/each}
         </ul>
       </dd>

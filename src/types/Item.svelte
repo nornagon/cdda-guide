@@ -133,9 +133,9 @@ const ascii_picture =
           <dt>Material</dt>
           <dd>
             <ul class="comma-separated">
-              {#each materials as m}<li>
-                  <ThingLink type="material" id={m.id} />
-                </li>{/each}
+              {#each materials as m}
+                <li><ThingLink type="material" id={m.id} /></li>
+              {/each}
             </ul>
           </dd>
         {/if}
@@ -174,9 +174,8 @@ const ascii_picture =
         <dt>Flags</dt>
         <dd>
           <ul class="comma-separated">
-            {#each flags as f}<li>
-                <ThingLink type="json_flag" id={f.id} />
-              </li>{:else}<li><em>none</em></li>{/each}
+            <!-- prettier-ignore -->
+            {#each flags as f}<li><ThingLink type="json_flag" id={f.id} /></li>{:else}<li><em>none</em></li>{/each}
           </ul>
         </dd>
         {#if faults.length}

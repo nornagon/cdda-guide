@@ -35,9 +35,11 @@ const mendingMethods = (item.mending_methods ?? []).map((mm) => {
     <dt>Flags</dt>
     <dd>
       <ul class="comma-separated">
-        {#each item.flags ?? [] as flag}<li>{flag}</li>{:else}<li>
-            <em>none</em>
-          </li>{/each}
+        {#each item.flags ?? [] as flag}
+          <li>{flag}</li>
+        {:else}
+          <li><em>none</em></li>
+        {/each}
       </ul>
     </dd>
   </dl>

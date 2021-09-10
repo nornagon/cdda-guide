@@ -393,7 +393,7 @@ let upgrades =
     <dd>
       {#each item.flags ?? [] as flag, i}<abbr
           title={mon_flag_descriptions[flag]}>{flag}</abbr
-        >{#if i < item.flags.length - 1}, {/if}{/each}
+        >{#if i < item.flags.length - 1}{", "}{/if}{/each}
     </dd>
     {#if item.death_function}
       <dt>On Death</dt>
@@ -403,9 +403,10 @@ let upgrades =
       <dt>Upgrades Into</dt>
       <dd>
         <ul class="comma-separated or">
-          {#each upgrades.monsters as mon}<li>
-              <ThingLink type="monster" id={mon} />
-            </li>{/each}
+          <!-- prettier-ignore -->
+          {#each upgrades.monsters as mon}
+            <li><ThingLink type="monster" id={mon} /></li>
+          {/each}
         </ul>
         {#if upgrades.age_grow}
           in {upgrades.age_grow} day{#if upgrades.age_grow !== 1}s{/if}

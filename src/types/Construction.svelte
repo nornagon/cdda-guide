@@ -78,8 +78,7 @@ const qualities = requirements.flatMap(([req, _count]) => {
                   : "s"}
                 with <ThingLink type="tool_quality" id={quality.id} /> of {quality.level}
                 or more{""}{/each}.
-            </li>
-          {/each}
+            </li>{/each}
           {#each tools as toolChoices}
             <li>
               {#each toolChoices as tool, i}
@@ -92,8 +91,7 @@ const qualities = requirements.flatMap(([req, _count]) => {
                 {/if}
                 {#if tool.count > 0}({tool.count} charge{#if tool.count !== 1}s{/if}){/if}
               {/each}
-            </li>
-          {/each}
+            </li>{/each}
         </ul>
       </dd>
     {/if}
@@ -107,8 +105,7 @@ const qualities = requirements.flatMap(([req, _count]) => {
                 {#if i !== 0}{" OR "}{/if}
                 <ThingLink {id} {count} type="item" />
               {/each}
-            </li>
-          {/each}
+            </li>{/each}
         </ul>
       </dd>
     {/if}

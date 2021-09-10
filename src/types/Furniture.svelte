@@ -61,14 +61,11 @@ const bits = [
         <dt>{title}</dt>
         <dd>
           <ul class="comma-separated">
-            {#each arr as { id, prob, count }}
-              <li>
-                <ThingLink
-                  type="item"
-                  {id} />{""}{#if count[0] === count[1]}{#if count[0] !== 1}{" "}({count[0]}){/if}{:else}{" "}({count[0]}–{count[1]}){/if}{""}{#if prob !== 1}{" "}({showProbability(
-                    prob
-                  )}){/if}
-              </li>
+            <!-- prettier-ignore -->
+            {#each arr as {id, prob, count}}
+            <li><span style="white-space: nowrap"><ThingLink type="item" {id} />{
+              ''}{#if count[0] === count[1]}{#if count[0] !== 1}&nbsp;({count[0]}){/if}{:else}&nbsp;({count[0]}–{count[1]}){/if}{
+              ''}{#if prob !== 1}&nbsp;({showProbability(prob)}){/if}</span></li>
             {/each}
           </ul>
         </dd>

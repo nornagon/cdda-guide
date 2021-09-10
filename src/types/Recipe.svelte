@@ -92,6 +92,7 @@ writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0));
       Autolearn
     </dt>
     <dd>
+      <!-- prettier-ignore-->
       {#if recipe.autolearn}
         <ul class="comma-separated">
           {#if Array.isArray(recipe.autolearn)}
@@ -121,10 +122,8 @@ writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0));
       <dd>
         <ul class="comma-separated">
           {#each writtenIn as [item_id, /* prettier-ignore */ level = 0]}
-            <li>
-              <span style="white-space: nowrap"
-                ><ThingLink id={item_id} type="item" /> ({level})</span>
-            </li>
+            <!-- prettier-ignore -->
+            <li><span style="white-space: nowrap"><ThingLink id={item_id} type="item" /> ({level})</span></li>
           {/each}
         </ul>
       </dd>
