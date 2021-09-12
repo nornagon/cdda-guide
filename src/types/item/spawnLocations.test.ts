@@ -265,4 +265,28 @@ describe("parsePalette()", () => {
       new Map([["X", new Map([["test_pants_fur", 0.5]])]])
     );
   });
+
+  it("knows about arrays in .items", () => {
+    const data = new CddaData([
+      {
+        id: "gr0",
+        type: "item_group",
+        subtype: "collection",
+        items: [["fake_item", 50]],
+      },
+      {
+        id: "gr1",
+        type: "item_group",
+        subtype: "collection",
+        items: [["fake_item", 50]],
+      },
+    ]);
+    const rawPalette = {
+      items: { X: [{ item: "gr0" }, { item: "gr1" }] },
+    };
+
+    const got = parsePalette(data, rawPalette);
+
+    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
+  });
 });

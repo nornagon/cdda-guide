@@ -132,8 +132,10 @@ export function parsePalette(
   const items = palette.items ?? {};
   return new Map(
     Object.entries(items).map(([sym, val]) => {
-      const g = getItemGroup(data, val.item);
-      return [sym, g];
+      const groups = [val]
+        .flat()
+        .map((entry) => ({ loot: getItemGroup(data, entry.item), chance: 1 }));
+      return [sym, collection(groups)];
     })
   );
 }
