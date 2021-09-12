@@ -56,12 +56,18 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
     };
   });
   /*
-  mapgen.object.palettes
-  mapgen.object.rows
+  mapgen.object.add
   mapgen.object.place_item
+  item, chance, repeat: number | [number] | [number, number]
+
   mapgen.object.place_items
   mapgen.object.place_loot
-  mapgen.object.add
+
+  mapgen.object is a palette
+  palette.item
+  palette.items
+  palette.sealed_item
+  palette.palettes // str, distribution, param or switch
   */
   return [];
 }
