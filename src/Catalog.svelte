@@ -40,7 +40,7 @@ const groupKeys = [...groups.keys()].sort();
     {#if groupName}
       <h1>{groupName}</h1>
     {/if}
-    <LimitedList items={groups.get(groupName)} let:item>
+    <LimitedList items={groups.get(groupName)} let:item limit={groupKeys.length === 1 ? Infinity : 10}>
       <ThingLink {type} id={item.id} />
     </LimitedList>
   </section>

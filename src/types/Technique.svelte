@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import type { CddaData } from "../data";
+import LimitedList from "../LimitedList.svelte";
 import type { Technique } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
@@ -54,10 +55,8 @@ const weapons = data
 {#if weapons.length}
   <section>
     <h1>Weapons</h1>
-    <ul>
-      {#each weapons as weapon}
-        <li><ThingLink type="item" id={weapon.id} /></li>
-      {/each}
-    </ul>
+    <LimitedList items={weapons} let:item limit={20}>
+      <ThingLink type="item" id={item.id} />
+    </LimitedList>
   </section>
 {/if}
