@@ -289,4 +289,24 @@ describe("parsePalette()", () => {
 
     expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
   });
+
+  it("knows about chance in .items", () => {
+    const data = new CddaData([
+      {
+        id: "fake_item_group",
+        type: "item_group",
+        subtype: "collection",
+        items: [["test_pants_fur", 50]],
+      },
+    ]);
+    const rawPalette = {
+      items: { X: { item: "fake_item_group", chance: 50 } },
+    };
+
+    const got = parsePalette(data, rawPalette);
+
+    expect(got).toStrictEqual(
+      new Map([["X", new Map([["test_pants_fur", 0.25]])]])
+    );
+  });
 });

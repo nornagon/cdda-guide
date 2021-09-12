@@ -117,7 +117,7 @@ export function getItemGroup(data: CddaData, id: string): Loot {
 type RawPaletteEntry = {
   chance?: number /*0 <= chance <= 100 */;
   item: string;
-  repeat?: number | [number] | [number, number];
+  // repeat?: number | [number] | [number, number];
 };
 type RawPalette = {
   // item
@@ -132,9 +132,10 @@ export function parsePalette(
   const items = palette.items ?? {};
   return new Map(
     Object.entries(items).map(([sym, val]) => {
-      const groups = [val]
-        .flat()
-        .map((entry) => ({ loot: getItemGroup(data, entry.item), chance: 1 }));
+      const groups = [val].flat().map(({ item, chance }) => ({
+        loot: getItemGroup(data, item),
+        chance: (chance ?? 100) / 100,
+      }));
       return [sym, collection(groups)];
     })
   );
