@@ -3,7 +3,7 @@ import { singularName } from "../../data";
 import type * as raw from "../../types";
 import { Maybe } from "./utils";
 
-/** 0.0 < chance < 1.0 */
+/** 0.0 <= chance <= 1.0 */
 type chance = number;
 
 type Loot = Map</**item_id*/ string, chance>;
@@ -110,4 +110,9 @@ export function getItemSpawnLocations(
       const omt = mapgen.overmap_terrains[0];
       return { chance: chance, ...omt };
     });
+}
+
+export function getItemGroup(data: CddaData, id: string): Loot {
+  const g = data.flattenItemGroup(data.byId("item_group", id));
+  return new Map(g.map(({ id, prob }) => [id, prob]));
 }
