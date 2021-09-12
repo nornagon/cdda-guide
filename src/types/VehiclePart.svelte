@@ -52,6 +52,7 @@ const breaksIntoGroup: ItemGroup | null =
     : item.breaks_into
     ? item.breaks_into
     : null;
+const breaksIntoGroupFlattened = breaksIntoGroup && data.flattenItemGroup(breaksIntoGroup);
 
 function parseDuration(duration: string | number) {
   if (typeof duration === "number") return duration / 100;
@@ -157,11 +158,11 @@ function asMinutes(duration: string | number) {
       <dt>{bonusLabel(item)}</dt>
       <dd>{item.bonus}</dd>
     {/if}
-    {#if breaksIntoGroup}
+    {#if breaksIntoGroupFlattened?.length}
       <dt>Breaks Into</dt>
       <dd>
         <ul class="comma-separated">
-          {#each data.flattenItemGroup(breaksIntoGroup) as { id, count, prob }}
+          {#each breaksIntoGroupFlattened as { id, count, prob }}
             <!-- prettier-ignore -->
             <li><ThingLink {id} {count} type="item" />{#if prob !== 1} ({showProbability(prob)}){/if}</li>
           {/each}
