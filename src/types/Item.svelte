@@ -33,6 +33,7 @@ import ItemSymbol from "./item/ItemSymbol.svelte";
 import MeleeInfo from "./item/MeleeInfo.svelte";
 import Recipes from "./item/Recipes.svelte";
 import SpawnedIn from "./item/SpawnedIn.svelte";
+import ToolInfo from "./item/ToolInfo.svelte";
 import WheelInfo from "./item/WheelInfo.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -241,6 +242,9 @@ const ascii_picture =
 {/if}
 {#if item.type === "ARMOR" || item.type === "TOOL_ARMOR"}
   <ArmorInfo {item} />
+{/if}
+{#if item.type === "TOOL" || item.type === "TOOL_ARMOR"}
+  <ToolInfo {item} />
 {/if}
 {#if item.type === "ENGINE" && item.displacement}
   <section>

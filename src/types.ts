@@ -167,6 +167,19 @@ export type BookSlot = {
   proficiencies?: BookProficiencyBonus[];
 };
 
+export type ToolSlot = {
+  ammo?: string | string[];
+  max_charges?: integer;
+  initial_charges?: integer;
+  charges_per_use?: integer;
+  charge_factor?: integer; // default 1
+  turns_per_charge?: integer;
+  power_draw?: integer;
+  revert_to?: string; // item_id
+  sub?: string; // item_id
+  rand_charges?: integer[];
+};
+
 export type DamageType =
   | "pure"
   | "biological"
@@ -357,9 +370,11 @@ type TypedItems =
   | ({ type: "BOOK" } & BookSlot)
   | ({ type: "GUN" } & GunSlot)
   | ({ type: "COMESTIBLE" } & ComestibleSlot)
-  | ({ type: "ARMOR" | "TOOL_ARMOR" } & ArmorSlot)
+  | ({ type: "ARMOR" } & ArmorSlot)
+  | ({ type: "TOOL_ARMOR" } & ToolSlot & ArmorSlot)
   | ({ type: "ENGINE" } & EngineSlot)
-  | ({ type: "WHEEL" } & WheelSlot);
+  | ({ type: "WHEEL" } & WheelSlot)
+  | ({ type: "TOOL" } & ToolSlot);
 type UntypedItemType = Exclude<AllItemTypes, TypedItems["type"]>;
 
 export type Item = ItemBasicInfo & (TypedItems | { type: UntypedItemType });
