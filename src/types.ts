@@ -144,6 +144,7 @@ export type Recipe = {
   reversible?: boolean;
   byproducts?: ([string] | [string, number])[];
   // TODO: construction_blueprint
+  construction_blueprint?: any;
 } & RequirementData;
 
 export type BookProficiencyBonus = {

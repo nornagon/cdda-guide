@@ -18,6 +18,7 @@ import type {
   SpecialAttack,
 } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import LimitedList from "../LimitedList.svelte";
 
 export let item: Monster;
 
@@ -245,8 +246,6 @@ let materials = item.material ?? [];
 
 let deathDrops = data.flatDeathDrops(item.id);
 
-let deathDropsLimit = 10;
-
 let harvest: Harvest = item.harvest
   ? data.byId("harvest", item.harvest)
   : undefined;
@@ -420,22 +419,10 @@ let upgrades =
 {#if deathDrops?.length}
   <section>
     <h1>Drops</h1>
-    <ul>
-      {#each deathDrops.slice(0, deathDropsLimit) as { id, prob }}
-        <li>
-          <ItemSymbol item={data.byId("item", id)} />
-          <ThingLink type="item" {id} /> ({showProbability(prob)})
-        </li>
-      {/each}
-    </ul>
-    {#if deathDrops.length > deathDropsLimit}
-      <button
-        class="disclosure"
-        on:click={(e) => {
-          e.preventDefault();
-          deathDropsLimit = Infinity;
-        }}>See all...</button>
-    {/if}
+    <LimitedList items={deathDrops} let:item>
+      <ItemSymbol item={data.byId("item", item.id)} />
+      <ThingLink type="item" id={item.id} /> ({showProbability(item.prob)})
+    </LimitedList>
   </section>
 {/if}
 {#if harvest && (harvest.entries ?? []).length}

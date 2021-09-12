@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
+import LimitedList from "../../LimitedList.svelte";
 import type { Recipe, RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
@@ -40,28 +41,14 @@ const uncraftableFrom = [...uncraftableFromSet].sort((a, b) =>
     singularName(data.byId("item", b))
   )
 );
-
-let uncraftLimit = 10;
 </script>
 
 {#if uncraftableFrom.length}
   <section>
     <h1>Disassemble</h1>
-    <ul>
-      {#each uncraftableFrom.slice(0, uncraftLimit) as id}
-        <li>
-          <ItemSymbol item={data.byId("item", id)} />
-          <ThingLink {id} type="item" />
-        </li>
-      {/each}
-    </ul>
-    {#if uncraftableFrom.length > uncraftLimit}
-      <button
-        class="disclosure"
-        on:click={(e) => {
-          e.preventDefault();
-          uncraftLimit = Infinity;
-        }}>See all...</button>
-    {/if}
+    <LimitedList items={uncraftableFrom} let:item={id}>
+      <ItemSymbol item={data.byId("item", id)} />
+      <ThingLink type="item" {id} />
+    </LimitedList>
   </section>
 {/if}

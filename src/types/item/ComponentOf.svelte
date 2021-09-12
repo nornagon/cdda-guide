@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
+import LimitedList from "../../LimitedList.svelte";
 import type { Recipe, RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
@@ -42,28 +43,14 @@ const results = [...new Set(recipes.map((r) => r.result))].sort((a, b) =>
     singularName(data.byId("item", b))
   )
 );
-
-let limit = 10;
 </script>
 
 {#if results.length}
   <section>
     <h1>Component Of</h1>
-    <ul>
-      {#each results.slice(0, limit) as r}
-        <li>
-          <ItemSymbol item={data.byId("item", r)} />
-          <ThingLink type="item" id={r} />
-        </li>
-      {/each}
-    </ul>
-    {#if results.length > limit}
-      <button
-        class="disclosure"
-        on:click={(e) => {
-          e.preventDefault();
-          limit = Infinity;
-        }}>See all...</button>
-    {/if}
+    <LimitedList items={results} let:item>
+      <ItemSymbol item={data.byId("item", item)} />
+      <ThingLink type="item" id={item} />
+    </LimitedList>
   </section>
 {/if}

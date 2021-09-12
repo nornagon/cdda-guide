@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, flattenItemGroup, singularName } from "../../data";
+import LimitedList from "../../LimitedList.svelte";
 import type { Furniture } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import FurnitureSymbol from "./FurnitureSymbol.svelte";
@@ -32,28 +33,14 @@ let deconstructibleFrom = data
     );
   })
   .sort((a, b) => singularName(a).localeCompare(singularName(b)));
-
-let limit = 10;
 </script>
 
 {#if deconstructibleFrom.length}
   <section>
     <h1>Deconstruct</h1>
-    <ul>
-      {#each deconstructibleFrom.slice(0, limit) as f}
-        <li>
-          <FurnitureSymbol item={data.byId("furniture", f.id)} />
-          <ThingLink id={f.id} type="furniture" />
-        </li>
-      {/each}
-    </ul>
-    {#if deconstructibleFrom.length > limit}
-      <button
-        class="disclosure"
-        on:click={(e) => {
-          e.preventDefault();
-          limit = Infinity;
-        }}>See all...</button>
-    {/if}
+    <LimitedList items={deconstructibleFrom} let:item={f}>
+      <FurnitureSymbol item={data.byId("furniture", f.id)} />
+      <ThingLink id={f.id} type="furniture" />
+    </LimitedList>
   </section>
 {/if}

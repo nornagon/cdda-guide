@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
+import LimitedList from "../LimitedList.svelte";
 import type { Item, VehiclePart, ToolQuality, Recipe } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
@@ -32,20 +33,30 @@ for (const it of data.byType<VehiclePart>("vehicle_part")) {
   }
 }
 
-const recipesUsingQuality: Recipe[] = [];
+const recipesUsingQualitySet = new Map<number, Set<string>>();
 for (const it of data.byType<Recipe>("recipe")) {
+  if (it.construction_blueprint) continue;
   const { qualities } = data.normalizeRequirements(it);
-  if (qualities.some((qs) => qs.some((q) => q.id === item.id))) {
-    recipesUsingQuality.push(it);
+  for (const qs of qualities) {
+    for (const { id, level } of qs) {
+      if (id === item.id) {
+        if (!recipesUsingQualitySet.has(level))
+          recipesUsingQualitySet.set(level, new Set());
+        recipesUsingQualitySet.get(level).add(it.result);
+      }
+    }
   }
 }
-recipesUsingQuality.sort((a, b) =>
-  singularName(data.byId("item", a.result)).localeCompare(
-    singularName(data.byId("item", b.result))
-  )
-);
-
-let recipesUsingQualityLimit = 10;
+const recipesUsingQuality = new Map<number, string[]>();
+for (const [level, set] of recipesUsingQualitySet)
+  recipesUsingQuality.set(
+    level,
+    [...set].sort((a, b) =>
+      singularName(data.byId("item", a)).localeCompare(
+        singularName(data.byId("item", b))
+      )
+    )
+  );
 </script>
 
 <h1>Quality: {singularName(item)}</h1>
@@ -72,13 +83,14 @@ let recipesUsingQualityLimit = 10;
     {#each [...toolsWithQualityByLevel.keys()].sort((a, b) => a - b) as level}
       <dt>Level {level}</dt>
       <dd>
-        <ul>
-          {#each toolsWithQualityByLevel
+        <LimitedList
+          items={toolsWithQualityByLevel
             .get(level)
-            .sort( (a, b) => singularName(a).localeCompare(singularName(b)) ) as { id }}
-            <li><ThingLink type="item" {id} /></li>
-          {/each}
-        </ul>
+            .sort((a, b) => singularName(a).localeCompare(singularName(b)))}
+          limit={20}
+          let:item>
+          <ThingLink type="item" id={item.id} />
+        </LimitedList>
       </dd>
     {/each}
   </dl>
@@ -90,33 +102,34 @@ let recipesUsingQualityLimit = 10;
       {#each [...vpartsWithQualityByLevel.keys()].sort((a, b) => a - b) as level}
         <dt>Level {level}</dt>
         <dd>
-          <ul>
-            {#each vpartsWithQualityByLevel
+          <LimitedList
+            items={vpartsWithQualityByLevel
               .get(level)
-              .sort( (a, b) => singularName(a).localeCompare(singularName(b)) ) as { id }}
-              <li><ThingLink type="vehicle_part" {id} /></li>
-            {/each}
-          </ul>
+              .sort((a, b) => singularName(a).localeCompare(singularName(b)))}
+            limit={20}
+            let:item>
+            <ThingLink type="vehicle_part" id={item.id} />
+          </LimitedList>
         </dd>
       {/each}
     </dl>
   </section>
 {/if}
-{#if recipesUsingQuality.length > 0}
+{#if recipesUsingQuality.size > 0}
   <section>
     <h1>Recipes</h1>
-    <ul>
-      {#each recipesUsingQuality.slice(0, recipesUsingQualityLimit) as recipe}
-        <li><ThingLink type="item" id={recipe.result} /></li>
+    <dl>
+      {#each [...recipesUsingQuality.keys()].sort((a, b) => a - b) as level}
+        <dt>Level {level}</dt>
+        <dd>
+          <LimitedList
+            items={recipesUsingQuality.get(level)}
+            let:item
+            limit={20}>
+            <ThingLink type="item" id={item} />
+          </LimitedList>
+        </dd>
       {/each}
-    </ul>
-    {#if recipesUsingQuality.length > recipesUsingQualityLimit}
-      <button
-        class="disclosure"
-        on:click={(e) => {
-          e.preventDefault();
-          recipesUsingQualityLimit = Infinity;
-        }}>See all...</button>
-    {/if}
+    </dl>
   </section>
 {/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singular, singularName } from "../data";
+import LimitedList from "../LimitedList.svelte";
 
 import type { ComestibleSlot, Vitamin } from "../types";
 import ThingLink from "./ThingLink.svelte";
@@ -31,8 +32,6 @@ const excessNames: any[] = item.excess
 const deficiencyNames: any[] = item.deficiency
   ? data.byId("effect_type", item.deficiency).name
   : [];
-
-let limit = 10;
 </script>
 
 <h1>Vitamin: {singularName(item)}</h1>
@@ -66,17 +65,7 @@ let limit = 10;
 </section>
 <section>
   <h1>Comestibles</h1>
-  <ul>
-    {#each containingComestibles.slice(0, limit) as { comestible, pct }}
-      <li><ThingLink id={comestible.id} type="item" /> ({pct}% RDA)</li>
-    {/each}
-  </ul>
-  {#if containingComestibles.length > limit}
-    <button
-      class="disclosure"
-      on:click={(e) => {
-        e.preventDefault();
-        limit = Infinity;
-      }}>See all...</button>
-  {/if}
+  <LimitedList items={containingComestibles} let:item>
+    <ThingLink id={item.comestible.id} type="item" /> ({item.pct}% RDA)
+  </LimitedList>
 </section>

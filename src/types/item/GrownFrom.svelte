@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
+import LimitedList from "../../LimitedList.svelte";
 import type { Item } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
@@ -16,30 +17,14 @@ const sources = data.byType<Item>("item").filter((item) => {
     item.seed_data.byproducts?.includes(item_id)
   );
 });
-//mons.sort((a, b) => b.prob - a.prob)
-
-let limit = 10;
 </script>
 
 {#if sources.length}
   <section>
     <h1>Grown From</h1>
-    <ul>
-      {#each sources.slice(0, limit) as item}
-        <li>
-          <ItemSymbol {item} />
-          <ThingLink id={item.id} type="item" /> ({item.seed_data.grow ??
-            "1 day"})
-        </li>
-      {/each}
-    </ul>
-    {#if sources.length > limit}
-      <button
-        class="disclosure"
-        on:click={(e) => {
-          e.preventDefault();
-          limit = Infinity;
-        }}>See all...</button>
-    {/if}
+    <LimitedList items={sources} let:item>
+      <ItemSymbol {item} />
+      <ThingLink id={item.id} type="item" /> ({item.seed_data.grow ?? "1 day"})
+    </LimitedList>
   </section>
 {/if}

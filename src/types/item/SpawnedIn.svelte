@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
+import LimitedList from "../../LimitedList.svelte";
 import type { Mapgen } from "../../types";
 
 export let item_id: string;
@@ -40,28 +41,15 @@ for (const mg of mapgens) {
 const om_terrains_sorted: any[] = [...om_terrains].sort((a, b) =>
   singularName(a).localeCompare(singularName(b))
 );
-let omTerrainLimit = 10;
 </script>
 
 {#if om_terrains_sorted.length}
   <section>
     <h1>Loot</h1>
-    <ul>
-      {#each om_terrains_sorted.slice(0, omTerrainLimit) as omt}
-        <li>
-          <span style="font-family: monospace;" class="c_{omt.color}"
-            >{omt.sym}</span>
-          <span title={omt.id}>{singularName(omt)}</span>
-        </li>
-      {/each}
-    </ul>
-    {#if om_terrains_sorted.length > omTerrainLimit}
-      <button
-        class="disclosure"
-        on:click={(e) => {
-          e.preventDefault();
-          omTerrainLimit = Infinity;
-        }}>See all...</button>
-    {/if}
+    <LimitedList items={om_terrains_sorted} let:item={omt}>
+      <span style="font-family: monospace;" class="c_{omt.color}"
+        >{omt.sym}</span>
+      <span title={omt.id}>{singularName(omt)}</span>
+    </LimitedList>
   </section>
 {/if}
