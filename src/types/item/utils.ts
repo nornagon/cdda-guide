@@ -4,6 +4,8 @@ export function showProbability(prob: number) {
   return ret + "%";
 }
 
+// I could use purify instead if you are ok with adding a dependency
+// see https://gigobyte.github.io/purify/adts/Maybe#static-fromNullable
 export class Maybe<T> {
   private readonly value: T | undefined;
   constructor(value: T | undefined) {
