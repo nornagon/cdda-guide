@@ -65,7 +65,7 @@ for (const [level, set] of recipesUsingQualitySet)
     <h1>Usages</h1>
     <dl>
       {#each item.usages as [level, usages]}
-        <dt>At Level {level}</dt>
+        <dt style="font-variant: tabular-nums">At Level {level}</dt>
         <dd>
           <ul class="comma-separated">
             {#each usages as usage}
@@ -81,7 +81,7 @@ for (const [level, set] of recipesUsingQualitySet)
   <h1>Tools</h1>
   <dl>
     {#each [...toolsWithQualityByLevel.keys()].sort((a, b) => a - b) as level}
-      <dt>Level {level}</dt>
+      <dt style="font-variant: tabular-nums">Level {level}</dt>
       <dd>
         <LimitedList
           items={toolsWithQualityByLevel
@@ -100,7 +100,7 @@ for (const [level, set] of recipesUsingQualitySet)
     <h1>Vehicle Parts</h1>
     <dl>
       {#each [...vpartsWithQualityByLevel.keys()].sort((a, b) => a - b) as level}
-        <dt>Level {level}</dt>
+        <dt style="font-variant: tabular-nums">Level {level}</dt>
         <dd>
           <LimitedList
             items={vpartsWithQualityByLevel
@@ -120,7 +120,7 @@ for (const [level, set] of recipesUsingQualitySet)
     <h1>Recipes</h1>
     <dl>
       {#each [...recipesUsingQuality.keys()].sort((a, b) => a - b) as level}
-        <dt>Level {level}</dt>
+        <dt style="font-variant: tabular-nums">Level {level}</dt>
         <dd>
           <LimitedList
             items={recipesUsingQuality.get(level)}
