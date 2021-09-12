@@ -261,9 +261,20 @@ export class CddaData {
     delete ret.extend;
     for (const k of Object.keys(ret.delete ?? {})) {
       if (Array.isArray(ret.delete[k])) {
-        ret[k] = (ret[k] ?? []).filter((x) => !ret.delete[k].includes(x));
+        // Some 'delete' entries delete qualities, which are arrays. As a rough
+        // heuristic, compare recursively.
+        const isEqual = (x, y) =>
+          x === y ||
+          (Array.isArray(x) &&
+            Array.isArray(y) &&
+            x.length === y.length &&
+            x.every((j, i) => isEqual(j, y[i])));
+        ret[k] = (ret[k] ?? []).filter(
+          (x) => !ret.delete[k].some((y) => isEqual(y, x))
+        );
       }
     }
+    delete ret.delete;
     this._flattenCache.set(obj, ret);
     return ret;
   }
