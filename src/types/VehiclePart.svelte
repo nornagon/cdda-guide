@@ -52,7 +52,8 @@ const breaksIntoGroup: ItemGroup | null =
     : item.breaks_into
     ? item.breaks_into
     : null;
-const breaksIntoGroupFlattened = breaksIntoGroup && data.flattenItemGroup(breaksIntoGroup);
+const breaksIntoGroupFlattened =
+  breaksIntoGroup && data.flattenItemGroup(breaksIntoGroup);
 
 function parseDuration(duration: string | number) {
   if (typeof duration === "number") return duration / 100;
