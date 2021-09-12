@@ -35,7 +35,7 @@ for (const it of data.byType<VehiclePart>("vehicle_part")) {
 
 const recipesUsingQualitySet = new Map<number, Set<string>>();
 for (const it of data.byType<Recipe>("recipe")) {
-  if (it.construction_blueprint) continue;
+  if (it.construction_blueprint || it.type === 'uncraft') continue;
   const { qualities } = data.normalizeRequirements(it);
   for (const qs of qualities) {
     for (const { id, level } of qs) {
