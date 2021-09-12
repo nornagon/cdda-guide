@@ -64,10 +64,7 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
   mapgen.object.place_loot
 
   mapgen.object is a palette
-  palette.item
-  palette.items
-  palette.sealed_item
-  palette.palettes // str, distribution, param or switch
+
   */
   return [];
 }
@@ -115,4 +112,28 @@ export function getItemSpawnLocations(
 export function getItemGroup(data: CddaData, id: string): Loot {
   const g = data.flattenItemGroup(data.byId("item_group", id));
   return new Map(g.map(({ id, prob }) => [id, prob]));
+}
+
+type RawPaletteEntry = {
+  chance?: number /*0 <= chance <= 100 */;
+  item: string;
+  repeat?: number | [number] | [number, number];
+};
+type RawPalette = {
+  // item
+  items?: Record<string, RawPaletteEntry | RawPaletteEntry[]>;
+  // sealed_item
+  // palettes // str, distribution, param or switch
+};
+export function parsePalette(
+  data: CddaData,
+  palette: RawPalette
+): Map<string, Loot> {
+  const items = palette.items ?? {};
+  return new Map(
+    Object.entries(items).map(([sym, val]) => {
+      const g = getItemGroup(data, val.item);
+      return [sym, g];
+    })
+  );
 }
