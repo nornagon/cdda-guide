@@ -1141,6 +1141,7 @@ const types = [
   "skill_display_type",
   "snippet",
   "speech",
+  "speed_description",
   "start_location",
   "talk_topic",
   "technique",
