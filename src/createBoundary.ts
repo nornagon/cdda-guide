@@ -1,5 +1,5 @@
-import { writable } from 'svelte/store';
-const GUARDED_BLOCK_FNS = ['c', 'l', 'h', 'm', 'p', 'a', 'i', 'o', 'd'];
+import { writable } from "svelte/store";
+const GUARDED_BLOCK_FNS = ["c", "l", "h", "m", "p", "a", "i", "o", "d"];
 
 export function createBoundary(Component) {
   if (Component.$$render) {
@@ -33,18 +33,19 @@ export function createBoundary(Component) {
       const error = writable(undefined);
 
       config.props.$$slots.default = config.props.$$slots.default.map(
-        (slot) => (...args) => {
-          let guarded = guard(slot, error.set);
-          let block = guarded(...args);
+        (slot) =>
+          (...args) => {
+            let guarded = guard(slot, error.set);
+            let block = guarded(...args);
 
-          if (block) {
-            for (let fn of GUARDED_BLOCK_FNS) {
-              if (block[fn]) block[fn] = guard(block[fn], error.set);
+            if (block) {
+              for (let fn of GUARDED_BLOCK_FNS) {
+                if (block[fn]) block[fn] = guard(block[fn], error.set);
+              }
             }
-          }
 
-          return block;
-        }
+            return block;
+          }
       );
 
       super(config);

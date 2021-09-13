@@ -1,43 +1,43 @@
 <script lang="ts">
-import { setContext } from 'svelte';
+import { setContext } from "svelte";
 
-import type { CddaData } from './data';
-import Monster from './types/Monster.svelte'
-import Item from './types/Item.svelte'
-import Unknown from './types/Unknown.svelte'
-import Material from './types/Material.svelte';
-import AmmunitionType from './types/AmmunitionType.svelte';
-import ToolQuality from './types/ToolQuality.svelte';
-import Furniture from './types/Furniture.svelte';
-import Skill from './types/Skill.svelte';
-import Proficiency from './types/Proficiency.svelte';
-import Flag from './types/Flag.svelte';
-import Fault from './types/Fault.svelte';
-import Technique from './types/Technique.svelte';
-import Vitamin from './types/Vitamin.svelte';
-import VehiclePart from './types/VehiclePart.svelte';
-import ErrorBoundary from './ErrorBoundary';
+import type { CddaData } from "./data";
+import Monster from "./types/Monster.svelte";
+import Item from "./types/Item.svelte";
+import Unknown from "./types/Unknown.svelte";
+import Material from "./types/Material.svelte";
+import AmmunitionType from "./types/AmmunitionType.svelte";
+import ToolQuality from "./types/ToolQuality.svelte";
+import Furniture from "./types/Furniture.svelte";
+import Skill from "./types/Skill.svelte";
+import Proficiency from "./types/Proficiency.svelte";
+import Flag from "./types/Flag.svelte";
+import Fault from "./types/Fault.svelte";
+import Technique from "./types/Technique.svelte";
+import Vitamin from "./types/Vitamin.svelte";
+import VehiclePart from "./types/VehiclePart.svelte";
+import ErrorBoundary from "./ErrorBoundary";
 
-export let item: { id: string, type: string }
+export let item: { id: string; type: string };
 
-export let data: CddaData
-setContext('data', data)
-let error: Error = null
+export let data: CddaData;
+setContext("data", data);
+let error: Error = null;
 
 function onError(e: Error) {
-  error = e
+  error = e;
 }
 
 function defaultItem(id: string, type: string) {
-  if (type === 'json_flag') {
-    return { id, type }
+  if (type === "json_flag") {
+    return { id, type };
   } else {
-    return null
+    return null;
   }
 }
 
 let obj: any;
-$: obj = data.byId(item.type, item.id) ?? defaultItem(item.id, item.type)
+$: obj = data.byId(item.type, item.id) ?? defaultItem(item.id, item.type);
 
 const displays = {
   MONSTER: Monster,
@@ -68,40 +68,37 @@ const displays = {
   technique: Technique,
   vitamin: Vitamin,
   vehicle_part: VehiclePart,
-}
+};
 </script>
 
 {#if !obj}
-Unknown obj: {item.type}/{item.id}
+  Unknown obj: {item.type}/{item.id}
 {:else}
-{#if error}
-<section>
-<h1>Error</h1>
-<p>
-There was a problem displaying this page.
+  {#if error}
+    <section>
+      <h1>Error</h1>
+      <p>
+        There was a problem displaying this page. Not all versions of Cataclysm
+        are supported by the Guide currently. Try selecting a different build.
+      </p>
+      <p>
+        <details>
+          <summary>{error.message}</summary>
+          <pre>{error.stack}</pre>
+        </details>
+      </p>
+    </section>
+  {:else if globalThis?.process}
+    <!-- running in tests -->
+    <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
+  {:else}
+    <ErrorBoundary {onError}>
+      <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
+    </ErrorBoundary>
+  {/if}
 
-Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build.
-</p>
-<p>
-<details>
-<summary>{error.message}</summary>
-<pre>{error.stack}</pre>
-</details>
-</p>
-</section>
-{:else}
-{#if globalThis?.process}
-<!-- running in tests -->
-<svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
-{:else}
-<ErrorBoundary onError={onError}>
-<svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
-</ErrorBoundary>
-{/if}
-{/if}
-
-<details>
-<summary>Raw JSON</summary>
-<pre>{JSON.stringify(obj, null, 2)}</pre>
-</details>
+  <details>
+    <summary>Raw JSON</summary>
+    <pre>{JSON.stringify(obj, null, 2)}</pre>
+  </details>
 {/if}

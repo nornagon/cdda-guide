@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { WheelSlot } from "../../types";
 
-export let item: WheelSlot
+export let item: WheelSlot;
 </script>
 
 <section>
