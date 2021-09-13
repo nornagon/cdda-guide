@@ -246,6 +246,11 @@ describe("getItemGroup()", () => {
 });
 
 describe("parsePalette()", () => {
+  it("perses empty pallete", () => {
+    const got = parsePalette(new CddaData([]), {});
+    expect(got).toStrictEqual(new Map());
+  });
+
   it("knows about .items", () => {
     const data = new CddaData([
       {
