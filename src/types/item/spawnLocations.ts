@@ -64,9 +64,6 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
 
   mapgen.object.place_items
   mapgen.object.place_loot
-
-  mapgen.object is a palette
-
   */
   return [];
 }
