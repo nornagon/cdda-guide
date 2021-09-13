@@ -123,6 +123,12 @@ describe("getAllLocationsAndLoot()", () => {
 });
 
 describe("getAllMapgens()", () => {
+  const mapgen_common = {
+    overmap_terrains: [],
+    rows: [],
+    palettes: [],
+    additional_items: new Map(),
+  };
   it("returns [] if there are no mapgens", () => {
     const given = new CddaData([]);
 
@@ -141,14 +147,7 @@ describe("getAllMapgens()", () => {
 
     const got = getAllMapgens(given);
 
-    expect(got).toStrictEqual([
-      {
-        overmap_terrains: [],
-        rows: [],
-        palettes: [],
-        additional_items: new Map(),
-      },
-    ]);
+    expect(got).toStrictEqual([mapgen_common]);
   });
   it.each([
     ["fake_terrain" /* :string */],
@@ -173,10 +172,8 @@ describe("getAllMapgens()", () => {
 
     expect(got).toStrictEqual([
       {
+        ...mapgen_common,
         overmap_terrains: [{ singularName: "fake terrain" }],
-        rows: [],
-        palettes: [],
-        additional_items: new Map(),
       },
     ]);
   });
@@ -199,10 +196,8 @@ describe("getAllMapgens()", () => {
 
     expect(got).toStrictEqual([
       {
+        ...mapgen_common,
         overmap_terrains: [{ singularName: "fake terrain" }],
-        rows: [],
-        palettes: [],
-        additional_items: new Map(),
       },
     ]);
   });
@@ -217,14 +212,7 @@ describe("getAllMapgens()", () => {
 
     const got = getAllMapgens(given);
 
-    expect(got).toStrictEqual([
-      {
-        overmap_terrains: [],
-        rows: ["X"],
-        palettes: [],
-        additional_items: new Map(),
-      },
-    ]);
+    expect(got).toStrictEqual([{ ...mapgen_common, rows: ["X"] }]);
   });
 
   it("parses palette", () => {
@@ -246,10 +234,8 @@ describe("getAllMapgens()", () => {
 
     expect(got).toStrictEqual([
       {
-        overmap_terrains: [],
-        rows: [],
+        ...mapgen_common,
         palettes: [new Map([["X", new Map([["fake_item", 0.5]])]])],
-        additional_items: new Map(),
       },
     ]);
   });
