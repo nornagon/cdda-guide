@@ -37,7 +37,7 @@ type OMT = {
 type Mapgen = {
   overmap_terrains: OMT[];
   rows: string[];
-  palettes: Map<string, Loot>[];
+  palette: Map<string, Loot>;
   additional_items: Loot;
 };
 export function getAllMapgens(data: CddaData): Mapgen[] {
@@ -48,12 +48,12 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
       .map((id) => data.byId("overmap_terrain", id))
       .map((ter) => ({ singularName: singularName(ter) }));
 
-    const pal = parsePalette(data, mapgen.object);
+    const palette = parsePalette(data, mapgen.object);
 
     return {
       overmap_terrains,
       rows: mapgen.object.rows ?? [],
-      palettes: pal.size ? [pal] : [],
+      palette,
       additional_items: new Map(),
     };
   });
@@ -79,12 +79,10 @@ export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
   return exports.getAllMapgens(data).map((mapgen) => {
     const items = mapgen.rows
       .flatMap((r) => Array.from(r))
-      .flatMap((sym) =>
-        mapgen.palettes.map((pallete) => ({
-          loot: pallete.get(sym),
-          chance: 1.0,
-        }))
-      );
+      .map((sym) => ({
+        loot: mapgen.palette.get(sym),
+        chance: 1.0,
+      }));
     items.push({ loot: mapgen.additional_items, chance: 1.0 });
     const loot = collection(items);
     return { mapgen, loot };

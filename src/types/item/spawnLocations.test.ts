@@ -18,7 +18,7 @@ describe("getItemSpawnLocations()", () => {
         mapgen: {
           overmap_terrains: [{ singularName: "fake loc" }],
           rows: [],
-          palettes: [],
+          palette: new Map(),
           additional_items: new Map(),
         },
         loot: new Map([["fake_item", 0.25]]),
@@ -79,7 +79,7 @@ describe("getAllLocationsAndLoot()", () => {
       additional_items,
       overmap_terrains: [],
       rows: [],
-      palettes: [],
+      palette: new Map(),
     };
     const given = [mapgen];
     jest.spyOn(spawnLocations, "getAllMapgens").mockReturnValue(given);
@@ -94,7 +94,7 @@ describe("getAllLocationsAndLoot()", () => {
       additional_items: new Map(),
       overmap_terrains: [],
       rows: ["X"],
-      palettes: [new Map([["X", loot]])],
+      palette: new Map([["X", loot]]),
     };
     const given = [mapgen];
     jest.spyOn(spawnLocations, "getAllMapgens").mockReturnValue(given);
@@ -103,30 +103,13 @@ describe("getAllLocationsAndLoot()", () => {
 
     expect(got).toStrictEqual([{ loot, mapgen }]);
   });
-  it("handles multiple palletes", () => {
-    const loot = new Map([["fake_item", 0.5]]);
-    const pallete = new Map([["X", loot]]);
-    const mapgen = {
-      additional_items: new Map(),
-      overmap_terrains: [],
-      rows: ["X"],
-      palettes: [pallete, pallete],
-    };
-    const given = [mapgen];
-    jest.spyOn(spawnLocations, "getAllMapgens").mockReturnValue(given);
-
-    const got = getAllLocationsAndLoot(null as CddaData);
-
-    const expectedLoot = new Map([["fake_item", 0.75]]);
-    expect(got).toStrictEqual([{ loot: expectedLoot, mapgen }]);
-  });
 });
 
 describe("getAllMapgens()", () => {
   const mapgen_common = {
     overmap_terrains: [],
     rows: [],
-    palettes: [],
+    palette: new Map(),
     additional_items: new Map(),
   };
   it("returns [] if there are no mapgens", () => {
@@ -235,7 +218,7 @@ describe("getAllMapgens()", () => {
     expect(got).toStrictEqual([
       {
         ...mapgen_common,
-        palettes: [new Map([["X", new Map([["fake_item", 0.5]])]])],
+        palette: new Map([["X", new Map([["fake_item", 0.5]])]]),
       },
     ]);
   });
