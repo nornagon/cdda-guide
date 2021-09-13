@@ -5,7 +5,6 @@ import {
   asKilograms,
   asLiters,
   CddaData,
-  flattenItemGroup,
   normalizeDamageInstance,
   singularName,
 } from "../data";
@@ -431,7 +430,7 @@ let upgrades =
     <ul>
       {#each harvest.entries as harvest_entry}
         {#if harvest_entry.type === "bionic_group"}
-          {#each flattenItemGroup(data, data.byId("item_group", harvest_entry.drop)) as { id, prob }}
+          {#each data.flattenItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
             <li>
               <ItemSymbol item={data.byId("item", id)} />
               <ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)

@@ -301,7 +301,7 @@ export class CddaData {
     };
     const mon = this.byId("monster", mon_id);
     const ret = mon.death_drops
-      ? flattenItemGroup(this, normalizeDeathDrops(mon.death_drops))
+      ? this.flattenItemGroup(normalizeDeathDrops(mon.death_drops))
       : [];
     ret.sort((a, b) => b.prob - a.prob);
     this._cachedDeathDrops.set(mon_id, ret);
@@ -337,7 +337,7 @@ export class CddaData {
           ? { subtype: "collection" as const, entries: v }
           : v;
       if (group) {
-        for (const { id } of flattenItemGroup(this, group)) add(c, id);
+        for (const { id } of this.flattenItemGroup(group)) add(c, id);
       } else {
         if (typeof v === "string") {
           const item = this.byId<Item>("item", v);
@@ -396,7 +396,7 @@ export class CddaData {
           ? { subtype: "collection" as const, entries: v.item }
           : v.item;
       if (group) {
-        for (const { id } of flattenItemGroup(this, group)) ret.add(id);
+        for (const { id } of this.flattenItemGroup(group)) ret.add(id);
       } else {
         if (typeof v === "string") {
           const item = this.byId<Item>("item", v);
@@ -408,8 +408,7 @@ export class CddaData {
     for (const v of mapgen.object.place_loot ?? []) {
       if (v.item) ret.add(v.item);
       if (v.group)
-        for (const { id } of flattenItemGroup(
-          this,
+        for (const { id } of this.flattenItemGroup(
           this.byId<ItemGroup>("item_group", v.group)
         ))
           ret.add(id);
@@ -675,13 +674,6 @@ export class CddaData {
     );
     return { tools, qualities, components };
   }
-}
-
-export function flattenItemGroup(
-  data: CddaData,
-  group: ItemGroup
-): { id: string; prob: number; count: [number, number] }[] {
-  return data.flattenItemGroup(group);
 }
 
 function flattenChoices<T>(

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { getContext } from "svelte";
-import { CddaData, flattenItemGroup, singularName } from "../../data";
+import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import type { Furniture } from "../../types";
 import ThingLink from "../ThingLink.svelte";
@@ -14,14 +14,14 @@ let deconstructibleFrom = data
   .byType<Furniture>("furniture")
   .filter((f) => {
     const deconstruct = f.deconstruct?.items
-      ? flattenItemGroup(data, {
+      ? data.flattenItemGroup({
           subtype: "collection",
           entries: f.deconstruct.items,
         })
       : [];
 
     const bash = f.bash?.items
-      ? flattenItemGroup(data, {
+      ? data.flattenItemGroup({
           subtype: "collection",
           entries: f.bash.items,
         })
