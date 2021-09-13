@@ -48,10 +48,12 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
       .map((id) => data.byId("overmap_terrain", id))
       .map((ter) => ({ singularName: singularName(ter) }));
 
+    const pal = parsePalette(data, mapgen.object);
+
     return {
       overmap_terrains,
       rows: mapgen.object.rows ?? [],
-      palettes: [],
+      palettes: pal.size ? [pal] : [],
       additional_items: new Map(),
     };
   });

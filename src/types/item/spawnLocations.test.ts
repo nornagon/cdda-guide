@@ -226,6 +226,33 @@ describe("getAllMapgens()", () => {
       },
     ]);
   });
+
+  it("parses palette", () => {
+    const given = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        object: { items: { X: { item: "fake_item_group" } } },
+      },
+      {
+        id: "fake_item_group",
+        type: "item_group",
+        subtype: "collection",
+        items: [["fake_item", 50]],
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+
+    expect(got).toStrictEqual([
+      {
+        overmap_terrains: [],
+        rows: [],
+        palettes: [new Map([["X", new Map([["fake_item", 0.5]])]])],
+        additional_items: new Map(),
+      },
+    ]);
+  });
 });
 
 describe("getItemGroup()", () => {
