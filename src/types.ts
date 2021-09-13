@@ -765,7 +765,7 @@ export interface MapgenObject {
 type MapgenInt = number | [number] | [number, number];
 export interface MapgenItemGroup {
   item: string | ItemGroup | ItemGroupEntry[] /* subtype collection */;
-  chance?: MapgenInt;
+  chance?: number;
   repeat?: MapgenInt;
 }
 
