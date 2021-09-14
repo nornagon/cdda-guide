@@ -130,6 +130,33 @@ describe("getAllLocationsAndLoot()", () => {
       },
     ]);
   });
+  it("handles missing palette", () => {
+    /* a more plausable situation: mapgen has a palette, but it does not define
+    any items for X */
+    const data = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        object: {
+          rows: ["X"],
+        },
+      },
+    ]);
+
+    const got = getAllLocationsAndLoot(data);
+
+    expect(got).toStrictEqual([
+      {
+        loot: new Map(),
+        mapgen: {
+          additional_items: new Map(),
+          overmap_terrains: [],
+          rows: ["X"],
+          palette: new Map(),
+        },
+      },
+    ]);
+  });
 });
 
 describe("getAllMapgens()", () => {

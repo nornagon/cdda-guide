@@ -79,8 +79,10 @@ export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
   return getAllMapgens(data).map((mapgen) => {
     const items = mapgen.rows
       .flatMap((r) => Array.from(r))
-      .map((sym) => ({
-        loot: mapgen.palette.get(sym),
+      .map((sym) => mapgen.palette.get(sym))
+      .filter((loot) => loot != null)
+      .map((loot) => ({
+        loot,
         chance: 1.0,
       }));
     items.push({ loot: mapgen.additional_items, chance: 1.0 });
