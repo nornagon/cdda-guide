@@ -73,7 +73,7 @@ type LocationAndLoot = {
   loot: Loot;
 };
 export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
-  return exports.getAllMapgens(data).map((mapgen) => {
+  return getAllMapgens(data).map((mapgen) => {
     const items = mapgen.rows
       .flatMap((r) => Array.from(r))
       .map((sym) => ({
@@ -96,14 +96,12 @@ export function getItemSpawnLocations(
   data: CddaData,
   item_id: string
 ): SpawnLocation[] {
-  return exports // This is to allow tests to mock getAllLocationsAndLoot()
-    .getAllLocationsAndLoot(data)
-    .flatMap(({ mapgen, loot }) => {
-      if (!loot.has(item_id)) return [];
-      const chance = loot.get(item_id);
-      const omt = mapgen.overmap_terrains[0];
-      return { chance: chance, ...omt };
-    });
+  return getAllLocationsAndLoot(data).flatMap(({ mapgen, loot }) => {
+    if (!loot.has(item_id)) return [];
+    const chance = loot.get(item_id);
+    const omt = mapgen.overmap_terrains[0];
+    return { chance: chance, ...omt };
+  });
 }
 
 export function getItemGroup(data: CddaData, id: string): Loot {
