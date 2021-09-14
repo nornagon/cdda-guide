@@ -45,8 +45,11 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
     const overmap_terrains = new Maybe(mapgen.om_terrain)
       .map((om_terrain) => [om_terrain].flat(2))
       .getOrDefault([])
-      .map((id) => data.byId("overmap_terrain", id))
-      .map((ter) => ({ singularName: singularName(ter) }));
+      .map((id) =>
+        new Maybe(data.byId("overmap_terrain", id))
+          .map((ter) => ({ singularName: singularName(ter) }))
+          .getOrDefault({ singularName: id })
+      );
 
     const palette = parsePalette(data, mapgen.object);
 

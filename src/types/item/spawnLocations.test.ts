@@ -249,6 +249,25 @@ describe("getAllMapgens()", () => {
       },
     ]);
   });
+  it("handles missing overmap_terrain", () => {
+    const given = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        object: {},
+        om_terrain: "fake_terrain",
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+
+    expect(got).toStrictEqual([
+      {
+        ...mapgen_common,
+        overmap_terrains: [{ singularName: "fake_terrain" }],
+      },
+    ]);
+  });
 });
 
 describe("getItemGroup()", () => {
