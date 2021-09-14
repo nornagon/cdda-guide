@@ -14,11 +14,12 @@ beforeEach(() => jest.restoreAllMocks());
 const raw_mapgen_common = {
   type: "mapgen",
   method: "json",
+  om_terrain: "this_terrain_does_not_exist",
   object: {},
 };
 
 const mapgen_common = {
-  overmap_terrains: [],
+  overmap_terrains: [{ singularName: "this_terrain_does_not_exist" }],
   rows: [],
   palette: new Map(),
   additional_items: new Map(),
