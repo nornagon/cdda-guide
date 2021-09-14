@@ -11,12 +11,24 @@ import { CddaData } from "../../data";
 
 beforeEach(() => jest.restoreAllMocks());
 
+const raw_mapgen_common = {
+  type: "mapgen",
+  method: "json",
+  object: {},
+};
+
+const mapgen_common = {
+  overmap_terrains: [],
+  rows: [],
+  palette: new Map(),
+  additional_items: new Map(),
+};
+
 describe("getItemSpawnLocations()", () => {
   it("finds a one spawn location", () => {
     const data = new CddaData([
       {
-        type: "mapgen",
-        method: "json",
+        ...raw_mapgen_common,
         om_terrain: "fake_terrain",
         object: {
           rows: ["X"],
@@ -101,8 +113,7 @@ describe("getAllLocationsAndLoot()", () => {
   it("knows about rows", () => {
     const data = new CddaData([
       {
-        type: "mapgen",
-        method: "json",
+        ...raw_mapgen_common,
         object: {
           rows: ["X"],
           items: { X: { item: "fake_item_group" } },
@@ -122,8 +133,7 @@ describe("getAllLocationsAndLoot()", () => {
       {
         loot: new Map([["fake_item", 1.0]]),
         mapgen: {
-          additional_items: new Map(),
-          overmap_terrains: [],
+          ...mapgen_common,
           rows: ["X"],
           palette: new Map([["X", new Map([["fake_item", 1.0]])]]),
         },
@@ -135,8 +145,7 @@ describe("getAllLocationsAndLoot()", () => {
     any items for X */
     const data = new CddaData([
       {
-        type: "mapgen",
-        method: "json",
+        ...raw_mapgen_common,
         object: {
           rows: ["X"],
         },
@@ -149,10 +158,8 @@ describe("getAllLocationsAndLoot()", () => {
       {
         loot: new Map(),
         mapgen: {
-          additional_items: new Map(),
-          overmap_terrains: [],
+          ...mapgen_common,
           rows: ["X"],
-          palette: new Map(),
         },
       },
     ]);
@@ -160,12 +167,6 @@ describe("getAllLocationsAndLoot()", () => {
 });
 
 describe("getAllMapgens()", () => {
-  const mapgen_common = {
-    overmap_terrains: [],
-    rows: [],
-    palette: new Map(),
-    additional_items: new Map(),
-  };
   it("returns [] if there are no mapgens", () => {
     const given = new CddaData([]);
 
@@ -174,13 +175,7 @@ describe("getAllMapgens()", () => {
     expect(got).toStrictEqual([]);
   });
   it("finds one mapgen if there is only one", () => {
-    const given = new CddaData([
-      {
-        type: "mapgen",
-        method: "json",
-        object: {},
-      },
-    ]);
+    const given = new CddaData([raw_mapgen_common]);
 
     const got = getAllMapgens(given);
 
@@ -193,9 +188,7 @@ describe("getAllMapgens()", () => {
   ])("understands om_terrain %j", (om_terrain) => {
     const given = new CddaData([
       {
-        type: "mapgen",
-        method: "json",
-        object: {},
+        ...raw_mapgen_common,
         om_terrain,
       },
       {
@@ -217,9 +210,7 @@ describe("getAllMapgens()", () => {
   it("understands name objects", () => {
     const given = new CddaData([
       {
-        type: "mapgen",
-        method: "json",
-        object: {},
+        ...raw_mapgen_common,
         om_terrain: "fake_terrain",
       },
       {
@@ -241,8 +232,7 @@ describe("getAllMapgens()", () => {
   it("knows about rows", () => {
     const given = new CddaData([
       {
-        type: "mapgen",
-        method: "json",
+        ...raw_mapgen_common,
         object: { rows: ["X"] },
       },
     ]);
@@ -255,8 +245,7 @@ describe("getAllMapgens()", () => {
   it("parses palette", () => {
     const given = new CddaData([
       {
-        type: "mapgen",
-        method: "json",
+        ...raw_mapgen_common,
         object: { items: { X: { item: "fake_item_group" } } },
       },
       {
@@ -279,9 +268,7 @@ describe("getAllMapgens()", () => {
   it("handles missing overmap_terrain", () => {
     const given = new CddaData([
       {
-        type: "mapgen",
-        method: "json",
-        object: {},
+        ...raw_mapgen_common,
         om_terrain: "fake_terrain",
       },
     ]);
