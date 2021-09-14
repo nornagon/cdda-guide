@@ -283,6 +283,23 @@ describe("getAllMapgens()", () => {
       },
     ]);
   });
+  it("ignores nested and update mapgens", () => {
+    const { om_terrain: _, ...common } = raw_mapgen_common;
+    const given = new CddaData([
+      {
+        ...common,
+        nested_mapgen_id: "fake_nested",
+      },
+      {
+        ...common,
+        update_mapgen_id: "fake_update",
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+
+    expect(got).toStrictEqual([]);
+  });
 });
 
 describe("getItemGroup()", () => {
