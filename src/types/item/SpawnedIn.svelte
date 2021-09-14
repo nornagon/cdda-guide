@@ -1,7 +1,8 @@
 <script lang="ts">
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../../data";
+import { CddaData, singular, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
+import type { OvermapTerrain } from "../../types";
 
 export let item_id: string;
 
@@ -10,7 +11,7 @@ let data = getContext<CddaData>("data");
 const mapgens = data
   .byType("mapgen")
   .filter((mapgen) => data.mapgenSpawnItems(mapgen).includes(item_id));
-const om_terrains = new Set();
+const om_terrains = new Set<OvermapTerrain>();
 for (const mg of mapgens) {
   if (!mg.om_terrain) continue;
   let mg_omts: string[];
@@ -37,8 +38,8 @@ for (const mg of mapgens) {
       om_terrains.add(omt);
   });
 }
-const om_terrains_sorted: any[] = [...om_terrains].sort((a, b) =>
-  singularName(a).localeCompare(singularName(b))
+const om_terrains_sorted = [...om_terrains].sort((a, b) =>
+  singular(a.name).localeCompare(singular(b.name))
 );
 </script>
 

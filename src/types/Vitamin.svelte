@@ -27,11 +27,11 @@ const containingComestibles = data
   });
 containingComestibles.sort((a, b) => b.pct - a.pct);
 
-const excessNames: any[] = item.excess
-  ? data.byId("effect_type", item.excess).name
+const excessNames = item.excess
+  ? data.byId("effect_type", item.excess).name ?? []
   : [];
-const deficiencyNames: any[] = item.deficiency
-  ? data.byId("effect_type", item.deficiency).name
+const deficiencyNames = item.deficiency
+  ? data.byId("effect_type", item.deficiency).name ?? []
   : [];
 </script>
 

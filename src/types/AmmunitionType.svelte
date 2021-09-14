@@ -1,9 +1,10 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
+import type { AmmunitionType } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
-export let item: any;
+export let item: AmmunitionType;
 
 const data = getContext<CddaData>("data");
 

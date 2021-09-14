@@ -1041,6 +1041,98 @@ export type AsciiArt = {
   picture: string[];
 };
 
+export type AmmunitionType = {
+  type: "ammunition_type";
+  id: string;
+  name: Translation;
+  default: string; // item_id
+};
+
+export type BodyPart = {
+  type: "body_part";
+  id: string;
+
+  name: Translation;
+  name_multiple?: Translation;
+  accusative: Translation;
+  accusative_multiple?: Translation;
+  heading: Translation;
+  heading_multiple: Translation;
+  hp_bar_ui_text?: Translation;
+  encumbrance_text: Translation;
+
+  hit_size: number;
+  hit_difficulty: number;
+  hit_size_relative: [number, number, number];
+
+  base_hp: integer;
+  stat_hp_mods?: any; // TODO
+
+  drench_capacity: integer;
+
+  is_limb?: boolean;
+  is_vital?: boolean;
+  limb_type:
+    | "head"
+    | "torso"
+    | "sensor"
+    | "mouth"
+    | "arm"
+    | "hand"
+    | "leg"
+    | "foot"
+    | "wing"
+    | "tail"
+    | "other";
+
+  fire_warmth_bonus?: integer;
+
+  main_part: string; // bodypart_id
+  connected_to?: string; // bodypart_id
+
+  opposite_part: string; // bodypart_id
+
+  bionic_slots?: integer;
+
+  flags?: string[];
+
+  side: "left" | "right" | "both";
+
+  // ...
+};
+
+export type EffectType = {
+  type: "effect_type";
+  id: string;
+  name?: Translation[];
+
+  // ...
+};
+
+export type ConstructionGroup = {
+  type: "construction_group";
+  id: string;
+  name: Translation;
+
+  // ...
+};
+
+export type OvermapTerrain = {
+  type: "overmap_terrain";
+  id: string | string[];
+  name: Translation;
+
+  // ...
+};
+
+export type Material = {
+  type: "material";
+  id: string;
+  name: Translation;
+
+  // ...
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1063,15 +1155,21 @@ export type SupportedTypes = {
 
   // Non-item types.
   MONSTER: Monster;
+  ammunition_type: AmmunitionType;
   ascii_art: AsciiArt;
+  body_part: BodyPart;
   construction: Construction;
+  construction_group: ConstructionGroup;
+  effect_type: EffectType;
   fault: Fault;
   furniture: Furniture;
   harvest: Harvest;
-  item_group: ItemGroup;
+  item_group: { type: "item_group" } & ItemGroup;
   json_flag: JsonFlag;
   mapgen: Mapgen;
+  material: Material;
   monstergroup: MonsterGroup;
+  overmap_terrain: OvermapTerrain;
   palette: Palette;
   proficiency: Proficiency;
   recipe: { type: "recipe" } & Recipe;
@@ -1084,13 +1182,7 @@ export type SupportedTypes = {
   vitamin: Vitamin;
 
   // TODO: used, but not yet typed
-  ammunition_type: any;
-  body_part: any;
-  effect_type: any;
-  construction_group: any;
-  overmap_terrain: any;
-  material: any;
-  monster_attack: any;
+  monster_attack: { type: "monster_attack"; id: string };
 };
 
 export type SupportedTypesWithMapped = SupportedTypes & {
