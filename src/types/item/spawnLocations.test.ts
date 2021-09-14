@@ -13,20 +13,30 @@ beforeEach(() => jest.restoreAllMocks());
 
 describe("getItemSpawnLocations()", () => {
   it("finds a one spawn location", () => {
-    let loot = [
+    const data = new CddaData([
       {
-        mapgen: {
-          overmap_terrains: [{ singularName: "fake loc" }],
-          rows: [],
-          palette: new Map(),
-          additional_items: new Map(),
+        type: "mapgen",
+        method: "json",
+        om_terrain: "fake_terrain",
+        object: {
+          rows: ["X"],
+          items: { X: { item: "fake_item_group" } },
         },
-        loot: new Map([["fake_item", 0.25]]),
       },
-    ];
-    jest.spyOn(spawnLocations, "getAllLocationsAndLoot").mockReturnValue(loot);
+      {
+        id: "fake_item_group",
+        type: "item_group",
+        subtype: "collection",
+        items: [["fake_item", 25]],
+      },
+      {
+        type: "overmap_terrain",
+        id: "fake_terrain",
+        name: "fake loc",
+      },
+    ]);
 
-    const locations = getItemSpawnLocations(null as CddaData, "fake_item");
+    const locations = getItemSpawnLocations(data, "fake_item");
 
     expect(locations).toStrictEqual([
       { singularName: "fake loc", chance: 0.25 },
