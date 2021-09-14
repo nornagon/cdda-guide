@@ -8,13 +8,10 @@ import type {
   Recipe,
   Mapgen,
   PaletteData,
-  Palette,
-  Item,
   DamageInstance,
   DamageUnit,
   RequirementData,
   Monster,
-  SupportedTypes,
   SupportedTypesWithMapped,
 } from "./types";
 
@@ -56,7 +53,6 @@ const typeMappings = new Map([
   ["GENERIC", "item"],
   ["BIONIC_ITEM", "item"],
   ["MONSTER", "monster"],
-  ["uncraft", "recipe"],
 ]);
 
 export const mapType = (type: string): string => typeMappings.get(type) ?? type;
@@ -150,7 +146,7 @@ export class CddaData {
       }
       // recipes are id'd by their result
       if (
-        mappedType === "recipe" &&
+        (mappedType === "recipe" || mappedType === "uncraft") &&
         Object.hasOwnProperty.call(obj, "result")
       ) {
         if (!this._byTypeById.has(mappedType))
@@ -319,14 +315,10 @@ export class CddaData {
   }
 
   uncraftRecipe(item_id: string): Recipe | undefined {
-    let reversed: Recipe;
-    for (const recipe of this.byType("recipe")) {
-      if (recipe.result === item_id) {
-        if ((recipe.type as any) === "uncraft") return recipe;
-        else if (recipe.reversible) reversed = recipe;
-      }
-    }
-    return reversed;
+    for (const recipe of this.byType("uncraft"))
+      if (recipe.result === item_id) return recipe;
+    for (const recipe of this.byType("recipe"))
+      if (recipe.result === item_id && recipe.reversible) return recipe;
   }
 
   _cachedMapgenSpawnItems = new Map<Mapgen, string[]>();

@@ -2,7 +2,7 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { RequirementData } from "../../types";
+import type { Recipe, RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
@@ -11,11 +11,10 @@ export let item_id: string;
 let data = getContext<CddaData>("data");
 
 const uncraftableFromSet = new Set<string>();
-for (const recipe of data.byType("recipe")) {
-  if (
-    recipe.result &&
-    (recipe.reversible || (recipe.type as any) === "uncraft")
-  ) {
+for (const recipe of (data.byType("recipe") as Recipe[]).concat(
+  data.byType("uncraft")
+)) {
+  if (recipe.result && (recipe.reversible || recipe.type === "uncraft")) {
     const normalizedUsing = recipe.using
       ? Array.isArray(recipe.using)
         ? recipe.using
