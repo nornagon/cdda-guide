@@ -10,10 +10,8 @@ export let item_id: string;
 const data = getContext<CddaData>("data");
 const spawnLocations = getItemSpawnLocations(data, item_id);
 /*
-  TODO:
-  sort((a, b) =>
-    singularName(a).localeCompare(singularName(b))
-  )
+  TODO: sort by spawn chance
+  TODO: skip secret locations
   */
 </script>
 
