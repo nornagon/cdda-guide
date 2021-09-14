@@ -99,19 +99,36 @@ describe("getAllLocationsAndLoot()", () => {
     expect(got).toStrictEqual([{ loot: additional_items, mapgen }]);
   });
   it("knows about rows", () => {
-    const loot = new Map([["fake_item", 1.0]]);
-    const mapgen = {
-      additional_items: new Map(),
-      overmap_terrains: [],
-      rows: ["X"],
-      palette: new Map([["X", loot]]),
-    };
-    const given = [mapgen];
-    jest.spyOn(spawnLocations, "getAllMapgens").mockReturnValue(given);
+    const data = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        object: {
+          rows: ["X"],
+          items: { X: { item: "fake_item_group" } },
+        },
+      },
+      {
+        id: "fake_item_group",
+        type: "item_group",
+        subtype: "collection",
+        items: [["fake_item", 100]],
+      },
+    ]);
 
-    const got = getAllLocationsAndLoot(null as CddaData);
+    const got = getAllLocationsAndLoot(data);
 
-    expect(got).toStrictEqual([{ loot, mapgen }]);
+    expect(got).toStrictEqual([
+      {
+        loot: new Map([["fake_item", 1.0]]),
+        mapgen: {
+          additional_items: new Map(),
+          overmap_terrains: [],
+          rows: ["X"],
+          palette: new Map([["X", new Map([["fake_item", 1.0]])]]),
+        },
+      },
+    ]);
   });
 });
 
