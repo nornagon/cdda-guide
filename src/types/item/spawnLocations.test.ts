@@ -83,7 +83,7 @@ describe("collection()", () => {
 });
 
 describe("getAllLocationsAndLoot()", () => {
-  it("knows about additional_items", () => {
+  it.skip("knows about additional_items", () => {
     const additional_items = new Map([["fake_item", 1.0]]);
     const mapgen = {
       additional_items,
