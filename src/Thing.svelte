@@ -36,8 +36,8 @@ function defaultItem(id: string, type: string) {
   }
 }
 
-let obj: any;
-$: obj = data.byId(item.type, item.id) ?? defaultItem(item.id, item.type);
+let obj =
+  data.byId(item.type as any, item.id) ?? defaultItem(item.id, item.type);
 
 const displays = {
   MONSTER: Monster,

@@ -5,7 +5,23 @@ import { CddaData } from "./data";
 
 const program = TJS.programFromConfig(__dirname + "/../tsconfig.json");
 
-const schema = TJS.generateSchema(program, "Thing", { required: true });
+const ajv = new Ajv({ allowUnionTypes: true });
+const typesSchema = TJS.generateSchema(program, "SupportedTypes", {
+  required: true,
+});
+const schemasByType = new Map(
+  Object.entries(typesSchema.properties).map(([typeName, sch]) => {
+    const schemaForType = sch as TJS.Definition;
+    return [
+      typeName,
+      ajv.compile({
+        ...schemaForType,
+        definitions: typesSchema.definitions,
+        $schema: typesSchema.$schema,
+      } as TJS.Definition),
+    ];
+  })
+);
 const data = new CddaData(
   JSON.parse(fs.readFileSync(__dirname + "/../_test/all.json", "utf8")).data
 );
@@ -16,23 +32,19 @@ const id = (x) => {
 };
 const all = data._raw
   .filter((x) => id(x))
+  .filter((x) => schemasByType.has(x.type))
   .map((x, i) => [x.type, id(x) ?? i, data._flatten(x)]);
 
 const skipped = new Set<string>([]);
-
-const ajv = new Ajv({ allowUnionTypes: true });
-const validate = ajv.compile(schema);
 
 test.each(all)("schema matches %s %s", (type, id, obj) => {
   if (skipped.has(id)) {
     pending();
     return;
   }
+  const validate = schemasByType.get(type);
   const valid = validate(obj);
   if (!valid) {
-    expect(
-      validate.errors.filter((e) => e.instancePath !== "/type")
-    ).toHaveLength(0);
     expect(validate.errors).toHaveLength(0);
   }
   expect(valid).toBe(true);

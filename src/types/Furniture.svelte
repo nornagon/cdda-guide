@@ -1,6 +1,6 @@
 <script lang="ts">
-import { CddaData, flattenItemGroup, singularName } from "../data";
-import type { Construction as ConstructionT, Furniture } from "../types";
+import { CddaData, singularName } from "../data";
+import type { Furniture } from "../types";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import Construction from "./Construction.svelte";
@@ -11,14 +11,14 @@ const data = getContext<CddaData>("data");
 export let item: Furniture;
 
 const deconstruct = item.deconstruct?.items
-  ? flattenItemGroup(data, {
+  ? data.flattenItemGroup({
       subtype: "collection",
       entries: item.deconstruct.items,
     })
   : [];
 
 const bash = item.bash?.items
-  ? flattenItemGroup(data, {
+  ? data.flattenItemGroup({
       subtype: "collection",
       entries: item.bash.items,
     })
@@ -31,7 +31,7 @@ function showProbability(prob: number) {
 }
 
 const constructions = data
-  .byType<ConstructionT>("construction")
+  .byType("construction")
   .filter((c) => c.post_terrain === item.id);
 
 const bits = [

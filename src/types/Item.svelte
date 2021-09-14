@@ -13,10 +13,7 @@ import type {
   RequirementData,
   ItemBasicInfo,
   Item,
-  Fault,
-  JsonFlag,
-  VehiclePart,
-  AsciiArt,
+  SupportedTypesWithMapped,
 } from "../types";
 import AsciiPicture from "./AsciiPicture.svelte";
 import AmmoInfo from "./item/AmmoInfo.svelte";
@@ -33,6 +30,7 @@ import ItemSymbol from "./item/ItemSymbol.svelte";
 import MeleeInfo from "./item/MeleeInfo.svelte";
 import Recipes from "./item/Recipes.svelte";
 import SpawnedIn from "./item/SpawnedIn.svelte";
+import ToolInfo from "./item/ToolInfo.svelte";
 import WheelInfo from "./item/WheelInfo.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -52,9 +50,9 @@ let materials = (
   typeof item.material === "string" ? [item.material] : item.material ?? []
 ).map((id) => data.byId("material", id));
 let flags = (item.flags ?? []).map(
-  (id) => data.byId<JsonFlag>("json_flag", id) ?? { id }
+  (id) => data.byId("json_flag", id) ?? { id }
 );
-let faults = (item.faults ?? []).map((f) => data.byId<Fault>("fault", f));
+let faults = (item.faults ?? []).map((f) => data.byId("fault", f));
 
 const defaultPocketData = {
   pocket_type: "CONTAINER",
@@ -74,8 +72,14 @@ let magazine_compatible = pockets
   .filter((p) => p.pocket_type === "MAGAZINE_WELL")
   .flatMap(
     (p) =>
-      p.item_restriction?.map((id) => ({ type: "item", id })) ??
-      p.flag_restriction.map((id) => ({ type: "json_flag", id }))
+      p.item_restriction?.map((id) => ({
+        type: "item" as keyof SupportedTypesWithMapped,
+        id,
+      })) ??
+      p.flag_restriction.map((id) => ({
+        type: "json_flag" as keyof SupportedTypesWithMapped,
+        id,
+      }))
   );
 
 function maxCharges(ammo_id: string) {
@@ -103,7 +107,7 @@ const uncraft = (() => {
   const requirements = normalizedUsing
     .map(
       ([id, count]) =>
-        [data.byId<RequirementData>("requirement", id), count] as const
+        [data.byId("requirement", id) as RequirementData, count] as const
     )
     .concat([[recipe, 1]]);
   const components = requirements.flatMap(([req, count]) => {
@@ -116,11 +120,11 @@ const uncraft = (() => {
 })();
 
 const vparts = data
-  .byType<VehiclePart>("vehicle_part")
+  .byType("vehicle_part")
   .filter((vp) => vp.id && vp.item === item.id);
 
 const ascii_picture =
-  item.ascii_picture && data.byId<AsciiArt>("ascii_art", item.ascii_picture);
+  item.ascii_picture && data.byId("ascii_art", item.ascii_picture);
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -241,6 +245,9 @@ const ascii_picture =
 {/if}
 {#if item.type === "ARMOR" || item.type === "TOOL_ARMOR"}
   <ArmorInfo {item} />
+{/if}
+{#if item.type === "TOOL" || item.type === "TOOL_ARMOR"}
+  <ToolInfo {item} />
 {/if}
 {#if item.type === "ENGINE" && item.displacement}
   <section>

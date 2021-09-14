@@ -2,7 +2,6 @@
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Item } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
@@ -10,7 +9,7 @@ export let item_id: string;
 
 let data = getContext<CddaData>("data");
 
-const sources = data.byType<Item>("item").filter((item) => {
+const sources = data.byType("item").filter((item) => {
   if (!item.id || !item.seed_data) return false;
   return (
     item.seed_data.fruit === item_id ||
