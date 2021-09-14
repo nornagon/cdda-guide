@@ -2,7 +2,7 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Recipe, RequirementData } from "../../types";
+import type { RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
@@ -10,7 +10,7 @@ export let item_id: string;
 
 const data = getContext<CddaData>("data");
 
-const recipes = data.byType<Recipe>("recipe").filter((recipe) => {
+const recipes = data.byType("recipe").filter((recipe) => {
   if (
     recipe.type !== "recipe" ||
     !recipe.result ||
@@ -26,7 +26,7 @@ const recipes = data.byType<Recipe>("recipe").filter((recipe) => {
     .map(
       ([id, count]) =>
         [
-          data.byId<RequirementData>("requirement", id),
+          data.byId("requirement", id) as RequirementData,
           count as number,
         ] as const
     )

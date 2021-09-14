@@ -9,7 +9,7 @@ export let item: JsonFlag;
 let data = getContext<CddaData>("data");
 
 let itemsWithFlag = new Array<Item>();
-for (const it of data.byType<Item>("item")) {
+for (const it of data.byType("item")) {
   if (!it.id) continue;
   const q = (it.flags ?? []).find((id) => id === item.id);
   if (q) {
@@ -18,7 +18,7 @@ for (const it of data.byType<Item>("item")) {
 }
 
 let vpartsWithFlag = new Array<VehiclePart>();
-for (const it of data.byType<VehiclePart>("vehicle_part")) {
+for (const it of data.byType("vehicle_part")) {
   if (!it.id) continue;
   const q = (it.flags ?? []).find((id) => id === item.id);
   if (q) {

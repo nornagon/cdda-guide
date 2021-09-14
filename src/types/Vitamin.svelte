@@ -3,7 +3,7 @@ import { getContext } from "svelte";
 import { CddaData, singular, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 
-import type { ComestibleSlot, Vitamin } from "../types";
+import type { SupportedTypes, Vitamin } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: Vitamin;
@@ -11,7 +11,7 @@ export let item: Vitamin;
 const data = getContext<CddaData>("data");
 
 const containingComestibles = data
-  .byType<ComestibleSlot & { id: string; type: string }>("item")
+  .byType("item")
   .filter(
     (t) =>
       t.type === "COMESTIBLE" &&
@@ -19,9 +19,10 @@ const containingComestibles = data
       (t.vitamins ?? []).some((v) => v[0] === item.id)
   )
   .map((c) => {
+    const comestible = c as SupportedTypes["COMESTIBLE"];
     return {
-      comestible: c,
-      pct: c.vitamins.find((v) => v[0] === item.id)[1],
+      comestible,
+      pct: comestible.vitamins.find((v) => v[0] === item.id)[1],
     };
   });
 containingComestibles.sort((a, b) => b.pct - a.pct);

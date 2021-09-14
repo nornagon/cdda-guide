@@ -2,14 +2,14 @@
 import { getContext } from "svelte";
 import { CddaData, showProbability } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Harvest, Monster } from "../../types";
+import type { Harvest } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
 export let item_id: string;
 
 let data = getContext<CddaData>("data");
-const mons = data.byType<Monster>("monster").flatMap((mon) => {
+const mons = data.byType("monster").flatMap((mon) => {
   if (!mon.id) return [];
   const deathDrops = data.flatDeathDrops(mon.id);
   const dd = deathDrops.find((dd) => dd.id === item_id);
@@ -26,10 +26,10 @@ const itemsFromHarvest = (h: Harvest): string[] =>
   ) ?? [];
 
 const harvests = data
-  .byType<Harvest>("harvest")
+  .byType("harvest")
   .filter((h) => itemsFromHarvest(h).some((e) => e === item_id));
 const harvestableFrom = data
-  .byType<Monster>("monster")
+  .byType("monster")
   .filter((m) => m.id && harvests.some((h) => h.id === m.harvest));
 </script>
 

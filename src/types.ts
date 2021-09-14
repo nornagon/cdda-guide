@@ -36,7 +36,7 @@ export type ItemGroup =
     }
   | {
       subtype?: "old"; // ~= "distribution"
-      items: ItemGroupEntryOrShortcut[];
+      items?: ItemGroupEntryOrShortcut[];
     };
 
 export type Construction = {
@@ -165,6 +165,19 @@ export type BookSlot = {
   martial_art?: string; // matype_id
   chapters?: number; // default: 0
   proficiencies?: BookProficiencyBonus[];
+};
+
+export type ToolSlot = {
+  ammo?: string | string[];
+  max_charges?: integer;
+  initial_charges?: integer;
+  charges_per_use?: integer;
+  charge_factor?: integer; // default 1
+  turns_per_charge?: integer;
+  power_draw?: integer;
+  revert_to?: string; // item_id
+  sub?: string; // item_id
+  rand_charges?: integer[];
 };
 
 export type DamageType =
@@ -304,7 +317,6 @@ export type WheelSlot = {
 
 export type ItemBasicInfo = {
   id: string;
-  type: AllItemTypes;
   description?: Translation;
   qualities?: [string, number][];
   volume?: volume;
@@ -332,37 +344,23 @@ export type ItemBasicInfo = {
   ascii_picture?: string;
 };
 
-const itemTypes = [
-  "AMMO",
-  "ARMOR",
-  "BATTERY",
-  "BIONIC_ITEM",
-  "BOOK",
-  "COMESTIBLE",
-  "ENGINE",
-  "GENERIC",
-  "GUN",
-  "GUNMOD",
-  "MAGAZINE",
-  "PET_ARMOR",
-  "TOOL",
-  "TOOLMOD",
-  "TOOL_ARMOR",
-  "WHEEL",
-] as const;
-type AllItemTypes = typeof itemTypes[Exclude<keyof typeof itemTypes, keyof []>];
-
-type TypedItems =
-  | ({ type: "AMMO" } & AmmoSlot)
-  | ({ type: "BOOK" } & BookSlot)
-  | ({ type: "GUN" } & GunSlot)
-  | ({ type: "COMESTIBLE" } & ComestibleSlot)
-  | ({ type: "ARMOR" | "TOOL_ARMOR" } & ArmorSlot)
-  | ({ type: "ENGINE" } & EngineSlot)
-  | ({ type: "WHEEL" } & WheelSlot);
-type UntypedItemType = Exclude<AllItemTypes, TypedItems["type"]>;
-
-export type Item = ItemBasicInfo & (TypedItems | { type: UntypedItemType });
+export type Item =
+  | SupportedTypes["AMMO"]
+  | SupportedTypes["ARMOR"]
+  | SupportedTypes["BATTERY"]
+  | SupportedTypes["BIONIC_ITEM"]
+  | SupportedTypes["BOOK"]
+  | SupportedTypes["COMESTIBLE"]
+  | SupportedTypes["ENGINE"]
+  | SupportedTypes["GENERIC"]
+  | SupportedTypes["GUN"]
+  | SupportedTypes["GUNMOD"]
+  | SupportedTypes["MAGAZINE"]
+  | SupportedTypes["PET_ARMOR"]
+  | SupportedTypes["TOOL"]
+  | SupportedTypes["TOOLMOD"]
+  | SupportedTypes["TOOL_ARMOR"]
+  | SupportedTypes["WHEEL"];
 
 export type PocketData = {
   pocket_type?: string;
@@ -551,6 +549,7 @@ export type BonusContainer = {
 
 export type Technique = {
   id: string;
+  type: "technique";
   name: Translation;
   description?: Translation;
 
@@ -933,6 +932,7 @@ export type Monster = {
         into?: string;
       };
   ascii_picture?: string;
+  death_drops?: string | ItemGroup | ItemGroupEntry[]; // distribution
 };
 
 export type MonsterGroup = {
@@ -1041,166 +1041,59 @@ export type AsciiArt = {
   picture: string[];
 };
 
-const types = [
-  "AMMO",
-  "ARMOR",
-  "BATTERY",
-  "BIONIC_ITEM",
-  "BOOK",
-  "COMESTIBLE",
-  "ENGINE",
-  "GENERIC",
-  "GUN",
-  "GUNMOD",
-  "ITEM_CATEGORY",
-  "LOOT_ZONE",
-  "MAGAZINE",
-  "MIGRATION",
-  "MONSTER",
-  "MONSTER_BLACKLIST",
-  "MONSTER_FACTION",
-  "PET_ARMOR",
-  "SPECIES",
-  "SPELL",
-  "TOOL",
-  "TOOLMOD",
-  "TOOL_ARMOR",
-  "WHEEL",
-  "achievement",
-  "activity_type",
-  "ammo_effect",
-  "ammunition_type",
-  "anatomy",
-  "ascii_art",
-  "behavior",
-  "bionic",
-  "body_part",
-  "butchery_requirement",
-  "charge_removal_blacklist",
-  "city_building",
-  "clothing_mod",
-  "conduct",
-  "construction",
-  "construction_category",
-  "construction_group",
-  "disease_type",
-  "dream",
-  "effect_on_condition",
-  "effect_type",
-  "emit",
-  "enchantment",
-  "event_statistic",
-  "event_transformation",
-  "faction",
-  "fault",
-  "field_type",
-  "furniture",
-  "gate",
-  "harvest",
-  "hit_range",
-  "item_action",
-  "item_group",
-  "json_flag",
-  "map_extra",
-  "mapgen",
-  "martial_art",
-  "material",
-  "mission_definition",
-  "monster_attack",
-  "monstergroup",
-  "morale_type",
-  "movement_mode",
-  "mutation",
-  "mutation_category",
-  "mutation_type",
-  "npc",
-  "npc_class",
-  "obsolete_terrain",
-  "overlay_order",
-  "overmap_connection",
-  "overmap_land_use_code",
-  "overmap_location",
-  "overmap_special",
-  "overmap_terrain",
-  "palette",
-  "practice",
-  "profession",
-  "profession_item_substitutions",
-  "proficiency",
-  "recipe",
-  "recipe_category",
-  "recipe_group",
-  "region_settings",
-  "relic_procgen_data",
-  "requirement",
-  "rotatable_symbol",
-  "scenario",
-  "scent_type",
-  "score",
-  "skill",
-  "skill_display_type",
-  "snippet",
-  "speech",
-  "speed_description",
-  "start_location",
-  "talk_topic",
-  "technique",
-  "ter_furn_transform",
-  "terrain",
-  "tool_quality",
-  "trait_group",
-  "trap",
-  "uncraft",
-  "vehicle",
-  "vehicle_group",
-  "vehicle_part",
-  "vehicle_part_category",
-  "vehicle_placement",
-  "vehicle_spawn",
-  "vitamin",
-  "weather_type",
-  "widget",
-] as const;
-type AllTypes = typeof types[Exclude<keyof typeof types, keyof []>];
+// Used for schema validation.
+export type SupportedTypes = {
+  // Item types.
+  AMMO: { type: "AMMO" } & ItemBasicInfo & AmmoSlot;
+  ARMOR: { type: "ARMOR" } & ItemBasicInfo & ArmorSlot;
+  BATTERY: { type: "BATTERY" } & ItemBasicInfo;
+  BIONIC_ITEM: { type: "BIONIC_ITEM" } & ItemBasicInfo;
+  BOOK: { type: "BOOK" } & ItemBasicInfo & BookSlot;
+  COMESTIBLE: { type: "COMESTIBLE" } & ItemBasicInfo & ComestibleSlot;
+  ENGINE: { type: "ENGINE" } & ItemBasicInfo & EngineSlot;
+  GENERIC: { type: "GENERIC" } & ItemBasicInfo;
+  GUN: { type: "GUN" } & ItemBasicInfo & GunSlot;
+  GUNMOD: { type: "GUNMOD" } & ItemBasicInfo;
+  MAGAZINE: { type: "MAGAZINE" } & ItemBasicInfo;
+  PET_ARMOR: { type: "PET_ARMOR" } & ItemBasicInfo;
+  TOOL: { type: "TOOL" } & ItemBasicInfo & ToolSlot;
+  TOOLMOD: { type: "TOOLMOD" } & ItemBasicInfo;
+  TOOL_ARMOR: { type: "TOOL_ARMOR" } & ItemBasicInfo & ToolSlot & ArmorSlot;
+  WHEEL: { type: "WHEEL" } & ItemBasicInfo & WheelSlot;
 
-type SupportedThing =
-  | Item
-  | Palette
-  | Mapgen
-  | Skill
-  | Proficiency
-  | Furniture
-  | JsonFlag
-  | Construction
-  | Requirement
-  | Vitamin
-  | Fault
-  | Recipe
-  | ToolQuality
-  | Harvest
-  | Monster
-  | VehiclePart
-  | MonsterGroup
-  | AsciiArt;
+  // Non-item types.
+  MONSTER: Monster;
+  ascii_art: AsciiArt;
+  construction: Construction;
+  fault: Fault;
+  furniture: Furniture;
+  harvest: Harvest;
+  item_group: ItemGroup;
+  json_flag: JsonFlag;
+  mapgen: Mapgen;
+  monstergroup: MonsterGroup;
+  palette: Palette;
+  proficiency: Proficiency;
+  recipe: { type: "recipe" } & Recipe;
+  requirement: Requirement;
+  skill: Skill;
+  technique: Technique;
+  tool_quality: ToolQuality;
+  uncraft: { type: "uncraft" } & Recipe;
+  vehicle_part: VehiclePart;
+  vitamin: Vitamin;
 
-type UnsupportedType = Exclude<AllTypes, SupportedThing["type"]>;
+  // TODO: used, but not yet typed
+  ammunition_type: any;
+  body_part: any;
+  effect_type: any;
+  construction_group: any;
+  overmap_terrain: any;
+  material: any;
+  monster_attack: any;
+};
 
-// https://stackoverflow.com/a/53808212/216728
-// prettier-ignore
-type IfEquals<T, U, Y = unknown, N = never> =
-  (<G>() => G extends T ? 1 : 2) extends
-  (<G>() => G extends U ? 1 : 2) ? Y : N;
-
-// prettier-ignore
-let unsupportedTypeMustNotBeString: IfEquals<string, UnsupportedType, true, false> = false
-
-export type Thing =
-  | SupportedThing
-  // I would make this extra one just Exclude<string, SupportedThing['type']>, but
-  // typescript-json-schema just renders that as {type: string}, which would allow any
-  // non-conforming object to pass the schema.
-  // This _could_ be rendered in JSON-Schema using the 'not' operator, but
-  // typescript-json-schema doesn't support it.
-  | { type: UnsupportedType };
-
-export type All = { data: Thing[] };
+export type SupportedTypesWithMapped = SupportedTypes & {
+  item: Item;
+  monster: Monster;
+};
