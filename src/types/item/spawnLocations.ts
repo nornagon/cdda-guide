@@ -46,9 +46,8 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
     .map(({ object, om_terrain }) => {
       // If om_terrain is missing, this is nested_mapgen or update_mapgen
       if (om_terrain == null) return;
-      const overmap_terrains = new Maybe(om_terrain)
-        .map((om_terrain) => [om_terrain].flat(2))
-        .getOrDefault([])
+      const overmap_terrains = [om_terrain]
+        .flat(2)
         .map((id) =>
           new Maybe(data.byId("overmap_terrain", id))
             .map((ter) => ({ singularName: singularName(ter) }))
