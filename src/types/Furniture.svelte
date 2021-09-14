@@ -1,6 +1,6 @@
 <script lang="ts">
 import { CddaData, singularName } from "../data";
-import type { Construction as ConstructionT, Furniture } from "../types";
+import type { Furniture } from "../types";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import Construction from "./Construction.svelte";
@@ -31,7 +31,7 @@ function showProbability(prob: number) {
 }
 
 const constructions = data
-  .byType<ConstructionT>("construction")
+  .byType("construction")
   .filter((c) => c.post_terrain === item.id);
 
 const bits = [

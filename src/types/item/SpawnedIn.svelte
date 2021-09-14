@@ -2,14 +2,13 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Mapgen } from "../../types";
 
 export let item_id: string;
 
 let data = getContext<CddaData>("data");
 
 const mapgens = data
-  .byType<Mapgen>("mapgen")
+  .byType("mapgen")
   .filter((mapgen) => data.mapgenSpawnItems(mapgen).includes(item_id));
 const om_terrains = new Set();
 for (const mg of mapgens) {

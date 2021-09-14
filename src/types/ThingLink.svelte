@@ -1,8 +1,9 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, countsByCharges, pluralName, singularName } from "../data";
+import type { SupportedTypesWithMapped } from "../types";
 
-export let type: string;
+export let type: keyof SupportedTypesWithMapped;
 export let id: string;
 export let plural: boolean = false;
 export let count: number | [number, number] | undefined = undefined;

@@ -46,7 +46,7 @@ function showProbability(prob: number) {
 
 const breaksIntoGroup: ItemGroup | null =
   typeof item.breaks_into === "string"
-    ? data.byId<ItemGroup>("item_group", item.breaks_into)
+    ? data.byId("item_group", item.breaks_into)
     : Array.isArray(item.breaks_into)
     ? { subtype: "collection", entries: item.breaks_into }
     : item.breaks_into

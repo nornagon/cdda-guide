@@ -3,14 +3,20 @@ import { setContext } from "svelte";
 
 import { CddaData, singularName } from "./data";
 import LimitedList from "./LimitedList.svelte";
-import type { Item, Monster, VehiclePart } from "./types";
+import type {
+  Item,
+  Monster,
+  SupportedTypesWithMapped,
+  VehiclePart,
+} from "./types";
 import ThingLink from "./types/ThingLink.svelte";
 
 export let type: string;
 export let data: CddaData;
+let typeWithCorrectType = type as keyof SupportedTypesWithMapped;
 setContext("data", data);
 
-const things = data.byType(type).filter((o) => o.id);
+const things = data.byType(type as any).filter((o) => o.id);
 things.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 
 function groupBy<T>(things: T[], f: (x: T) => string) {
@@ -44,7 +50,7 @@ const groupKeys = [...groups.keys()].sort();
       items={groups.get(groupName)}
       let:item
       limit={groupKeys.length === 1 ? Infinity : 10}>
-      <ThingLink {type} id={item.id} />
+      <ThingLink type={typeWithCorrectType} id={item.id} />
     </LimitedList>
   </section>
 {/each}

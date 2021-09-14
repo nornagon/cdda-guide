@@ -2,7 +2,6 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Furniture } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import FurnitureSymbol from "./FurnitureSymbol.svelte";
 
@@ -11,7 +10,7 @@ export let item_id: string;
 const data = getContext<CddaData>("data");
 
 let deconstructibleFrom = data
-  .byType<Furniture>("furniture")
+  .byType("furniture")
   .filter((f) => {
     const deconstruct = f.deconstruct?.items
       ? data.flattenItemGroup({

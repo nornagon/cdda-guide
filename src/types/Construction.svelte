@@ -18,7 +18,7 @@ const using =
 const requirements = using
   .map(
     ([id, count]) =>
-      [data.byId<RequirementData>("requirement", id), count] as const
+      [data.byId("requirement", id) as RequirementData, count] as const
   )
   .concat([[construction, 1]]);
 

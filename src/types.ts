@@ -317,7 +317,6 @@ export type WheelSlot = {
 
 export type ItemBasicInfo = {
   id: string;
-  type: AllItemTypes;
   description?: Translation;
   qualities?: [string, number][];
   volume?: volume;
@@ -345,39 +344,23 @@ export type ItemBasicInfo = {
   ascii_picture?: string;
 };
 
-const itemTypes = [
-  "AMMO",
-  "ARMOR",
-  "BATTERY",
-  "BIONIC_ITEM",
-  "BOOK",
-  "COMESTIBLE",
-  "ENGINE",
-  "GENERIC",
-  "GUN",
-  "GUNMOD",
-  "MAGAZINE",
-  "PET_ARMOR",
-  "TOOL",
-  "TOOLMOD",
-  "TOOL_ARMOR",
-  "WHEEL",
-] as const;
-type AllItemTypes = typeof itemTypes[Exclude<keyof typeof itemTypes, keyof []>];
-
-type TypedItems =
-  | ({ type: "AMMO" } & AmmoSlot)
-  | ({ type: "BOOK" } & BookSlot)
-  | ({ type: "GUN" } & GunSlot)
-  | ({ type: "COMESTIBLE" } & ComestibleSlot)
-  | ({ type: "ARMOR" } & ArmorSlot)
-  | ({ type: "TOOL_ARMOR" } & ToolSlot & ArmorSlot)
-  | ({ type: "ENGINE" } & EngineSlot)
-  | ({ type: "WHEEL" } & WheelSlot)
-  | ({ type: "TOOL" } & ToolSlot);
-type UntypedItemType = Exclude<AllItemTypes, TypedItems["type"]>;
-
-export type Item = ItemBasicInfo & (TypedItems | { type: UntypedItemType });
+export type Item =
+  | SupportedTypes["AMMO"]
+  | SupportedTypes["ARMOR"]
+  | SupportedTypes["BATTERY"]
+  | SupportedTypes["BIONIC_ITEM"]
+  | SupportedTypes["BOOK"]
+  | SupportedTypes["COMESTIBLE"]
+  | SupportedTypes["ENGINE"]
+  | SupportedTypes["GENERIC"]
+  | SupportedTypes["GUN"]
+  | SupportedTypes["GUNMOD"]
+  | SupportedTypes["MAGAZINE"]
+  | SupportedTypes["PET_ARMOR"]
+  | SupportedTypes["TOOL"]
+  | SupportedTypes["TOOLMOD"]
+  | SupportedTypes["TOOL_ARMOR"]
+  | SupportedTypes["WHEEL"];
 
 export type PocketData = {
   pocket_type?: string;
@@ -949,6 +932,7 @@ export type Monster = {
         into?: string;
       };
   ascii_picture?: string;
+  death_drops?: string | ItemGroup | ItemGroupEntry[]; // distribution
 };
 
 export type MonsterGroup = {
@@ -1060,22 +1044,22 @@ export type AsciiArt = {
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
-  AMMO: ItemBasicInfo & AmmoSlot;
-  ARMOR: ItemBasicInfo & ArmorSlot;
-  BATTERY: ItemBasicInfo;
-  BIONIC_ITEM: ItemBasicInfo;
-  BOOK: ItemBasicInfo & BookSlot;
-  COMESTIBLE: ItemBasicInfo & ComestibleSlot;
-  ENGINE: ItemBasicInfo & EngineSlot;
-  GENERIC: ItemBasicInfo;
-  GUN: ItemBasicInfo & GunSlot;
-  GUNMOD: ItemBasicInfo;
-  MAGAZINE: ItemBasicInfo;
-  PET_ARMOR: ItemBasicInfo;
-  TOOL: ItemBasicInfo & ToolSlot;
-  TOOLMOD: ItemBasicInfo;
-  TOOL_ARMOR: ItemBasicInfo & ToolSlot & ArmorSlot;
-  WHEEL: ItemBasicInfo & WheelSlot;
+  AMMO: { type: "AMMO" } & ItemBasicInfo & AmmoSlot;
+  ARMOR: { type: "ARMOR" } & ItemBasicInfo & ArmorSlot;
+  BATTERY: { type: "BATTERY" } & ItemBasicInfo;
+  BIONIC_ITEM: { type: "BIONIC_ITEM" } & ItemBasicInfo;
+  BOOK: { type: "BOOK" } & ItemBasicInfo & BookSlot;
+  COMESTIBLE: { type: "COMESTIBLE" } & ItemBasicInfo & ComestibleSlot;
+  ENGINE: { type: "ENGINE" } & ItemBasicInfo & EngineSlot;
+  GENERIC: { type: "GENERIC" } & ItemBasicInfo;
+  GUN: { type: "GUN" } & ItemBasicInfo & GunSlot;
+  GUNMOD: { type: "GUNMOD" } & ItemBasicInfo;
+  MAGAZINE: { type: "MAGAZINE" } & ItemBasicInfo;
+  PET_ARMOR: { type: "PET_ARMOR" } & ItemBasicInfo;
+  TOOL: { type: "TOOL" } & ItemBasicInfo & ToolSlot;
+  TOOLMOD: { type: "TOOLMOD" } & ItemBasicInfo;
+  TOOL_ARMOR: { type: "TOOL_ARMOR" } & ItemBasicInfo & ToolSlot & ArmorSlot;
+  WHEEL: { type: "WHEEL" } & ItemBasicInfo & WheelSlot;
 
   // Non-item types.
   MONSTER: Monster;
@@ -1090,16 +1074,26 @@ export type SupportedTypes = {
   monstergroup: MonsterGroup;
   palette: Palette;
   proficiency: Proficiency;
-  recipe: Recipe;
+  recipe: { type: "recipe" } & Recipe;
   requirement: Requirement;
   skill: Skill;
   technique: Technique;
   tool_quality: ToolQuality;
-  uncraft: Recipe;
+  uncraft: { type: "uncraft" } & Recipe;
   vehicle_part: VehiclePart;
   vitamin: Vitamin;
 
   // TODO: used, but not yet typed
   ammunition_type: any;
+  body_part: any;
+  effect_type: any;
+  construction_group: any;
+  overmap_terrain: any;
   material: any;
+  monster_attack: any;
+};
+
+export type SupportedTypesWithMapped = SupportedTypes & {
+  item: Item;
+  monster: Monster;
 };

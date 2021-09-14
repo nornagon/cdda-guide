@@ -3,7 +3,7 @@ import { normalize, singularName } from "../data";
 import type { CddaData } from "../data";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
-import type { Fault, Requirement } from "../types";
+import type { Fault } from "../types";
 
 const data = getContext<CddaData>("data");
 
@@ -12,7 +12,7 @@ export let item: Fault;
 const mendingMethods = (item.mending_methods ?? []).map((mm) => {
   const requirement =
     typeof mm.requirements === "string"
-      ? data.byId<Requirement>("requirement", mm.requirements)
+      ? data.byId("requirement", mm.requirements)
       : mm.requirements;
   const tools = data.flattenRequirement(
     requirement.tools ?? [],

@@ -13,6 +13,9 @@ import type {
   DamageInstance,
   DamageUnit,
   RequirementData,
+  Monster,
+  SupportedTypes,
+  SupportedTypesWithMapped,
 } from "./types";
 
 const idlessTypes = new Set([
@@ -176,7 +179,10 @@ export class CddaData {
     }
   }
 
-  byId<T = any>(type: string, id: string): T {
+  byId<TypeName extends keyof SupportedTypesWithMapped>(
+    type: TypeName,
+    id: string
+  ): SupportedTypesWithMapped[TypeName] {
     if (typeof id !== "string") throw new Error("Requested non-string id");
     if (type === "item" && this._migrations.has(id))
       return this.byId(type, this._migrations.get(id));
@@ -184,7 +190,9 @@ export class CddaData {
     if (obj) return this._flatten(obj);
   }
 
-  byType<T = any>(type: string): T[] {
+  byType<TypeName extends keyof SupportedTypesWithMapped>(
+    type: TypeName
+  ): SupportedTypesWithMapped[TypeName][] {
     return this._byType.get(type).map((x) => this._flatten(x)) ?? [];
   }
 
@@ -288,10 +296,12 @@ export class CddaData {
   ): { id: string; prob: number; count: [number, number] }[] {
     if (this._cachedDeathDrops.has(mon_id))
       return this._cachedDeathDrops.get(mon_id);
-    const normalizeDeathDrops = (death_drops): ItemGroup | undefined => {
+    const normalizeDeathDrops = (
+      death_drops: Monster["death_drops"]
+    ): ItemGroup | undefined => {
       if (death_drops) {
         if (typeof death_drops === "string") {
-          return this.byId("item_group", death_drops) as ItemGroup;
+          return this.byId("item_group", death_drops);
         } else if (Array.isArray(death_drops)) {
           return { subtype: "distribution", entries: death_drops };
         } else {
@@ -310,9 +320,9 @@ export class CddaData {
 
   uncraftRecipe(item_id: string): Recipe | undefined {
     let reversed: Recipe;
-    for (const recipe of this.byType<Recipe>("recipe")) {
+    for (const recipe of this.byType("recipe")) {
       if (recipe.result === item_id) {
-        if (recipe.type === "uncraft") return recipe;
+        if ((recipe.type as any) === "uncraft") return recipe;
         else if (recipe.reversible) reversed = recipe;
       }
     }
@@ -332,7 +342,7 @@ export class CddaData {
     const addGroup = (c: string, v: string | ItemGroup | ItemGroupEntry[]) => {
       const group =
         typeof v === "string"
-          ? this.byId<ItemGroup>("item_group", v)
+          ? this.byId("item_group", v)
           : Array.isArray(v)
           ? { subtype: "collection" as const, entries: v }
           : v;
@@ -340,7 +350,7 @@ export class CddaData {
         for (const { id } of this.flattenItemGroup(group)) add(c, id);
       } else {
         if (typeof v === "string") {
-          const item = this.byId<Item>("item", v);
+          const item = this.byId("item", v);
           if (item) add(c, v);
         }
       }
@@ -367,8 +377,7 @@ export class CddaData {
     addPalette(mapgen.object);
 
     for (const p_id of mapgen.object.palettes ?? [])
-      if (typeof p_id === "string")
-        addPalette(this.byId<Palette>("palette", p_id));
+      if (typeof p_id === "string") addPalette(this.byId("palette", p_id));
       else {
         // TODO: handle param/distribution/switch
       }
@@ -391,7 +400,7 @@ export class CddaData {
     for (const v of mapgen.object.place_items ?? []) {
       const group =
         typeof v.item === "string"
-          ? this.byId<ItemGroup>("item_group", v.item)
+          ? this.byId("item_group", v.item)
           : Array.isArray(v.item)
           ? { subtype: "collection" as const, entries: v.item }
           : v.item;
@@ -399,7 +408,7 @@ export class CddaData {
         for (const { id } of this.flattenItemGroup(group)) ret.add(id);
       } else {
         if (typeof v === "string") {
-          const item = this.byId<Item>("item", v);
+          const item = this.byId("item", v);
           if (item) ret.add(v);
         }
       }
@@ -409,7 +418,7 @@ export class CddaData {
       if (v.item) ret.add(v.item);
       if (v.group)
         for (const { id } of this.flattenItemGroup(
-          this.byId<ItemGroup>("item_group", v.group)
+          this.byId("item_group", v.group)
         ))
           ret.add(id);
     }
@@ -629,9 +638,7 @@ export class CddaData {
         onlyRecoverable
           ? x.filter(
               (c) =>
-                !(this.byId<Item>("item", c.id).flags ?? []).includes(
-                  "UNRECOVERABLE"
-                )
+                !(this.byId("item", c.id).flags ?? []).includes("UNRECOVERABLE")
             )
           : x
       )
@@ -652,7 +659,7 @@ export class CddaData {
       .map(
         ([id, count]) =>
           [
-            this.byId<RequirementData>("requirement", id),
+            this.byId("requirement", id) as RequirementData,
             count as number,
           ] as const
       )

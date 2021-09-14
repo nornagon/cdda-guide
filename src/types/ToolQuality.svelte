@@ -2,7 +2,7 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
-import type { Item, VehiclePart, ToolQuality, Recipe } from "../types";
+import type { Item, VehiclePart, ToolQuality } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: ToolQuality;
@@ -22,7 +22,7 @@ for (const it of data.byType("item")) {
 }
 
 const vpartsWithQualityByLevel = new Map<number, VehiclePart[]>();
-for (const it of data.byType<VehiclePart>("vehicle_part")) {
+for (const it of data.byType("vehicle_part")) {
   if (!it.id) continue;
   const q = (it.qualities ?? []).find(([id, _level]) => id === item.id);
   if (q) {
@@ -34,8 +34,8 @@ for (const it of data.byType<VehiclePart>("vehicle_part")) {
 }
 
 const recipesUsingQualitySet = new Map<number, Set<string>>();
-for (const it of data.byType<Recipe>("recipe")) {
-  if (it.construction_blueprint || it.type === "uncraft") continue;
+for (const it of data.byType("recipe")) {
+  if (it.construction_blueprint || (it.type as any) === "uncraft") continue;
   const { qualities } = data.normalizeRequirements(it);
   for (const qs of qualities) {
     for (const { id, level } of qs) {

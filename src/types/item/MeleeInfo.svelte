@@ -1,15 +1,13 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, parseMass, parseVolume, singular } from "../../data";
-import type { Item, Technique } from "../../types";
+import type { Item } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
 let data = getContext<CddaData>("data");
 export let item: Item;
 
-let techniques = (item.techniques ?? []).map((t) =>
-  data.byId<Technique>("technique", t)
-);
+let techniques = (item.techniques ?? []).map((t) => data.byId("technique", t));
 
 const gripVal = { bad: 0, none: 1, solid: 2, weapon: 3 };
 const lengthVal = { hand: 0, short: 1, long: 2 };
