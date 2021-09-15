@@ -72,9 +72,9 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
         const palette = parsePalette(data, object);
         const additional_items = collection(
           [...(object.place_item ?? []), ...(object.add ?? [])].map(
-            ({ item, chance }) => ({
+            ({ item, chance = 100 }) => ({
               /* TODO: repeat: number | [number] | [number, number] */
-              loot: new Map([[item, (chance ?? 100) / 100]]),
+              loot: new Map([[item, chance / 100]]),
               chance: 1,
             })
           )
