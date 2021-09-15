@@ -23,5 +23,11 @@ export class Maybe<T> {
 }
 
 export function multimap<K, V>(entries: [K, V][]): Map<K, V[]> {
-  return new Map(entries.map(([k, v]) => [k, [v]]));
+  let ret = new Map();
+  for (const [k, v] of entries) {
+    const list = ret.get(k) ?? [];
+    list.push(v);
+    ret.set(k, list);
+  }
+  return ret;
 }

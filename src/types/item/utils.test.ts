@@ -59,4 +59,12 @@ describe("multimap()", () => {
       ])
     );
   });
+  it("collects multiple entries", () => {
+    expect(
+      multimap([
+        ["k", "v1"],
+        ["k", "v2"],
+      ])
+    ).toStrictEqual(new Map([["k", ["v1", "v2"]]]));
+  });
 });
