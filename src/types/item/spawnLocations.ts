@@ -145,15 +145,22 @@ type RawPaletteEntry = {
   repeat?: number | [number] | [number, number];
 };
 type RawPalette = {
-  // item
+  // TODO: item
   items?: Record<string, RawPaletteEntry | RawPaletteEntry[]>;
-  // sealed_item
-  // palettes // str, distribution, param or switch
+  // TODO: sealed_item
+  palettes?: (
+    | string
+    | { param: any }
+    | { distribution: any }
+    | { switch: any }
+  )[];
 };
 export function parsePalette(
   data: CddaData,
   palette: RawPalette
 ): Map<string, Loot> {
+  if (palette.palettes && typeof palette.palettes[0] === "string")
+    palette = data.byId("palette", palette.palettes[0]);
   const items = palette.items ?? {};
   return new Map(
     Object.entries(items).map(([sym, val]) => {
