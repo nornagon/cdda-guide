@@ -1,6 +1,7 @@
 import type { CddaData } from "../../data";
 import { singularName } from "../../data";
 import type * as raw from "../../types";
+import { multimap } from "./utils";
 
 /** 0.0 <= chance <= 1.0 */
 type chance = number;
@@ -106,12 +107,16 @@ export function getItemSpawnLocations(
   data: CddaData,
   item_id: string
 ): SpawnLocation[] {
-  return getAllLocationsAndLoot(data).flatMap(({ mapgen, loot }) => {
+  const entries = getAllLocationsAndLoot(data).flatMap(({ mapgen, loot }) => {
     if (!loot.has(item_id)) return [];
     const chance = loot.get(item_id);
-    const omt = mapgen.overmap_terrains[0];
-    return { chance: [chance], ...omt };
+    const { singularName } = mapgen.overmap_terrains[0];
+    return [[singularName, chance] as [string, number]];
   });
+  return [...multimap(entries)].map(([k, v]) => ({
+    singularName: k,
+    chance: v,
+  }));
 }
 
 export function getItemGroup(data: CddaData, id: string): Loot {
