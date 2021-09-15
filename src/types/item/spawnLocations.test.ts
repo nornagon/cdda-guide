@@ -9,8 +9,6 @@ import {
 } from "./spawnLocations";
 import { CddaData } from "../../data";
 
-beforeEach(() => jest.restoreAllMocks());
-
 const raw_mapgen_common = {
   type: "mapgen",
   method: "json",
