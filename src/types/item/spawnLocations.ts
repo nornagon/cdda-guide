@@ -159,10 +159,8 @@ export function parsePalette(
   data: CddaData,
   palette: RawPalette
 ): Map<string, Loot> {
-  if (palette.palettes && typeof palette.palettes[0] === "string")
-    palette = data.byId("palette", palette.palettes[0]);
   const items = palette.items ?? {};
-  return new Map(
+  const self = new Map(
     Object.entries(items).map(([sym, val]) => {
       const groups = [val].flat().map(({ item, chance = 100, repeat }) => ({
         loot:
@@ -173,5 +171,20 @@ export function parsePalette(
       }));
       return [sym, collection(groups)];
     })
+  );
+  const all = (palette.palettes ?? [])
+    .flatMap((id) =>
+      typeof id !== "string" ? [] /*TODO*/ : [data.byId("palette", id)]
+    )
+    .map((p) => parsePalette(data, p));
+  return new Map(
+    [...multimap([self, ...all].flatMap((p) => [...p]))].map(([k, v]) => [
+      k,
+      collection(
+        v.map((l) => ({
+          loot: l,
+        }))
+      ),
+    ])
   );
 }

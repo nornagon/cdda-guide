@@ -527,16 +527,17 @@ describe("parsePalette()", () => {
         id: "fake_item_group",
         type: "item_group",
         subtype: "collection",
-        items: ["fake_item"],
+        items: [["fake_item", 50]],
       },
     ]);
     const rawPalette = {
       palettes: ["fake_palette"],
+      items: { X: { item: "fake_item_group" } },
     };
 
     const got = parsePalette(data, rawPalette);
 
-    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 1]])]]));
+    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
   });
 });
 
