@@ -24,6 +24,7 @@ const spawnLocations = getItemSpawnLocations(data, item_id);
       >{loc.sym}</span>
       -->
     <!--TODO<span title={loc.id}>-->
-    <span>{loc.singularName} ({showProbability(loc.chance[0])})</span>
+    <span
+      >{loc.singularName} ({loc.chance.map(showProbability).join(", ")})</span>
   </LimitedList>
 </section>

@@ -40,5 +40,24 @@ describe("the loot section", () => {
     expect(getByText(/fake place/)).toBeInTheDocument();
     expect(getByText(/50.00%/)).toBeInTheDocument();
   });
+  it("displays the list of chances", () => {
+    const oneVariant = {
+      type: "mapgen",
+      method: "json",
+      om_terrain: "fake_terrain",
+      object: {
+        place_item: [{ item: "fake_item" }],
+      },
+    };
+    const data = new CddaData([oneVariant, oneVariant]);
+
+    const { getByText } = render(WithData, {
+      Component: SpawnedIn,
+      item_id: "fake_item",
+      data,
+    });
+
+    expect(getByText(/100.00%, 100.00%/)).toBeInTheDocument();
+  });
 });
 //getItemSpawnLocations
