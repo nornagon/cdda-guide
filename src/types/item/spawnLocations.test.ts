@@ -384,6 +384,25 @@ describe("getAllMapgens()", () => {
       },
     ]);
   });
+  it("knows about .object.place_item.[].repeat", () => {
+    const given = new CddaData([
+      {
+        ...raw_mapgen_common,
+        object: {
+          place_item: [{ item: "fake_item", chance: 50, repeat: 2 }],
+        },
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+
+    expect(got).toStrictEqual([
+      {
+        ...mapgen_common,
+        additional_items: new Map([["fake_item", 0.75]]),
+      },
+    ]);
+  });
 });
 
 describe("getItemGroup()", () => {
