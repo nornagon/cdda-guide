@@ -22,6 +22,6 @@ export class Maybe<T> {
   }
 }
 
-export function multimap<K, V>(entries: Iterable<[K, V]>): Map<K, V[]> {
-  return new Map();
+export function multimap<K, V>(entries: [K, V][]): Map<K, V[]> {
+  return new Map(entries.map(([k, v]) => [k, [v]]));
 }

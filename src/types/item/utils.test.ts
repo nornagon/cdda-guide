@@ -46,4 +46,17 @@ describe("multimap()", () => {
   it("correcty handles empty input", () => {
     expect(multimap([])).toStrictEqual(new Map());
   });
+  it("collects entries into a map", () => {
+    expect(
+      multimap([
+        ["k1", "v1"],
+        ["k2", "v2"],
+      ])
+    ).toStrictEqual(
+      new Map([
+        ["k1", ["v1"]],
+        ["k2", ["v2"]],
+      ])
+    );
+  });
 });
