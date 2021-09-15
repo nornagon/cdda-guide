@@ -77,12 +77,16 @@ describe("getItemSpawnLocations()", () => {
         place_item: [{ item: "fake_item", chance }],
       },
     });
-    const data = new CddaData([withChance(50), withChance(100)]);
+    const data = new CddaData([
+      withChance(100),
+      withChance(25),
+      withChance(50),
+    ]);
 
     const locations = getItemSpawnLocations(data, "fake_item");
 
     expect(locations).toStrictEqual([
-      { singularName: "fake_terrain", chance: [1, 0.5] },
+      { singularName: "fake_terrain", chance: [1, 0.5, 0.25] },
     ]);
   });
 });
