@@ -74,7 +74,6 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
           [...(object.place_item ?? []), ...(object.add ?? [])].map(
             ({ item, chance = 100, repeat }) => ({
               loot: new Map([[item, repeatChance(repeat, chance / 100)]]),
-              chance: 1,
             })
           )
         );
@@ -104,11 +103,8 @@ export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
       .flatMap((r) => Array.from(r))
       .map((sym) => mapgen.palette.get(sym))
       .filter((loot) => loot != null)
-      .map((loot) => ({
-        loot,
-        chance: 1.0,
-      }));
-    items.push({ loot: mapgen.additional_items, chance: 1.0 });
+      .map((loot) => ({ loot }));
+    items.push({ loot: mapgen.additional_items });
     const loot = collection(items);
     return { mapgen, loot };
   });
