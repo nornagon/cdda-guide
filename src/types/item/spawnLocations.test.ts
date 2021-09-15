@@ -478,4 +478,7 @@ describe("repeatChance()", () => {
   it.each([1.0, 0.5])("repeats once (chance: %d)", (chance) => {
     expect(repeatChance(1, chance)).toBe(chance);
   });
+  it("repeats twice", () => {
+    expect(repeatChance(2, 0.5)).toBe(0.75);
+  });
 });

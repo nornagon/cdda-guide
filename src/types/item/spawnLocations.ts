@@ -10,7 +10,8 @@ export function repeatChance(
   repeat: undefined | number | [number] | [number, number],
   chance: chance
 ): chance {
-  return chance;
+  if (typeof repeat !== "number") return 1.0;
+  return chance + (repeat - 1) * 0.25;
 }
 
 type Loot = Map</**item_id*/ string, chance>;
