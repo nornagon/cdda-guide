@@ -21,3 +21,7 @@ export class Maybe<T> {
     return new Maybe(value);
   }
 }
+
+export function multimap<K, V>(entries: Iterable<[K, V]>): Map<K, V[]> {
+  return new Map();
+}

@@ -1,4 +1,4 @@
-import { Maybe } from "./utils";
+import { Maybe, multimap } from "./utils";
 
 describe("Maybe.getOrDefault()", () => {
   it.each([
@@ -39,5 +39,11 @@ describe("Maybe.map()", () => {
     const got = given.map(callback);
 
     expect(got.getOrDefault(-100)).toBe(expected);
+  });
+});
+
+describe("multimap()", () => {
+  it("correcty handles empty input", () => {
+    expect(multimap([])).toStrictEqual(new Map());
   });
 });
