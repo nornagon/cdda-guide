@@ -484,4 +484,7 @@ describe("repeatChance()", () => {
   ])("repeats %d times", (repeat, expected) => {
     expect(repeatChance(repeat, 0.5)).toBe(expected);
   });
+  it("handles repeat ranges", () => {
+    expect(repeatChance([1, 2], 0.5)).toBe((0.5 + 0.75) / 2);
+  });
 });

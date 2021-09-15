@@ -10,8 +10,18 @@ export function repeatChance(
   repeat: undefined | number | [number] | [number, number],
   chance: chance
 ): chance {
-  if (typeof repeat !== "number") return 1.0;
-  return 1 - Math.pow(1 - chance, repeat);
+  if (typeof repeat === "number") return 1 - Math.pow(1 - chance, repeat);
+  if (!Array.isArray(repeat)) return 1.0;
+  let sum = 0;
+  let count = 0;
+  // It would me more efficient to use the formula
+  // for the sum of a geometric progerssion,
+  // but this should be easier to understand
+  for (let r = repeat[0]; r <= repeat[1]; ++r) {
+    sum += 1 - Math.pow(1 - chance, r);
+    ++count;
+  }
+  return sum / count;
 }
 
 type Loot = Map</**item_id*/ string, chance>;
