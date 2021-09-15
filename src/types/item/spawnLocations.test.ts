@@ -50,7 +50,7 @@ describe("getItemSpawnLocations()", () => {
     const locations = getItemSpawnLocations(data, "fake_item");
 
     expect(locations).toStrictEqual([
-      { singularName: "fake loc", chance: 0.25 },
+      { singularName: "fake loc", chance: [0.25] },
     ]);
   });
 });

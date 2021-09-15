@@ -100,7 +100,7 @@ type SpawnLocation = {
   singularName: string;
   // sym: string
   // color: string
-  chance: chance;
+  chance: chance[];
 };
 export function getItemSpawnLocations(
   data: CddaData,
@@ -110,7 +110,7 @@ export function getItemSpawnLocations(
     if (!loot.has(item_id)) return [];
     const chance = loot.get(item_id);
     const omt = mapgen.overmap_terrains[0];
-    return { chance: chance, ...omt };
+    return { chance: [chance], ...omt };
   });
 }
 
