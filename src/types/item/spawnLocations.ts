@@ -139,18 +139,6 @@ export function getItemGroup(data: CddaData, id: string): Loot {
   return new Map(g.map(({ id, prob }) => [id, prob]));
 }
 
-type RawPalette = {
-  // TODO: item
-  items?: raw.PlaceMapping<raw.MapgenItemGroup>;
-  // TODO: sealed_item
-  palettes?: (
-    | string
-    | { param: any }
-    | { distribution: any }
-    | { switch: any }
-  )[];
-};
-
 function mergePalettes(palettes: Map<string, Loot>[]): Map<string, Loot> {
   return new Map(
     [...multimap(palettes.flatMap((p) => [...p]))].map(([k, v]) => [
@@ -164,13 +152,24 @@ function mergePalettes(palettes: Map<string, Loot>[]): Map<string, Loot> {
   );
 }
 
+type RawPalette = {
+  // TODO: item
+  items?: raw.PlaceMapping<raw.MapgenItemGroup>;
+  // TODO: sealed_item
+  palettes?: (
+    | string
+    | { param: any }
+    | { distribution: any }
+    | { switch: any }
+  )[];
+};
+
 export function parsePalette(
   data: CddaData,
   palette: RawPalette
 ): Map<string, Loot> {
-  const items = palette.items ?? {};
-  const self = new Map(
-    Object.entries(items).map(([sym, val]) => {
+  const items = new Map(
+    Object.entries(palette.items ?? {}).map(([sym, val]) => {
       const groups = [val].flat().map(({ item, chance = 100, repeat }) => ({
         loot:
           typeof item === "string"
@@ -186,5 +185,5 @@ export function parsePalette(
       typeof id !== "string" ? [] /*TODO*/ : [data.byId("palette", id)]
     )
     .map((p) => parsePalette(data, p));
-  return mergePalettes([self, ...palettes]);
+  return mergePalettes([items, ...palettes]);
 }
