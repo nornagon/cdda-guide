@@ -10,8 +10,7 @@ export function repeatChance(
   repeat: undefined | number | [number] | [number, number],
   chance: chance
 ): chance {
-  if (repeat == null) return 1.0;
-  let repeat_a = [repeat].flat();
+  let repeat_a = [repeat ?? 1].flat();
   if (repeat_a.length === 1) repeat_a = [repeat_a[0], repeat_a[0]];
   let sum = 0;
   let count = 0;

@@ -490,4 +490,7 @@ describe("repeatChance()", () => {
   it("handles one-element ranges", () => {
     expect(repeatChance([2], 0.5)).toBe(0.75);
   });
+  it.each([undefined, null])("handles %s repeat as 1", (nullish) => {
+    expect(repeatChance(nullish, 0.5)).toBe(0.5);
+  });
 });
