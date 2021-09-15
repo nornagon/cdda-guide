@@ -686,7 +686,7 @@ export interface Mapgen {
   update_mapgen_id?: string;
 }
 
-type PlaceMapping<T> = Record<string, T | T[]>;
+export type PlaceMapping<T> = Record<string, T | T[]>;
 type PlaceList<T> = (MapgenPlace & T)[];
 
 interface MapgenPlace {

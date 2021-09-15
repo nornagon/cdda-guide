@@ -139,14 +139,9 @@ export function getItemGroup(data: CddaData, id: string): Loot {
   return new Map(g.map(({ id, prob }) => [id, prob]));
 }
 
-type RawPaletteEntry = {
-  chance?: number /*0 <= chance <= 100 */;
-  item: string | raw.ItemGroup | raw.ItemGroupEntry[] /* subtype collection */;
-  repeat?: number | [number] | [number, number];
-};
 type RawPalette = {
   // TODO: item
-  items?: Record<string, RawPaletteEntry | RawPaletteEntry[]>;
+  items?: raw.PlaceMapping<raw.MapgenItemGroup>;
   // TODO: sealed_item
   palettes?: (
     | string
