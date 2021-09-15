@@ -10,15 +10,15 @@ export function repeatChance(
   repeat: undefined | number | [number] | [number, number],
   chance: chance
 ): chance {
-  if (typeof repeat === "number") return 1 - Math.pow(1 - chance, repeat);
-  if (!Array.isArray(repeat)) return 1.0;
-  if (repeat.length === 1) repeat = [repeat[0], repeat[0]];
+  if (repeat == null) return 1.0;
+  let repeat_a = [repeat].flat();
+  if (repeat_a.length === 1) repeat_a = [repeat_a[0], repeat_a[0]];
   let sum = 0;
   let count = 0;
   // It would me more efficient to use the formula
   // for the sum of a geometric progerssion,
   // but this should be easier to understand
-  for (let r = repeat[0]; r <= repeat[1]; ++r) {
+  for (let r = repeat_a[0]; r <= repeat_a[1]; ++r) {
     sum += 1 - Math.pow(1 - chance, r);
     ++count;
   }
