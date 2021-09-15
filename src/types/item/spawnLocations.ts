@@ -56,11 +56,13 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
           );
         const palette = parsePalette(data, object);
         const additional_items = collection(
-          (object.place_item ?? []).map(({ item, chance }) => ({
-            /* TODO: repeat: number | [number] | [number, number] */
-            loot: new Map([[item, (chance ?? 100) / 100]]),
-            chance: 1,
-          }))
+          [...(object.place_item ?? []), ...(object.add ?? [])].map(
+            ({ item, chance }) => ({
+              /* TODO: repeat: number | [number] | [number, number] */
+              loot: new Map([[item, (chance ?? 100) / 100]]),
+              chance: 1,
+            })
+          )
         );
         return {
           overmap_terrains,
@@ -71,8 +73,7 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
       })
   );
   /*
-  mapgen.object.add
-
+  TODO:
   mapgen.object.place_items
   mapgen.object.place_loot
   */

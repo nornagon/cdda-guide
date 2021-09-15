@@ -300,15 +300,12 @@ describe("getAllMapgens()", () => {
 
     expect(got).toStrictEqual([]);
   });
-  it("knows about .object.place_item", () => {
+  it.each(["place_item", "add"])("knows about .object.%s", (key) => {
     const given = new CddaData([
       {
         ...raw_mapgen_common,
         object: {
-          place_item: [
-            { item: "fake_item" },
-            { item: "with_chance", chance: 50 },
-          ],
+          [key]: [{ item: "fake_item" }, { item: "with_chance", chance: 50 }],
         },
       },
     ]);
