@@ -771,7 +771,7 @@ export interface MapgenItemGroup {
 export interface MapgenSpawnItem {
   item: string;
   amount?: MapgenInt;
-  chance?: MapgenInt;
+  chance?: number;
   repeat?: MapgenInt;
   "custom-flags"?: string[];
 }

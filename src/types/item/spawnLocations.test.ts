@@ -300,6 +300,31 @@ describe("getAllMapgens()", () => {
 
     expect(got).toStrictEqual([]);
   });
+  it("knows about .object.place_item", () => {
+    const given = new CddaData([
+      {
+        ...raw_mapgen_common,
+        object: {
+          place_item: [
+            { item: "fake_item" },
+            { item: "with_chance", chance: 50 },
+          ],
+        },
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+
+    expect(got).toStrictEqual([
+      {
+        ...mapgen_common,
+        additional_items: new Map([
+          ["fake_item", 1],
+          ["with_chance", 0.5],
+        ]),
+      },
+    ]);
+  });
 });
 
 describe("getItemGroup()", () => {

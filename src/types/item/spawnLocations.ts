@@ -53,14 +53,18 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
             .map((ter) => ({ singularName: singularName(ter) }))
             .getOrDefault({ singularName: id })
         );
-
       const palette = parsePalette(data, object);
-
+      const additional_items = collection(
+        (object.place_item ?? []).map(({ item, chance }) => ({
+          loot: new Map([[item, (chance ?? 100) / 100]]),
+          chance: 1,
+        }))
+      );
       return {
         overmap_terrains,
         rows: object.rows ?? [],
         palette,
-        additional_items: new Map(),
+        additional_items,
       };
     })
     .filter((mapgen) => mapgen != null);
