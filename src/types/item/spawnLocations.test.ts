@@ -6,6 +6,7 @@ import {
   getAllMapgens,
   getItemGroup,
   parsePalette,
+  repeatChance,
 } from "./spawnLocations";
 import { CddaData } from "../../data";
 
@@ -470,5 +471,11 @@ describe("parsePalette()", () => {
     expect(got).toStrictEqual(
       new Map([["X", new Map([["test_pants_fur", 0.25]])]])
     );
+  });
+});
+
+describe("repeatChance()", () => {
+  it("repeats once", () => {
+    expect(repeatChance(1, 1.0)).toBe(1.0);
   });
 });

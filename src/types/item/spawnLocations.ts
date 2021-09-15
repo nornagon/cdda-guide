@@ -6,6 +6,13 @@ import { multimap } from "./utils";
 /** 0.0 <= chance <= 1.0 */
 type chance = number;
 
+export function repeatChance(
+  repeat: undefined | number | [number] | [number, number],
+  chance: chance
+): chance {
+  return 1.0;
+}
+
 type Loot = Map</**item_id*/ string, chance>;
 /** Independently choose whether to place each item  */
 export function collection(
