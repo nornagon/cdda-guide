@@ -89,6 +89,29 @@ describe("getItemSpawnLocations()", () => {
       { singularName: "fake_terrain", chance: [1, 0.5, 0.25] },
     ]);
   });
+  it("sorts by highest chance", () => {
+    const data = new CddaData(
+      [
+        ["ter100", 100],
+        ["ter25", 25],
+        ["ter50", 50],
+      ].map(([om_terrain, chance]) => ({
+        ...raw_mapgen_common,
+        om_terrain,
+        object: {
+          place_item: [{ item: "fake_item", chance }],
+        },
+      }))
+    );
+
+    const locations = getItemSpawnLocations(data, "fake_item");
+
+    expect(locations).toStrictEqual([
+      { singularName: "ter100", chance: [1] },
+      { singularName: "ter50", chance: [0.5] },
+      { singularName: "ter25", chance: [0.25] },
+    ]);
+  });
 });
 
 describe("collection()", () => {

@@ -113,10 +113,12 @@ export function getItemSpawnLocations(
     const { singularName } = mapgen.overmap_terrains[0];
     return [[singularName, chance] as [string, number]];
   });
-  return [...multimap(entries)].map(([k, v]) => ({
-    singularName: k,
-    chance: [...v].sort().reverse(),
-  }));
+  return [...multimap(entries)]
+    .map(([k, v]) => ({
+      singularName: k,
+      chance: [...v].sort().reverse(),
+    }))
+    .sort(({ chance: lhs }, { chance: rhs }) => rhs[0] - lhs[0]);
 }
 
 export function getItemGroup(data: CddaData, id: string): Loot {
