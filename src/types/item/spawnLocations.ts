@@ -12,6 +12,7 @@ export function repeatChance(
 ): chance {
   if (typeof repeat === "number") return 1 - Math.pow(1 - chance, repeat);
   if (!Array.isArray(repeat)) return 1.0;
+  if (repeat.length === 1) repeat = [repeat[0], repeat[0]];
   let sum = 0;
   let count = 0;
   // It would me more efficient to use the formula
