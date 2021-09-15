@@ -96,19 +96,23 @@ describe("collection()", () => {
 });
 
 describe("getAllLocationsAndLoot()", () => {
-  it.skip("knows about additional_items", () => {
+  it("knows about additional_items", () => {
+    const data = new CddaData([
+      {
+        ...raw_mapgen_common,
+        object: {
+          place_item: [{ item: "fake_item" }],
+        },
+      },
+    ]);
+
+    const got = getAllLocationsAndLoot(data);
+
     const additional_items = new Map([["fake_item", 1.0]]);
     const mapgen = {
+      ...mapgen_common,
       additional_items,
-      overmap_terrains: [],
-      rows: [],
-      palette: new Map(),
     };
-    const given = [mapgen];
-    jest.spyOn(spawnLocations, "getAllMapgens").mockReturnValue(given);
-
-    const got = getAllLocationsAndLoot(null as CddaData);
-
     expect(got).toStrictEqual([{ loot: additional_items, mapgen }]);
   });
   it("knows about rows", () => {
