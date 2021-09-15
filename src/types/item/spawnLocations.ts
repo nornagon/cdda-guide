@@ -41,33 +41,34 @@ type Mapgen = {
   additional_items: Loot;
 };
 export function getAllMapgens(data: CddaData): Mapgen[] {
-  return data
-    .byType("mapgen")
-    .map(({ object, om_terrain }) => {
+  return (
+    data
+      .byType("mapgen")
       // If om_terrain is missing, this is nested_mapgen or update_mapgen
-      if (om_terrain == null) return;
-      const overmap_terrains = [om_terrain]
-        .flat(2)
-        .map((id) =>
-          new Maybe(data.byId("overmap_terrain", id))
-            .map((ter) => ({ singularName: singularName(ter) }))
-            .getOrDefault({ singularName: id })
+      .filter((m) => m.om_terrain != null)
+      .map(({ object, om_terrain }) => {
+        const overmap_terrains = [om_terrain]
+          .flat(2)
+          .map((id) =>
+            new Maybe(data.byId("overmap_terrain", id))
+              .map((ter) => ({ singularName: singularName(ter) }))
+              .getOrDefault({ singularName: id })
+          );
+        const palette = parsePalette(data, object);
+        const additional_items = collection(
+          (object.place_item ?? []).map(({ item, chance }) => ({
+            loot: new Map([[item, (chance ?? 100) / 100]]),
+            chance: 1,
+          }))
         );
-      const palette = parsePalette(data, object);
-      const additional_items = collection(
-        (object.place_item ?? []).map(({ item, chance }) => ({
-          loot: new Map([[item, (chance ?? 100) / 100]]),
-          chance: 1,
-        }))
-      );
-      return {
-        overmap_terrains,
-        rows: object.rows ?? [],
-        palette,
-        additional_items,
-      };
-    })
-    .filter((mapgen) => mapgen != null);
+        return {
+          overmap_terrains,
+          rows: object.rows ?? [],
+          palette,
+          additional_items,
+        };
+      })
+  );
   /*
   mapgen.object.add
   mapgen.object.place_item
