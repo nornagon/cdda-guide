@@ -27,10 +27,10 @@ export function repeatChance(
 type Loot = Map</**item_id*/ string, chance>;
 /** Independently choose whether to place each item  */
 export function collection(
-  items: Iterable<{ loot: Loot; chance: chance }>
+  items: Iterable<{ loot: Loot; chance?: chance }>
 ): Loot {
   const ret = new Map();
-  for (const { loot, chance } of items) {
+  for (const { loot, chance = 1.0 } of items) {
     for (const [item_id, item_chance] of loot.entries()) {
       const current_chance = ret.get(item_id) ?? 0;
       const add_chance = item_chance * chance;
