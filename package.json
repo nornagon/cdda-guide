@@ -11,8 +11,8 @@
     "test:watch": "npm run test -- --watch",
     "update-test-data": "node fetch-fixtures.js latest",
     "deploy": "npm run build && gh-pages -d public",
-    "lint": "prettier -c src",
-    "lint:fix": "prettier -w src"
+    "lint": "prettier -c .",
+    "lint:fix": "prettier -w ."
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
