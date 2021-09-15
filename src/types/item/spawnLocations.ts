@@ -150,6 +150,20 @@ type RawPalette = {
     | { switch: any }
   )[];
 };
+
+function mergePalettes(palettes: Map<string, Loot>[]): Map<string, Loot> {
+  return new Map(
+    [...multimap(palettes.flatMap((p) => [...p]))].map(([k, v]) => [
+      k,
+      collection(
+        v.map((l) => ({
+          loot: l,
+        }))
+      ),
+    ])
+  );
+}
+
 export function parsePalette(
   data: CddaData,
   palette: RawPalette
@@ -167,19 +181,10 @@ export function parsePalette(
       return [sym, collection(groups)];
     })
   );
-  const all = (palette.palettes ?? [])
+  const palettes = (palette.palettes ?? [])
     .flatMap((id) =>
       typeof id !== "string" ? [] /*TODO*/ : [data.byId("palette", id)]
     )
     .map((p) => parsePalette(data, p));
-  return new Map(
-    [...multimap([self, ...all].flatMap((p) => [...p]))].map(([k, v]) => [
-      k,
-      collection(
-        v.map((l) => ({
-          loot: l,
-        }))
-      ),
-    ])
-  );
+  return mergePalettes([self, ...palettes]);
 }
