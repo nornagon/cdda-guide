@@ -475,7 +475,7 @@ describe("parsePalette()", () => {
 });
 
 describe("repeatChance()", () => {
-  it("repeats once", () => {
-    expect(repeatChance(1, 1.0)).toBe(1.0);
+  it.each([1.0, 0.5])("repeats once (chance: %d)", (chance) => {
+    expect(repeatChance(1, chance)).toBe(chance);
   });
 });
