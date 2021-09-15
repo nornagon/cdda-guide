@@ -11,7 +11,7 @@ export function repeatChance(
   chance: chance
 ): chance {
   if (typeof repeat !== "number") return 1.0;
-  return chance + (repeat - 1) * 0.25;
+  return 1 - Math.pow(1 - chance, repeat);
 }
 
 type Loot = Map</**item_id*/ string, chance>;
