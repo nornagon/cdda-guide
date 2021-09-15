@@ -1,7 +1,6 @@
 import type { CddaData } from "../../data";
 import { singularName } from "../../data";
 import type * as raw from "../../types";
-import { Maybe } from "./utils";
 
 /** 0.0 <= chance <= 1.0 */
 type chance = number;
@@ -47,13 +46,10 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
       // If om_terrain is missing, this is nested_mapgen or update_mapgen
       .filter((m) => m.om_terrain != null)
       .map(({ object, om_terrain }) => {
-        const overmap_terrains = [om_terrain]
-          .flat(2)
-          .map((id) =>
-            new Maybe(data.byId("overmap_terrain", id))
-              .map((ter) => ({ singularName: singularName(ter) }))
-              .getOrDefault({ singularName: id })
-          );
+        const overmap_terrains = [om_terrain].flat(2).map((id) => {
+          const omt = data.byId("overmap_terrain", id);
+          return { singularName: (omt && singularName(omt)) ?? id };
+        });
         const palette = parsePalette(data, object);
         const additional_items = collection(
           [...(object.place_item ?? []), ...(object.add ?? [])].map(
