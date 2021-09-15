@@ -115,7 +115,7 @@ export function getItemSpawnLocations(
   });
   return [...multimap(entries)].map(([k, v]) => ({
     singularName: k,
-    chance: v,
+    chance: [...v].sort().reverse(),
   }));
 }
 

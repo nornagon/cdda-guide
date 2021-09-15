@@ -69,6 +69,22 @@ describe("getItemSpawnLocations()", () => {
       { singularName: "fake_terrain", chance: [1, 1] },
     ]);
   });
+  it("sorts the chances", () => {
+    const withChance = (chance) => ({
+      ...raw_mapgen_common,
+      om_terrain: "fake_terrain",
+      object: {
+        place_item: [{ item: "fake_item", chance }],
+      },
+    });
+    const data = new CddaData([withChance(50), withChance(100)]);
+
+    const locations = getItemSpawnLocations(data, "fake_item");
+
+    expect(locations).toStrictEqual([
+      { singularName: "fake_terrain", chance: [1, 0.5] },
+    ]);
+  });
 });
 
 describe("collection()", () => {
