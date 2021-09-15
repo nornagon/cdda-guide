@@ -10,6 +10,7 @@ const SEARCHABLE_TYPES = new Set([
   "furniture",
   "vehicle_part",
   "tool_quality",
+  "martial_art",
 ]);
 
 let fuse: Fuse<any>;

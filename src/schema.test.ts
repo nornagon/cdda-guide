@@ -35,7 +35,9 @@ const all = data._raw
   .filter((x) => schemasByType.has(x.type))
   .map((x, i) => [x.type, id(x) ?? i, data._flatten(x)]);
 
-const skipped = new Set<string>([]);
+const skipped = new Set<string>([
+  "style_brawling", // https://github.com/CleverRaven/Cataclysm-DDA/pull/51662
+]);
 
 test.each(all)("schema matches %s %s", (type, id, obj) => {
   if (skipped.has(id)) {

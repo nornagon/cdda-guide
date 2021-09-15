@@ -526,7 +526,7 @@ export type MartialArtRequirements = {
   unarmed_weapons_allowed?: boolean; // default: true
   strictly_unarmed?: boolean;
   wall_adjacent?: boolean;
-  req_bufs?: string[]; // mabuff_id[]
+  req_buffs?: string | string[]; // mabuff_id[]
   req_flags?: string[]; // flag_id[] (json_flag)
   skill_requirements?: { name: string; level: number }[];
   weapon_damage_requirements?: { type: string; min: number }[];
@@ -1133,6 +1133,56 @@ export type Material = {
   // ...
 };
 
+export type MartialArtBuff = {
+  id: string;
+  name: Translation;
+  description?: Translation;
+  buff_duration?: duration; // default: 2 turns
+  max_stacks?: integer; // default: 1
+  bonus_dodges?: integer;
+  bonus_blocks?: integer;
+  quiet?: boolean;
+  throw_immune?: boolean;
+  stealthy?: boolean;
+} & MartialArtRequirements &
+  BonusContainer;
+
+export type MartialArt = {
+  type: "martial_art";
+  id: string;
+  name: Translation;
+  description: Translation;
+
+  learn_difficulty?: integer;
+  autolearn?: [string, integer][];
+
+  static_buffs?: MartialArtBuff[];
+  onmove_buffs?: MartialArtBuff[];
+  onpause_buffs?: MartialArtBuff[];
+  onhit_buffs?: MartialArtBuff[];
+  onattack_buffs?: MartialArtBuff[];
+  ondodge_buffs?: MartialArtBuff[];
+  onblock_buffs?: MartialArtBuff[];
+  ongethit_buffs?: MartialArtBuff[];
+  onmiss_buffs?: MartialArtBuff[];
+  oncrit_buffs?: MartialArtBuff[];
+  onkill_buffs?: MartialArtBuff[];
+
+  techniques?: string[]; // technique_id
+  weapons?: string[]; // item_id
+
+  strictly_melee?: boolean;
+  strictly_unarmed?: boolean;
+  allow_melee?: boolean;
+  force_unarmed?: boolean;
+
+  arm_block_with_bio_armor_arms?: boolean;
+  arm_block?: integer;
+  leg_block_with_bio_armor_legs?: boolean;
+  leg_block?: integer;
+  // ...
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1167,6 +1217,7 @@ export type SupportedTypes = {
   item_group: { type: "item_group" } & ItemGroup;
   json_flag: JsonFlag;
   mapgen: Mapgen;
+  martial_art: MartialArt;
   material: Material;
   monstergroup: MonsterGroup;
   overmap_terrain: OvermapTerrain;
