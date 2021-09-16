@@ -1,2 +1,4 @@
 /_test/
 /public/build/
+/generate-color-css.js
+/public/global.css
