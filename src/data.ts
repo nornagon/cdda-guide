@@ -13,6 +13,7 @@ import type {
   RequirementData,
   Monster,
   SupportedTypesWithMapped,
+  SupportedTypeMapped,
 } from "./types";
 
 const idlessTypes = new Set([
@@ -35,7 +36,7 @@ const idlessTypes = new Set([
   "uncraft",
 ]);
 
-const typeMappings = new Map([
+const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["AMMO", "item"],
   ["GUN", "item"],
   ["ARMOR", "item"],
@@ -55,7 +56,9 @@ const typeMappings = new Map([
   ["MONSTER", "monster"],
 ]);
 
-export const mapType = (type: string): string => typeMappings.get(type) ?? type;
+export const mapType = (
+  type: keyof SupportedTypesWithMapped
+): keyof SupportedTypesWithMapped => typeMappings.get(type) ?? type;
 
 export const singular = (name: Translation): string =>
   typeof name === "string" ? name : "str_sp" in name ? name.str_sp : name.str;
@@ -210,7 +213,7 @@ export class CddaData {
     return this._craftingPseudoItems.get(id);
   }
 
-  all() {
+  all(): SupportedTypeMapped[] {
     return this._raw;
   }
 
@@ -755,7 +758,7 @@ const fetchJson = async (version: string) => {
 };
 
 let _hasSetVersion = false;
-const { subscribe, set } = writable(null);
+const { subscribe, set } = writable<CddaData>(null);
 export const data = {
   subscribe,
   setVersion(version: string) {

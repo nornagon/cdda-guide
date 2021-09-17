@@ -1240,3 +1240,6 @@ export type SupportedTypesWithMapped = SupportedTypes & {
   item: Item;
   monster: Monster;
 };
+
+export type SupportedTypeMapped =
+  SupportedTypesWithMapped[keyof SupportedTypesWithMapped];
