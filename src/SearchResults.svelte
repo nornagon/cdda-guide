@@ -1,5 +1,6 @@
 <script lang="ts">
-import { data, mapType, singularName } from "./data";
+import { mapType, singularName } from "./data";
+import type { CddaData } from "./data";
 import * as fuzzysort from "fuzzysort";
 import FurnitureSymbol from "./types/item/FurnitureSymbol.svelte";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
@@ -14,12 +15,14 @@ const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "martial_art",
 ]);
 
+export let data: CddaData;
+
 let targets: {
   id: string;
   name: string;
   type: keyof SupportedTypesWithMapped;
 }[];
-$: targets = [...($data?.all() ?? [])]
+$: targets = [...(data?.all() ?? [])]
   .filter(
     (x) =>
       "id" in x &&
@@ -45,12 +48,12 @@ function filter(text: string): Map<string, any[]> {
     const mappedType = item.type;
     if (!SEARCHABLE_TYPES.has(mappedType)) continue;
     if (!byType.has(mappedType)) byType.set(mappedType, []);
-    byType.get(mappedType).push($data.byId(mappedType, item.id));
+    byType.get(mappedType).push(data.byId(mappedType, item.id));
   }
   return byType;
 }
 
-$: matchingObjects = search && search.length > 1 && $data && filter(search);
+$: matchingObjects = search && search.length > 1 && data && filter(search);
 
 $: history.replaceState({ search }, "");
 </script>
@@ -62,12 +65,12 @@ $: history.replaceState({ search }, "");
       {#each matchingObjects.get(type) as obj}
         <li>
           {#if type === "furniture"}
-            <FurnitureSymbol item={$data._flatten(obj)} />
+            <FurnitureSymbol item={data._flatten(obj)} />
           {:else if type === "item" || type === "monster"}
-            <ItemSymbol item={$data._flatten(obj)} />
+            <ItemSymbol item={data._flatten(obj)} />
           {/if}
           <a href="#/{mapType(obj.type)}/{obj.id}"
-            >{singularName($data._flatten(obj))}</a>
+            >{singularName(data._flatten(obj))}</a>
         </li>
       {/each}
     </ul>

@@ -107,7 +107,7 @@ function maybeFocusSearch(e: KeyboardEvent) {
     {/if}
   {:else if search}
     {#key search}
-      <SearchResults {search} />
+      <SearchResults data={$data} {search} />
     {/key}
   {:else}
     <img
