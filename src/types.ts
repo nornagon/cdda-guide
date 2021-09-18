@@ -121,7 +121,14 @@ export type Recipe = {
 
   skills_required?: [string, number] | [string, number][]; // skill_id, level
 
-  proficiencies?: any[]; // TODO
+  proficiencies?: {
+    proficiency: string; // proficiency_id
+    required?: boolean;
+    time_multiplier?: number; // default to proficiency multiplier
+    fail_multiplier?: number; // default to proficiency multiplier
+    learning_time_multiplier?: number; // default 1.0
+    max_experience?: duration;
+  }[];
   autolearn?: boolean | [string, number][];
   never_learn?: boolean;
   decomp_learn?: number | [string, number][];
