@@ -40,12 +40,6 @@ export function collection(
   }
   return ret;
 }
-/** Choose based on weight */
-export function distribution(
-  items: Iterable<{ loot: Loot; weight: number }>
-): Loot {
-  throw "not implemented";
-}
 
 type OMT = {
   singularName: string;
@@ -102,10 +96,6 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
         };
       })
   );
-  /*
-  TODO:
-  mapgen.object.place_loot
-  */
 }
 
 type LocationAndLoot = {
