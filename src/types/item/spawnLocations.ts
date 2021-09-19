@@ -179,12 +179,12 @@ type RawPalette = {
 
 function parsePlaceMapping<T>(
   mapping: undefined | raw.PlaceMapping<T>,
-  extract: (t: T) => { chance: chance; loot: Loot }[]
+  extract: (t: T) => Iterable<{ chance: chance; loot: Loot }>
 ): Map<string, Loot> {
   return new Map(
     Object.entries(mapping ?? {}).map(([sym, val]) => [
       sym,
-      collection([val].flat().flatMap(extract)),
+      collection([val].flat().flatMap((x: T) => [...extract(x)])),
     ])
   );
 }
@@ -195,44 +195,42 @@ export function parsePalette(
 ): Map<string, Loot> {
   const sealed_item = parsePlaceMapping(
     palette.sealed_item,
-    ({ item, items, chance = 100 }) => [
-      ...(function* () {
-        if (items)
-          yield {
-            loot: parseItemGroup(data, items.item),
-            chance: repeatChance(
-              items.repeat,
-              (chance / 100) * ((items.chance ?? 100) / 100)
-            ),
-          };
-        if (item)
-          yield {
-            loot: new Map([[item.item, 1]]),
-            chance: repeatChance(
-              item.repeat,
-              (chance / 100) * ((item.chance ?? 100) / 100)
-            ),
-          };
-      })(),
-    ]
+    function* ({ item, items, chance = 100 }) {
+      if (items)
+        yield {
+          loot: parseItemGroup(data, items.item),
+          chance: repeatChance(
+            items.repeat,
+            (chance / 100) * ((items.chance ?? 100) / 100)
+          ),
+        };
+      if (item)
+        yield {
+          loot: new Map([[item.item, 1]]),
+          chance: repeatChance(
+            item.repeat,
+            (chance / 100) * ((item.chance ?? 100) / 100)
+          ),
+        };
+    }
   );
   const item = parsePlaceMapping(
     palette.item,
-    ({ item, chance = 100, repeat }) => [
-      {
+    function* ({ item, chance = 100, repeat }) {
+      yield {
         loot: new Map([[item, 1]]),
         chance: repeatChance(repeat, chance / 100),
-      },
-    ]
+      };
+    }
   );
   const items = parsePlaceMapping(
     palette.items,
-    ({ item, chance = 100, repeat }) => [
-      {
+    function* ({ item, chance = 100, repeat }) {
+      yield {
         loot: parseItemGroup(data, item),
         chance: repeatChance(repeat, chance / 100),
-      },
-    ]
+      };
+    }
   );
   const palettes = (palette.palettes ?? [])
     .flatMap((id) =>
