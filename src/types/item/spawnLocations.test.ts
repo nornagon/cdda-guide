@@ -409,6 +409,39 @@ describe("getAllMapgens()", () => {
       },
     ]);
   });
+  it("knows about .object.place_items", () => {
+    const common = {};
+    const given = new CddaData([
+      ...["plain", "with_chance", "with_repeat"].map((s) => ({
+        id: s + "_g",
+        type: "item_group",
+        subtype: "collection",
+        items: [[s, 100]],
+      })),
+      {
+        ...raw_mapgen_common,
+        object: {
+          place_items: [
+            { item: "plain_g" },
+            { item: "with_chance_g", chance: 50 },
+            { item: "with_repeat_g", chance: 50, repeat: 2 },
+          ],
+        },
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+    expect(got).toStrictEqual([
+      {
+        ...mapgen_common,
+        additional_items: new Map([
+          ["plain", 1],
+          ["with_chance", 0.5],
+          ["with_repeat", 0.75],
+        ]),
+      },
+    ]);
+  });
 });
 
 describe("parsePalette()", () => {

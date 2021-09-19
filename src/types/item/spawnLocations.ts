@@ -70,13 +70,19 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
           return { singularName: (omt && singularName(omt)) ?? id };
         });
         const palette = parsePalette(data, object);
-        const additional_items = collection(
-          [...(object.place_item ?? []), ...(object.add ?? [])].map(
-            ({ item, chance = 100, repeat }) => ({
-              loot: new Map([[item, repeatChance(repeat, chance / 100)]]),
-            })
-          )
+        const place_items = (object.place_items ?? []).map(
+          ({ item, chance = 100, repeat }) => ({
+            loot: parseItemGroup(data, item),
+            chance: repeatChance(repeat, chance / 100),
+          })
         );
+        const place_item = [
+          ...(object.place_item ?? []),
+          ...(object.add ?? []),
+        ].map(({ item, chance = 100, repeat }) => ({
+          loot: new Map([[item, repeatChance(repeat, chance / 100)]]),
+        }));
+        const additional_items = collection([...place_items, ...place_item]);
         return {
           overmap_terrains,
           rows: object.rows ?? [],
