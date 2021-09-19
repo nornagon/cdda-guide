@@ -93,10 +93,8 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
   );
   /*
   TODO:
-  mapgen.object.place_items
   mapgen.object.place_loot
   */
-  return [];
 }
 
 type LocationAndLoot = {
