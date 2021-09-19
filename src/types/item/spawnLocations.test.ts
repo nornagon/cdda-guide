@@ -441,6 +441,41 @@ describe("getAllMapgens()", () => {
       },
     ]);
   });
+  it("knows about .object.place_loot", () => {
+    const given = new CddaData([
+      {
+        id: "fake_item_group",
+        type: "item_group",
+        subtype: "collection",
+        items: [["fake_item", 50]],
+      },
+      {
+        ...raw_mapgen_common,
+        object: {
+          place_loot: [
+            { group: "fake_item_group" },
+            { item: "plain" },
+            { item: "with_chance", chance: 50 },
+            { item: "with_repeat", chance: 50, repeat: 2 },
+          ],
+        },
+      },
+    ]);
+
+    const got = getAllMapgens(given);
+
+    expect(got).toStrictEqual([
+      {
+        ...mapgen_common,
+        additional_items: new Map([
+          ["fake_item", 0.5],
+          ["plain", 1],
+          ["with_chance", 0.5],
+          ["with_repeat", 0.75],
+        ]),
+      },
+    ]);
+  });
 });
 
 describe("parsePalette()", () => {

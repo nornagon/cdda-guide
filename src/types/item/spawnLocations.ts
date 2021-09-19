@@ -82,7 +82,18 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
         ].map(({ item, chance = 100, repeat }) => ({
           loot: new Map([[item, repeatChance(repeat, chance / 100)]]),
         }));
-        const additional_items = collection([...place_items, ...place_item]);
+        const place_loot = (object.place_loot ?? []).map(
+          ({ item, group, chance = 100, repeat }) => ({
+            // This assumes that .item and .group are mutually exclusive
+            loot: item ? new Map([[item, 1]]) : parseItemGroup(data, group),
+            chance: repeatChance(repeat, chance / 100),
+          })
+        );
+        const additional_items = collection([
+          ...place_items,
+          ...place_item,
+          ...place_loot,
+        ]);
         return {
           overmap_terrains,
           rows: object.rows ?? [],
