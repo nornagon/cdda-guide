@@ -537,6 +537,18 @@ describe("parsePalette()", () => {
     const got = parsePalette(data, rawPalette);
     expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.5]])]]));
   });
+  it("parses inline item collections", () => {
+    const data = new CddaData([]);
+    const rawPalette = {
+      items: {
+        X: {
+          item: [{ item: "fake_item" }],
+        },
+      },
+    };
+    const got = parsePalette(data, rawPalette);
+    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 1]])]]));
+  });
 });
 
 describe("repeatChance()", () => {

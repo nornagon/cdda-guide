@@ -138,8 +138,12 @@ function parseItemGroup(
   data: CddaData,
   group: string | raw.ItemGroup | raw.ItemGroupEntry[]
 ): Loot {
-  if (Array.isArray(group)) return new Map(); /*TODO*/
-  const g = typeof group !== "string" ? group : data.byId("item_group", group);
+  const g =
+    typeof group === "string"
+      ? data.byId("item_group", group)
+      : Array.isArray(group)
+      ? { subtype: "collection" as "collection", entries: group }
+      : group;
   const flat = data.flattenItemGroup(g);
   return new Map(flat.map(({ id, prob }) => [id, prob]));
 }
