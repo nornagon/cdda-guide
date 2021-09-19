@@ -410,7 +410,6 @@ describe("getAllMapgens()", () => {
     ]);
   });
   it("knows about .object.place_items", () => {
-    const common = {};
     const given = new CddaData([
       ...["plain", "with_chance", "with_repeat"].map((s) => ({
         id: s + "_g",
