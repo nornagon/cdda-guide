@@ -778,7 +778,7 @@ export interface MapgenSpawnItem {
 
 export interface MapgenSealedItem {
   furniture: string;
-  chance: MapgenInt;
+  chance?: number;
   item?: MapgenSpawnItem;
   items?: MapgenItemGroup;
 }
