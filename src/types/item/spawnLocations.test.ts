@@ -597,6 +597,28 @@ describe("parsePalette()", () => {
       ])
     );
   });
+  it("knows about .sealed_item | .[].items | {repeat, chance}", () => {
+    const data = new CddaData([
+      {
+        id: "fake_item_group",
+        type: "item_group",
+        subtype: "collection",
+        items: ["fake_item"],
+      },
+    ]);
+    const rawPalette = {
+      sealed_item: {
+        X: {
+          items: { item: "fake_item_group", chance: 50, repeat: 2 },
+          furniture: "fake",
+        },
+      },
+    };
+
+    const got = parsePalette(data, rawPalette);
+
+    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
+  });
 });
 
 describe("repeatChance()", () => {

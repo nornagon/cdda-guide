@@ -187,7 +187,10 @@ export function parsePalette(
       collection(
         [val].flat().map(({ items, chance = 100 }) => ({
           loot: parseItemGroup(data, items.item),
-          chance: chance / 100,
+          chance: repeatChance(
+            items.repeat,
+            (chance / 100) * ((items.chance ?? 100) / 100)
+          ),
         }))
       ),
     ])
