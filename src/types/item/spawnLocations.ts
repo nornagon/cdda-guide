@@ -166,7 +166,7 @@ function mergePalettes(palettes: Map<string, Loot>[]): Map<string, Loot> {
 }
 
 type RawPalette = {
-  // TODO: item
+  item?: raw.PlaceMapping<raw.MapgenSpawnItem>;
   items?: raw.PlaceMapping<raw.MapgenItemGroup>;
   // TODO: sealed_item
   palettes?: (
@@ -181,6 +181,19 @@ export function parsePalette(
   data: CddaData,
   palette: RawPalette
 ): Map<string, Loot> {
+  const item = new Map(
+    Object.entries(palette.item ?? {}).map(([sym, val]) => [
+      sym,
+      collection(
+        [val]
+          .flat()
+          .map(({ item, chance = 100, repeat }) => ({
+            loot: new Map([[item, 1]]),
+            chance: repeatChance(repeat, chance / 100),
+          }))
+      ),
+    ])
+  );
   const items = new Map(
     Object.entries(palette.items ?? {}).map(([sym, val]) => {
       const groups = [val].flat().map(({ item, chance = 100, repeat }) => ({
@@ -195,5 +208,5 @@ export function parsePalette(
       typeof id !== "string" ? [] /*TODO*/ : [data.byId("palette", id)]
     )
     .map((p) => parsePalette(data, p));
-  return mergePalettes([items, ...palettes]);
+  return mergePalettes([item, items, ...palettes]);
 }

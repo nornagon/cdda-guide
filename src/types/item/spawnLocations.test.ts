@@ -549,6 +549,28 @@ describe("parsePalette()", () => {
     const got = parsePalette(data, rawPalette);
     expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 1]])]]));
   });
+  it("knows about .item", () => {
+    const data = new CddaData([]);
+    const rawPalette = {
+      item: {
+        X: { item: "i0", chance: 50, repeat: 2 },
+        Y: [{ item: "i1" }, { item: "i2" }],
+      },
+    };
+    const got = parsePalette(data, rawPalette);
+    expect(got).toStrictEqual(
+      new Map([
+        ["X", new Map([["i0", 0.75]])],
+        [
+          "Y",
+          new Map([
+            ["i1", 1],
+            ["i2", 1],
+          ]),
+        ],
+      ])
+    );
+  });
 });
 
 describe("repeatChance()", () => {
