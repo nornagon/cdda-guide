@@ -134,7 +134,7 @@ export function getItemSpawnLocations(
     .sort(({ chance: lhs }, { chance: rhs }) => rhs[0] - lhs[0]);
 }
 
-export function getItemGroup(data: CddaData, id: string): Loot {
+function getItemGroup(data: CddaData, id: string): Loot {
   const g = data.flattenItemGroup(data.byId("item_group", id));
   return new Map(g.map(({ id, prob }) => [id, prob]));
 }

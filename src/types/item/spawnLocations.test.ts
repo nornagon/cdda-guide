@@ -4,7 +4,6 @@ import {
   collection,
   getAllLocationsAndLoot,
   getAllMapgens,
-  getItemGroup,
   parsePalette,
   repeatChance,
 } from "./spawnLocations";
@@ -409,23 +408,6 @@ describe("getAllMapgens()", () => {
         additional_items: new Map([["fake_item", 0.75]]),
       },
     ]);
-  });
-});
-
-describe("getItemGroup()", () => {
-  it("finds an item group", () => {
-    const given = new CddaData([
-      {
-        id: "fake_item_group",
-        type: "item_group",
-        subtype: "collection",
-        items: [["test_pants_fur", 50]],
-      },
-    ]);
-
-    const got = getItemGroup(given, "fake_item_group");
-
-    expect(got).toStrictEqual(new Map([["test_pants_fur", 0.5]]));
   });
 });
 
