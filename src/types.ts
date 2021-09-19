@@ -789,6 +789,7 @@ export interface MapgenLoot {
   chance?: number; // int, default 100
   group?: string; // item_group_id
   item?: string; // item_id
+  repeat?: MapgenInt;
 }
 
 export interface MapgenNested {
