@@ -177,56 +177,62 @@ type RawPalette = {
   )[];
 };
 
+function parsePlaceMapping<T>(
+  mapping: undefined | raw.PlaceMapping<T>,
+  extract: (t: T) => { chance: chance; loot: Loot }[]
+): Map<string, Loot> {
+  return new Map(
+    Object.entries(mapping ?? {}).map(([sym, val]) => [
+      sym,
+      collection([val].flat().flatMap(extract)),
+    ])
+  );
+}
+
 export function parsePalette(
   data: CddaData,
   palette: RawPalette
 ): Map<string, Loot> {
-  const sealed_item = new Map(
-    Object.entries(palette.sealed_item ?? {}).map(([sym, val]) => [
-      sym,
-      collection(
-        [val].flat().flatMap(({ item, items, chance = 100 }) => [
-          ...(function* () {
-            if (items)
-              yield {
-                loot: parseItemGroup(data, items.item),
-                chance: repeatChance(
-                  items.repeat,
-                  (chance / 100) * ((items.chance ?? 100) / 100)
-                ),
-              };
-            if (item)
-              yield {
-                loot: new Map([[item.item, 1]]),
-                chance: repeatChance(
-                  item.repeat,
-                  (chance / 100) * ((item.chance ?? 100) / 100)
-                ),
-              };
-          })(),
-        ])
-      ),
-    ])
+  const sealed_item = parsePlaceMapping(
+    palette.sealed_item,
+    ({ item, items, chance = 100 }) => [
+      ...(function* () {
+        if (items)
+          yield {
+            loot: parseItemGroup(data, items.item),
+            chance: repeatChance(
+              items.repeat,
+              (chance / 100) * ((items.chance ?? 100) / 100)
+            ),
+          };
+        if (item)
+          yield {
+            loot: new Map([[item.item, 1]]),
+            chance: repeatChance(
+              item.repeat,
+              (chance / 100) * ((item.chance ?? 100) / 100)
+            ),
+          };
+      })(),
+    ]
   );
-  const item = new Map(
-    Object.entries(palette.item ?? {}).map(([sym, val]) => [
-      sym,
-      collection(
-        [val].flat().map(({ item, chance = 100, repeat }) => ({
-          loot: new Map([[item, 1]]),
-          chance: repeatChance(repeat, chance / 100),
-        }))
-      ),
-    ])
+  const item = parsePlaceMapping(
+    palette.item,
+    ({ item, chance = 100, repeat }) => [
+      {
+        loot: new Map([[item, 1]]),
+        chance: repeatChance(repeat, chance / 100),
+      },
+    ]
   );
-  const items = new Map(
-    Object.entries(palette.items ?? {}).map(([sym, val]) => {
-      const groups = [val].flat().map(({ item, chance = 100, repeat }) => ({
+  const items = parsePlaceMapping(
+    palette.items,
+    ({ item, chance = 100, repeat }) => [
+      {
         loot: parseItemGroup(data, item),
         chance: repeatChance(repeat, chance / 100),
-      }));
-      return [sym, collection(groups)];
-    })
+      },
+    ]
   );
   const palettes = (palette.palettes ?? [])
     .flatMap((id) =>
