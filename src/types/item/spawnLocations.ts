@@ -144,16 +144,20 @@ function parseItemGroup(
 }
 
 function mergePalettes(palettes: Map<string, Loot>[]): Map<string, Loot> {
-  return new Map(
-    [...multimap(palettes.flatMap((p) => [...p]))].map(([k, v]) => [
-      k,
-      collection(
-        v.map((l) => ({
-          loot: l,
-        }))
-      ),
-    ])
-  );
+  return [palettes]
+    .map((x) => x.flatMap((p) => [...p]))
+    .map((x) => [...multimap(x)])
+    .map((x) =>
+      x.map(([k, v]) => [
+        k,
+        collection(
+          v.map((l) => ({
+            loot: l,
+          }))
+        ),
+      ])
+    )
+    .map((x: [string, Loot][]) => new Map(x))[0];
 }
 
 type RawPalette = {
