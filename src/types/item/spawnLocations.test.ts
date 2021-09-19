@@ -619,6 +619,41 @@ describe("parsePalette()", () => {
 
     expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
   });
+  it("knows about .sealed_item | .[].item", () => {
+    const data = new CddaData([]);
+    const rawPalette = {
+      sealed_item: {
+        X: {
+          item: { item: "fake_item" },
+          furniture: "fake",
+        },
+        Y: {
+          item: { item: "fake_item" },
+          furniture: "fake",
+          chance: 50,
+        },
+        Z: {
+          item: { item: "fake_item", chance: 50 },
+          furniture: "fake",
+        },
+        A: {
+          item: { item: "fake_item", chance: 50, repeat: 2 },
+          furniture: "fake",
+        },
+      },
+    };
+
+    const got = parsePalette(data, rawPalette);
+
+    expect(got).toStrictEqual(
+      new Map([
+        ["X", new Map([["fake_item", 1]])],
+        ["Y", new Map([["fake_item", 0.5]])],
+        ["Z", new Map([["fake_item", 0.5]])],
+        ["A", new Map([["fake_item", 0.75]])],
+      ])
+    );
+  });
 });
 
 describe("repeatChance()", () => {

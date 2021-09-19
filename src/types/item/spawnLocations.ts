@@ -185,13 +185,26 @@ export function parsePalette(
     Object.entries(palette.sealed_item ?? {}).map(([sym, val]) => [
       sym,
       collection(
-        [val].flat().map(({ items, chance = 100 }) => ({
-          loot: parseItemGroup(data, items.item),
-          chance: repeatChance(
-            items.repeat,
-            (chance / 100) * ((items.chance ?? 100) / 100)
-          ),
-        }))
+        [val].flat().flatMap(({ item, items, chance = 100 }) => [
+          ...(function* () {
+            if (items)
+              yield {
+                loot: parseItemGroup(data, items.item),
+                chance: repeatChance(
+                  items.repeat,
+                  (chance / 100) * ((items.chance ?? 100) / 100)
+                ),
+              };
+            if (item)
+              yield {
+                loot: new Map([[item.item, 1]]),
+                chance: repeatChance(
+                  item.repeat,
+                  (chance / 100) * ((item.chance ?? 100) / 100)
+                ),
+              };
+          })(),
+        ])
       ),
     ])
   );
