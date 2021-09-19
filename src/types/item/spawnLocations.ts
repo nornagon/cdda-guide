@@ -134,8 +134,12 @@ export function getItemSpawnLocations(
     .sort(({ chance: lhs }, { chance: rhs }) => rhs[0] - lhs[0]);
 }
 
-function getItemGroup(data: CddaData, id: string): Loot {
-  const g = data.flattenItemGroup(data.byId("item_group", id));
+function parseItemGroup(
+  data: CddaData,
+  group: string | raw.ItemGroup | raw.ItemGroupEntry[]
+): Loot {
+  if (typeof group !== "string") return new Map(); /*TODO*/
+  const g = data.flattenItemGroup(data.byId("item_group", group));
   return new Map(g.map(({ id, prob }) => [id, prob]));
 }
 
@@ -171,10 +175,7 @@ export function parsePalette(
   const items = new Map(
     Object.entries(palette.items ?? {}).map(([sym, val]) => {
       const groups = [val].flat().map(({ item, chance = 100, repeat }) => ({
-        loot:
-          typeof item === "string"
-            ? getItemGroup(data, item)
-            : new Map() /*TODO*/,
+        loot: parseItemGroup(data, item),
         chance: repeatChance(repeat, chance / 100),
       }));
       return [sym, collection(groups)];
