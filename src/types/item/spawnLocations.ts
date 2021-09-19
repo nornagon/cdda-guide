@@ -185,12 +185,10 @@ export function parsePalette(
     Object.entries(palette.item ?? {}).map(([sym, val]) => [
       sym,
       collection(
-        [val]
-          .flat()
-          .map(({ item, chance = 100, repeat }) => ({
-            loot: new Map([[item, 1]]),
-            chance: repeatChance(repeat, chance / 100),
-          }))
+        [val].flat().map(({ item, chance = 100, repeat }) => ({
+          loot: new Map([[item, 1]]),
+          chance: repeatChance(repeat, chance / 100),
+        }))
       ),
     ])
   );
