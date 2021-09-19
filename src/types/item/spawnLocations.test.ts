@@ -521,6 +521,22 @@ describe("parsePalette()", () => {
 
     expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
   });
+  it("parses inline item group", () => {
+    const data = new CddaData([]);
+    const rawPalette = {
+      items: {
+        X: {
+          item: {
+            subtype: "collection" as "collection",
+            items: [["fake_item", 50] as [string, number]],
+          },
+        },
+      },
+    };
+
+    const got = parsePalette(data, rawPalette);
+    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.5]])]]));
+  });
 });
 
 describe("repeatChance()", () => {

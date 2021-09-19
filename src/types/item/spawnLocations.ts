@@ -138,9 +138,10 @@ function parseItemGroup(
   data: CddaData,
   group: string | raw.ItemGroup | raw.ItemGroupEntry[]
 ): Loot {
-  if (typeof group !== "string") return new Map(); /*TODO*/
-  const g = data.flattenItemGroup(data.byId("item_group", group));
-  return new Map(g.map(({ id, prob }) => [id, prob]));
+  if (Array.isArray(group)) return new Map(); /*TODO*/
+  const g = typeof group !== "string" ? group : data.byId("item_group", group);
+  const flat = data.flattenItemGroup(g);
+  return new Map(flat.map(({ id, prob }) => [id, prob]));
 }
 
 function mergePalettes(palettes: Map<string, Loot>[]): Map<string, Loot> {
