@@ -333,7 +333,7 @@ const ascii_picture =
           <dd>
             <ul class="comma-separated">
               {#each pocket.flag_restriction as flag}
-                <li>{flag}</li>
+                <li><ThingLink type="json_flag" id={flag} /></li>
               {/each}
             </ul>
           </dd>

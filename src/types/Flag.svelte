@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
+import LimitedList from "../LimitedList.svelte";
 import type { Item, VehiclePart, JsonFlag } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
@@ -71,20 +72,24 @@ const colorLookup = (color: string): string => {
 {#if itemsWithFlag.length}
   <section>
     <h1>Items</h1>
-    <ul>
-      {#each itemsWithFlag.sort( (a, b) => singularName(a).localeCompare(singularName(b)) ) as { id }}
-        <li><ThingLink type="item" {id} /></li>
-      {/each}
-    </ul>
+    <LimitedList
+      items={itemsWithFlag.sort((a, b) =>
+        singularName(a).localeCompare(singularName(b))
+      )}
+      let:item>
+      <ThingLink type="item" id={item.id} />
+    </LimitedList>
   </section>
 {/if}
 {#if vpartsWithFlag.length}
   <section>
     <h1>Vehicle Parts</h1>
-    <ul>
-      {#each vpartsWithFlag.sort( (a, b) => singularName(a).localeCompare(singularName(b)) ) as { id }}
-        <li><ThingLink type="vehicle_part" {id} /></li>
-      {/each}
-    </ul>
+    <LimitedList
+      items={vpartsWithFlag.sort((a, b) =>
+        singularName(a).localeCompare(singularName(b))
+      )}
+      let:item>
+      <ThingLink type="vehicle_part" id={item.id} />
+    </LimitedList>
   </section>
 {/if}
