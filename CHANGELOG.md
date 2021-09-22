@@ -1,10 +1,12 @@
 # Jun 2020
+
 - It's now possible to list all items or vehicle parts having a given flag (thanks @CalKerethi!)
 - Item ASCII art is now shown
 - Fixed an issue where damage type wasn't shown correctly on SPEAR/STAB weapons
 - Added the ability to link directly to a search (#/search/...)
 
 # Apr 2020
+
 - New types supported: vehicle parts and vitamins
 - Seed items now show what they grow into, and items grown from seeds show
   their related seed item

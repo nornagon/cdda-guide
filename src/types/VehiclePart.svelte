@@ -110,6 +110,10 @@ function asMinutes(duration: string | number) {
       Durability
     </dt>
     <dd>{item.durability ?? 0}</dd>
+    {#if item.size}
+      <dt>Capacity</dt>
+      <dd>{asLiters(item.size)}</dd>
+    {/if}
     {#if item.folded_volume}
       <dt>Folded Volume</dt>
       <dd>{asLiters(item.folded_volume)}</dd>

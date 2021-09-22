@@ -1,9 +1,14 @@
 <script lang="ts">
+import { getContext } from "svelte";
+import type { CddaData } from "../data";
+
 import type { Recipe } from "../types";
 import RequirementData from "./item/RequirementData.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let recipe: Recipe;
+
+const data = getContext<CddaData>("data");
 
 function normalizeSkillsRequired(
   skills_required: [string, number] | [string, number][] | undefined
@@ -23,6 +28,16 @@ const writtenIn = Array.isArray(recipe.book_learn)
       ([k, v]) => [k, v.skill_level]
     );
 writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0));
+
+const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
+  const proficiency = data.byId("proficiency", prof.proficiency);
+  return {
+    fail_multiplier: proficiency.default_fail_multiplier,
+    time_multiplier: proficiency.default_time_multiplier,
+    learning_time_multiplier: 1,
+    ...prof,
+  };
+});
 </script>
 
 <section class="recipe">
@@ -47,12 +62,24 @@ writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0));
         {/each}
       </dd>
     {/if}
-    {#if recipe.proficiencies}
+    {#if proficiencies.length}
       <dt>Proficiencies</dt>
       <dd>
         <ul>
-          {#each recipe.proficiencies ?? [] as prof}
-            <li><ThingLink type="proficiency" id={prof.proficiency} /></li>
+          {#each proficiencies as prof}
+            <li>
+              <ThingLink type="proficiency" id={prof.proficiency} />
+              {#if prof.time_multiplier !== 1 || prof.fail_multiplier !== 1 || prof.learning_time_multiplier !== 1}
+                ({[
+                  [prof.time_multiplier, "time"],
+                  [prof.fail_multiplier, "fail"],
+                  [prof.learning_time_multiplier, "learning speed"],
+                ]
+                  .filter((x) => x[0] !== 1)
+                  .map(([num, name]) => `${num}× ${name}`)
+                  .join(", ")})
+              {/if}
+            </li>
           {/each}
         </ul>
       </dd>

@@ -49,6 +49,10 @@ for (const recipe of data.byType("recipe")) {
       <dt>Chapters</dt>
       <dd>{item.chapters}</dd>
     {/if}
+    {#if item.martial_art}
+      <dt>Martial Art</dt>
+      <dd><ThingLink type="martial_art" id={item.martial_art} /></dd>
+    {/if}
     {#if bookRecipes.size}
       <dt>Recipes</dt>
       <dd>

@@ -11,12 +11,7 @@ export let item_id: string;
 const data = getContext<CddaData>("data");
 
 const recipes = data.byType("recipe").filter((recipe) => {
-  if (
-    recipe.type !== "recipe" ||
-    !recipe.result ||
-    !data.byId("item", recipe.result)
-  )
-    return false;
+  if (!recipe.result || !data.byId("item", recipe.result)) return false;
   const using =
     typeof recipe.using === "string"
       ? ([[recipe.using, 1]] as const)

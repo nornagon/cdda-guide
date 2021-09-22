@@ -24,6 +24,7 @@ const types = [
   "skill",
   "vehicle_part",
   "vitamin",
+  "martial_art",
 ];
 
 const all = data._raw

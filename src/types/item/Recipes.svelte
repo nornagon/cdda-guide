@@ -9,7 +9,7 @@ let data = getContext<CddaData>("data");
 
 let recipes = data
   .byType("recipe")
-  .filter((x) => x.type === "recipe" && x.result === item_id && !x.obsolete);
+  .filter((x) => x.result === item_id && !x.obsolete);
 </script>
 
 {#if recipes.length}

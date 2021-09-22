@@ -121,7 +121,14 @@ export type Recipe = {
 
   skills_required?: [string, number] | [string, number][]; // skill_id, level
 
-  proficiencies?: any[]; // TODO
+  proficiencies?: {
+    proficiency: string; // proficiency_id
+    required?: boolean;
+    time_multiplier?: number; // default to proficiency multiplier
+    fail_multiplier?: number; // default to proficiency multiplier
+    learning_time_multiplier?: number; // default 1.0
+    max_experience?: duration;
+  }[];
   autolearn?: boolean | [string, number][];
   never_learn?: boolean;
   decomp_learn?: number | [string, number][];
@@ -526,7 +533,7 @@ export type MartialArtRequirements = {
   unarmed_weapons_allowed?: boolean; // default: true
   strictly_unarmed?: boolean;
   wall_adjacent?: boolean;
-  req_bufs?: string[]; // mabuff_id[]
+  req_buffs?: string | string[]; // mabuff_id[]
   req_flags?: string[]; // flag_id[] (json_flag)
   skill_requirements?: { name: string; level: number }[];
   weapon_damage_requirements?: { type: string; min: number }[];
@@ -1042,6 +1049,148 @@ export type AsciiArt = {
   picture: string[];
 };
 
+export type AmmunitionType = {
+  type: "ammunition_type";
+  id: string;
+  name: Translation;
+  default: string; // item_id
+};
+
+export type BodyPart = {
+  type: "body_part";
+  id: string;
+
+  name: Translation;
+  name_multiple?: Translation;
+  accusative: Translation;
+  accusative_multiple?: Translation;
+  heading: Translation;
+  heading_multiple: Translation;
+  hp_bar_ui_text?: Translation;
+  encumbrance_text: Translation;
+
+  hit_size: number;
+  hit_difficulty: number;
+  hit_size_relative: [number, number, number];
+
+  base_hp: integer;
+  stat_hp_mods?: any; // TODO
+
+  drench_capacity: integer;
+
+  is_limb?: boolean;
+  is_vital?: boolean;
+  limb_type:
+    | "head"
+    | "torso"
+    | "sensor"
+    | "mouth"
+    | "arm"
+    | "hand"
+    | "leg"
+    | "foot"
+    | "wing"
+    | "tail"
+    | "other";
+
+  fire_warmth_bonus?: integer;
+
+  main_part: string; // bodypart_id
+  connected_to?: string; // bodypart_id
+
+  opposite_part: string; // bodypart_id
+
+  bionic_slots?: integer;
+
+  flags?: string[];
+
+  side: "left" | "right" | "both";
+
+  // ...
+};
+
+export type EffectType = {
+  type: "effect_type";
+  id: string;
+  name?: Translation[];
+
+  // ...
+};
+
+export type ConstructionGroup = {
+  type: "construction_group";
+  id: string;
+  name: Translation;
+
+  // ...
+};
+
+export type OvermapTerrain = {
+  type: "overmap_terrain";
+  id: string | string[];
+  name: Translation;
+
+  // ...
+};
+
+export type Material = {
+  type: "material";
+  id: string;
+  name: Translation;
+
+  // ...
+};
+
+export type MartialArtBuff = {
+  id: string;
+  name: Translation;
+  description?: Translation;
+  buff_duration?: duration; // default: 2 turns
+  max_stacks?: integer; // default: 1
+  bonus_dodges?: integer;
+  bonus_blocks?: integer;
+  quiet?: boolean;
+  throw_immune?: boolean;
+  stealthy?: boolean;
+} & MartialArtRequirements &
+  BonusContainer;
+
+export type MartialArt = {
+  type: "martial_art";
+  id: string;
+  name: Translation;
+  description: Translation;
+
+  learn_difficulty?: integer;
+  autolearn?: [string, integer][];
+
+  static_buffs?: MartialArtBuff[];
+  onmove_buffs?: MartialArtBuff[];
+  onpause_buffs?: MartialArtBuff[];
+  onhit_buffs?: MartialArtBuff[];
+  onattack_buffs?: MartialArtBuff[];
+  ondodge_buffs?: MartialArtBuff[];
+  onblock_buffs?: MartialArtBuff[];
+  ongethit_buffs?: MartialArtBuff[];
+  onmiss_buffs?: MartialArtBuff[];
+  oncrit_buffs?: MartialArtBuff[];
+  onkill_buffs?: MartialArtBuff[];
+
+  techniques?: string[]; // technique_id
+  weapons?: string[]; // item_id
+
+  strictly_melee?: boolean;
+  strictly_unarmed?: boolean;
+  allow_melee?: boolean;
+  force_unarmed?: boolean;
+
+  arm_block_with_bio_armor_arms?: boolean;
+  arm_block?: integer;
+  leg_block_with_bio_armor_legs?: boolean;
+  leg_block?: integer;
+  // ...
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1064,15 +1213,22 @@ export type SupportedTypes = {
 
   // Non-item types.
   MONSTER: Monster;
+  ammunition_type: AmmunitionType;
   ascii_art: AsciiArt;
+  body_part: BodyPart;
   construction: Construction;
+  construction_group: ConstructionGroup;
+  effect_type: EffectType;
   fault: Fault;
   furniture: Furniture;
   harvest: Harvest;
-  item_group: ItemGroup;
+  item_group: { type: "item_group" } & ItemGroup;
   json_flag: JsonFlag;
   mapgen: Mapgen;
+  martial_art: MartialArt;
+  material: Material;
   monstergroup: MonsterGroup;
+  overmap_terrain: OvermapTerrain;
   palette: Palette;
   proficiency: Proficiency;
   recipe: { type: "recipe" } & Recipe;
@@ -1085,16 +1241,13 @@ export type SupportedTypes = {
   vitamin: Vitamin;
 
   // TODO: used, but not yet typed
-  ammunition_type: any;
-  body_part: any;
-  effect_type: any;
-  construction_group: any;
-  overmap_terrain: any;
-  material: any;
-  monster_attack: any;
+  monster_attack: { type: "monster_attack"; id: string };
 };
 
 export type SupportedTypesWithMapped = SupportedTypes & {
   item: Item;
   monster: Monster;
 };
+
+export type SupportedTypeMapped =
+  SupportedTypesWithMapped[keyof SupportedTypesWithMapped];

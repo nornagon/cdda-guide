@@ -1,50 +1,59 @@
 <script lang="ts">
-import { data, mapType, singularName } from "./data";
-import Fuse from "fuse.js";
+import { mapType, singularName } from "./data";
+import type { CddaData } from "./data";
+import * as fuzzysort from "fuzzysort";
 import FurnitureSymbol from "./types/item/FurnitureSymbol.svelte";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
+import type { SupportedTypesWithMapped } from "./types";
 
-const SEARCHABLE_TYPES = new Set([
+const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
   "monster",
   "furniture",
   "vehicle_part",
   "tool_quality",
+  "martial_art",
 ]);
 
-let fuse: Fuse<any>;
-$: fuse = new Fuse(
-  [...($data?.all() ?? [])].filter(
-    (x) => typeof x.id === "string" && SEARCHABLE_TYPES.has(mapType(x.type))
-  ),
-  {
-    keys: ["id", "name"],
-    getFn: (obj: any, path: string | string[]): string | string[] => {
-      if (path[0] === "id") return obj.id ?? obj.abstract ?? "";
-      if (path[0] === "name") return singularName(obj);
-    },
-    ignoreFieldNorm: true,
-    ignoreLocation: true,
-    minMatchCharLength: 2,
-    threshold: 0.2,
-  }
-);
+export let data: CddaData;
+
+let targets: {
+  id: string;
+  name: string;
+  type: keyof SupportedTypesWithMapped;
+}[];
+$: targets = [...(data?.all() ?? [])]
+  .filter(
+    (x) =>
+      "id" in x &&
+      typeof x.id === "string" &&
+      SEARCHABLE_TYPES.has(mapType(x.type))
+  )
+  .map((x) => ({
+    id: (x as any).id,
+    name: singularName(x),
+    type: mapType(x.type),
+  }));
 
 export let search: string;
 
 function filter(text: string): Map<string, any[]> {
-  const results = fuse.search(text, { limit: 100 });
+  const results = fuzzysort.go(text, targets, {
+    limit: 100,
+    keys: ["id", "name"],
+    threshold: -10000,
+  });
   const byType = new Map<string, any[]>();
-  for (const { item } of results) {
-    const mappedType = mapType(item.type);
+  for (const { obj: item } of results) {
+    const mappedType = item.type;
     if (!SEARCHABLE_TYPES.has(mappedType)) continue;
     if (!byType.has(mappedType)) byType.set(mappedType, []);
-    byType.get(mappedType).push(item);
+    byType.get(mappedType).push(data.byId(mappedType, item.id));
   }
   return byType;
 }
 
-$: matchingObjects = search && search.length > 1 && $data && filter(search);
+$: matchingObjects = search && search.length > 1 && data && filter(search);
 
 $: history.replaceState({ search }, "");
 </script>
@@ -56,12 +65,12 @@ $: history.replaceState({ search }, "");
       {#each matchingObjects.get(type) as obj}
         <li>
           {#if type === "furniture"}
-            <FurnitureSymbol item={$data._flatten(obj)} />
+            <FurnitureSymbol item={data._flatten(obj)} />
           {:else if type === "item" || type === "monster"}
-            <ItemSymbol item={$data._flatten(obj)} />
+            <ItemSymbol item={data._flatten(obj)} />
           {/if}
           <a href="#/{mapType(obj.type)}/{obj.id}"
-            >{singularName($data._flatten(obj))}</a>
+            >{singularName(data._flatten(obj))}</a>
         </li>
       {/each}
     </ul>

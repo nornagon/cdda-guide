@@ -13,9 +13,9 @@ import Skill from "./types/Skill.svelte";
 import Proficiency from "./types/Proficiency.svelte";
 import Flag from "./types/Flag.svelte";
 import Fault from "./types/Fault.svelte";
-import Technique from "./types/Technique.svelte";
 import Vitamin from "./types/Vitamin.svelte";
 import VehiclePart from "./types/VehiclePart.svelte";
+import MartialArt from "./types/MartialArt.svelte";
 import ErrorBoundary from "./ErrorBoundary";
 
 export let item: { id: string; type: string };
@@ -65,9 +65,9 @@ const displays = {
   proficiency: Proficiency,
   json_flag: Flag,
   fault: Fault,
-  technique: Technique,
   vitamin: Vitamin,
   vehicle_part: VehiclePart,
+  martial_art: MartialArt,
 };
 </script>
 
