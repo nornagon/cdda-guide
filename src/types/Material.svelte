@@ -1,10 +1,27 @@
 <script lang="ts">
+import { getContext } from "svelte";
+
+import { CddaData, singularName } from "../data";
+import LimitedList from "../LimitedList.svelte";
+import type { Material } from "../types";
+
 import ThingLink from "./ThingLink.svelte";
 
-export let item: any;
+const data = getContext<CddaData>("data");
+
+export let item: Material;
+
+let itemsWithMaterial = data
+  .byType("item")
+  .filter((i) => {
+    const material =
+      typeof i.material === "string" ? [i.material] : i.material ?? [];
+    return i.id && material.some((m) => m === item.id);
+  })
+  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
-<h1>Material: {item.name}</h1>
+<h1>Material: {singularName(item)}</h1>
 <section>
   <h1>Properties</h1>
   <dl>
@@ -16,7 +33,7 @@ export let item: any;
         2.108} (solid)
     </dd>
     <dt>Latent Heat</dt>
-    <dd>{item.latent_heat ?? 333}</dd>
+    <dd>{item.latent_heat ?? 334}</dd>
     <dt>Resistance</dt>
     <dd>
       <dl>
@@ -48,3 +65,12 @@ export let item: any;
     <dd>{item.rotting ? "yes" : "no"}</dd>
   </dl>
 </section>
+
+{#if itemsWithMaterial.length}
+  <section>
+    <h1>Items Made From {singularName(item)}</h1>
+    <LimitedList items={itemsWithMaterial} let:item>
+      <ThingLink id={item.id} type="item" />
+    </LimitedList>
+  </section>
+{/if}
