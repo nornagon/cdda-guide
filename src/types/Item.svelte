@@ -29,6 +29,7 @@ import GunInfo from "./item/GunInfo.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import MeleeInfo from "./item/MeleeInfo.svelte";
 import Recipes from "./item/Recipes.svelte";
+import Salvaged from "./item/Salvaged.svelte";
 import SpawnedIn from "./item/SpawnedIn.svelte";
 import ToolInfo from "./item/ToolInfo.svelte";
 import WheelInfo from "./item/WheelInfo.svelte";
@@ -360,6 +361,7 @@ const ascii_picture =
   <DroppedBy item_id={item.id} />
   <GrownFrom item_id={item.id} />
   <Disassembly item_id={item.id} />
+  <Salvaged item_id={item.id} />
   <Deconstruct item_id={item.id} />
   <SpawnedIn item_id={item.id} />
 </div>
