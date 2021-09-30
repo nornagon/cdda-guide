@@ -38,7 +38,7 @@ for (const book of booksWithSkill) {
     <h1>Books</h1>
     <dl>
       {#each [...booksByLevel.keys()].sort((a, b) => a - b) as level}
-        <dt>Level {level}</dt>
+        <dt style="font-variant: tabular-nums">Level {level}</dt>
         <dd>
           <ul>
             {#each booksByLevel
