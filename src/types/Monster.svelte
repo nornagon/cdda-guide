@@ -387,6 +387,10 @@ let upgrades =
       <dt>Placate Triggers</dt>
       <dd>{item.placate_triggers.join(", ")}</dd>
     {/if}
+    {#if item.fear_triggers}
+      <dt>Fear Triggers</dt>
+      <dd>{item.fear_triggers.join(", ")}</dd>
+    {/if}
     <dt>Flags</dt>
     <dd>
       {#each item.flags ?? [] as flag, i}<abbr

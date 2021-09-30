@@ -923,6 +923,7 @@ export type Monster = {
   default_faction?: string;
   anger_triggers?: string[];
   placate_triggers?: string[];
+  fear_triggers?: string[];
   morale?: number;
   aggression?: number;
   death_function?: {
