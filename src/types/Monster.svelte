@@ -220,6 +220,22 @@ const mon_flag_descriptions = {
   RANGED_ATTACKER: "This monster has any sort of ranged attack",
 };
 
+// prettier-ignore
+const trigger_descriptions = {
+  FIRE: "Triggers if there's a fire within 3 tiles, the strength of the effect equals 5 * the field intensity of the fire.",
+  FRIEND_ATTACKED: "Triggers if the monster sees another monster of the same type being attacked; strength = 15.",
+  FRIEND_DIED: "Triggers if the monster sees another monster of the same type dying; strength = 15.",
+  HURT: "Triggers when the monster is hurt, strength equals 1 + (damage / 3).",
+  MEAT: "Meat or a corpse is nearby.",
+  PLAYER_CLOSE: "Triggers when a potential enemy is within 5 tiles range.",
+  PLAYER_WEAK: "Raises monster aggression by 10 - (percent of hp remaining / 10) if a potential enemy has less than 70% hp remaining",
+  PLAYER_NEAR_BABY: "Increases monster aggression by 8 and morale by 4 if **the player** comes within 3 tiles of its offspring (defined by the baby_monster field in its reproduction data)",
+  SOUND: "Not an actual trigger, monsters above 10 aggression and 0 morale will wander towards, monsters below 0 morale will wander away from the source of the sound for 1 turn (6, if they have the GOODHEARING flag).",
+  STALK: "Raises monster aggresssion by 1, triggers 20% of the time each turn if aggression > 5.",
+  HOSTILE_SEEN: "Increases aggression/decreases morale by a random amount between 0-2 for every potential enemy it can see, up to 20 aggression.",
+  MATING_SEASON: "Increases aggression by 3 if a potential enemy is within 5 tiles range and the season is the same as the monster's mating season (defined by the baby_flags field in its reproduction data).",
+}
+
 function specialAttackToString(special_attack: SpecialAttack): string {
   if (Array.isArray(special_attack))
     if (special_attack.length > 1)
