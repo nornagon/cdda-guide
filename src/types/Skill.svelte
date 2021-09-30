@@ -2,11 +2,7 @@
 import { getContext } from "svelte";
 
 import { CddaData, singularName } from "../data";
-import type {
-  Skill,
-  SupportedTypeMapped,
-  SupportedTypesWithMapped,
-} from "../types";
+import type { Skill, SupportedTypesWithMapped } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: Skill;
