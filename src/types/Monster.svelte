@@ -408,12 +408,16 @@ let upgrades =
       <dt>Fear Triggers</dt>
       <dd>{item.fear_triggers.join(", ")}</dd>
     {/if}
-    <dt>Flags</dt>
-    <dd>
-      {#each item.flags ?? [] as flag, i}<abbr
-          title={mon_flag_descriptions[flag]}>{flag}</abbr
-        >{#if i < item.flags.length - 1}{", "}{/if}{/each}
-    </dd>
+    {#if item.flags?.length}
+      <dt>Flags</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.flags ?? [] as flag, i}
+            <li><abbr title={mon_flag_descriptions[flag]}>{flag}</abbr></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
     {#if item.death_function}
       <dt>On Death</dt>
       <dd>
