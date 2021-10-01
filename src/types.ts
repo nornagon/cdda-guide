@@ -1216,6 +1216,14 @@ export type MartialArt = {
   // ...
 };
 
+export type Spell = {
+  id: string;
+  type: "SPELL";
+
+  name: Translation;
+  description: Translation;
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1238,6 +1246,7 @@ export type SupportedTypes = {
 
   // Non-item types.
   MONSTER: Monster;
+  SPELL: Spell;
   ammunition_type: AmmunitionType;
   ascii_art: AsciiArt;
   body_part: BodyPart;

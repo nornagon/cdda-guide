@@ -6,6 +6,7 @@ import {
   asLiters,
   CddaData,
   normalizeDamageInstance,
+  singular,
   singularName,
 } from "../data";
 import ThingLink from "./ThingLink.svelte";
@@ -415,7 +416,17 @@ let upgrades =
     </dd>
     {#if item.death_function}
       <dt>On Death</dt>
-      <dd>{item.death_function.corpse_type ?? "NORMAL"}</dd>
+      <dd>
+        {#if item.death_function.effect?.id && data.byId("SPELL", item.death_function.effect.id)}
+          {singularName(data.byId("SPELL", item.death_function.effect.id))} ({singular(
+            data.byId("SPELL", item.death_function.effect.id).description
+          )})
+        {:else}
+          {item.death_function.effect?.id ??
+            item.death_function.corpse_type ??
+            "NORMAL"}
+        {/if}
+      </dd>
     {/if}
     {#if upgrades}
       <dt>Upgrades Into</dt>
