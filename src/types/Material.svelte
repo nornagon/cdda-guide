@@ -4,6 +4,7 @@ import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { Material } from "../types";
+import ItemSymbol from "./item/ItemSymbol.svelte";
 
 import ThingLink from "./ThingLink.svelte";
 
@@ -70,7 +71,7 @@ let itemsWithMaterial = data
   <section>
     <h1>Items Made From {singularName(item)}</h1>
     <LimitedList items={itemsWithMaterial} let:item>
-      <ThingLink id={item.id} type="item" />
+      <ItemSymbol {item} /> <ThingLink id={item.id} type="item" />
     </LimitedList>
   </section>
 {/if}

@@ -412,7 +412,7 @@ let upgrades =
       <dt>Flags</dt>
       <dd>
         <ul class="comma-separated">
-          {#each item.flags ?? [] as flag, i}
+          {#each item.flags ?? [] as flag}
             <li><abbr title={mon_flag_descriptions[flag]}>{flag}</abbr></li>
           {/each}
         </ul>
