@@ -923,6 +923,7 @@ export type Monster = {
   default_faction?: string;
   anger_triggers?: string[];
   placate_triggers?: string[];
+  fear_triggers?: string[];
   morale?: number;
   aggression?: number;
   death_function?: {
@@ -1137,7 +1138,32 @@ export type Material = {
   id: string;
   name: Translation;
 
-  // ...
+  density: integer; // default 1
+
+  bash_resist: integer;
+  cut_resist: integer;
+  acid_resist: integer;
+  elec_resist: integer;
+  fire_resist: integer;
+  bullet_resist: integer;
+  chip_resist: integer;
+
+  wind_resist?: integer;
+
+  specific_heat_liquid?: number; // default 4.186
+  specific_heat_solid?: number; // default 2.108
+  latent_heat?: number; // default 334.0
+  freezing_point?: number;
+
+  edible?: boolean;
+  rotting?: boolean;
+  soft?: boolean;
+  reinforces?: boolean;
+
+  salvaged_into?: string; // item_id
+  repaired_with?: string; // item_id
+
+  vitamins?: [string, number][];
 };
 
 export type MartialArtBuff = {
@@ -1190,6 +1216,14 @@ export type MartialArt = {
   // ...
 };
 
+export type Spell = {
+  id: string;
+  type: "SPELL";
+
+  name: Translation;
+  description: Translation;
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1212,6 +1246,7 @@ export type SupportedTypes = {
 
   // Non-item types.
   MONSTER: Monster;
+  SPELL: Spell;
   ammunition_type: AmmunitionType;
   ascii_art: AsciiArt;
   body_part: BodyPart;

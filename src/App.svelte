@@ -77,10 +77,10 @@ function maybeFocusSearch(e: KeyboardEvent) {
   <nav>
     <div class="title">
       <!-- svelte-ignore a11y-invalid-attribute -->
-      <strong
-        ><a href="#" on:click={() => (search = "")}
-          >Hitchhiker's Guide to the Cataclysm</a
-        ></strong>
+      <strong>
+        <a href="#" on:click={() => (search = "")}
+          >Hitchhiker's Guide to the Cataclysm</a>
+      </strong>
     </div>
     <div class="search">
       <input
