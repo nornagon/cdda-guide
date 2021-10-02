@@ -149,6 +149,7 @@ const ascii_picture =
         <dd>{asKilograms(item.weight)}</dd>
         <dt>Length</dt>
         <dd>{length(item)}</dd>
+
         {#if ammo.length}
           <dt>Ammo</dt>
           <dd>
@@ -165,6 +166,7 @@ const ascii_picture =
             </ul>
           </dd>
         {/if}
+
         {#if magazine_compatible.length}
           <dt>Compatible Magazines</dt>
           <dd>
@@ -175,6 +177,7 @@ const ascii_picture =
             </ul>
           </dd>
         {/if}
+
         <dt>Flags</dt>
         <dd>
           <ul class="comma-separated">
@@ -182,6 +185,7 @@ const ascii_picture =
             {#each flags as f}<li><ThingLink type="json_flag" id={f.id} /></li>{:else}<li><em>none</em></li>{/each}
           </ul>
         </dd>
+
         {#if faults.length}
           <dt>Possible Faults</dt>
           <dd>
@@ -190,7 +194,8 @@ const ascii_picture =
                 <li><ThingLink type="fault" id={fault.id} /></li>
               {/each}
             </ul>
-          </dd>{/if}
+          </dd>
+        {/if}
 
         {#if qualities.length}
           <dt>Qualities</dt>
