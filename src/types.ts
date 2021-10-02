@@ -324,6 +324,8 @@ export type WheelSlot = {
 
 export type ItemBasicInfo = {
   id: string;
+  color?: string;
+  symbol?: string;
   description?: Translation;
   qualities?: [string, number][];
   volume?: volume;
@@ -891,6 +893,8 @@ export type Harvest = {
 export type Monster = {
   id: string;
   type: "MONSTER";
+  color?: string;
+  symbol?: string;
   material?: string | string[];
   description?: Translation;
   volume?: string | number;
