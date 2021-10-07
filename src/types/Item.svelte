@@ -29,6 +29,7 @@ import GunInfo from "./item/GunInfo.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import MeleeInfo from "./item/MeleeInfo.svelte";
 import Recipes from "./item/Recipes.svelte";
+import Salvaged from "./item/Salvaged.svelte";
 import SpawnedIn from "./item/SpawnedIn.svelte";
 import ToolInfo from "./item/ToolInfo.svelte";
 import WheelInfo from "./item/WheelInfo.svelte";
@@ -149,6 +150,7 @@ const ascii_picture =
         <dd>{asKilograms(item.weight)}</dd>
         <dt>Length</dt>
         <dd>{length(item)}</dd>
+
         {#if ammo.length}
           <dt>Ammo</dt>
           <dd>
@@ -165,6 +167,7 @@ const ascii_picture =
             </ul>
           </dd>
         {/if}
+
         {#if magazine_compatible.length}
           <dt>Compatible Magazines</dt>
           <dd>
@@ -175,6 +178,7 @@ const ascii_picture =
             </ul>
           </dd>
         {/if}
+
         <dt>Flags</dt>
         <dd>
           <ul class="comma-separated">
@@ -182,6 +186,7 @@ const ascii_picture =
             {#each flags as f}<li><ThingLink type="json_flag" id={f.id} /></li>{:else}<li><em>none</em></li>{/each}
           </ul>
         </dd>
+
         {#if faults.length}
           <dt>Possible Faults</dt>
           <dd>
@@ -190,7 +195,8 @@ const ascii_picture =
                 <li><ThingLink type="fault" id={fault.id} /></li>
               {/each}
             </ul>
-          </dd>{/if}
+          </dd>
+        {/if}
 
         {#if qualities.length}
           <dt>Qualities</dt>
@@ -328,12 +334,16 @@ const ascii_picture =
         {/if}
         <dt>Moves to Remove Item</dt>
         <dd>{pocket.moves}</dd>
+        {#if (pocket.sealed_data?.spoil_multiplier ?? 1) !== 1.0}
+          <dt>Spoil Multiplier</dt>
+          <dd>{pocket.sealed_data.spoil_multiplier}</dd>
+        {/if}
         {#if pocket.flag_restriction}
           <dt>Flag Restriction</dt>
           <dd>
             <ul class="comma-separated">
               {#each pocket.flag_restriction as flag}
-                <li>{flag}</li>
+                <li><ThingLink type="json_flag" id={flag} /></li>
               {/each}
             </ul>
           </dd>
@@ -360,6 +370,7 @@ const ascii_picture =
   <DroppedBy item_id={item.id} />
   <GrownFrom item_id={item.id} />
   <Disassembly item_id={item.id} />
+  <Salvaged item_id={item.id} />
   <Deconstruct item_id={item.id} />
   <SpawnedIn item_id={item.id} />
 </div>

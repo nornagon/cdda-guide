@@ -138,6 +138,9 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
                 <li><ThingLink type="skill" id={skill} /> ({level})</li>
               {/each}
             {/if}
+            {#if !recipe.skill_used && !skillsRequired.length}
+            <li>At birth</li>
+            {/if}
           {/if}
         </ul>
       {:else}
