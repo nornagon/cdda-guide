@@ -26,8 +26,9 @@ export function repeatChance(
 export type Loot = Map</**item_id*/ string, chance>;
 /** Independently choose whether to place each item  */
 export function collection(
-  items: Iterable<{ loot: Loot; chance?: chance }>
+  items: Array<{ loot: Loot; chance?: chance }>
 ): Loot {
+  if (items.length === 1 && (items[0].chance ?? 1) === 1) return items[0].loot;
   const ret = new Map();
   for (const { loot, chance = 1.0 } of items) {
     for (const [item_id, item_chance] of loot.entries()) {
@@ -167,11 +168,20 @@ function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
     ...place_item,
     ...place_loot,
   ]);
-  const items = (mapgen.object.rows ?? [])
-    .flatMap((r) => Array.from(r))
-    .map((sym) => palette.get(sym))
-    .filter((loot) => loot != null)
-    .map((loot) => ({ loot }));
+  const countByPalette = new Map<string, number>();
+  for (const row of mapgen.object.rows ?? [])
+    for (const char of row)
+      if (palette.has(char))
+        countByPalette.set(char, (countByPalette.get(char) ?? 0) + 1);
+  const items: { loot: Loot }[] = [];
+  for (const [sym, count] of countByPalette.entries()) {
+    const loot = palette.get(sym);
+    const multipliedLoot: Loot = new Map();
+    for (const [id, chance] of loot.entries()) {
+      multipliedLoot.set(id, 1 - Math.pow(1 - chance, count));
+    }
+    items.push({ loot: multipliedLoot });
+  }
   items.push({ loot: additional_items });
   const loot = collection(items);
   lootForMapgenCache.set(mapgen, loot);
@@ -233,10 +243,12 @@ function parsePlaceMapping<T>(
   );
 }
 
+const paletteCache = new WeakMap<RawPalette, Map<string, Loot>>();
 export function parsePalette(
   data: CddaData,
   palette: RawPalette
 ): Map<string, Loot> {
+  if (paletteCache.has(palette)) return paletteCache.get(palette);
   const sealed_item = parsePlaceMapping(
     palette.sealed_item,
     function* ({ item, items, chance = 100 }) {
@@ -281,5 +293,7 @@ export function parsePalette(
       typeof id !== "string" ? [] /*TODO*/ : [data.byId("palette", id)]
     )
     .map((p) => parsePalette(data, p));
-  return mergePalettes([item, items, sealed_item, ...palettes]);
+  const ret = mergePalettes([item, items, sealed_item, ...palettes]);
+  paletteCache.set(palette, ret);
+  return ret;
 }
