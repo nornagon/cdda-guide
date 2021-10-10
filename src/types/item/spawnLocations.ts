@@ -56,6 +56,10 @@ function offsetMapgen(mapgen: raw.Mapgen, x: number, y: number): raw.Mapgen {
     object.place_item = object.place_item.filter(
       (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
     );
+  if (object.add)
+    object.add = object.add.filter(
+      (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
+    );
   if (object.place_loot)
     object.place_loot = object.place_loot.filter(
       (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
