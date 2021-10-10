@@ -24,7 +24,7 @@ export function repeatChance(
   return sum / count;
 }
 
-type Loot = Map</**item_id*/ string, chance>;
+export type Loot = Map</**item_id*/ string, chance>;
 /** Independently choose whether to place each item  */
 export function collection(
   items: Iterable<{ loot: Loot; chance?: chance }>
@@ -39,6 +39,131 @@ export function collection(
     }
   }
   return ret;
+}
+
+function offsetMapgen(mapgen: raw.Mapgen, x: number, y: number): raw.Mapgen {
+  const object = {
+    ...mapgen.object,
+    rows: (mapgen.object.rows ?? [])
+      .slice(y * 24, (y + 1) * 24)
+      .map((row) => row.slice(x * 24, (x + 1) * 24)),
+  };
+  if (object.place_items)
+    object.place_items = object.place_items.filter(
+      (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
+    );
+  if (object.place_item)
+    object.place_item = object.place_item.filter(
+      (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
+    );
+  if (object.place_loot)
+    object.place_loot = object.place_loot.filter(
+      (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
+    );
+  return { ...mapgen, object };
+}
+
+export function lootByOmSpecial(data: CddaData) {
+  const mapgensByOmt = new Map<string, raw.Mapgen[]>();
+  const add = (id: string, mapgen: raw.Mapgen) => {
+    if (!mapgensByOmt.has(id)) mapgensByOmt.set(id, []);
+    mapgensByOmt.get(id).push(mapgen);
+  };
+  // If om_terrain is missing, this is nested_mapgen or update_mapgen
+  const mapgens = data.byType("mapgen").filter((m) => m.om_terrain != null);
+  for (const mapgen of mapgens) {
+    if (typeof mapgen.om_terrain === "string") {
+      add(mapgen.om_terrain, mapgen);
+    } else {
+      if (typeof mapgen.om_terrain[0] === "string") {
+        for (const id of mapgen.om_terrain as string[]) add(id, mapgen);
+      } else {
+        for (let y = 0; y < mapgen.om_terrain.length; y++)
+          for (let x = 0; x < mapgen.om_terrain[y].length; x++)
+            add(mapgen.om_terrain[y][x], offsetMapgen(mapgen, x, y));
+      }
+    }
+  }
+
+  // om_terrain can be one of three things:
+  // 1. a string. if so, this mapgen can be instantiated for that om_terrain.
+  // 2. an array of strings. if so, this mapgen can be instantiated for any of the given om_terrains.
+  // 3. an array of arrays of strings. if so, this is actually several mapgens in a trench coat, and the ids are a grid.
+
+  const overmap_specials = data.byType("overmap_special");
+
+  const lootByOmSpecial = new Map<string, Loot>();
+  for (const om_special of overmap_specials) {
+    if (om_special.subtype === "mutable") continue;
+    const loots = [];
+    for (const om of om_special.overmaps ?? []) {
+      const overmap_id = om.overmap.replace(/_(north|east|west|south)$/, "");
+      const mapgens = mapgensByOmt.get(overmap_id) ?? [];
+      const loot = mergeLoot(
+        mapgens.map((mg) => ({
+          weight: mg.weight,
+          loot: getLootForMapgen(data, mg),
+        }))
+      );
+      loots.push(loot);
+    }
+    lootByOmSpecial.set(om_special.id, addLoot(loots));
+  }
+  return lootByOmSpecial;
+}
+
+export function lootByOMT(data: CddaData) {
+  const mapgensByOmt = new Map<string, raw.Mapgen[]>();
+  const add = (id: string, mapgen: raw.Mapgen) => {
+    if (!mapgensByOmt.has(id)) mapgensByOmt.set(id, []);
+    mapgensByOmt.get(id).push(mapgen);
+  };
+  // If om_terrain is missing, this is nested_mapgen or update_mapgen
+  const allMapgens = data.byType("mapgen").filter((m) => m.om_terrain != null);
+  for (const mapgen of allMapgens) {
+    if (typeof mapgen.om_terrain === "string") {
+      add(mapgen.om_terrain, mapgen);
+    } else {
+      if (typeof mapgen.om_terrain[0] === "string") {
+        for (const id of mapgen.om_terrain as string[]) add(id, mapgen);
+      } else {
+        for (let y = 0; y < mapgen.om_terrain.length; y++)
+          for (let x = 0; x < mapgen.om_terrain[y].length; x++)
+            add(mapgen.om_terrain[y][x], offsetMapgen(mapgen, x, y));
+      }
+    }
+  }
+
+  const omts = data.byType("overmap_terrain");
+  const omtIdsByOmtKey = new Map<
+    string,
+    { omt: { sym: string; color: string; name: string }; ids: string[] }
+  >();
+  for (const omt of omts) {
+    const key = `${omt.sym}\0${omt.color}\0${omt.name}`;
+    if (!omt.id) continue;
+    const ids = typeof omt.id === "string" ? [omt.id] : omt.id;
+    if (!omtIdsByOmtKey.has(key))
+      omtIdsByOmtKey.set(key, {
+        omt: { sym: omt.sym, color: omt.color, name: singularName(omt) },
+        ids: [],
+      });
+    omtIdsByOmtKey.get(key).ids.push(...ids);
+  }
+  const lootByOmtKey = new Map<
+    string,
+    { omt: { sym: string; color: string; name: string }; loot: Loot }
+  >();
+  for (const [key, { omt, ids }] of omtIdsByOmtKey.entries()) {
+    const mapgens = ids.flatMap((id) => mapgensByOmt.get(id)).filter((x) => x);
+    const loots = mapgens.map((mg) => ({
+      loot: getLootForMapgen(data, mg),
+      weight: mg.weight ?? 1000,
+    }));
+    const mergedLoot = mergeLoot(loots);
+    lootByOmtKey.set(key, { omt, loot: mergedLoot });
+  }
+  return lootByOmtKey;
 }
 
 type OMT = {
@@ -96,6 +221,73 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
         };
       })
   );
+}
+
+export function mergeLoot(loots: { loot: Loot; weight: number }[]): Loot {
+  const totalWeight = loots
+    .map((l) => l.weight ?? 1000)
+    .reduce((m, o) => m + o, 0);
+  const mergedLoot: Loot = new Map();
+
+  for (const { loot, weight } of loots) {
+    for (const [item_id, chance] of loot.entries()) {
+      if (!mergedLoot.has(item_id)) mergedLoot.set(item_id, 0);
+      const v =
+        mergedLoot.get(item_id) + (chance * (weight ?? 1000)) / totalWeight;
+      mergedLoot.set(item_id, v);
+    }
+  }
+  return mergedLoot;
+}
+
+function addLoot(loots: Loot[]): Loot {
+  const ret: Loot = new Map();
+  for (const loot of loots) {
+    for (const [item_id, chance] of loot.entries()) {
+      if (!ret.has(item_id)) ret.set(item_id, 0);
+      ret.set(item_id, 1 - (1 - chance) * (1 - ret.get(item_id)));
+    }
+  }
+  return ret;
+}
+
+const lootForMapgenCache = new WeakMap<raw.Mapgen, Loot>();
+function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
+  if (lootForMapgenCache.has(mapgen)) return lootForMapgenCache.get(mapgen);
+  const palette = parsePalette(data, mapgen.object);
+  const place_items = (mapgen.object.place_items ?? []).map(
+    ({ item, chance = 100, repeat }) => ({
+      loot: parseItemGroup(data, item),
+      chance: repeatChance(repeat, chance / 100),
+    })
+  );
+  const place_item = [
+    ...(mapgen.object.place_item ?? []),
+    ...(mapgen.object.add ?? []),
+  ].map(({ item, chance = 100, repeat }) => ({
+    loot: new Map([[item, repeatChance(repeat, chance / 100)]]),
+  }));
+  const place_loot = (mapgen.object.place_loot ?? []).map(
+    ({ item, group, chance = 100, repeat }) => ({
+      // This assumes that .item and .group are mutually exclusive
+      loot: item ? new Map([[item, 1]]) : parseItemGroup(data, group),
+      chance: repeatChance(repeat, chance / 100),
+    })
+  );
+  const additional_items = collection([
+    ...place_items,
+    ...place_item,
+    ...place_loot,
+  ]);
+  const items = (mapgen.object.rows ?? [])
+    .flatMap((r) => Array.from(r))
+    .map((sym) => palette.get(sym))
+    .filter((loot) => loot != null)
+    .map((loot) => ({ loot }));
+  items.push({ loot: additional_items });
+  const loot = collection(items);
+  lootForMapgenCache.set(mapgen, loot);
+  return loot;
 }
 
 type LocationAndLoot = {

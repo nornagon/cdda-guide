@@ -1135,6 +1135,8 @@ export type OvermapTerrain = {
   id: string | string[];
   name: Translation;
 
+  sym: string;
+  color: string;
   // ...
 };
 
@@ -1229,6 +1231,20 @@ export type Spell = {
   description: Translation;
 };
 
+export type OvermapSpecial = {
+  id: string;
+  type: "overmap_special" | "city_building";
+
+  subtype?: "fixed" | "mutable"; // default fixed
+  locations?: string[];
+  overmaps?: {
+    point: [integer, integer, integer];
+    overmap: string;
+    flags?: string[];
+    locations?: string[];
+  }[];
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1267,6 +1283,8 @@ export type SupportedTypes = {
   martial_art: MartialArt;
   material: Material;
   monstergroup: MonsterGroup;
+  overmap_special: { type: "overmap_special" } & OvermapSpecial;
+  city_building: { type: "city_building" } & OvermapSpecial;
   overmap_terrain: OvermapTerrain;
   palette: Palette;
   proficiency: Proficiency;

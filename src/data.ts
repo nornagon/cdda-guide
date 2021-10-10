@@ -54,6 +54,7 @@ const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["GENERIC", "item"],
   ["BIONIC_ITEM", "item"],
   ["MONSTER", "monster"],
+  ["city_building", "overmap_special"],
 ]);
 
 export const mapType = (
