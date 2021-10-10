@@ -134,15 +134,40 @@ function omsName(oms: OvermapSpecial): string {
 }
 
 spawnLocations.sort((a, b) => b.chance - a.chance);
+
+let limit = 10;
+
+let grace = 4;
+
+let realLimit = spawnLocations.length <= limit + grace ? limit + grace : limit;
 </script>
 
 {#if spawnLocations.length}
   <section>
     <h1>Loot</h1>
-    <LimitedList items={spawnLocations} let:item={loc}>
-      <OvermapAppearance overmapSpecial={loc.overmap_special} />
-      <span title={loc.ids.join(", ")}>{omsName(loc.overmap_special)}</span>
-      ({showProbability(loc.chance)})
-    </LimitedList>
+    <table class="alternating">
+      <tbody>
+        {#each spawnLocations.slice(0, realLimit) as loc}
+          <tr>
+            <td style="text-align: center">
+              <OvermapAppearance overmapSpecial={loc.overmap_special} />
+            </td>
+            <td style="vertical-align: middle">
+              <span title={loc.ids.join(", ")}
+                >{omsName(loc.overmap_special)}</span>
+              ({showProbability(loc.chance)})
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    {#if spawnLocations.length > realLimit}
+      <button
+        class="disclosure"
+        on:click={(e) => {
+          e.preventDefault();
+          realLimit = Infinity;
+        }}>See all {Number(spawnLocations.length).toLocaleString()}...</button>
+    {/if}
   </section>
 {/if}

@@ -71,7 +71,7 @@ function omtAppearance(omt_id: string): {
 </script>
 
 <div
-  style="font-family: Unifont, monospace; line-height: 1; display: inline-block;">
+  style="font-family: Unifont, monospace; line-height: 1; display: inline-block; white-space: pre;">
   {#each appearanceGrid as row}
     {#each row as omt}
       <span class="c_{omt.color}" title={omt.name}>{omt.sym}</span>
