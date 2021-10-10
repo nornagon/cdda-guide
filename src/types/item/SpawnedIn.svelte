@@ -134,8 +134,6 @@ function omsName(oms: OvermapSpecial): string {
 }
 
 spawnLocations.sort((a, b) => b.chance - a.chance);
-console.log(data.flattenItemGroup(data.byId("item_group", "book_school")));
-console.log(data.flattenItemGroup(data.byId("item_group", "school")));
 </script>
 
 {#if spawnLocations.length}

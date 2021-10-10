@@ -1,5 +1,4 @@
 import type { CddaData } from "../../data";
-import { singularName } from "../../data";
 import type * as raw from "../../types";
 import { multimap } from "./utils";
 
@@ -112,117 +111,7 @@ export function lootByOmSpecial(data: CddaData) {
   return lootByOmSpecial;
 }
 
-export function lootByOMT(data: CddaData) {
-  const mapgensByOmt = new Map<string, raw.Mapgen[]>();
-  const add = (id: string, mapgen: raw.Mapgen) => {
-    if (!mapgensByOmt.has(id)) mapgensByOmt.set(id, []);
-    mapgensByOmt.get(id).push(mapgen);
-  };
-  // If om_terrain is missing, this is nested_mapgen or update_mapgen
-  const allMapgens = data.byType("mapgen").filter((m) => m.om_terrain != null);
-  for (const mapgen of allMapgens) {
-    if (typeof mapgen.om_terrain === "string") {
-      add(mapgen.om_terrain, mapgen);
-    } else {
-      if (typeof mapgen.om_terrain[0] === "string") {
-        for (const id of mapgen.om_terrain as string[]) add(id, mapgen);
-      } else {
-        for (let y = 0; y < mapgen.om_terrain.length; y++)
-          for (let x = 0; x < mapgen.om_terrain[y].length; x++)
-            add(mapgen.om_terrain[y][x], offsetMapgen(mapgen, x, y));
-      }
-    }
-  }
-
-  const omts = data.byType("overmap_terrain");
-  const omtIdsByOmtKey = new Map<
-    string,
-    { omt: { sym: string; color: string; name: string }; ids: string[] }
-  >();
-  for (const omt of omts) {
-    const key = `${omt.sym}\0${omt.color}\0${omt.name}`;
-    if (!omt.id) continue;
-    const ids = typeof omt.id === "string" ? [omt.id] : omt.id;
-    if (!omtIdsByOmtKey.has(key))
-      omtIdsByOmtKey.set(key, {
-        omt: { sym: omt.sym, color: omt.color, name: singularName(omt) },
-        ids: [],
-      });
-    omtIdsByOmtKey.get(key).ids.push(...ids);
-  }
-  const lootByOmtKey = new Map<
-    string,
-    { omt: { sym: string; color: string; name: string }; loot: Loot }
-  >();
-  for (const [key, { omt, ids }] of omtIdsByOmtKey.entries()) {
-    const mapgens = ids.flatMap((id) => mapgensByOmt.get(id)).filter((x) => x);
-    const loots = mapgens.map((mg) => ({
-      loot: getLootForMapgen(data, mg),
-      weight: mg.weight ?? 1000,
-    }));
-    const mergedLoot = mergeLoot(loots);
-    lootByOmtKey.set(key, { omt, loot: mergedLoot });
-  }
-  return lootByOmtKey;
-}
-
-type OMT = {
-  singularName: string;
-  // sym: string
-  // color: string
-};
-type Mapgen = {
-  overmap_terrains: OMT[]; // Not supposed to be empty
-  rows: string[];
-  palette: Map<string, Loot>;
-  additional_items: Loot;
-};
-export function getAllMapgens(data: CddaData): Mapgen[] {
-  return (
-    data
-      .byType("mapgen")
-      // If om_terrain is missing, this is nested_mapgen or update_mapgen
-      .filter((m) => m.om_terrain != null)
-      .map(({ object, om_terrain }) => {
-        const overmap_terrains = [om_terrain].flat(2).map((id) => {
-          const omt = data.byId("overmap_terrain", id);
-          return { singularName: (omt && singularName(omt)) ?? id };
-        });
-        const palette = parsePalette(data, object);
-        const place_items = (object.place_items ?? []).map(
-          ({ item, chance = 100, repeat }) => ({
-            loot: parseItemGroup(data, item),
-            chance: repeatChance(repeat, chance / 100),
-          })
-        );
-        const place_item = [
-          ...(object.place_item ?? []),
-          ...(object.add ?? []),
-        ].map(({ item, chance = 100, repeat }) => ({
-          loot: new Map([[item, repeatChance(repeat, chance / 100)]]),
-        }));
-        const place_loot = (object.place_loot ?? []).map(
-          ({ item, group, chance = 100, repeat }) => ({
-            // This assumes that .item and .group are mutually exclusive
-            loot: item ? new Map([[item, 1]]) : parseItemGroup(data, group),
-            chance: repeatChance(repeat, chance / 100),
-          })
-        );
-        const additional_items = collection([
-          ...place_items,
-          ...place_item,
-          ...place_loot,
-        ]);
-        return {
-          overmap_terrains,
-          rows: object.rows ?? [],
-          palette,
-          additional_items,
-        };
-      })
-  );
-}
-
+// Weighted average.
 export function mergeLoot(loots: { loot: Loot; weight: number }[]): Loot {
   const totalWeight = loots.map((l) => l.weight).reduce((m, o) => m + o, 0);
   const mergedLoot: Loot = new Map();
@@ -287,47 +176,6 @@ function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   const loot = collection(items);
   lootForMapgenCache.set(mapgen, loot);
   return loot;
-}
-
-type LocationAndLoot = {
-  mapgen: Mapgen;
-  loot: Loot;
-};
-export function getAllLocationsAndLoot(data: CddaData): LocationAndLoot[] {
-  return getAllMapgens(data).map((mapgen) => {
-    const items = mapgen.rows
-      .flatMap((r) => Array.from(r))
-      .map((sym) => mapgen.palette.get(sym))
-      .filter((loot) => loot != null)
-      .map((loot) => ({ loot }));
-    items.push({ loot: mapgen.additional_items });
-    const loot = collection(items);
-    return { mapgen, loot };
-  });
-}
-
-type SpawnLocation = {
-  singularName: string;
-  // sym: string
-  // color: string
-  chance: chance[];
-};
-export function getItemSpawnLocations(
-  data: CddaData,
-  item_id: string
-): SpawnLocation[] {
-  const entries = getAllLocationsAndLoot(data).flatMap(({ mapgen, loot }) => {
-    if (!loot.has(item_id)) return [];
-    const chance = loot.get(item_id);
-    const { singularName } = mapgen.overmap_terrains[0];
-    return [[singularName, chance] as [string, number]];
-  });
-  return [...multimap(entries)]
-    .map(([k, v]) => ({
-      singularName: k,
-      chance: [...v].sort().reverse(),
-    }))
-    .sort(({ chance: lhs }, { chance: rhs }) => rhs[0] - lhs[0]);
 }
 
 function parseItemGroup(
