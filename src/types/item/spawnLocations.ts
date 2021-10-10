@@ -67,9 +67,9 @@ function offsetMapgen(mapgen: raw.Mapgen, x: number, y: number): raw.Mapgen {
   return { ...mapgen, object };
 }
 
-const lootByOmSpecialCache = new WeakMap<CddaData, Map<string, Loot>>()
+const lootByOmSpecialCache = new WeakMap<CddaData, Map<string, Loot>>();
 export function lootByOmSpecial(data: CddaData) {
-  if (lootByOmSpecialCache.has(data)) return lootByOmSpecialCache.get(data)
+  if (lootByOmSpecialCache.has(data)) return lootByOmSpecialCache.get(data);
   const mapgensByOmt = new Map<string, raw.Mapgen[]>();
   const add = (id: string, mapgen: raw.Mapgen) => {
     if (!mapgensByOmt.has(id)) mapgensByOmt.set(id, []);
@@ -115,7 +115,7 @@ export function lootByOmSpecial(data: CddaData) {
     }
     lootByOmSpecial.set(om_special.id, addLoot(loots));
   }
-  lootByOmSpecialCache.set(data, lootByOmSpecial)
+  lootByOmSpecialCache.set(data, lootByOmSpecial);
   return lootByOmSpecial;
 }
 
