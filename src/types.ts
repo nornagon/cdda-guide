@@ -689,7 +689,7 @@ export interface Mapgen {
   type: "mapgen";
   method: "json";
   om_terrain?: string | string[] | string[][];
-  weight?: number;
+  weight?: integer;
   object: MapgenObject;
   nested_mapgen_id?: string;
   update_mapgen_id?: string;

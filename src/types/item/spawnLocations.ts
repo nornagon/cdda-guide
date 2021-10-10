@@ -101,7 +101,7 @@ export function lootByOmSpecial(data: CddaData) {
       const mapgens = mapgensByOmt.get(overmap_id) ?? [];
       const loot = mergeLoot(
         mapgens.map((mg) => ({
-          weight: mg.weight,
+          weight: mg.weight ?? 1000,
           loot: getLootForMapgen(data, mg),
         }))
       );
@@ -224,17 +224,16 @@ export function getAllMapgens(data: CddaData): Mapgen[] {
 }
 
 export function mergeLoot(loots: { loot: Loot; weight: number }[]): Loot {
-  const totalWeight = loots
-    .map((l) => l.weight ?? 1000)
-    .reduce((m, o) => m + o, 0);
+  const totalWeight = loots.map((l) => l.weight).reduce((m, o) => m + o, 0);
   const mergedLoot: Loot = new Map();
 
   for (const { loot, weight } of loots) {
+    const proportion = (weight ?? 1000) / totalWeight;
     for (const [item_id, chance] of loot.entries()) {
-      if (!mergedLoot.has(item_id)) mergedLoot.set(item_id, 0);
-      const v =
-        mergedLoot.get(item_id) + (chance * (weight ?? 1000)) / totalWeight;
-      mergedLoot.set(item_id, v);
+      mergedLoot.set(
+        item_id,
+        (mergedLoot.get(item_id) ?? 0) + chance * proportion
+      );
     }
   }
   return mergedLoot;
@@ -244,8 +243,8 @@ function addLoot(loots: Loot[]): Loot {
   const ret: Loot = new Map();
   for (const loot of loots) {
     for (const [item_id, chance] of loot.entries()) {
-      if (!ret.has(item_id)) ret.set(item_id, 0);
-      ret.set(item_id, 1 - (1 - chance) * (1 - ret.get(item_id)));
+      const oldChance = ret.get(item_id) ?? 0;
+      ret.set(item_id, 1 - (1 - chance) * (1 - oldChance));
     }
   }
   return ret;
