@@ -689,13 +689,13 @@ export interface Mapgen {
   type: "mapgen";
   method: "json";
   om_terrain?: string | string[] | string[][];
-  weight?: number;
+  weight?: integer;
   object: MapgenObject;
   nested_mapgen_id?: string;
   update_mapgen_id?: string;
 }
 
-type PlaceMapping<T> = Record<string, T | T[]>;
+export type PlaceMapping<T> = Record<string, T | T[]>;
 type PlaceList<T> = (MapgenPlace & T)[];
 
 interface MapgenPlace {
@@ -773,21 +773,21 @@ export interface MapgenObject {
 type MapgenInt = number | [number] | [number, number];
 export interface MapgenItemGroup {
   item: string | ItemGroup | ItemGroupEntry[] /* subtype collection */;
-  chance?: MapgenInt;
+  chance?: number;
   repeat?: MapgenInt;
 }
 
 export interface MapgenSpawnItem {
   item: string;
   amount?: MapgenInt;
-  chance?: MapgenInt;
+  chance?: number;
   repeat?: MapgenInt;
   "custom-flags"?: string[];
 }
 
 export interface MapgenSealedItem {
   furniture: string;
-  chance: MapgenInt;
+  chance?: number;
   item?: MapgenSpawnItem;
   items?: MapgenItemGroup;
 }
@@ -798,6 +798,7 @@ export interface MapgenLoot {
   chance?: number; // int, default 100
   group?: string; // item_group_id
   item?: string; // item_id
+  repeat?: MapgenInt;
 }
 
 export interface MapgenNested {
@@ -1134,6 +1135,8 @@ export type OvermapTerrain = {
   id: string | string[];
   name: Translation;
 
+  sym?: string; // defaults to \u00a0
+  color: string;
   // ...
 };
 
@@ -1228,6 +1231,23 @@ export type Spell = {
   description: Translation;
 };
 
+export type OvermapSpecial = {
+  id: string;
+  type: "overmap_special" | "city_building";
+  locations?: string[];
+} & (
+  | {
+      subtype?: "fixed"; // default fixed
+      overmaps?: {
+        point: [integer, integer, integer];
+        overmap: string;
+        flags?: string[];
+        locations?: string[];
+      }[];
+    }
+  | { subtype: "mutable" }
+);
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1266,6 +1286,8 @@ export type SupportedTypes = {
   martial_art: MartialArt;
   material: Material;
   monstergroup: MonsterGroup;
+  overmap_special: { type: "overmap_special" } & OvermapSpecial;
+  city_building: { type: "city_building" } & OvermapSpecial;
   overmap_terrain: OvermapTerrain;
   palette: Palette;
   proficiency: Proficiency;

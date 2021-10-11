@@ -71,7 +71,8 @@ let itemsWithMaterial = data
   <section>
     <h1>Items Made From {singularName(item)}</h1>
     <LimitedList items={itemsWithMaterial} let:item>
-      <ItemSymbol {item} /> <ThingLink id={item.id} type="item" />
+      <ItemSymbol {item} />
+      <ThingLink id={item.id} type="item" />
     </LimitedList>
   </section>
 {/if}

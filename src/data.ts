@@ -54,6 +54,7 @@ const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["GENERIC", "item"],
   ["BIONIC_ITEM", "item"],
   ["MONSTER", "monster"],
+  ["city_building", "overmap_special"],
 ]);
 
 export const mapType = (
@@ -192,7 +193,7 @@ export class CddaData {
   byType<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName
   ): SupportedTypesWithMapped[TypeName][] {
-    return this._byType.get(type).map((x) => this._flatten(x)) ?? [];
+    return this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
   }
 
   replacementTools(type: string): string[] {
