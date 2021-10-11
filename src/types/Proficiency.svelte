@@ -4,6 +4,7 @@ import ThingLink from "./ThingLink.svelte";
 import type { Proficiency } from "../types";
 import { getContext } from "svelte";
 import LimitedList from "../LimitedList.svelte";
+import ItemSymbol from "./item/ItemSymbol.svelte";
 
 export let item: Proficiency;
 
@@ -54,7 +55,7 @@ const recipesUsingProficiency = [
   <section>
     <h1>Recipes</h1>
     <LimitedList items={recipesUsingProficiency} let:item>
-      <ThingLink type="item" id={item} />
+      <ItemSymbol item={data.byId("item", item)} /> <ThingLink type="item" id={item} />
     </LimitedList>
   </section>
 {/if}
