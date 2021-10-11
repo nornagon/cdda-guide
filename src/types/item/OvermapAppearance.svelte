@@ -22,9 +22,9 @@ for (const om of overmaps) {
   if (y > maxY) maxY = y;
   overmapsByPoint.set(`${x}|${y}`, om);
 }
-const appearanceGrid: { sym: string; color: string; name: string }[][] = [];
+const appearanceGrid: { sym?: string; color: string; name: string }[][] = [];
 for (let y = minY; y <= maxY; y++) {
-  const appearanceRow: { sym: string; color: string; name: string }[] = [];
+  const appearanceRow: { sym?: string; color: string; name: string }[] = [];
   for (let x = minX; x <= maxX; x++) {
     const om = overmapsByPoint.get(`${x}|${y}`);
     if (om) {
@@ -50,7 +50,9 @@ while (appearanceGrid.length) {
   appearanceGrid.pop();
 }
 
-function isEmpty(row: { sym: string; color: string; name: string }[]): boolean {
+function isEmpty(
+  row: { sym?: string; color: string; name: string }[]
+): boolean {
   return row.every((cell) => cell.sym === " ");
 }
 
@@ -70,7 +72,7 @@ function omtAppearance(omt_id: string): {
   style="font-family: Unifont, monospace; line-height: 1; display: inline-block; white-space: pre;">
   {#each appearanceGrid as row}
     {#each row as omt}
-      <span class="c_{omt.color}" title={omt.name}>{omt.sym}</span>
+      <span class="c_{omt.color}" title={omt.name}>{omt.sym ?? "\u00a0"}</span>
     {/each}
     <br />
   {/each}

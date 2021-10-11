@@ -1135,7 +1135,7 @@ export type OvermapTerrain = {
   id: string | string[];
   name: Translation;
 
-  sym: string;
+  sym?: string; // defaults to \u00a0
   color: string;
   // ...
 };
@@ -1234,16 +1234,19 @@ export type Spell = {
 export type OvermapSpecial = {
   id: string;
   type: "overmap_special" | "city_building";
-
-  subtype?: "fixed" | "mutable"; // default fixed
   locations?: string[];
-  overmaps?: {
-    point: [integer, integer, integer];
-    overmap: string;
-    flags?: string[];
-    locations?: string[];
-  }[];
-};
+} & (
+  | {
+      subtype?: "fixed"; // default fixed
+      overmaps?: {
+        point: [integer, integer, integer];
+        overmap: string;
+        flags?: string[];
+        locations?: string[];
+      }[];
+    }
+  | { subtype: "mutable" }
+);
 
 // Used for schema validation.
 export type SupportedTypes = {
