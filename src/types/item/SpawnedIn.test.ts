@@ -29,6 +29,13 @@ describe("the loot section", () => {
         id: "fake_terrain",
         name: "fake place",
       },
+      {
+        type: "overmap_special",
+        id: "fake_overmap_special",
+        overmaps: [
+          { point: [0, 0, 0], overmap: "fake_terrain" }
+        ]
+      }
     ]);
 
     const { getByText } = render(WithData, {
@@ -40,16 +47,37 @@ describe("the loot section", () => {
     expect(getByText(/fake place/)).toBeInTheDocument();
     expect(getByText(/50.00%/)).toBeInTheDocument();
   });
-  it("displays the list of chances", () => {
-    const oneVariant = {
-      type: "mapgen",
-      method: "json",
-      om_terrain: "fake_terrain",
-      object: {
-        place_item: [{ item: "fake_item" }],
+  it("displays a composite chance", () => {
+    const data = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        om_terrain: "fake_terrain",
+        object: {
+          place_item: [{ item: "fake_item" }],
+        },
       },
-    };
-    const data = new CddaData([oneVariant, oneVariant]);
+      {
+        type: "mapgen",
+        method: "json",
+        om_terrain: "fake_terrain",
+        object: {
+          place_item: [{ item: "fake_item", chance: 50 }],
+        },
+      },
+      {
+        type: "overmap_terrain",
+        id: "fake_terrain",
+        name: "fake place",
+      },
+      {
+        type: "overmap_special",
+        id: "fake_overmap_special",
+        overmaps: [
+          { point: [0, 0, 0], overmap: "fake_terrain" }
+        ]
+      }
+    ]);
 
     const { getByText } = render(WithData, {
       Component: SpawnedIn,
@@ -57,7 +85,7 @@ describe("the loot section", () => {
       data,
     });
 
-    expect(getByText(/100.00%, 100.00%/)).toBeInTheDocument();
+    expect(getByText(/75.00%/)).toBeInTheDocument();
   });
 });
 //getItemSpawnLocations

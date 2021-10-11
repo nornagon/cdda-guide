@@ -7,7 +7,9 @@ const data = getContext<CddaData>("data");
 
 export let overmapSpecial: OvermapSpecial;
 
-const overmaps = [...(overmapSpecial.overmaps ?? [])];
+const overmaps = [
+  ...((overmapSpecial as OvermapSpecial & { subtype: "fixed" }).overmaps ?? []),
+];
 let minX = Infinity,
   minY = Infinity;
 let maxX = -Infinity,

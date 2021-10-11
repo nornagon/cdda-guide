@@ -2,7 +2,6 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import { lootByOmSpecial, mergeLoot } from "./spawnLocations";
-import LimitedList from "../../LimitedList.svelte";
 import { showProbability } from "./utils";
 import type { OvermapSpecial } from "../../types";
 import OvermapAppearance from "./OvermapAppearance.svelte";
@@ -54,6 +53,7 @@ for (const { loot, ids } of lootByOMSAppearance.values()) {
 }
 
 function overmapAppearance(oms: OvermapSpecial): string {
+  if (oms.subtype === "mutable") return "";
   const overmaps = [...(oms.overmaps ?? [])];
   let minX = Infinity,
     minY = Infinity;
@@ -95,6 +95,7 @@ function overmapAppearance(oms: OvermapSpecial): string {
 }
 
 function omsName(oms: OvermapSpecial): string {
+  if (oms.subtype === "mutable") return oms.id;
   const ground_level_omts = (oms.overmaps ?? []).filter(
     (p) => p.point[2] === 0
   );
