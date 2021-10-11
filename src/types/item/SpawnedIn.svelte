@@ -17,6 +17,7 @@ const hiddenLocations = new Set([
   "lab_mutagen_6_level",
   "Lab_SECURITY_1x1x6",
   "Lab_CARGO_Surface",
+  "hub_01",
 ]);
 
 const lootByOMS = lootByOmSpecial(data);
