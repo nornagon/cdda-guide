@@ -32,10 +32,8 @@ describe("the loot section", () => {
       {
         type: "overmap_special",
         id: "fake_overmap_special",
-        overmaps: [
-          { point: [0, 0, 0], overmap: "fake_terrain" }
-        ]
-      }
+        overmaps: [{ point: [0, 0, 0], overmap: "fake_terrain" }],
+      },
     ]);
 
     const { getByText } = render(WithData, {
@@ -73,10 +71,8 @@ describe("the loot section", () => {
       {
         type: "overmap_special",
         id: "fake_overmap_special",
-        overmaps: [
-          { point: [0, 0, 0], overmap: "fake_terrain" }
-        ]
-      }
+        overmaps: [{ point: [0, 0, 0], overmap: "fake_terrain" }],
+      },
     ]);
 
     const { getByText } = render(WithData, {

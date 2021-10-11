@@ -55,7 +55,8 @@ const recipesUsingProficiency = [
   <section>
     <h1>Recipes</h1>
     <LimitedList items={recipesUsingProficiency} let:item>
-      <ItemSymbol item={data.byId("item", item)} /> <ThingLink type="item" id={item} />
+      <ItemSymbol item={data.byId("item", item)} />
+      <ThingLink type="item" id={item} />
     </LimitedList>
   </section>
 {/if}
