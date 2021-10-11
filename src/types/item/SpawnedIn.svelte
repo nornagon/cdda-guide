@@ -28,6 +28,7 @@ const lootByOMSAppearance = new Map<
 for (const [oms_id, loot] of lootByOMS.entries()) {
   if (hiddenLocations.has(oms_id)) continue;
   const appearance = overmapAppearance(data.byId("overmap_special", oms_id));
+  if (!appearance) continue;
   if (!lootByOMSAppearance.has(appearance))
     lootByOMSAppearance.set(appearance, { loot: undefined, ids: [] });
   const l = lootByOMSAppearance.get(appearance);
@@ -53,8 +54,8 @@ for (const { loot, ids } of lootByOMSAppearance.values()) {
   }
 }
 
-function overmapAppearance(oms: OvermapSpecial): string {
-  if (oms.subtype === "mutable") return "";
+function overmapAppearance(oms: OvermapSpecial): string | undefined {
+  if (oms.subtype === "mutable") return;
   const overmaps = [...(oms.overmaps ?? [])];
   let minX = Infinity,
     minY = Infinity;
@@ -72,6 +73,8 @@ function overmapAppearance(oms: OvermapSpecial): string {
     if (y > maxY) maxY = y;
     overmapsByPoint.set(`${x}|${y}`, om);
   }
+  // Skip any location that has no surface-level appearance.
+  if (minX === Infinity || minY === Infinity) return;
   const appearanceComponents: any[] = [maxY - minY, maxX - minX];
   for (let y = minY; y <= maxY; y++)
     for (let x = minX; x <= maxX; x++) {
