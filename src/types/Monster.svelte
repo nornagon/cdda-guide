@@ -275,7 +275,7 @@ function showProbability(prob: number) {
 function flattenGroup(mg: MonsterGroup): string[] {
   return [mg.default].concat(
     mg.monsters.map((m) => m.monster).filter((x) => x !== mg.default)
-  );
+  ).filter(x => x);
 }
 
 let upgrades =

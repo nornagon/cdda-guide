@@ -757,13 +757,7 @@ export interface MapgenObject {
   //place_signs?: PlaceGraffitiElement[];
   //place_toilets?: PlaceGaspumpElement[];
   //faction_owner?: FactionOwner[];
-  predecessor_mapgen?:
-    | "field"
-    | "forest"
-    | "forest_thick"
-    | "forest_water"
-    | "lake_shore"
-    | "lake_surface";
+  predecessor_mapgen?: string;
   //place_graffiti?: PlaceGraffitiElement[];
   //place_ter_furn_transforms?: PlaceTerFurnTransform[];
   //ter_furn_transforms?: TerFurnTransforms;
