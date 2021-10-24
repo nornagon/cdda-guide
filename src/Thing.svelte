@@ -17,6 +17,9 @@ import Vitamin from "./types/Vitamin.svelte";
 import VehiclePart from "./types/VehiclePart.svelte";
 import MartialArt from "./types/MartialArt.svelte";
 import ErrorBoundary from "./ErrorBoundary";
+import Mutation from "./types/Mutation.svelte";
+import MutationCategory from "./types/MutationCategory.svelte";
+import MutationType from "./types/MutationType.svelte";
 
 export let item: { id: string; type: string };
 
@@ -68,6 +71,9 @@ const displays = {
   vitamin: Vitamin,
   vehicle_part: VehiclePart,
   martial_art: MartialArt,
+  mutation: Mutation,
+  mutation_category: MutationCategory,
+  mutation_type: MutationType,
 };
 </script>
 

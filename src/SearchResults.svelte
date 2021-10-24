@@ -13,6 +13,7 @@ const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "vehicle_part",
   "tool_quality",
   "martial_art",
+  "mutation",
 ]);
 
 export let data: CddaData;

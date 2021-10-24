@@ -1242,6 +1242,39 @@ export type OvermapSpecial = {
   | { subtype: "mutable" }
 );
 
+export type Mutation = {
+  id: string;
+  type: "mutation";
+  name: Translation;
+  description: Translation;
+  points: integer;
+
+  prereqs?: string[];
+  prereqs2?: string[];
+  threshreq?: string[];
+  category?: string[];
+  leads_to?: string[];
+  changes_to?: string[];
+  cancels?: string[];
+
+  types?: string[];
+
+  threshold?: boolean;
+}
+
+export type MutationType = {
+  id: string;
+  type: "mutation_type";
+}
+
+export type MutationCategory = {
+  id: string;
+  type: "mutation_category";
+  name: Translation;
+  description?: Translation;
+  threshold_mut?: string;
+}
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1280,6 +1313,9 @@ export type SupportedTypes = {
   martial_art: MartialArt;
   material: Material;
   monstergroup: MonsterGroup;
+  mutation: Mutation;
+  mutation_category: MutationCategory;
+  mutation_type: MutationType;
   overmap_special: { type: "overmap_special" } & OvermapSpecial;
   city_building: { type: "city_building" } & OvermapSpecial;
   overmap_terrain: OvermapTerrain;
