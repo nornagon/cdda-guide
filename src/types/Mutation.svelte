@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 
-import { CddaData, singularName } from "../data";
+import { CddaData, singular, singularName } from "../data";
 
 import type { Mutation } from "../types";
 import ThingLink from "./ThingLink.svelte";
@@ -122,7 +122,7 @@ const requiredBy = data
       </dd>
     {/if}
   </dl>
-  <p style="color: var(--cata-color-gray)">{item.description}</p>
+  <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
 </section>
 
 {#if item.threshold && postThresholdMutations.length}
