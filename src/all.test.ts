@@ -25,6 +25,9 @@ const types = [
   "vehicle_part",
   "vitamin",
   "martial_art",
+  "mutation",
+  "mutation_type",
+  "mutation_category",
 ];
 
 const all = data._raw
