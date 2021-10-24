@@ -43,6 +43,11 @@ const groupingFn =
 
 const groups = groupBy(things, groupingFn);
 const groupKeys = [...groups.keys()].sort();
+
+const groupFilter =
+  {
+    mutation: (m: Mutation) => !/Fake\d$/.test(m.id),
+  }[type] ?? (() => true);
 </script>
 
 <h1>{type}</h1>
@@ -57,7 +62,7 @@ const groupKeys = [...groups.keys()].sort();
         <h1>{groupName}</h1>
       {/if}
       <LimitedList
-        items={groups.get(groupName)}
+        items={groups.get(groupName).filter(groupFilter)}
         let:item
         limit={groupKeys.length === 1 ? Infinity : 10}>
         <ThingLink type={typeWithCorrectType} id={item.id} />

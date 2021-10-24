@@ -2,18 +2,22 @@
 import { getContext } from "svelte";
 
 import { CddaData, singularName } from "../data";
-import type { MutationType } from "../types";
+import { topologicalSort } from "../toposort";
+import type { Mutation, MutationType } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: MutationType;
 
 let data = getContext<CddaData>("data");
 
-const mutationsWithType = data
-  .byType("mutation")
-  .filter((m) => (m.types ?? []).includes(item.id));
-mutationsWithType.sort((a, b) =>
-  singularName(a).localeCompare(singularName(b))
+const allPrereqs = (m: Mutation) =>
+  (m.prereqs ?? []).concat(m.prereqs2 ?? []).concat(m.threshreq ?? []);
+const mutationsWithType = topologicalSort(
+  data
+    .byType("mutation")
+    .filter((m) => (m.types ?? []).includes(item.id))
+    .sort((a, b) => singularName(a).localeCompare(singularName(b))),
+  (m) => allPrereqs(m).map((x) => data.byId("mutation", x))
 );
 </script>
 
