@@ -7,6 +7,7 @@ import RequirementData from "./item/RequirementData.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let recipe: Recipe;
+export let showResult: boolean = false;
 
 const data = getContext<CddaData>("data");
 
@@ -41,8 +42,14 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
 </script>
 
 <section class="recipe">
-  <h1>Craft</h1>
+  <h1>
+    {#if showResult}Byproduct{:else}Craft{/if}
+  </h1>
   <dl>
+    {#if showResult}
+      <dt>Result</dt>
+      <dd><ThingLink id={recipe.result} type="item" /></dd>
+    {/if}
     <dt>Primary Skill</dt>
     <dd>
       {#if recipe.skill_used}
