@@ -12,9 +12,15 @@ export let item: MutationCategory;
 const mutationsInCategory = data
   .byType("mutation")
   .filter((m) => (m.category ?? []).includes(item.id));
-mutationsInCategory.sort((a, b) => singularName(a).localeCompare(singularName(b)))
-const preThreshold = mutationsInCategory.filter(t => !t.threshreq || t.threshreq.length === 0)
-const postThreshold = mutationsInCategory.filter(t => !(!t.threshreq || t.threshreq.length === 0))
+mutationsInCategory.sort((a, b) =>
+  singularName(a).localeCompare(singularName(b))
+);
+const preThreshold = mutationsInCategory.filter(
+  (t) => !t.threshreq || t.threshreq.length === 0
+);
+const postThreshold = mutationsInCategory.filter(
+  (t) => !(!t.threshreq || t.threshreq.length === 0)
+);
 </script>
 
 <h1>Mutation Category: {singularName(item)}</h1>

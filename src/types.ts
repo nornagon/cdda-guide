@@ -1260,12 +1260,12 @@ export type Mutation = {
   types?: string[];
 
   threshold?: boolean;
-}
+};
 
 export type MutationType = {
   id: string;
   type: "mutation_type";
-}
+};
 
 export type MutationCategory = {
   id: string;
@@ -1273,7 +1273,7 @@ export type MutationCategory = {
   name: Translation;
   description?: Translation;
   threshold_mut?: string;
-}
+};
 
 // Used for schema validation.
 export type SupportedTypes = {

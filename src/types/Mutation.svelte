@@ -60,23 +60,22 @@ const requiredBy = data
     <dd>
       {#if item.prereqs}
         <ul>
-        <li>
-        <ul class="comma-separated or">
-          {#each item.prereqs as prereq_id}
-            <li><ThingLink type="mutation" id={prereq_id} /></li>
-          {/each}
-        </ul>
-        </li>
-        {#if item.prereqs2}
-        <li>
-        <ul class="comma-separated or">
-          {#each item.prereqs2 as prereq_id}
-            <li><ThingLink type="mutation" id={prereq_id} /></li>
-          {/each}
-        </ul>
-
-        </li>
-        {/if}
+          <li>
+            <ul class="comma-separated or">
+              {#each item.prereqs as prereq_id}
+                <li><ThingLink type="mutation" id={prereq_id} /></li>
+              {/each}
+            </ul>
+          </li>
+          {#if item.prereqs2}
+            <li>
+              <ul class="comma-separated or">
+                {#each item.prereqs2 as prereq_id}
+                  <li><ThingLink type="mutation" id={prereq_id} /></li>
+                {/each}
+              </ul>
+            </li>
+          {/if}
         </ul>
       {:else}
         <em>None</em>
