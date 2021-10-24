@@ -6,6 +6,7 @@ import LimitedList from "./LimitedList.svelte";
 import type {
   Item,
   Monster,
+  Mutation,
   SupportedTypesWithMapped,
   VehiclePart,
 } from "./types";
@@ -19,22 +20,25 @@ setContext("data", data);
 const things = data.byType(type as any).filter((o) => o.id);
 things.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 
-function groupBy<T>(things: T[], f: (x: T) => string) {
+function groupBy<T>(things: T[], groupsFor: (x: T) => string[]) {
   const map = new Map<string, T[]>();
   for (const thing of things) {
-    const group = f(thing);
-    if (!map.has(group)) map.set(group, []);
-    map.get(group).push(thing);
+    const groups = groupsFor(thing);
+    for (const group of groups) {
+      if (!map.has(group)) map.set(group, []);
+      map.get(group).push(thing);
+    }
   }
   return map;
 }
 
 const groupingFn =
   {
-    monster: (m: Monster) => m.default_faction ?? "",
-    item: (i: Item) => i.type,
-    vehicle_part: (vp: VehiclePart) => (vp.categories ?? [])[0] ?? "",
-  }[type] ?? (() => "");
+    monster: (m: Monster) => [m.default_faction ?? ""],
+    item: (i: Item) => [i.type],
+    vehicle_part: (vp: VehiclePart) => vp.categories ?? [""],
+    mutation: (m: Mutation) => m.category ?? [""],
+  }[type] ?? (() => [""]);
 
 const groups = groupBy(things, groupingFn);
 const groupKeys = [...groups.keys()].sort();
