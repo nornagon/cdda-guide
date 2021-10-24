@@ -31,8 +31,8 @@ $: targets = [...(data?.all() ?? [])]
       SEARCHABLE_TYPES.has(mapType(x.type))
   )
   .filter((x) => {
-    if (x.type === 'mutation') {
-      return !/Fake\d$/.test(x.id)
+    if (x.type === "mutation") {
+      return !/Fake\d$/.test(x.id);
     }
     return true;
   })
@@ -55,7 +55,7 @@ function filter(text: string): Map<string, any[]> {
     const mappedType = item.type;
     if (!SEARCHABLE_TYPES.has(mappedType)) continue;
     if (!byType.has(mappedType)) byType.set(mappedType, []);
-    const obj = data.byId(mappedType, item.id)
+    const obj = data.byId(mappedType, item.id);
     if (!obj) debugger;
     byType.get(mappedType).push(obj);
   }
