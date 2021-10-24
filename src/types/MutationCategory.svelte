@@ -2,12 +2,42 @@
 import { getContext } from "svelte";
 
 import { CddaData, singularName } from "../data";
-import type { MutationCategory } from "../types";
+import type { Mutation, MutationCategory } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 let data = getContext<CddaData>("data");
 
 export let item: MutationCategory;
+
+function topologicalSort<T>(xs: T[], outgoingEdges: (n: T) => T[]) {
+  const result: T[] = [];
+  let isDag = true;
+  const unmarked = new Set(xs);
+  const tempMarks = new Set();
+  while (unmarked.size) {
+    const n = unmarked.values().next().value as T;
+    visit(n);
+    if (!isDag) {
+      throw new Error("Not a DAG");
+    }
+  }
+  return result;
+
+  function visit(n: T) {
+    if (!unmarked.has(n)) return;
+    if (tempMarks.has(n)) {
+      isDag = false;
+      return;
+    }
+    tempMarks.add(n);
+    for (const m of outgoingEdges(n)) {
+      visit(m);
+    }
+    tempMarks.delete(n);
+    unmarked.delete(n);
+    result.push(n);
+  }
+}
 
 const mutationsInCategory = data
   .byType("mutation")
@@ -15,11 +45,15 @@ const mutationsInCategory = data
 mutationsInCategory.sort((a, b) =>
   singularName(a).localeCompare(singularName(b))
 );
-const preThreshold = mutationsInCategory.filter(
-  (t) => !t.threshreq || t.threshreq.length === 0
+const allPrereqs = (m: Mutation) =>
+  (m.prereqs ?? []).concat(m.prereqs2 ?? []).concat(m.threshreq ?? []);
+const preThreshold = topologicalSort(
+  mutationsInCategory.filter((t) => !t.threshreq || t.threshreq.length === 0),
+  (m) => allPrereqs(m).map((x) => data.byId("mutation", x))
 );
-const postThreshold = mutationsInCategory.filter(
-  (t) => !(!t.threshreq || t.threshreq.length === 0)
+const postThreshold = topologicalSort(mutationsInCategory.filter(
+  (t) => !(!t.threshreq || t.threshreq.length === 0)),
+  (m) => allPrereqs(m).map((x) => data.byId("mutation", x))
 );
 </script>
 
