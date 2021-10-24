@@ -51,8 +51,10 @@ const preThreshold = topologicalSort(
   mutationsInCategory.filter((t) => !t.threshreq || t.threshreq.length === 0),
   (m) => allPrereqs(m).map((x) => data.byId("mutation", x))
 );
-const postThreshold = topologicalSort(mutationsInCategory.filter(
-  (t) => !(!t.threshreq || t.threshreq.length === 0)),
+const postThreshold = topologicalSort(
+  mutationsInCategory.filter(
+    (t) => !(!t.threshreq || t.threshreq.length === 0)
+  ),
   (m) => allPrereqs(m).map((x) => data.byId("mutation", x))
 );
 </script>

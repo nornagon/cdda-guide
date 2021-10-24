@@ -136,6 +136,7 @@ export class CddaData {
         }
         continue;
       }
+      if (obj.type === "mutation" && /Fake\d$/.test(obj.id)) continue;
       const mappedType = mapType(obj.type);
       if (!this._byType.has(mappedType)) this._byType.set(mappedType, []);
       this._byType.get(mappedType).push(obj);
