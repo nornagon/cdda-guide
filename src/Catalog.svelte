@@ -10,6 +10,7 @@ import type {
   SupportedTypesWithMapped,
   VehiclePart,
 } from "./types";
+import MutationCategory from "./types/MutationCategory.svelte";
 import ThingLink from "./types/ThingLink.svelte";
 
 export let type: string;
@@ -46,15 +47,21 @@ const groupKeys = [...groups.keys()].sort();
 
 <h1>{type}</h1>
 {#each groupKeys as groupName}
-  <section>
-    {#if groupName}
-      <h1>{groupName}</h1>
-    {/if}
-    <LimitedList
-      items={groups.get(groupName)}
-      let:item
-      limit={groupKeys.length === 1 ? Infinity : 10}>
-      <ThingLink type={typeWithCorrectType} id={item.id} />
-    </LimitedList>
-  </section>
+  {#if type === "mutation" && groupName && data.byId("mutation_category", groupName)}
+    <MutationCategory
+      item={data.byId("mutation_category", groupName)}
+      inCatalog={true} />
+  {:else}
+    <section>
+      {#if groupName}
+        <h1>{groupName}</h1>
+      {/if}
+      <LimitedList
+        items={groups.get(groupName)}
+        let:item
+        limit={groupKeys.length === 1 ? Infinity : 10}>
+        <ThingLink type={typeWithCorrectType} id={item.id} />
+      </LimitedList>
+    </section>
+  {/if}
 {/each}

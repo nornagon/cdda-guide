@@ -8,6 +8,7 @@ import ThingLink from "./ThingLink.svelte";
 let data = getContext<CddaData>("data");
 
 export let item: MutationCategory;
+export let inCatalog: boolean = false;
 
 function topologicalSort<T>(xs: T[], outgoingEdges: (n: T) => T[]) {
   const result: T[] = [];
@@ -59,9 +60,14 @@ const postThreshold = topologicalSort(
 );
 </script>
 
-<h1>Mutation Category: {singularName(item)}</h1>
+{#if !inCatalog}
+  <h1>Mutation Category: {singularName(item)}</h1>
+{/if}
 
 <section>
+  {#if inCatalog}
+    <h1>{singularName(item)}</h1>
+  {/if}
   <dl>
     {#if item.threshold_mut}
       <dt>Threshold Mutation</dt>
