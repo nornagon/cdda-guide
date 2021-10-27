@@ -746,6 +746,67 @@ export function normalizeDamageInstance(
   else return [damageInstance];
 }
 
+const vpartVariants = [
+  "cover_left",
+  "cover_right",
+  "hatch_wheel_left",
+  "hatch_wheel_right",
+  "wheel_left",
+  "wheel_right",
+  "cross_unconnected",
+  "cross",
+  "horizontal_front_edge",
+  "horizontal_front",
+  "horizontal_rear_edge",
+  "horizontal_rear",
+  "horizontal_2_front",
+  "horizontal_2_rear",
+  "ne_edge",
+  "nw_edge",
+  "se_edge",
+  "sw_edge",
+  "vertical_right",
+  "vertical_left",
+  "vertical_2_right",
+  "vertical_2_left",
+  "vertical_T_right",
+  "vertical_T_left",
+  "front_right",
+  "front_left",
+  "rear_right",
+  "rear_left",
+  // these have to be last to avoid false positives
+  "cover",
+  "vertical",
+  "horizontal",
+  "vertical_2",
+  "horizontal_2",
+  "ne",
+  "nw",
+  "se",
+  "sw",
+  "front",
+  "rear",
+  "left",
+  "right",
+];
+
+export const getVehiclePartIdAndVariant = (
+  data: CddaData,
+  compositePartId: string
+): [string, string] => {
+  if (data.byId("vehicle_part", compositePartId)) return [compositePartId, ""];
+  for (const variant of vpartVariants) {
+    if (compositePartId.endsWith("_" + variant)) {
+      return [
+        compositePartId.slice(0, compositePartId.length - variant.length - 1),
+        variant,
+      ];
+    }
+  }
+  return [compositePartId, ""];
+};
+
 export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroup {
   return {
     subtype: "collection",
