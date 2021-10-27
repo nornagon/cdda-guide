@@ -5,9 +5,12 @@ import {
   asKilograms,
   asLiters,
   CddaData,
+  getVehiclePartIdAndVariant,
+  showProbability,
   singular,
   singularName,
 } from "../data";
+import LimitedList from "../LimitedList.svelte";
 
 import type { ItemGroup, VehiclePart } from "../types";
 import RequirementData from "./item/RequirementData.svelte";
@@ -37,12 +40,6 @@ function bonusLabel(item: VehiclePart) {
 }
 
 const data = getContext<CddaData>("data");
-
-function showProbability(prob: number) {
-  const ret = (prob * 100).toFixed(2);
-  if (ret === "0.00") return "< 0.01%";
-  return ret + "%";
-}
 
 const breaksIntoGroup: ItemGroup | null =
   typeof item.breaks_into === "string"
@@ -89,6 +86,20 @@ function asMinutes(duration: string | number) {
   const seconds = parseDuration(duration);
   return `${Math.round(seconds / 60)} m`;
 }
+
+const vehiclesContainingPart = data.byType("vehicle").filter((v) =>
+  v.parts.some((part) => {
+    const parts = part.part
+      ? [{ part: part.part, fuel: part.fuel }]
+      : part.parts?.map((part) => (typeof part === "string" ? { part } : part));
+    return parts.some(
+      (p) => getVehiclePartIdAndVariant(data, p.part)[0] === item.id
+    );
+  })
+);
+vehiclesContainingPart.sort((a, b) =>
+  singularName(a).localeCompare(singularName(b))
+);
 </script>
 
 <h1>
@@ -261,5 +272,14 @@ function asMinutes(duration: string | number) {
     <p style="color: var(--cata-color-gray); font-style: italic">
       Repair time and requirements are lower for parts that are less damaged.
     </p>
+  </section>
+{/if}
+
+{#if vehiclesContainingPart}
+  <section>
+    <h1>Vehicles</h1>
+    <LimitedList items={vehiclesContainingPart} let:item>
+      <ThingLink type="vehicle" id={item.id} />
+    </LimitedList>
   </section>
 {/if}
