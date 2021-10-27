@@ -14,6 +14,7 @@ import type {
   Monster,
   SupportedTypesWithMapped,
   SupportedTypeMapped,
+  Vehicle,
 } from "./types";
 
 const idlessTypes = new Set([
@@ -743,6 +744,33 @@ export function normalizeDamageInstance(
   if (Array.isArray(damageInstance)) return damageInstance;
   else if ("values" in damageInstance) return damageInstance.values;
   else return [damageInstance];
+}
+
+export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroup {
+  return {
+    subtype: "collection",
+    entries: (vehicle.items ?? []).map((it) => {
+      if (it.items) {
+        return {
+          collection: (typeof it.items === "string"
+            ? [it.items]
+            : it.items
+          ).map((it_id) => ({ item: it_id })),
+          prob: it.chance,
+        };
+      } else if (it.item_groups) {
+        return {
+          distribution: (typeof it.item_groups === "string"
+            ? [it.item_groups]
+            : it.item_groups
+          ).map((ig_id) => ({ group: ig_id })),
+          prob: it.chance,
+        };
+      } else {
+        return { distribution: [] };
+      }
+    }),
+  };
 }
 
 const fetchJson = async (version: string) => {

@@ -31,6 +31,7 @@ import MeleeInfo from "./item/MeleeInfo.svelte";
 import Recipes from "./item/Recipes.svelte";
 import Salvaged from "./item/Salvaged.svelte";
 import SpawnedIn from "./item/SpawnedIn.svelte";
+import SpawnedInVehicle from "./item/SpawnedInVehicle.svelte";
 import ToolInfo from "./item/ToolInfo.svelte";
 import WheelInfo from "./item/WheelInfo.svelte";
 import ThingLink from "./ThingLink.svelte";
@@ -373,6 +374,7 @@ const ascii_picture =
   <Salvaged item_id={item.id} />
   <Deconstruct item_id={item.id} />
   <SpawnedIn item_id={item.id} />
+  <SpawnedInVehicle item_id={item.id} />
 </div>
 
 <style>

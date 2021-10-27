@@ -1,0 +1,251 @@
+<script lang="ts">
+import { getContext } from "svelte";
+
+import {
+  CddaData,
+  itemGroupFromVehicle,
+  showProbability,
+  singularName,
+} from "../data";
+import LimitedList from "../LimitedList.svelte";
+
+import type { ItemGroup, ItemGroupEntry, Vehicle } from "../types";
+import ItemSymbol from "./item/ItemSymbol.svelte";
+import ThingLink from "./ThingLink.svelte";
+
+export let item: Vehicle;
+
+const data = getContext<CddaData>("data");
+
+let minX = Infinity;
+let maxX = -Infinity;
+let minY = Infinity;
+let maxY = -Infinity;
+for (const part of item.parts) {
+  if (part.x < minX) minX = part.x;
+  if (part.x > maxX) maxX = part.x;
+  if (part.y < minY) minY = part.y;
+  if (part.y > maxY) maxY = part.y;
+}
+
+const vpartVariants = [
+  "cover_left",
+  "cover_right",
+  "hatch_wheel_left",
+  "hatch_wheel_right",
+  "wheel_left",
+  "wheel_right",
+  "cross_unconnected",
+  "cross",
+  "horizontal_front_edge",
+  "horizontal_front",
+  "horizontal_rear_edge",
+  "horizontal_rear",
+  "horizontal_2_front",
+  "horizontal_2_rear",
+  "ne_edge",
+  "nw_edge",
+  "se_edge",
+  "sw_edge",
+  "vertical_right",
+  "vertical_left",
+  "vertical_2_right",
+  "vertical_2_left",
+  "vertical_T_right",
+  "vertical_T_left",
+  "front_right",
+  "front_left",
+  "rear_right",
+  "rear_left",
+  // these have to be last to avoid false positives
+  "cover",
+  "vertical",
+  "horizontal",
+  "vertical_2",
+  "horizontal_2",
+  "ne",
+  "nw",
+  "se",
+  "sw",
+  "front",
+  "rear",
+  "left",
+  "right",
+];
+
+const getVehiclePartIdAndVariant = (
+  compositePartId: string
+): [string, string] => {
+  if (data.byId("vehicle_part", compositePartId)) return [compositePartId, ""];
+  for (const variant of vpartVariants) {
+    if (compositePartId.endsWith("_" + variant)) {
+      return [
+        compositePartId.slice(0, compositePartId.length - variant.length - 1),
+        variant,
+      ];
+    }
+  }
+  return [compositePartId, ""];
+};
+
+const standardSymbols = {
+  cover: "^",
+  cross: "c",
+  horizontal: "h",
+  horizontal_2: "=",
+  vertical: "j",
+  vertical_2: "H",
+  ne: "u",
+  nw: "y",
+  se: "n",
+  sw: "b",
+};
+
+const zOrder = {
+  on_roof: 9,
+  on_cargo: 8,
+  center: 7,
+  under: 6,
+  structure: 5,
+  engine_block: 4,
+  on_battery_mount: 3,
+  fuel_source: 2,
+  roof: -1,
+  armor: -2,
+};
+
+const LINE_XOXO = "│";
+const LINE_OXOX = "─";
+const LINE_XXOO = "└";
+const LINE_OXXO = "┌";
+const LINE_OOXX = "┐";
+const LINE_XOOX = "┘";
+const LINE_XXXO = "├";
+const LINE_XXOX = "┴";
+const LINE_XOXX = "┤";
+const LINE_OXXX = "┬";
+const LINE_XXXX = "┼";
+
+const specialSymbol = (symbol: string): string => {
+  switch (symbol) {
+    case "j":
+      return LINE_XOXO;
+    case "h":
+      return LINE_OXOX;
+    case "c":
+      return LINE_XXXX;
+    case "y":
+      return LINE_OXXO;
+    case "u":
+      return LINE_OOXX;
+    case "n":
+      return LINE_XOOX;
+    case "b":
+      return LINE_XXOO;
+    default:
+      return symbol;
+  }
+};
+
+const symbolForVehiclePartVariant = (
+  partId: string,
+  variant: string
+): string => {
+  const vehiclePart = data.byId("vehicle_part", partId);
+  const symbol = vehiclePart.symbol ?? "=";
+  const symbols = {
+    ...(vehiclePart.standard_symbols ? standardSymbols : {}),
+    ...vehiclePart.symbols,
+  };
+  return specialSymbol(symbols[variant] ?? symbol);
+};
+
+const colorForVehiclePart = (partId: string) => {
+  const vehiclePart = data.byId("vehicle_part", partId);
+  const color = vehiclePart.color;
+  return color;
+};
+
+type NormalizedPart = { partId: string; variant: string; fuel?: string };
+type NormalizedPartList = {
+  x: number;
+  y: number;
+  parts: NormalizedPart[];
+};
+const normalizedParts: NormalizedPartList[] = item.parts.map((part) => {
+  const parts = (
+    part.part
+      ? [{ part: part.part, fuel: part.fuel }]
+      : part.parts?.map((part) => (typeof part === "string" ? { part } : part))
+  ).map(({ part, fuel }) => {
+    const [partId, variant] = getVehiclePartIdAndVariant(part);
+    return {
+      partId,
+      variant,
+      fuel,
+    };
+  });
+  return {
+    x: part.x,
+    y: part.y,
+    parts,
+  };
+});
+
+const zForPart = (partId: string): number => {
+  const vehiclePart = data.byId("vehicle_part", partId);
+  const location = vehiclePart.location;
+  const z = zOrder[location] ?? 0;
+  return z;
+};
+
+const grid: (NormalizedPart | undefined)[][] = [];
+for (let x = maxX; x >= minX; x--) {
+  const row: (NormalizedPart | undefined)[] = [];
+  for (let y = minY; y <= maxY; y++) {
+    const parts = normalizedParts
+      .filter((p) => p.x === x && p.y === y)
+      .flatMap((p) => p.parts);
+    if (!parts.length) {
+      row.push(undefined);
+      continue;
+    }
+    let topPart = parts[0];
+    let topZ = zForPart(topPart.partId);
+    for (const part of parts) {
+      const z = zForPart(part.partId);
+      if (z >= 0 && z > topZ) {
+        topZ = z;
+        topPart = part;
+      }
+    }
+    row.push(topPart);
+  }
+  grid.push(row);
+}
+
+const items = data.flattenItemGroup(itemGroupFromVehicle(item));
+items.sort((a, b) => b.prob - a.prob);
+</script>
+
+<h1>{singularName(item)}</h1>
+
+<section>
+  <pre
+    style="font-family: Unifont, monospace; line-height: 1">
+    {#each grid as row}
+    {#each row as part}{#if part}<span title={`${part.partId}_${part.variant}`} class={`c_${colorForVehiclePart(part.partId)}`}>{symbolForVehiclePartVariant(part.partId, part.variant)}</span>{:else}{" "}{/if}{/each}{'\n'}
+    {/each}
+  </pre>
+</section>
+
+{#if items.length}
+  <section>
+    <h1>Items</h1>
+    <LimitedList {items} let:item>
+      <ItemSymbol item={data.byId("item", item.id)} />
+      <ThingLink id={item.id} type="item" />
+      ({showProbability(item.prob)})
+    </LimitedList>
+  </section>
+{/if}

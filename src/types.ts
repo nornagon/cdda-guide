@@ -1040,6 +1040,10 @@ export type VehiclePart = {
   // TODO:
   // transform_terrain
   // symbol, color, etc
+  standard_symbols?: boolean;
+  symbols?: Record<string, string>;
+  symbol?: string;
+  color?: string;
 };
 
 export type AsciiArt = {
@@ -1275,6 +1279,27 @@ export type MutationCategory = {
   threshold_mut?: string;
 };
 
+export type Vehicle = {
+  id: string;
+  type: "vehicle";
+  name: Translation;
+  blueprint?: string[][] | string[];
+  parts: {
+    x: integer;
+    y: integer;
+    parts?: (string | { part: string; fuel?: string })[];
+    part?: string;
+    fuel?: string;
+  }[];
+  items?: {
+    x: integer;
+    y: integer;
+    chance: integer;
+    items?: string | string[];
+    item_groups?: string | string[];
+  }[];
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1327,6 +1352,7 @@ export type SupportedTypes = {
   technique: Technique;
   tool_quality: ToolQuality;
   uncraft: { type: "uncraft" } & Recipe;
+  vehicle: Vehicle;
   vehicle_part: VehiclePart;
   vitamin: Vitamin;
 

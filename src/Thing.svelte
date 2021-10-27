@@ -20,6 +20,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import Mutation from "./types/Mutation.svelte";
 import MutationCategory from "./types/MutationCategory.svelte";
 import MutationType from "./types/MutationType.svelte";
+import Vehicle from "./types/Vehicle.svelte";
 
 export let item: { id: string; type: string };
 
@@ -74,6 +75,7 @@ const displays = {
   mutation: Mutation,
   mutation_category: MutationCategory,
   mutation_type: MutationType,
+  vehicle: Vehicle,
 };
 </script>
 
