@@ -451,7 +451,7 @@ export type MapBashInfo = {
   // ter_set
   // move_cost
 
-  items?: ItemGroupEntry[];
+  items?: string | ItemGroupEntry[];
 
   // tent_centers
 };
@@ -459,13 +459,19 @@ export type MapBashInfo = {
 export type MapDeconstructInfo = {
   furn_set?: string; // default: f_null
   deconstruct_above?: boolean; // default: false
-  items?: ItemGroupEntry[];
+  items?: string | ItemGroupEntry[];
 };
 
 export type MapDataCommon = {
-  description: string;
+  color?: string | [string] | [string, string, string, string];
+  bgcolor?: string | [string] | [string, string, string, string];
+  symbol: string | [string] | [string, string, string, string]; // TODO: can be 1-char or LINE_XOXO
+  description: Translation;
   // examine_action
-  // harvest_by_season
+  harvest_by_season?: {
+    seasons: string[];
+    id: string;
+  }[];
   // curtain_transform
 };
 
@@ -475,9 +481,6 @@ export type Furniture = MapDataCommon & {
   name: Translation;
   move_cost_mod: number;
   required_str: number;
-  color?: string | [string] | [string, string, string, string];
-  bgcolor?: string | [string] | [string, string, string, string];
-  symbol: string | [string] | [string, string, string, string]; // TODO: can be 1-char or LINE_XOXO
   flags?: string[];
 
   coverage?: number;
@@ -1300,6 +1303,23 @@ export type Vehicle = {
   }[];
 };
 
+export type Terrain = MapDataCommon & {
+  type: "terrain";
+  id: string;
+  name: Translation;
+  description: Translation;
+  symbol: string;
+  color: string | [string, string, string, string];
+
+  move_cost?: integer;
+  coverage?: integer;
+  flags?: string[];
+  bash?: MapBashInfo;
+  deconstruct?: MapDeconstructInfo;
+
+  transforms_into?: string;
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1350,6 +1370,7 @@ export type SupportedTypes = {
   requirement: Requirement;
   skill: Skill;
   technique: Technique;
+  terrain: Terrain;
   tool_quality: ToolQuality;
   uncraft: { type: "uncraft" } & Recipe;
   vehicle: Vehicle;

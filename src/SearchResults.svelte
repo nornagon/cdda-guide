@@ -15,6 +15,7 @@ const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "martial_art",
   "mutation",
   "vehicle",
+  "terrain",
 ]);
 
 export let data: CddaData;
@@ -74,7 +75,7 @@ $: history.replaceState({ search }, "");
     <ul>
       {#each matchingObjects.get(type) as obj}
         <li>
-          {#if type === "furniture"}
+          {#if type === "furniture" || type === "terrain"}
             <FurnitureSymbol item={data._flatten(obj)} />
           {:else if type === "item" || type === "monster"}
             <ItemSymbol item={data._flatten(obj)} />

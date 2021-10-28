@@ -1,15 +1,15 @@
 <script lang="ts">
-import { CddaData, singularName } from "../data";
-import type { Furniture } from "../types";
-import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
-import Construction from "./Construction.svelte";
+
+import { CddaData, showProbability, singular, singularName } from "../data";
+import type { Terrain } from "../types";
 import FurnitureSymbol from "./item/FurnitureSymbol.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import ThingLink from "./ThingLink.svelte";
 
 const data = getContext<CddaData>("data");
 
-export let item: Furniture;
+export let item: Terrain;
 
 const deconstruct = item.deconstruct?.items
   ? data.flattenItemGroup({
@@ -31,16 +31,6 @@ const bash = item.bash?.items
     })
   : [];
 
-function showProbability(prob: number) {
-  const ret = (prob * 100).toFixed(2);
-  if (ret === "0.00") return "< 0.01%";
-  return ret + "%";
-}
-
-const constructions = data
-  .byType("construction")
-  .filter((c) => c.post_terrain === item.id);
-
 const bits = [
   ["Deconstruct", deconstruct],
   ["Bash", bash],
@@ -54,22 +44,24 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
 }
 </script>
 
-<h1><FurnitureSymbol {item} /> {singularName(item)}</h1>
+<h1>
+  <FurnitureSymbol {item} />
+  {singularName(item)}
+</h1>
 
 <section>
-  <h1>General</h1>
   <dl>
-    <dt>Move Cost Modifier</dt>
-    <dd>
-      {#if item.move_cost_mod < 0}<em>impassable</em
-        >{:else}+{item.move_cost_mod * 50}{/if}
-    </dd>
-    <dt>Strength Required to Drag</dt>
-    <dd>{item.required_str >= 0 ? item.required_str : "not movable"}</dd>
+    <dt>Move Cost</dt>
+    <dd>{item.move_cost ?? 100}</dd>
     <dt>Coverage</dt>
     <dd>{item.coverage ?? 0}%</dd>
-    <dt>Comfort</dt>
-    <dd>{item.comfort ?? 0}</dd>
+    {#if item.transforms_into}
+      <dt>Transforms Into</dt>
+      <dd>
+        <FurnitureSymbol item={data.byId("terrain", item.transforms_into)} />
+        <ThingLink id={item.transforms_into} type="terrain" />
+      </dd>
+    {/if}
     {#each bits as [title, arr]}
       {#if arr.length}
         <dt>{title}</dt>
@@ -130,12 +122,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
       </ul>
     </dd>
   </dl>
-  <p style="color: var(--cata-color-gray)">{item.description}</p>
+  <p style="color: var(--cata-color-gray); margin-bottom: 0;">
+    {singular(item.description)}
+  </p>
 </section>
-
-{#if constructions.length}
-  <h2>Construction</h2>
-  {#each constructions as construction}
-    <Construction {construction} />
-  {/each}
-{/if}

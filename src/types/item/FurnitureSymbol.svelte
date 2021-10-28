@@ -1,7 +1,7 @@
 <script lang="ts">
-import type { Furniture } from "../../types";
+import type { MapDataCommon } from "../../types";
 
-export let item: Furniture;
+export let item: MapDataCommon;
 function colorFromBgcolor(
   color: string | [string] | [string, string, string, string]
 ) {
@@ -14,7 +14,9 @@ const color = item.color
   ? colorFromBgcolor(item.bgcolor)
   : null;
 
-const symbol = typeof item.symbol === "string" ? item.symbol : item.symbol[0];
+const sym =
+  typeof item.symbol === "string" ? item.symbol : (item.symbol ?? [])[0];
+const symbol = /^LINE_/.test(sym) ? "|" : sym;
 </script>
 
 <span style="font-family: monospace;" class="c_{color}">{symbol}</span>

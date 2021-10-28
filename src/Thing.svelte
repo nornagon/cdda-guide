@@ -21,6 +21,7 @@ import Mutation from "./types/Mutation.svelte";
 import MutationCategory from "./types/MutationCategory.svelte";
 import MutationType from "./types/MutationType.svelte";
 import Vehicle from "./types/Vehicle.svelte";
+import Terrain from "./types/Terrain.svelte";
 
 export let item: { id: string; type: string };
 
@@ -76,6 +77,7 @@ const displays = {
   mutation_category: MutationCategory,
   mutation_type: MutationType,
   vehicle: Vehicle,
+  terrain: Terrain,
 };
 </script>
 

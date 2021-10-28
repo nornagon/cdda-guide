@@ -119,6 +119,96 @@ export function lootByOmSpecial(data: CddaData) {
   return lootByOmSpecial;
 }
 
+function overmapAppearance(
+  data: CddaData,
+  oms: raw.OvermapSpecial
+): string | undefined {
+  if (oms.subtype === "mutable") return;
+  const overmaps = [...(oms.overmaps ?? [])];
+  let minX = Infinity,
+    minY = Infinity;
+  let maxX = -Infinity,
+    maxY = -Infinity;
+  const overmapsByPoint = new Map<string, typeof overmaps[0]>();
+  for (const om of overmaps) {
+    const omt_id = om.overmap.replace(/_(north|south|east|west)$/, "");
+    if (!data.byId("overmap_terrain", omt_id)) continue;
+    const [x, y, z] = om.point;
+    if (z !== 0) continue;
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+    overmapsByPoint.set(`${x}|${y}`, om);
+  }
+  // Skip any location that has no surface-level appearance.
+  if (minX === Infinity || minY === Infinity) return;
+  const appearanceComponents: any[] = [maxY - minY, maxX - minX];
+  for (let y = minY; y <= maxY; y++)
+    for (let x = minX; x <= maxX; x++) {
+      const om = overmapsByPoint.get(`${x}|${y}`);
+      if (om) {
+        const omt_id = om.overmap.replace(/_(north|south|east|west)$/, "");
+        const appearance = omtAppearanceString(omt_id);
+        appearanceComponents.push(appearance);
+      } else {
+        appearanceComponents.push("no_om");
+      }
+    }
+
+  return appearanceComponents.join("\0");
+
+  function omtAppearanceString(omt_id: string): string {
+    const omt = data.byId("overmap_terrain", omt_id);
+    return omt
+      ? `${omt.sym}\u0001${omt.color}\u0001${omt.name}`
+      : `appearance_unk`;
+  }
+}
+
+// Showing these is a bit spoilery, and also they are visually large, so hide them.
+const hiddenLocations = new Set([
+  "Necropolis",
+  "Isherwood Farms",
+  "lab_mutagen_6_level",
+  "Lab_SECURITY_1x1x6",
+  "Lab_CARGO_Surface",
+  "hub_01",
+]);
+const lootByOmAppearanceCache = new WeakMap<
+  CddaData,
+  Map<string, { loot: Map<string, number>; ids: string[] }>
+>();
+export function lootByOMSAppearance(data: CddaData) {
+  if (lootByOmAppearanceCache.has(data))
+    return lootByOmAppearanceCache.get(data);
+  const lootByOMS = lootByOmSpecial(data);
+  const lootByOMSAppearance = new Map<
+    string,
+    { loot: Map<string, number>; ids: string[] }
+  >();
+  for (const [oms_id, loot] of lootByOMS.entries()) {
+    if (hiddenLocations.has(oms_id)) continue;
+    const appearance = overmapAppearance(
+      data,
+      data.byId("overmap_special", oms_id)
+    );
+    if (!appearance) continue;
+    if (!lootByOMSAppearance.has(appearance))
+      lootByOMSAppearance.set(appearance, { loot: undefined, ids: [] });
+    const l = lootByOMSAppearance.get(appearance);
+    if (l.loot)
+      l.loot = mergeLoot([
+        { loot: l.loot, weight: 1 },
+        { loot: loot, weight: 1 },
+      ]);
+    else l.loot = loot;
+    l.ids.push(oms_id);
+  }
+  lootByOmAppearanceCache.set(data, lootByOMSAppearance);
+  return lootByOMSAppearance;
+}
+
 // Weighted average.
 export function mergeLoot(loots: { loot: Loot; weight: number }[]): Loot {
   const totalWeight = loots.map((l) => l.weight).reduce((m, o) => m + o, 0);

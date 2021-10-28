@@ -15,14 +15,20 @@ let deconstructibleFrom = data
     const deconstruct = f.deconstruct?.items
       ? data.flattenItemGroup({
           subtype: "collection",
-          entries: f.deconstruct.items,
+          entries:
+            typeof f.deconstruct.items === "string"
+              ? [{ group: f.deconstruct.items }]
+              : f.deconstruct.items,
         })
       : [];
 
     const bash = f.bash?.items
       ? data.flattenItemGroup({
           subtype: "collection",
-          entries: f.bash.items,
+          entries:
+            typeof f.bash.items === "string"
+              ? [{ group: f.bash.items }]
+              : f.bash.items,
         })
       : [];
 
