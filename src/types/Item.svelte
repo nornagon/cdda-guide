@@ -26,6 +26,7 @@ import Disassembly from "./item/Disassembly.svelte";
 import DroppedBy from "./item/DroppedBy.svelte";
 import GrownFrom from "./item/GrownFrom.svelte";
 import GunInfo from "./item/GunInfo.svelte";
+import HarvestedFrom from "./item/HarvestedFrom.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import MeleeInfo from "./item/MeleeInfo.svelte";
 import Recipes from "./item/Recipes.svelte";
@@ -370,6 +371,7 @@ const ascii_picture =
   <Recipes item_id={item.id} />
   <DroppedBy item_id={item.id} />
   <GrownFrom item_id={item.id} />
+  <HarvestedFrom item_id={item.id} />
   <Disassembly item_id={item.id} />
   <Salvaged item_id={item.id} />
   <Deconstruct item_id={item.id} />
