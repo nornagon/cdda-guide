@@ -31,5 +31,7 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" != "push" ]; then
             yarn test:latest
           else
+            git config --global user.name 'HHG2C Deploy Bot'
+            git config --global user.email 'hhg2c@users.noreply.github.com'
             yarn test && yarn deploy
           fi
