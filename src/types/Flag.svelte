@@ -3,6 +3,7 @@ import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { Item, VehiclePart, JsonFlag } from "../types";
+import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: JsonFlag;
@@ -77,6 +78,7 @@ const colorLookup = (color: string): string => {
         singularName(a).localeCompare(singularName(b))
       )}
       let:item>
+      <ItemSymbol {item} />
       <ThingLink type="item" id={item.id} />
     </LimitedList>
   </section>
