@@ -35,6 +35,7 @@ jobs:
           else
             # temporarily commented for testing github workflows
             #yarn test
+            true
           fi
       - name: Build
         run: yarn build
