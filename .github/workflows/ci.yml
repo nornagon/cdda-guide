@@ -31,5 +31,5 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" != "push" ]; then
             yarn test:latest
           else
-            yarn test
+            yarn test && yarn deploy
           fi
