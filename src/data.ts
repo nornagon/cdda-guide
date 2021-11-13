@@ -522,6 +522,8 @@ export class CddaData {
         const { prob = 100 } = entry;
         const nProb = Math.min(prob, 100) / 100;
         const nCount = normalizeCount(entry);
+        if (entry["container-item"])
+          add({ id: entry["container-item"], prob: nProb, count: [1, 1] });
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
         } else if ("group" in entry) {
@@ -555,6 +557,8 @@ export class CddaData {
       for (const entry of normalizedEntries) {
         const nProb = (entry.prob ?? 100) / totalProb;
         const nCount = normalizeCount(entry);
+        if (entry["container-item"])
+          add({ id: entry["container-item"], prob: nProb, count: [1, 1] });
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
         } else if ("group" in entry) {

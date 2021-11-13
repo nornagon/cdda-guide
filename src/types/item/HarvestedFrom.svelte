@@ -1,10 +1,9 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
-import { showProbability } from "./utils";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
-import type { Furniture, MapDataCommon, Terrain } from "../../types";
+import type { Furniture, Terrain } from "../../types";
 import FurnitureSymbol from "./FurnitureSymbol.svelte";
 
 export let item_id: string;
