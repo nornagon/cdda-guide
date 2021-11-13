@@ -26,12 +26,22 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn install --frozen-lockfile
-      - run: |
+      - name: Fetch Dependencies
+        run: yarn install --frozen-lockfile
+      - name: Test
+        run: |
           if [ "$GITHUB_EVENT_NAME" != "push" ]; then
             yarn test:latest
           else
-            git config --global user.name 'HHG2C Deploy Bot'
-            git config --global user.email 'hhg2c@users.noreply.github.com'
-            yarn test && yarn deploy
+            # temporarily commented for testing github workflows
+            #yarn test
           fi
+      - name: Build
+        run: yarn build
+
+      - name: Deploy 🚀
+        if: gitub.event_name == "push"
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          branch: gh-pages
+          folder: public
