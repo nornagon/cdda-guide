@@ -1,4 +1,5 @@
 import { CddaData } from "./data";
+import { getLootForMapgen } from "./types/item/spawnLocations";
 
 test("flattened item group includes container item for distribution", () => {
   const data = new CddaData([
@@ -40,6 +41,35 @@ test("flattened item group includes container item for collection", () => {
   ]);
 });
 
+test("includes container item specified in item", () => {
+  const data = new CddaData([
+    {
+      type: "item_group",
+      id: "foo",
+      subtype: "collection",
+      entries: [{ item: "contained_thing", prob: 50 }],
+    },
+    {
+      type: "COMESTIBLE",
+      id: "contained_thing",
+      container: "container",
+    },
+  ]);
+  const flat = data.flattenItemGroup(data.byId("item_group", "foo"));
+  expect(flat.map((x) => ({ ...x, prob: x.prob.toFixed(2) }))).toEqual([
+    {
+      count: [1, 1],
+      id: "contained_thing",
+      prob: "0.50",
+    },
+    {
+      count: [1, 1],
+      id: "container",
+      prob: "0.50",
+    },
+  ]);
+});
+
 test("nested", () => {
   const data = new CddaData([
     {
@@ -65,7 +95,7 @@ test("nested", () => {
               ],
               prob: 90,
             },
-            { collection: [], prob: 10 }
+            { collection: [], prob: 10 },
           ],
         },
       ],

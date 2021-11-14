@@ -238,7 +238,7 @@ function addLoot(loots: Loot[]): Loot {
 }
 
 const lootForMapgenCache = new WeakMap<raw.Mapgen, Loot>();
-function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
+export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   if (lootForMapgenCache.has(mapgen)) return lootForMapgenCache.get(mapgen);
   const palette = parsePalette(data, mapgen.object);
   const place_items = (mapgen.object.place_items ?? []).map(

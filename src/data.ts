@@ -526,6 +526,10 @@ export class CddaData {
           add({ id: entry["container-item"], prob: nProb, count: [1, 1] });
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
+          const item = this.byId("item", entry.item);
+          if (item && item.container) {
+            add({ id: item.container, prob: nProb, count: nCount });
+          }
         } else if ("group" in entry) {
           add(
             ...this.flattenItemGroup(this.byId("item_group", entry.group)).map(
