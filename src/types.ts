@@ -335,7 +335,7 @@ export type ItemBasicInfo = {
   flags?: string[];
   faults?: string[];
   pocket_data?: PocketData[];
-  container?: string;
+  container?: string | null;
   bashing?: number;
   cutting?: number;
   min_strength?: number;
