@@ -686,6 +686,58 @@ export class CddaData {
     );
     return { tools, qualities, components };
   }
+
+  _itemComponentCache: {
+    byTool: Map<string, Set<string>>;
+    byComponent: Map<string, Set<string>>;
+  };
+  getItemComponents() {
+    if (this._itemComponentCache) return this._itemComponentCache;
+    const itemsByTool = new Map<string, Set<string>>();
+    const itemsByComponent = new Map<string, Set<string>>();
+
+    this.byType("recipe").forEach((recipe) => {
+      if (!recipe.result || !this.byId("item", recipe.result)) return false;
+      const using =
+        typeof recipe.using === "string"
+          ? ([[recipe.using, 1]] as const)
+          : recipe.using;
+
+      const requirements = (using ?? [])
+        .map(
+          ([id, count]) =>
+            [
+              this.byId("requirement", id) as RequirementData,
+              count as number,
+            ] as const
+        )
+        .concat([[recipe, 1] as const]);
+      const tools = requirements.flatMap(([req]) =>
+        this.flattenRequirement(req.tools ?? [], (x) => x.tools)
+      );
+      for (const toolOptions of tools)
+        for (const tool of toolOptions) {
+          if (!itemsByTool.has(tool.id)) itemsByTool.set(tool.id, new Set());
+          itemsByTool.get(tool.id).add(recipe.result);
+        }
+      const components = requirements.flatMap(([req, count]) =>
+        this.flattenRequirement(req.components ?? [], (x) => x.components).map(
+          (x) => x.map((x) => ({ ...x, count: x.count * count }))
+        )
+      );
+      for (const componentOptions of components)
+        for (const component of componentOptions) {
+          if (!itemsByComponent.has(component.id))
+            itemsByComponent.set(component.id, new Set());
+          itemsByComponent.get(component.id).add(recipe.result);
+        }
+    });
+    this._itemComponentCache = {
+      byTool: itemsByTool,
+      byComponent: itemsByComponent,
+    };
+    return this._itemComponentCache;
+  }
 }
 
 function flattenChoices<T>(

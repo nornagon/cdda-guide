@@ -10,49 +10,20 @@ export let item_id: string;
 
 const data = getContext<CddaData>("data");
 
-const recipes: Recipe[] = [];
-const toolRecipes: Recipe[] = [];
+const { byTool, byComponent } = data.getItemComponents();
 
-data.byType("recipe").forEach((recipe) => {
-  if (!recipe.result || !data.byId("item", recipe.result)) return false;
-  const using =
-    typeof recipe.using === "string"
-      ? ([[recipe.using, 1]] as const)
-      : recipe.using;
+const recipes: Set<string> = byComponent.get(item_id) ?? new Set();
+const toolRecipes: Set<string> = byTool.get(item_id) ?? new Set();
 
-  const requirements = (using ?? [])
-    .map(
-      ([id, count]) =>
-        [
-          data.byId("requirement", id) as RequirementData,
-          count as number,
-        ] as const
-    )
-    .concat([[recipe, 1] as const]);
-  const tools = requirements.flatMap(([req]) =>
-    data.flattenRequirement(req.tools ?? [], (x) => x.tools)
-  );
-  if (tools.some((c) => c.some((d) => d.id === item_id)))
-    toolRecipes.push(recipe);
-  const components = requirements.flatMap(([req, count]) =>
-    data
-      .flattenRequirement(req.components ?? [], (x) => x.components)
-      .map((x) => x.map((x) => ({ ...x, count: x.count * count })))
-  );
-  if (components.some((c) => c.some((d) => d.id === item_id)))
-    recipes.push(recipe);
-});
-
-const results = [...new Set(recipes.map((r) => r.result))].sort((a, b) =>
+const results = [...recipes].sort((a, b) =>
   singularName(data.byId("item", a)).localeCompare(
     singularName(data.byId("item", b))
   )
 );
-const toolResults = [...new Set(toolRecipes.map((r) => r.result))].sort(
-  (a, b) =>
-    singularName(data.byId("item", a)).localeCompare(
-      singularName(data.byId("item", b))
-    )
+const toolResults = [...toolRecipes].sort((a, b) =>
+  singularName(data.byId("item", a)).localeCompare(
+    singularName(data.byId("item", b))
+  )
 );
 </script>
 
