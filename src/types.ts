@@ -335,7 +335,10 @@ export type ItemBasicInfo = {
   flags?: string[];
   faults?: string[];
   pocket_data?: PocketData[];
-  container?: string | null;
+  container?:
+    | string
+    | null
+    | any /* this is to appease json-schema, which doesn't generate a correct schema for just string | null */;
   bashing?: number;
   cutting?: number;
   min_strength?: number;
