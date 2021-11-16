@@ -7,3 +7,11 @@ The Guide stores all its data locally and is offline-capable, so you can take it
 _More popular than the Celestial Home Care Omnibus, better selling than Fifty-three More Things to do in Zero Gravity, and more controversial than Oolon Colluphid's trilogy of philosophical blockbusters Where God Went Wrong, Some More of God's Greatest Mistakes and Who is this God Person Anyway?_
 
 [📕 **Open the Guide**](https://nornagon.github.io/cdda-guide)
+
+## Acknowledgements
+
+The Hitchhiker's Guide to the Cataclysm is maintained by @nornagon, with generous contributions from the following folks:
+
+- @hexagonrecursion
+
+Further, thanks to everyone who files bugs and feature requests in the issue tracker. You all help make the Guide what it is!
