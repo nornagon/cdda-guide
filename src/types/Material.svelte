@@ -12,12 +12,20 @@ const data = getContext<CddaData>("data");
 
 export let item: Material;
 
+function isStrings<T>(array: string[] | T[]): array is string[] {
+  return typeof array[0] === "string";
+}
+
 let itemsWithMaterial = data
   .byType("item")
   .filter((i) => {
-    const material =
-      typeof i.material === "string" ? [i.material] : i.material ?? [];
-    return i.id && material.some((m) => m === item.id);
+    const normalizedMaterial =
+      typeof i.material === "string"
+        ? [i.material]
+        : isStrings(i.material)
+        ? i.material
+        : i.material.map((m) => m.type);
+    return i.id && normalizedMaterial.some((m) => m === item.id);
   })
   .sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>

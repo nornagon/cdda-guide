@@ -6,6 +6,7 @@ import {
   asLiters,
   CddaData,
   parseVolume,
+  showProbability,
   singular,
   singularName,
 } from "../data";
@@ -49,9 +50,17 @@ let qualities = (item.qualities ?? []).map(([id, level]) => ({
   quality: data.byId("tool_quality", id),
   level,
 }));
-let materials = (
-  typeof item.material === "string" ? [item.material] : item.material ?? []
-).map((id) => data.byId("material", id));
+
+function isStrings<T>(array: string[] | T[]): array is string[] {
+  return typeof array[0] === "string";
+}
+const materials =
+  typeof item.material === "string"
+    ? [{ type: item.material, portion: 1 }]
+    : isStrings(item.material)
+    ? item.material.map((s) => ({ type: s, portion: 1 }))
+    : item.material;
+const totalMaterialPortion = materials.reduce((m, o) => m + o.portion, 0);
 let flags = (item.flags ?? []).map(
   (id) => data.byId("json_flag", id) ?? { id }
 );
@@ -141,7 +150,14 @@ const ascii_picture =
           <dd>
             <ul class="comma-separated">
               {#each materials as m}
-                <li><ThingLink type="material" id={m.id} /></li>
+                <li>
+                  <ThingLink
+                    type="material"
+                    id={m.type} />{#if materials.length > 1}{" "}({(
+                      (m.portion / totalMaterialPortion) *
+                      100
+                    ).toFixed(0)}%){/if}
+                </li>
               {/each}
             </ul>
           </dd>

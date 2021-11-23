@@ -310,7 +310,6 @@ export type ArmorSlot = {
   coverage?: number;
   environmental_protection?: number;
   material_thickness?: number;
-  material?: string | string[];
 };
 
 export type EngineSlot = {
@@ -331,7 +330,7 @@ export type ItemBasicInfo = {
   volume?: volume;
   weight?: mass;
   longest_side?: string;
-  material?: string | string[]; // material_id
+  material?: string | string[] | { type: string; portion: integer }[]; // material_id
   flags?: string[];
   faults?: string[];
   pocket_data?: PocketData[];
