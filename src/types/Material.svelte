@@ -20,7 +20,9 @@ let itemsWithMaterial = data
   .byType("item")
   .filter((i) => {
     const normalizedMaterial =
-      typeof i.material === "string"
+      i.material == null
+        ? []
+        : typeof i.material === "string"
         ? [i.material]
         : isStrings(i.material)
         ? i.material

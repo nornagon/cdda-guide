@@ -11,7 +11,9 @@ function isStrings<T>(array: string[] | T[]): array is string[] {
 }
 
 const normalizedMaterial =
-  typeof item.material === "string"
+  item.material == null
+    ? []
+    : typeof item.material === "string"
     ? [{ type: item.material, portion: 1 }]
     : isStrings(item.material)
     ? item.material.map((s) => ({ type: s, portion: 1 }))

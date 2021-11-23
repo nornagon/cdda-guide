@@ -6,7 +6,6 @@ import {
   asLiters,
   CddaData,
   parseVolume,
-  showProbability,
   singular,
   singularName,
 } from "../data";
@@ -55,7 +54,9 @@ function isStrings<T>(array: string[] | T[]): array is string[] {
   return typeof array[0] === "string";
 }
 const materials =
-  typeof item.material === "string"
+  item.material == null
+    ? []
+    : typeof item.material === "string"
     ? [{ type: item.material, portion: 1 }]
     : isStrings(item.material)
     ? item.material.map((s) => ({ type: s, portion: 1 }))
