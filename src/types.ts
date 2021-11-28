@@ -864,16 +864,16 @@ export type ToolQuality = {
   usages?: [number, string[]][];
 };
 
+export type HarvestDropType = {
+  id: string;
+  type: "harvest_drop_type";
+  group?: boolean;
+  // ...
+}
+
 export type HarvestEntry = {
-  drop: string; // item id, or group id iff type === "bionic_group"
-  type?:
-    | "flesh"
-    | "blood"
-    | "bone"
-    | "skin"
-    | "offal"
-    | "bionic"
-    | "bionic_group";
+  drop: string; // item id (or group id iff byId("harvest_drop_type", i.type).group)
+  type?: string; // harvest_drop_type id
   base_num?: [number, number]; // default [1, 1]
   scale_num?: [number, number]; // default [0, 0]
   max?: number; // default 1000
@@ -1355,6 +1355,7 @@ export type SupportedTypes = {
   fault: Fault;
   furniture: Furniture;
   harvest: Harvest;
+  harvest_drop_type: HarvestDropType;
   item_group: { type: "item_group" } & ItemGroup;
   json_flag: JsonFlag;
   mapgen: Mapgen;
