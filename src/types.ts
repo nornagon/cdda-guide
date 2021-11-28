@@ -869,7 +869,7 @@ export type HarvestDropType = {
   type: "harvest_drop_type";
   group?: boolean;
   // ...
-}
+};
 
 export type HarvestEntry = {
   drop: string; // item id (or group id iff byId("harvest_drop_type", i.type).group)
