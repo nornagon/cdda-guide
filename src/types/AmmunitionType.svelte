@@ -63,7 +63,7 @@ usedBy.sort((a, b) => singularName(a).localeCompare(singularName(b)));
   {#if usedBy.length > 0}
     <LimitedList items={usedBy} let:item>
       <ItemSymbol {item} />
-      <ThingLink type={mapType(item.type)} id={item.id} />
+      <ThingLink type="item" id={item.id} />
     </LimitedList>
   {:else}
     <p>

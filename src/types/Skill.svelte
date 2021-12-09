@@ -1,8 +1,10 @@
 <script lang="ts">
 import { getContext } from "svelte";
 
-import { CddaData, singularName } from "../data";
+import { CddaData, mapType, singularName } from "../data";
+import LimitedList from "../LimitedList.svelte";
 import type { Skill, SupportedTypesWithMapped } from "../types";
+import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: Skill;
@@ -22,6 +24,13 @@ for (const book of booksWithSkill) {
     booksByLevel.set(book.max_level ?? 0, []);
   booksByLevel.get(book.max_level ?? 0).push(book);
 }
+
+const itemsUsingSkill = data
+  .byType("item")
+  .filter(
+    (i) => i.id && i.type === "GUN" && i.skill === item.id
+  ) as SupportedTypesWithMapped["GUN"][];
+itemsUsingSkill.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
 <h1>Skill: {singularName(item)}</h1>
@@ -46,5 +55,15 @@ for (const book of booksWithSkill) {
         </dd>
       {/each}
     </dl>
+  </section>
+{/if}
+
+{#if itemsUsingSkill.length}
+  <section>
+    <h1>Used By</h1>
+    <LimitedList items={itemsUsingSkill} let:item>
+      <ItemSymbol {item} />
+      <ThingLink type="item" id={item.id} />
+    </LimitedList>
   </section>
 {/if}
