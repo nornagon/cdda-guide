@@ -89,6 +89,16 @@ const buffMap = new Map(
           </ul>
         </dd>
       {/if}
+      {#if item.weapon_category}
+        <dt>Weapon Category</dt>
+        <dd>
+          <ul class="comma-separated">
+            {#each item.weapon_category as category_id}
+              <li><ThingLink type="weapon_category" id={category_id} /></li>
+            {/each}
+          </ul>
+        </dd>
+      {/if}
       {#if (item.arm_block ?? 99) != 99 || item.arm_block_with_bio_armor_arms}
         <dt>Arm Block</dt>
         <dd>

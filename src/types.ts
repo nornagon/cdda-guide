@@ -354,6 +354,7 @@ export type ItemBasicInfo = {
     byproducts?: string[]; // item_id
   };
   ascii_picture?: string;
+  weapon_category?: string[]; // weapon_category_id
 };
 
 export type Item =
@@ -1214,6 +1215,7 @@ export type MartialArt = {
 
   techniques?: string[]; // technique_id
   weapons?: string[]; // item_id
+  weapon_category?: string[]; // weapon_category_id
 
   strictly_melee?: boolean;
   strictly_unarmed?: boolean;
@@ -1323,6 +1325,12 @@ export type Terrain = MapDataCommon & {
   transforms_into?: string;
 };
 
+export type WeaponCategory = {
+  type: "weapon_category";
+  id: string;
+  name: Translation;
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1380,6 +1388,7 @@ export type SupportedTypes = {
   vehicle: Vehicle;
   vehicle_part: VehiclePart;
   vitamin: Vitamin;
+  weapon_category: WeaponCategory;
 
   // TODO: used, but not yet typed
   monster_attack: { type: "monster_attack"; id: string };

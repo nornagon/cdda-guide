@@ -30,6 +30,7 @@ const types = [
   "mutation_category",
   "vehicle",
   "terrain",
+  "weapon_category",
 ];
 
 const all = data._raw

@@ -22,6 +22,7 @@ import MutationCategory from "./types/MutationCategory.svelte";
 import MutationType from "./types/MutationType.svelte";
 import Vehicle from "./types/Vehicle.svelte";
 import Terrain from "./types/Terrain.svelte";
+import WeaponCategory from "./types/WeaponCategory.svelte";
 
 export let item: { id: string; type: string };
 
@@ -78,6 +79,7 @@ const displays = {
   mutation_type: MutationType,
   vehicle: Vehicle,
   terrain: Terrain,
+  weapon_category: WeaponCategory,
 };
 </script>
 

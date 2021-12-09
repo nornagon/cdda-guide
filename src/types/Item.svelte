@@ -198,6 +198,17 @@ const ascii_picture =
           </dd>
         {/if}
 
+        {#if item.weapon_category?.length}
+          <dt>Category</dt>
+          <dd>
+            <ul class="comma-separated">
+              {#each item.weapon_category as category_id}
+                <li><ThingLink type="weapon_category" id={category_id} /></li>
+              {/each}
+            </ul>
+          </dd>
+        {/if}
+
         <dt>Flags</dt>
         <dd>
           <ul class="comma-separated">
