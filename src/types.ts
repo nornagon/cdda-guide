@@ -1081,7 +1081,7 @@ export type BodyPart = {
 
   hit_size: number;
   hit_difficulty: number;
-  hit_size_relative: [number, number, number];
+  // hit_size_relative: [number, number, number];
 
   base_hp: integer;
   stat_hp_mods?: any; // TODO
