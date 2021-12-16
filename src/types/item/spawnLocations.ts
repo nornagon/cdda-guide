@@ -48,21 +48,27 @@ function offsetMapgen(mapgen: raw.Mapgen, x: number, y: number): raw.Mapgen {
       .slice(y * 24, (y + 1) * 24)
       .map((row) => row.slice(x * 24, (x + 1) * 24)),
   };
+  const min = (x: number | [number] | [number, number]) =>
+    Array.isArray(x) ? [0] : x;
   if (object.place_items)
     object.place_items = object.place_items.filter(
-      (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
+      (p) =>
+        min(p.x) >= x && min(p.y) >= y && min(p.x) < x + 24 && min(p.y) < y + 24
     );
   if (object.place_item)
     object.place_item = object.place_item.filter(
-      (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
+      (p) =>
+        min(p.x) >= x && min(p.y) >= y && min(p.x) < x + 24 && min(p.y) < y + 24
     );
   if (object.add)
     object.add = object.add.filter(
-      (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
+      (p) =>
+        min(p.x) >= x && min(p.y) >= y && min(p.x) < x + 24 && min(p.y) < y + 24
     );
   if (object.place_loot)
     object.place_loot = object.place_loot.filter(
-      (p) => p.x >= x && p.y >= y && p.x < x + 24 && p.y < y + 24
+      (p) =>
+        min(p.x) >= x && min(p.y) >= y && min(p.x) < x + 24 && min(p.y) < y + 24
     );
   return { ...mapgen, object };
 }
