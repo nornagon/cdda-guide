@@ -18,6 +18,7 @@ import type {
 import AsciiPicture from "./AsciiPicture.svelte";
 import AmmoInfo from "./item/AmmoInfo.svelte";
 import ArmorInfo from "./item/ArmorInfo.svelte";
+import Bash from "./item/Bash.svelte";
 import BookInfo from "./item/BookInfo.svelte";
 import ComestibleInfo from "./item/ComestibleInfo.svelte";
 import ComponentOf from "./item/ComponentOf.svelte";
@@ -403,6 +404,7 @@ const ascii_picture =
   <Disassembly item_id={item.id} />
   <Salvaged item_id={item.id} />
   <Deconstruct item_id={item.id} />
+  <Bash item_id={item.id} />
   <SpawnedIn item_id={item.id} />
   <SpawnedInVehicle item_id={item.id} />
 </div>

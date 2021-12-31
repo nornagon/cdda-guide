@@ -2,7 +2,7 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Furniture, Terrain } from "../../types";
+import type { Terrain, Furniture } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import FurnitureSymbol from "./FurnitureSymbol.svelte";
 
@@ -10,30 +10,30 @@ export let item_id: string;
 
 const data = getContext<CddaData>("data");
 
-let deconstructibleFrom = (data.byType("terrain") as (Terrain | Furniture)[])
+let bashFrom = (data.byType("terrain") as (Terrain | Furniture)[])
   .concat(data.byType("furniture"))
   .filter((f) => {
-    const deconstruct = f.deconstruct?.items
+    const bash = f.bash?.items
       ? data.flattenItemGroup({
           subtype: "collection",
           entries:
-            typeof f.deconstruct.items === "string"
-              ? [{ group: f.deconstruct.items }]
-              : f.deconstruct.items,
+            typeof f.bash.items === "string"
+              ? [{ group: f.bash.items }]
+              : f.bash.items,
         })
       : [];
 
-    return deconstruct.some(({ id }) => id === item_id);
+    return bash.some(({ id }) => id === item_id);
   })
   .sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
-{#if deconstructibleFrom.length}
+{#if bashFrom.length}
   <section>
-    <h1>Deconstruct</h1>
-    <LimitedList items={deconstructibleFrom} let:item={f}>
-      <FurnitureSymbol item={data.byId("furniture", f.id)} />
-      <ThingLink id={f.id} type="furniture" />
+    <h1>Bash</h1>
+    <LimitedList items={bashFrom} let:item={f}>
+      <FurnitureSymbol item={data.byId(f.type, f.id)} />
+      <ThingLink id={f.id} type={f.type} />
     </LimitedList>
   </section>
 {/if}
