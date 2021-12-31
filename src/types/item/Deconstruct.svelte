@@ -32,8 +32,8 @@ let deconstructibleFrom = (data.byType("terrain") as (Terrain | Furniture)[])
   <section>
     <h1>Deconstruct</h1>
     <LimitedList items={deconstructibleFrom} let:item={f}>
-      <FurnitureSymbol item={data.byId("furniture", f.id)} />
-      <ThingLink id={f.id} type="furniture" />
+      <FurnitureSymbol item={data.byId(f.type, f.id)} />
+      <ThingLink id={f.id} type={f.type} />
     </LimitedList>
   </section>
 {/if}
