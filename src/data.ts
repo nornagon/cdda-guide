@@ -233,6 +233,12 @@ export class CddaData {
           obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)
         }`
       );
+    if (parent === obj) {
+      // Working around bad data upstream, see: https://github.com/CleverRaven/Cataclysm-DDA/pull/53930
+      console.warn("Object copied from itself:", obj);
+      this._flattenCache.set(obj, obj);
+      return obj;
+    }
     if (!parent) {
       this._flattenCache.set(obj, obj);
       return obj;
