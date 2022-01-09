@@ -26,8 +26,8 @@ const constructions = data
     <LimitedList items={constructions} let:item={f}>
       <ThingLink id={f.group} type="construction_group" />
       {#if f.pre_terrain}
-        on <FurnitureSymbol item={data.byId("terrain", f.pre_terrain)} />
-        <ThingLink type="terrain" id={f.pre_terrain} />
+        on <FurnitureSymbol item={data.byId(f.pre_terrain.startsWith("f_") ? "furniture" : "terrain", f.pre_terrain)} />
+        <ThingLink type={f.pre_terrain.startsWith("f_") ? "furniture" : "terrain"} id={f.pre_terrain} />
       {/if}
     </LimitedList>
   </section>
