@@ -136,6 +136,6 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
 {#if constructions.length}
   <h2>Construction</h2>
   {#each constructions as construction}
-    <Construction {construction} />
+    <Construction {construction} includeTitle />
   {/each}
 {/if}

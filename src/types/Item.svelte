@@ -22,6 +22,7 @@ import Bash from "./item/Bash.svelte";
 import BookInfo from "./item/BookInfo.svelte";
 import ComestibleInfo from "./item/ComestibleInfo.svelte";
 import ComponentOf from "./item/ComponentOf.svelte";
+import ConstructionByproduct from "./item/ConstructionByproduct.svelte";
 import Deconstruct from "./item/Deconstruct.svelte";
 import Disassembly from "./item/Disassembly.svelte";
 import DroppedBy from "./item/DroppedBy.svelte";
@@ -403,6 +404,7 @@ const ascii_picture =
   <HarvestedFrom item_id={item.id} />
   <Disassembly item_id={item.id} />
   <Salvaged item_id={item.id} />
+  <ConstructionByproduct item_id={item.id} />
   <Deconstruct item_id={item.id} />
   <Bash item_id={item.id} />
   <SpawnedIn item_id={item.id} />

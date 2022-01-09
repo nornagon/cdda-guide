@@ -23,6 +23,7 @@ import MutationType from "./types/MutationType.svelte";
 import Vehicle from "./types/Vehicle.svelte";
 import Terrain from "./types/Terrain.svelte";
 import WeaponCategory from "./types/WeaponCategory.svelte";
+import ConstructionGroup from "./types/ConstructionGroup.svelte";
 
 export let item: { id: string; type: string };
 
@@ -80,6 +81,7 @@ const displays = {
   vehicle: Vehicle,
   terrain: Terrain,
   weapon_category: WeaponCategory,
+  construction_group: ConstructionGroup,
 };
 </script>
 

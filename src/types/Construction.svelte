@@ -1,14 +1,16 @@
 <script lang="ts">
 import { getContext } from "svelte";
-
 import type { CddaData } from "../data";
 import { singularName } from "../data";
 import type { Construction, RequirementData } from "../types";
+import FurnitureSymbol from "./item/FurnitureSymbol.svelte";
+import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 const data = getContext<CddaData>("data");
 
 export let construction: Construction;
+export let includeTitle: boolean = false;
 
 const using =
   typeof construction.using === "string"
@@ -37,10 +39,16 @@ const components = requirements.flatMap(([req, count]) => {
 const qualities = requirements.flatMap(([req, _count]) => {
   return (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x]));
 });
+
+const byproducts = data.flattenItemGroup(
+  data.normalizeItemGroup(construction.byproducts, "collection")
+);
 </script>
 
 <section>
-  <h1>{singularName(data.byId("construction_group", construction.group))}</h1>
+  {#if includeTitle}
+    <h1>{singularName(data.byId("construction_group", construction.group))}</h1>
+  {/if}
   <dl>
     <dt>Required Skills</dt>
     <dd>
@@ -61,9 +69,20 @@ const qualities = requirements.flatMap(([req, _count]) => {
         ? `${construction.time} m`
         : construction.time ?? "0 m"}
     </dd>
-    {#if construction.pre_terrain?.startsWith("f_")}
+    {#if construction.pre_terrain}
       <dt>Requires</dt>
-      <dd><ThingLink type="furniture" id={construction.pre_terrain} /></dd>
+      <dd>
+        <FurnitureSymbol
+          item={data.byId(
+            construction.pre_terrain.startsWith("f_") ? "furniture" : "terrain",
+            construction.pre_terrain
+          )} />
+        <ThingLink
+          type={construction.pre_terrain.startsWith("f_")
+            ? "furniture"
+            : "terrain"}
+          id={construction.pre_terrain} />
+      </dd>
     {/if}
     {#if qualities.length || tools.length}
       <dt>Tools Required</dt>
@@ -106,6 +125,19 @@ const qualities = requirements.flatMap(([req, _count]) => {
                 <ThingLink {id} {count} type="item" />
               {/each}
             </li>{/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if byproducts.length}
+      <dt>Byproducts</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each byproducts as { id, prob, count }}
+            <li>
+              <ItemSymbol item={data.byId("item", id)} />
+              <ThingLink type="item" {id} {count} />
+            </li>
+          {/each}
         </ul>
       </dd>
     {/if}

@@ -303,22 +303,11 @@ export class CddaData {
   ): { id: string; prob: number; count: [number, number] }[] {
     if (this._cachedDeathDrops.has(mon_id))
       return this._cachedDeathDrops.get(mon_id);
-    const normalizeDeathDrops = (
-      death_drops: Monster["death_drops"]
-    ): ItemGroup | undefined => {
-      if (death_drops) {
-        if (typeof death_drops === "string") {
-          return this.byId("item_group", death_drops);
-        } else if (Array.isArray(death_drops)) {
-          return { subtype: "distribution", entries: death_drops };
-        } else {
-          return { subtype: "distribution", ...death_drops };
-        }
-      }
-    };
     const mon = this.byId("monster", mon_id);
     const ret = mon.death_drops
-      ? this.flattenItemGroup(normalizeDeathDrops(mon.death_drops))
+      ? this.flattenItemGroup(
+          this.normalizeItemGroup(mon.death_drops, "distribution")
+        )
       : [];
     ret.sort((a, b) => b.prob - a.prob);
     this._cachedDeathDrops.set(mon_id, ret);
@@ -743,6 +732,22 @@ export class CddaData {
       byComponent: itemsByComponent,
     };
     return this._itemComponentCache;
+  }
+
+  normalizeItemGroup(
+    g: undefined | string | ItemGroup | ItemGroupEntry[],
+    subtype: "collection" | "distribution"
+  ): ItemGroup {
+    if (g) {
+      if (typeof g === "string") {
+        return this.byId("item_group", g);
+      } else if (Array.isArray(g)) {
+        return { subtype, entries: g };
+      } else {
+        return { subtype, ...g };
+      }
+    }
+    return { subtype, entries: [] };
   }
 }
 

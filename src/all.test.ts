@@ -31,6 +31,7 @@ const types = [
   "vehicle",
   "terrain",
   "weapon_category",
+  "construction_group",
 ];
 
 const all = data._raw
