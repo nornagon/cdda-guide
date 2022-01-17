@@ -247,8 +247,35 @@ export class CddaData {
     for (const k of Object.keys(ret.relative ?? {})) {
       if (typeof ret.relative[k] === "number") {
         ret[k] = (ret[k] ?? 0) + ret.relative[k];
+      } else if (k === "damage" && ret[k]) {
+        ret.damage = JSON.parse(JSON.stringify(ret.damage));
+        const relativeDamage = normalizeDamageInstance(ret.relative.damage);
+        for (const rdu of relativeDamage) {
+          const modified: DamageUnit = Array.isArray(ret.damage)
+            ? ret.damage.find(
+                (du: DamageUnit) => du.damage_type === rdu.damage_type
+              )
+            : ret.damage.damage_type === rdu.damage_type
+            ? ret.damage
+            : null;
+          if (modified) {
+            modified.amount = (modified.amount ?? 0) + (rdu.amount ?? 0);
+            modified.armor_penetration =
+              (modified.armor_penetration ?? 0) + (rdu.armor_penetration ?? 0);
+            modified.armor_multiplier =
+              (modified.armor_multiplier ?? 0) + (rdu.armor_multiplier ?? 0);
+            modified.damage_multiplier =
+              (modified.damage_multiplier ?? 0) + (rdu.damage_multiplier ?? 0);
+            modified.constant_armor_multiplier =
+              (modified.constant_armor_multiplier ?? 0) +
+              (rdu.constant_armor_multiplier ?? 0);
+            modified.constant_damage_multiplier =
+              (modified.constant_damage_multiplier ?? 0) +
+              (rdu.constant_damage_multiplier ?? 0);
+          }
+        }
       }
-      // TODO: damage, vitamins, mass, volume, time
+      // TODO: vitamins, mass, volume, time
     }
     delete ret.relative;
     for (const k of Object.keys(ret.proportional ?? {})) {
@@ -264,8 +291,37 @@ export class CddaData {
           ret[k] *= ret.proportional[k];
           ret[k] = ret[k] | 0; // most things are ints.. TODO: what keys are float?
         }
+      } else if (k === "damage" && ret[k]) {
+        ret.damage = JSON.parse(JSON.stringify(ret.damage));
+        const proportionalDamage = normalizeDamageInstance(
+          ret.proportional.damage
+        );
+        for (const pdu of proportionalDamage) {
+          const modified: DamageUnit = Array.isArray(ret.damage)
+            ? ret.damage.find(
+                (du: DamageUnit) => du.damage_type === pdu.damage_type
+              )
+            : ret.damage.damage_type === pdu.damage_type
+            ? ret.damage
+            : null;
+          if (modified) {
+            modified.amount = (modified.amount ?? 0) * (pdu.amount ?? 1);
+            modified.armor_penetration =
+              (modified.armor_penetration ?? 0) * (pdu.armor_penetration ?? 1);
+            modified.armor_multiplier =
+              (modified.armor_multiplier ?? 0) * (pdu.armor_multiplier ?? 1);
+            modified.damage_multiplier =
+              (modified.damage_multiplier ?? 0) * (pdu.damage_multiplier ?? 1);
+            modified.constant_armor_multiplier =
+              (modified.constant_armor_multiplier ?? 0) *
+              (pdu.constant_armor_multiplier ?? 1);
+            modified.constant_damage_multiplier =
+              (modified.constant_damage_multiplier ?? 0) *
+              (pdu.constant_damage_multiplier ?? 1);
+          }
+        }
       }
-      // TODO: damage, mass, volume, time (need to check the base value's type)
+      // TODO: mass, volume, time (need to check the base value's type)
     }
     delete ret.proportional;
     for (const k of Object.keys(ret.extend ?? {})) {
