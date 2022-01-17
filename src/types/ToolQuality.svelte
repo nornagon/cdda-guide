@@ -12,7 +12,9 @@ let data = getContext<CddaData>("data");
 let toolsWithQualityByLevel = new Map<number, Item[]>();
 for (const it of data.byType("item")) {
   if (!it.id) continue;
-  const q = (it.qualities ?? []).find(([id, _level]) => id === item.id);
+  const q = (it.qualities ?? [])
+    .concat(it.charged_qualities ?? [])
+    .find(([id, _level]) => id === item.id);
   if (q) {
     const [, level] = q;
     if (!toolsWithQualityByLevel.has(level))

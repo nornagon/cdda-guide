@@ -52,6 +52,11 @@ let qualities = (item.qualities ?? []).map(([id, level]) => ({
   level,
 }));
 
+let chargedQualities = (item.charged_qualities ?? []).map(([id, level]) => ({
+  quality: data.byId("tool_quality", id),
+  level,
+}));
+
 function isStrings<T>(array: string[] | T[]): array is string[] {
   return typeof array[0] === "string";
 }
@@ -230,7 +235,7 @@ const ascii_picture =
           </dd>
         {/if}
 
-        {#if qualities.length}
+        {#if qualities.length || chargedQualities.length}
           <dt>Qualities</dt>
           <dd>
             <ul class="no-bullets">
@@ -239,6 +244,14 @@ const ascii_picture =
                   Has level <strong
                     >{level}
                     <ThingLink type="tool_quality" id={quality.id} /></strong> quality.
+                </li>
+              {/each}
+              {#each chargedQualities as { quality, level }}
+                <li>
+                  Has level <strong
+                    >{level}
+                    <ThingLink type="tool_quality" id={quality.id} /></strong> quality
+                  (when charged).
                 </li>
               {/each}
             </ul>
