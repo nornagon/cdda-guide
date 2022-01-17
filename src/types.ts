@@ -327,6 +327,7 @@ export type ItemBasicInfo = {
   symbol?: string;
   description?: Translation;
   qualities?: [string, number][];
+  charged_qualities?: [string, number][];
   volume?: volume;
   weight?: mass;
   longest_side?: string;
