@@ -1,6 +1,6 @@
 <script lang="ts">
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../../data";
+import { CddaData, parseMass, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import type { Item, Material } from "../../types";
 import ThingLink from "../ThingLink.svelte";
@@ -9,6 +9,8 @@ import ItemSymbol from "./ItemSymbol.svelte";
 export let item_id: string;
 
 let data = getContext<CddaData>("data");
+
+const item = data.byId("item", item_id);
 
 function itemsWithOnlyMaterial(soughtMat: Material): Item[] {
   return data.byType("item").filter((it) => {
@@ -23,6 +25,7 @@ const salvagedFromMaterials = data
   .filter((mat) => mat.salvaged_into === item_id)
   .flatMap((mat) => itemsWithOnlyMaterial(mat))
   .filter((it) => !(it.flags ?? []).includes("NO_SALVAGE"))
+  .filter((it) => parseMass(it.weight) >= parseMass(item.weight))
   .sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
