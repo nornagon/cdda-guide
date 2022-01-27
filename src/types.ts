@@ -148,7 +148,7 @@ export type Recipe = {
   category?: string;
   subcategory?: string;
   description?: string;
-  reversible?: boolean;
+  reversible?: boolean | { time: duration };
   byproducts?: ([string] | [string, number])[];
   // TODO: construction_blueprint
   construction_blueprint?: any;
