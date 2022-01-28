@@ -26,6 +26,7 @@ import ConstructionByproduct from "./item/ConstructionByproduct.svelte";
 import Deconstruct from "./item/Deconstruct.svelte";
 import Disassembly from "./item/Disassembly.svelte";
 import DroppedBy from "./item/DroppedBy.svelte";
+import Foraged from "./item/Foraged.svelte";
 import GrownFrom from "./item/GrownFrom.svelte";
 import GunInfo from "./item/GunInfo.svelte";
 import HarvestedFrom from "./item/HarvestedFrom.svelte";
@@ -413,6 +414,7 @@ const ascii_picture =
   <h2>Obtaining</h2>
   <Recipes item_id={item.id} />
   <DroppedBy item_id={item.id} />
+  <Foraged item_id={item.id} />
   <GrownFrom item_id={item.id} />
   <HarvestedFrom item_id={item.id} />
   <Disassembly item_id={item.id} />

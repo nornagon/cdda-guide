@@ -1324,6 +1324,8 @@ export type Terrain = MapDataCommon & {
   deconstruct?: MapDeconstructInfo;
 
   transforms_into?: string;
+
+  examine_action?: string;
 };
 
 export type WeaponCategory = {
