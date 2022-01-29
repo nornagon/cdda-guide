@@ -253,7 +253,7 @@ function lootForChunks(data: CddaData, chunks: (string | [string, number])[]): L
     typeof c === 'string' ? [c, 100] as [string, number] : c
   )
   const loot = mergeLoot(normalizedChunks.map(([chunkId, weight]) => {
-    const chunkMapgens = data.byType("mapgen").filter(t => t.nested_mapgen_id === chunkId)
+    const chunkMapgens = data.nestedMapgensById(chunkId) ?? []
     const loot = mergeLoot(chunkMapgens.map(mg => {
       const loot = getLootForMapgen(data, mg)
       const weight = mg.weight ?? 1000
@@ -297,7 +297,6 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
     }
     return {loot: multipliedLoot}
   })
-  if (place_nested.length && place_nested.some(s => s.loot.has("seed_bee_balm"))) debugger
   const additional_items = collection([
     ...place_items,
     ...place_item,
