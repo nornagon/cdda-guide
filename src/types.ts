@@ -1325,7 +1325,7 @@ export type Terrain = MapDataCommon & {
 
   transforms_into?: string;
 
-  examine_action?: string;
+  examine_action?: string | { type: "cardreader" } | { type: "effect_on_condition" };
 };
 
 export type WeaponCategory = {
