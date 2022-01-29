@@ -181,8 +181,8 @@ export class CddaData {
 
       if (Object.hasOwnProperty.call(obj, "nested_mapgen_id")) {
         if (!this._nestedMapgensById.has(obj.nested_mapgen_id))
-          this._nestedMapgensById.set(obj.nested_mapgen_id, [])
-        this._nestedMapgensById.get(obj.nested_mapgen_id).push(obj)
+          this._nestedMapgensById.set(obj.nested_mapgen_id, []);
+        this._nestedMapgensById.get(obj.nested_mapgen_id).push(obj);
       }
     }
   }
@@ -223,7 +223,7 @@ export class CddaData {
   }
 
   nestedMapgensById(id: string): Mapgen[] | undefined {
-    return this._nestedMapgensById.get(id)
+    return this._nestedMapgensById.get(id);
   }
 
   all(): SupportedTypeMapped[] {

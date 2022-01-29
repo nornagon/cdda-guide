@@ -248,20 +248,27 @@ function addLoot(loots: Loot[]): Loot {
   return ret;
 }
 
-function lootForChunks(data: CddaData, chunks: (string | [string, number])[]): Loot {
-  const normalizedChunks = (chunks ?? []).map(c =>
-    typeof c === 'string' ? [c, 100] as [string, number] : c
-  )
-  const loot = mergeLoot(normalizedChunks.map(([chunkId, weight]) => {
-    const chunkMapgens = data.nestedMapgensById(chunkId) ?? []
-    const loot = mergeLoot(chunkMapgens.map(mg => {
-      const loot = getLootForMapgen(data, mg)
-      const weight = mg.weight ?? 1000
-      return { loot, weight }
-    }))
-    return { loot, weight }
-  }))
-  return loot
+function lootForChunks(
+  data: CddaData,
+  chunks: (string | [string, number])[]
+): Loot {
+  const normalizedChunks = (chunks ?? []).map((c) =>
+    typeof c === "string" ? ([c, 100] as [string, number]) : c
+  );
+  const loot = mergeLoot(
+    normalizedChunks.map(([chunkId, weight]) => {
+      const chunkMapgens = data.nestedMapgensById(chunkId) ?? [];
+      const loot = mergeLoot(
+        chunkMapgens.map((mg) => {
+          const loot = getLootForMapgen(data, mg);
+          const weight = mg.weight ?? 1000;
+          return { loot, weight };
+        })
+      );
+      return { loot, weight };
+    })
+  );
+  return loot;
 }
 
 const lootForMapgenCache = new WeakMap<raw.Mapgen, Loot>();
@@ -287,16 +294,17 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
       chance: repeatChance(repeat, chance / 100),
     })
   );
-  const place_nested = (mapgen.object.place_nested ?? []).map(nested => {
-    const loot = lootForChunks(data, nested.chunks)
+  const place_nested = (mapgen.object.place_nested ?? []).map((nested) => {
+    const loot = lootForChunks(data, nested.chunks);
     // TODO: do the probability correctly when repeat is a range, e.g. repeat: [2, 10]
-    const repeat = (Array.isArray(nested.repeat) ? nested.repeat[0] : nested.repeat) ?? 1
+    const repeat =
+      (Array.isArray(nested.repeat) ? nested.repeat[0] : nested.repeat) ?? 1;
     const multipliedLoot: Loot = new Map();
     for (const [id, chance] of loot.entries()) {
       multipliedLoot.set(id, 1 - Math.pow(1 - chance, repeat));
     }
-    return {loot: multipliedLoot}
-  })
+    return { loot: multipliedLoot };
+  });
   const additional_items = collection([
     ...place_items,
     ...place_item,
@@ -358,7 +366,7 @@ type RawPalette = {
   item?: raw.PlaceMapping<raw.MapgenSpawnItem>;
   items?: raw.PlaceMapping<raw.MapgenItemGroup>;
   sealed_item?: raw.PlaceMapping<raw.MapgenSealedItem>;
-  nested?: raw.PlaceMapping<raw.MapgenNested>
+  nested?: raw.PlaceMapping<raw.MapgenNested>;
   palettes?: (
     | string
     | { param: any }
@@ -424,15 +432,12 @@ export function parsePalette(
       };
     }
   );
-  const nested = parsePlaceMapping(
-    palette.nested,
-    function* ({ chunks }) {
-      yield {
-        loot: lootForChunks(data, chunks),
-        chance: 1
-      }
-    }
-  )
+  const nested = parsePlaceMapping(palette.nested, function* ({ chunks }) {
+    yield {
+      loot: lootForChunks(data, chunks),
+      chance: 1,
+    };
+  });
   const palettes = (palette.palettes ?? [])
     .flatMap((id) =>
       typeof id !== "string" ? [] /*TODO*/ : [data.byId("palette", id)]

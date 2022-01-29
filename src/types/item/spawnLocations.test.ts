@@ -1,6 +1,12 @@
-import { collection, getLootForMapgen, lootByOmSpecial, parsePalette, repeatChance } from "./spawnLocations";
+import {
+  collection,
+  getLootForMapgen,
+  lootByOmSpecial,
+  parsePalette,
+  repeatChance,
+} from "./spawnLocations";
 import { CddaData } from "../../data";
-import type {Mapgen, OvermapSpecial} from "../../types";
+import type { Mapgen, OvermapSpecial } from "../../types";
 
 describe("collection()", () => {
   it("returns nothing given no items", () => {
@@ -317,149 +323,145 @@ describe("nested mapgen", () => {
   it("reads place_nested", () => {
     const data = new CddaData([
       {
-        "type": "mapgen",
-        "method": "json",
-        "om_terrain": "test_ter",
-        "object": {
-          "fill_ter": "t_floor",
-          "rows": [],
-          "place_nested": [
-            { "chunks": [ "test_chunk" ], "x": 0, "y": 0 },
-          ]
-        }
+        type: "mapgen",
+        method: "json",
+        om_terrain: "test_ter",
+        object: {
+          fill_ter: "t_floor",
+          rows: [],
+          place_nested: [{ chunks: ["test_chunk"], x: 0, y: 0 }],
+        },
       } as Mapgen,
       {
-        "type": "mapgen",
-        "method": "json",
-        "nested_mapgen_id": "test_chunk",
-        "object": {
-          "mapgensize": [ 1, 1 ],
-          "rows": [
-            "L",
-          ],
-          "item": {
-            "L": { "item": "test_item" }
-          }
-        }
+        type: "mapgen",
+        method: "json",
+        nested_mapgen_id: "test_chunk",
+        object: {
+          mapgensize: [1, 1],
+          rows: ["L"],
+          item: {
+            L: { item: "test_item" },
+          },
+        },
       } as Mapgen,
-    ])
-    const loot = getLootForMapgen(data, data.byType("mapgen")[0])
-    expect([...loot.entries()]).toEqual([["test_item", 1]])
-  })
+    ]);
+    const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
+    expect([...loot.entries()]).toEqual([["test_item", 1]]);
+  });
 
   it("handles chunk weights", () => {
     const data = new CddaData([
       {
-        "type": "mapgen",
-        "method": "json",
-        "om_terrain": "test_ter",
-        "object": {
-          "fill_ter": "t_floor",
-          "rows": [],
-          "place_nested": [
-            { "chunks": [ [ "test_chunk", 10 ], [ "test_chunk_2", 30 ] ], "x": 0, "y": 0 },
-          ]
-        }
+        type: "mapgen",
+        method: "json",
+        om_terrain: "test_ter",
+        object: {
+          fill_ter: "t_floor",
+          rows: [],
+          place_nested: [
+            {
+              chunks: [
+                ["test_chunk", 10],
+                ["test_chunk_2", 30],
+              ],
+              x: 0,
+              y: 0,
+            },
+          ],
+        },
       } as Mapgen,
       {
-        "type": "mapgen",
-        "method": "json",
-        "nested_mapgen_id": "test_chunk",
-        "object": {
-          "mapgensize": [ 1, 1 ],
-          "rows": [
-            "L",
-          ],
-          "item": {
-            "L": { "item": "test_item" }
-          }
-        }
+        type: "mapgen",
+        method: "json",
+        nested_mapgen_id: "test_chunk",
+        object: {
+          mapgensize: [1, 1],
+          rows: ["L"],
+          item: {
+            L: { item: "test_item" },
+          },
+        },
       } as Mapgen,
       {
-        "type": "mapgen",
-        "method": "json",
-        "nested_mapgen_id": "test_chunk_2",
-        "object": {
-          "mapgensize": [ 1, 1 ],
-          "rows": [
-            "L",
-          ],
-          "item": {
-            "L": { "item": "test_item_2" }
-          }
-        }
+        type: "mapgen",
+        method: "json",
+        nested_mapgen_id: "test_chunk_2",
+        object: {
+          mapgensize: [1, 1],
+          rows: ["L"],
+          item: {
+            L: { item: "test_item_2" },
+          },
+        },
       } as Mapgen,
-    ])
-    const loot = getLootForMapgen(data, data.byType("mapgen")[0])
-    expect([...loot.entries()]).toEqual([["test_item", 0.25], ["test_item_2", 0.75]])
-  })
+    ]);
+    const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
+    expect([...loot.entries()]).toEqual([
+      ["test_item", 0.25],
+      ["test_item_2", 0.75],
+    ]);
+  });
 
   it("handles repeat", () => {
     const data = new CddaData([
       {
-        "type": "mapgen",
-        "method": "json",
-        "om_terrain": "test_ter",
-        "object": {
-          "fill_ter": "t_floor",
-          "rows": [],
-          "place_nested": [
-            { "chunks": [ "test_chunk" ], "x": 0, "y": 0, "repeat": 2 },
-          ]
-        }
+        type: "mapgen",
+        method: "json",
+        om_terrain: "test_ter",
+        object: {
+          fill_ter: "t_floor",
+          rows: [],
+          place_nested: [{ chunks: ["test_chunk"], x: 0, y: 0, repeat: 2 }],
+        },
       } as Mapgen,
       {
-        "type": "mapgen",
-        "method": "json",
-        "nested_mapgen_id": "test_chunk",
-        "object": {
-          "mapgensize": [ 1, 1 ],
-          "rows": [
-            "L",
-          ],
-          "item": {
-            "L": { "item": "test_item", "chance": 30 }
-          }
-        }
+        type: "mapgen",
+        method: "json",
+        nested_mapgen_id: "test_chunk",
+        object: {
+          mapgensize: [1, 1],
+          rows: ["L"],
+          item: {
+            L: { item: "test_item", chance: 30 },
+          },
+        },
       } as Mapgen,
-    ])
-    const loot = getLootForMapgen(data, data.byType("mapgen")[0])
-    expect([...loot.entries()]).toEqual([["test_item", 0.51]])
-  })
+    ]);
+    const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
+    expect([...loot.entries()]).toEqual([["test_item", 0.51]]);
+  });
 
-  it.todo("handles repeat range")
+  it.todo("handles repeat range");
 
   it("reads nested", () => {
     const data = new CddaData([
       {
-        "type": "mapgen",
-        "method": "json",
-        "om_terrain": "test_ter",
-        "object": {
-          "fill_ter": "t_floor",
-          "rows": [ "f" ],
-          "nested": {
-            "f": { "chunks": [ "test_chunk" ] },
-          }
-        }
+        type: "mapgen",
+        method: "json",
+        om_terrain: "test_ter",
+        object: {
+          fill_ter: "t_floor",
+          rows: ["f"],
+          nested: {
+            f: { chunks: ["test_chunk"] },
+          },
+        },
       } as Mapgen,
       {
-        "type": "mapgen",
-        "method": "json",
-        "nested_mapgen_id": "test_chunk",
-        "object": {
-          "mapgensize": [ 1, 1 ],
-          "rows": [
-            "L",
-          ],
-          "item": {
-            "L": { "item": "test_item" }
-          }
-        }
+        type: "mapgen",
+        method: "json",
+        nested_mapgen_id: "test_chunk",
+        object: {
+          mapgensize: [1, 1],
+          rows: ["L"],
+          item: {
+            L: { item: "test_item" },
+          },
+        },
       } as Mapgen,
-    ])
+    ]);
     // NB, lootByOmSpecial is what handles mapgen offsets, so we have to call through that.
-    const loot = getLootForMapgen(data, data.byType("mapgen")[0])
-    expect([...loot.entries()]).toEqual([["test_item", 1]])
-  })
-})
+    const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
+    expect([...loot.entries()]).toEqual([["test_item", 1]]);
+  });
+});
