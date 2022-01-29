@@ -49,7 +49,7 @@ function offsetMapgen(mapgen: raw.Mapgen, x: number, y: number): raw.Mapgen {
       .map((row) => row.slice(x * 24, (x + 1) * 24)),
   };
   const min = (x: number | [number] | [number, number]) =>
-    Array.isArray(x) ? [0] : x;
+    Array.isArray(x) ? x[0] : x;
   if (object.place_items)
     object.place_items = object.place_items.filter(
       (p) =>
@@ -67,6 +67,11 @@ function offsetMapgen(mapgen: raw.Mapgen, x: number, y: number): raw.Mapgen {
     );
   if (object.place_loot)
     object.place_loot = object.place_loot.filter(
+      (p) =>
+        min(p.x) >= x && min(p.y) >= y && min(p.x) < x + 24 && min(p.y) < y + 24
+    );
+  if (object.place_nested)
+    object.place_nested = object.place_nested.filter(
       (p) =>
         min(p.x) >= x && min(p.y) >= y && min(p.x) < x + 24 && min(p.y) < y + 24
     );
@@ -266,10 +271,33 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
       chance: repeatChance(repeat, chance / 100),
     })
   );
+  const place_nested = (mapgen.object.place_nested ?? []).map(nested => {
+    const normalizedChunks = (nested.chunks ?? []).map(c =>
+      typeof c === 'string' ? [c, 100] as [string, number] : c
+    )
+    const loot = mergeLoot(normalizedChunks.map(([chunkId, weight]) => {
+      const chunkMapgens = data.byType("mapgen").filter(t => t.nested_mapgen_id === chunkId)
+      const loot = mergeLoot(chunkMapgens.map(mg => {
+        const loot = getLootForMapgen(data, mg)
+        const weight = mg.weight ?? 1000
+        return { loot, weight }
+      }))
+      return { loot, weight }
+    }))
+    // TODO: do the probability correctly when repeat is a range, e.g. repeat: [2, 10]
+    const repeat = (Array.isArray(nested.repeat) ? nested.repeat[0] : nested.repeat) ?? 1
+    const multipliedLoot: Loot = new Map();
+    for (const [id, chance] of loot.entries()) {
+      multipliedLoot.set(id, 1 - Math.pow(1 - chance, repeat));
+    }
+    return {loot: multipliedLoot}
+  })
+  if (place_nested.length && place_nested.some(s => s.loot.has("seed_bee_balm"))) debugger
   const additional_items = collection([
     ...place_items,
     ...place_item,
     ...place_loot,
+    ...place_nested,
   ]);
   const countByPalette = new Map<string, number>();
   for (const row of mapgen.object.rows ?? [])
