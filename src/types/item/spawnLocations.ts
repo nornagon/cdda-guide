@@ -49,7 +49,7 @@ function offsetMapgen(mapgen: raw.Mapgen, x: number, y: number): raw.Mapgen {
       .map((row) => row.slice(x * 24, (x + 1) * 24)),
   };
   const min = (x: number | [number] | [number, number]) =>
-    Array.isArray(x) ? [0] : x;
+    Array.isArray(x) ? x[0] : x;
   if (object.place_items)
     object.place_items = object.place_items.filter(
       (p) =>
