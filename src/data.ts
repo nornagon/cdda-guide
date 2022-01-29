@@ -120,6 +120,7 @@ export class CddaData {
   _craftingPseudoItems: Map<string, string> = new Map();
   _migrations: Map<string, string> = new Map();
   _flattenCache: Map<any, any> = new Map();
+  _nestedMapgensById: Map<string, Mapgen[]> = new Map();
 
   release: any;
   build_number: string;
@@ -177,6 +178,12 @@ export class CddaData {
       if (Object.hasOwnProperty.call(obj, "crafting_pseudo_item")) {
         this._craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id);
       }
+
+      if (Object.hasOwnProperty.call(obj, "nested_mapgen_id")) {
+        if (!this._nestedMapgensById.has(obj.nested_mapgen_id))
+          this._nestedMapgensById.set(obj.nested_mapgen_id, [])
+        this._nestedMapgensById.get(obj.nested_mapgen_id).push(obj)
+      }
     }
   }
 
@@ -213,6 +220,10 @@ export class CddaData {
 
   craftingPseudoItem(id: string): string | undefined {
     return this._craftingPseudoItems.get(id);
+  }
+
+  nestedMapgensById(id: string): Mapgen[] | undefined {
+    return this._nestedMapgensById.get(id)
   }
 
   all(): SupportedTypeMapped[] {
