@@ -1,6 +1,6 @@
 <script lang="ts">
 import { getContext } from "svelte";
-import { CddaData, showProbability } from "../../data";
+import type { CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import FurnitureSymbol from "./FurnitureSymbol.svelte";
