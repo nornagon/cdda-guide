@@ -12,7 +12,7 @@ _More popular than the Celestial Home Care Omnibus, better selling than Fifty-th
 
 ## Acknowledgements
 
-The Hitchhiker's Guide to the Cataclysm is maintained by @nornagon, with generous contributions from the following folks:
+The Hitchhiker's Guide to the Cataclysm is maintained by [**@nornagon**](https://github.com/nornagon), with generous contributions from the following folks:
 
 - [**@hexagonrecursion**](https://github.com/hexagonrecursion)
 
