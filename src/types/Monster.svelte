@@ -376,15 +376,33 @@ let upgrades =
     <dd>{item.default_faction}</dd>
     {#if item.anger_triggers}
       <dt>Anger Triggers</dt>
-      <dd>{item.anger_triggers.join(", ")}</dd>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.anger_triggers as t}
+            <li><abbr title={trigger_descriptions[t]}>{t}</abbr></li>
+          {/each}
+        </ul>
+      </dd>
     {/if}
     {#if item.placate_triggers}
       <dt>Placate Triggers</dt>
-      <dd>{item.placate_triggers.join(", ")}</dd>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.placate_triggers as t}
+            <li><abbr title={trigger_descriptions[t]}>{t}</abbr></li>
+          {/each}
+        </ul>
+      </dd>
     {/if}
     {#if item.fear_triggers}
       <dt>Fear Triggers</dt>
-      <dd>{item.fear_triggers.join(", ")}</dd>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.fear_triggers as t}
+            <li><abbr title={trigger_descriptions[t]}>{t}</abbr></li>
+          {/each}
+        </ul>
+      </dd>
     {/if}
     {#if item.flags?.length}
       <dt>Flags</dt>
