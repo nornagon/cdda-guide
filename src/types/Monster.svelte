@@ -374,7 +374,7 @@ let upgrades =
     <dd>{item.vision_day ?? 40} (day) / {item.vision_night ?? 1} (night)</dd>
     <dt>Default Faction</dt>
     <dd>{item.default_faction}</dd>
-    {#if item.anger_triggers}
+    {#if item.anger_triggers?.length}
       <dt>Anger Triggers</dt>
       <dd>
         <ul class="comma-separated">
@@ -384,7 +384,7 @@ let upgrades =
         </ul>
       </dd>
     {/if}
-    {#if item.placate_triggers}
+    {#if item.placate_triggers?.length}
       <dt>Placate Triggers</dt>
       <dd>
         <ul class="comma-separated">
@@ -394,7 +394,7 @@ let upgrades =
         </ul>
       </dd>
     {/if}
-    {#if item.fear_triggers}
+    {#if item.fear_triggers?.length}
       <dt>Fear Triggers</dt>
       <dd>
         <ul class="comma-separated">
