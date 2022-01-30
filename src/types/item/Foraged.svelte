@@ -36,7 +36,7 @@ const forageSources = data
       <FurnitureSymbol {item} />
       <ThingLink type="terrain" id={item.id} /> in
       <ul class="comma-separated or">
-        {#each forageable as [season, prob /* TODO: probability is a bit messy here. */]}
+        {#each forageable as [season, _prob /* TODO: probability is a bit messy here. */]}
           <li>{season}</li>
         {/each}
       </ul>

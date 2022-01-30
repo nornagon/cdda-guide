@@ -54,35 +54,36 @@ const zOrder = {
   roof: -1,
   armor: -2,
 };
-
-const LINE_XOXO = "│";
-const LINE_OXOX = "─";
-const LINE_XXOO = "└";
-const LINE_OXXO = "┌";
-const LINE_OOXX = "┐";
-const LINE_XOOX = "┘";
-const LINE_XXXO = "├";
-const LINE_XXOX = "┴";
-const LINE_XOXX = "┤";
-const LINE_OXXX = "┬";
-const LINE_XXXX = "┼";
+const LINE = {
+  XOXO: "│",
+  OXOX: "─",
+  XXOO: "└",
+  OXXO: "┌",
+  OOXX: "┐",
+  XOOX: "┘",
+  XXXO: "├",
+  XXOX: "┴",
+  XOXX: "┤",
+  OXXX: "┬",
+  XXXX: "┼",
+};
 
 const specialSymbol = (symbol: string): string => {
   switch (symbol) {
     case "j":
-      return LINE_XOXO;
+      return LINE.XOXO;
     case "h":
-      return LINE_OXOX;
+      return LINE.OXOX;
     case "c":
-      return LINE_XXXX;
+      return LINE.XXXX;
     case "y":
-      return LINE_OXXO;
+      return LINE.OXXO;
     case "u":
-      return LINE_OOXX;
+      return LINE.OOXX;
     case "n":
-      return LINE_XOOX;
+      return LINE.XOOX;
     case "b":
-      return LINE_XXOO;
+      return LINE.XXOO;
     default:
       return symbol;
   }

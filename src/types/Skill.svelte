@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 
-import { CddaData, mapType, singularName } from "../data";
+import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { Skill, SupportedTypesWithMapped } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";

@@ -1,12 +1,9 @@
 <script lang="ts">
-import { getContext } from "svelte";
-import { CddaData, normalizeDamageInstance } from "../../data";
+import { normalizeDamageInstance } from "../../data";
 import type { SpecialAttack } from "../../types";
 import GunAttack from "./special_attacks/GunAttack.svelte";
 
 export let special_attack: SpecialAttack;
-
-let data = getContext<CddaData>("data");
 </script>
 
 {#if Array.isArray(special_attack)}

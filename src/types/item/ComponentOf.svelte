@@ -2,7 +2,6 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Recipe, RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
