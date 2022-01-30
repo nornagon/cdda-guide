@@ -620,7 +620,7 @@ export type Vitamin = {
   flags?: string[];
 };
 
-type LeapAttack = {
+export type LeapAttack = {
   type: "leap";
   max_range: number; // float
   min_range?: number; // float, default 1
@@ -629,7 +629,7 @@ type LeapAttack = {
   min_consider_range?: number; // default 0
   max_consider_range?: number; // default 200
 };
-type MeleeAttack = {
+export type MeleeAttack = {
   type: "melee";
   damage_max_instance?: DamageInstance;
   min_mul?: number; // float, default 0
@@ -646,13 +646,13 @@ type MeleeAttack = {
     chance?: number /* int, default 100 */;
   }[];
 };
-type BiteAttack = Omit<MeleeAttack, "type"> & {
+export type BiteAttack = Omit<MeleeAttack, "type"> & {
   type: "bite";
   no_infection_chance?: number; // int, default 14
 };
-type GunAttack = {
+export type GunAttack = {
   type: "gun";
-  gun_type?: string; // item_id
+  gun_type: string; // item_id
   ammo_type?: string; // item_id
   fake_skills?: [string /* skill_id */, number /* level */][];
   fake_str?: number;
@@ -674,13 +674,13 @@ type SpellData = {
   // TODO: ...
 };
 
-type SpellAttack = {
+export type SpellAttack = {
   type: "spell";
   spell_data: SpellData;
   monster_message?: Translation;
 };
 
-type GenericMonsterAttack = {
+export type GenericMonsterAttack = {
   type?: "monster_attack";
   id: string;
 } & Omit<MeleeAttack, "type">;

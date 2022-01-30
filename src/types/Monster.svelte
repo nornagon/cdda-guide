@@ -10,14 +10,9 @@ import {
   singularName,
 } from "../data";
 import ThingLink from "./ThingLink.svelte";
-import type {
-  DamageUnit,
-  Harvest,
-  Monster,
-  MonsterGroup,
-  SpecialAttack,
-} from "../types";
+import type { Harvest, Monster, MonsterGroup } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import SpecialAttack from "./monster/SpecialAttack.svelte";
 import LimitedList from "../LimitedList.svelte";
 
 export let item: Monster;
@@ -237,27 +232,6 @@ const trigger_descriptions = {
   MATING_SEASON: "Increases aggression by 3 if a potential enemy is within 5 tiles range and the season is the same as the monster's mating season (defined by the baby_flags field in its reproduction data).",
 }
 
-function specialAttackToString(special_attack: SpecialAttack): string {
-  if (Array.isArray(special_attack))
-    if (special_attack.length > 1)
-      return `${special_attack[0]} (cooldown: ${special_attack[1]})`;
-    else return special_attack[0];
-  if ("type" in special_attack)
-    if ("cooldown" in special_attack)
-      return `${special_attack.type} (cooldown: ${special_attack.cooldown})`;
-    else return special_attack.type;
-  if ("id" in special_attack)
-    if ("damage_max_instance" in special_attack)
-      return `${special_attack.id}: ${(
-        special_attack.damage_max_instance as DamageUnit[]
-      )
-        .map((inst) => {
-          return `(${inst.damage_type} for ${inst.amount} damage)`;
-        })
-        .join(" ")}`;
-    else return special_attack.id;
-}
-
 let materials = item.material ?? [];
 
 let deathDrops = data.flatDeathDrops(item.id);
@@ -342,7 +316,7 @@ let upgrades =
                 {#if special_attack[0] && data.byId("monster_attack", special_attack[0])}
                   <ThingLink type="monster_attack" id={special_attack[0]} />
                 {:else}
-                  {specialAttackToString(special_attack)}
+                  <SpecialAttack {special_attack} />
                 {/if}
               </li>
             {/each}
