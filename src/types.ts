@@ -932,6 +932,10 @@ export type Monster = {
   anger_triggers?: string[];
   placate_triggers?: string[];
   fear_triggers?: string[];
+  special_when_hit?: [
+    "NONE" | "ZAPBACK" | "ACIDSPLASH" | "RETURN_FIRE",
+    integer
+  ];
   morale?: number;
   aggression?: number;
   death_function?: {

@@ -353,6 +353,10 @@ let upgrades =
           <dd>{item.armor_fire ?? 0}</dd>
         </dl>
       </dd>
+      {#if item.special_when_hit}
+        <dt>When Hit</dt>
+        <dd>{item.special_when_hit[0]} ({item.special_when_hit[1]}%)</dd>
+      {/if}
     </dl>
   </section>
 </div>
