@@ -80,7 +80,8 @@
   },
   "lint-staged": {
     "*.{js,ts,svelte}": [
-      "prettier -w"
+      "prettier -w",
+      "svelte-check"
     ]
   }
 }
