@@ -10,7 +10,9 @@ const data = getContext<CddaData>("data");
 
 const unlocks = data
   .byType("achievement")
-  .filter((x) => x.id !== item.id && x.hidden_by?.includes(item.id));
+  .filter(
+    (x) => x.id !== item.id && [x.hidden_by ?? []].flat().includes(item.id)
+  );
 </script>
 
 <h1>
@@ -28,7 +30,7 @@ const unlocks = data
       <dt>Hidden By</dt>
       <dd>
         <ul class="comma-separated and">
-          {#each item.hidden_by as id}
+          {#each [item.hidden_by].flat() as id}
             <li><ThingLink type={item.type} {id} /></li>
           {/each}
         </ul>

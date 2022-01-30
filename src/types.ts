@@ -1376,7 +1376,7 @@ export type Achievement = {
   name: Translation;
   description?: Translation;
   requirements: AchievementRequirement[];
-  hidden_by?: string; // achievement_id
+  hidden_by?: string | string[]; // achievement_id
   time_constraint?: {
     since: "cataclysm" | "game_start";
     is: AchievementComparison;
