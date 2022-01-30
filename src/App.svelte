@@ -166,6 +166,10 @@ function maybeFocusSearch(e: KeyboardEvent) {
       <li><a href="#/tool_quality">Qualities</a></li>
       <li><a href="#/mutation">Mutations</a></li>
       <li><a href="#/json_flag">Flags</a></li>
+      <li>
+        <a href="#/achievement">Achievements</a> /
+        <a href="#/conduct">Conducts</a>
+      </li>
     </ul>
   {/if}
 

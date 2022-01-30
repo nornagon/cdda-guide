@@ -24,6 +24,7 @@ import Vehicle from "./types/Vehicle.svelte";
 import Terrain from "./types/Terrain.svelte";
 import WeaponCategory from "./types/WeaponCategory.svelte";
 import ConstructionGroup from "./types/ConstructionGroup.svelte";
+import Achievement from "./types/Achievement.svelte";
 
 export let item: { id: string; type: string };
 
@@ -82,6 +83,8 @@ const displays = {
   terrain: Terrain,
   weapon_category: WeaponCategory,
   construction_group: ConstructionGroup,
+  achievement: Achievement,
+  conduct: Achievement,
 };
 </script>
 

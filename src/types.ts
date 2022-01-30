@@ -1342,6 +1342,48 @@ export type WeaponCategory = {
   name: Translation;
 };
 
+export type EventStatistic = {
+  type: "event_statistic";
+  id: string;
+  description?: Translation;
+} & (
+  | { stat_type: "count" }
+  | {
+      stat_type:
+        | "total"
+        | "minimum"
+        | "maximum"
+        | "unique_value"
+        | "first_value"
+        | "last_value";
+      field: string;
+    }
+) &
+  ({ event_type: string } | { event_transformation: string });
+
+export type AchievementComparison = "==" | "<=" | ">=" | "anything";
+
+export type AchievementRequirement = {
+  event_statistic: string;
+  is: AchievementComparison;
+  target?: integer | duration | [string, string];
+  description?: Translation;
+};
+
+export type Achievement = {
+  type: "achievement" | "conduct";
+  id: string;
+  name: Translation;
+  description?: Translation;
+  requirements: AchievementRequirement[];
+  hidden_by?: string; // achievement_id
+  time_constraint?: {
+    since: "cataclysm" | "game_start";
+    is: AchievementComparison;
+    target: duration;
+  };
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1365,12 +1407,15 @@ export type SupportedTypes = {
   // Non-item types.
   MONSTER: Monster;
   SPELL: Spell;
+  achievement: Achievement;
   ammunition_type: AmmunitionType;
   ascii_art: AsciiArt;
   body_part: BodyPart;
+  conduct: Achievement;
   construction: Construction;
   construction_group: ConstructionGroup;
   effect_type: EffectType;
+  event_statistic: EventStatistic;
   fault: Fault;
   furniture: Furniture;
   harvest: Harvest;

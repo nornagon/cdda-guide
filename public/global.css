@@ -91,6 +91,9 @@ ul.comma-separated > li:not(:first-child)::before {
 ul.comma-separated.or > li:last-child:not(:first-child)::before {
 	content: ' or '
 }
+ul.comma-separated.and > li:last-child:not(:first-child)::before {
+	content: ' and '
+}
 
 dl {
 	display: grid;
