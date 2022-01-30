@@ -30,8 +30,10 @@ for (let y = minY; y <= maxY; y++) {
   for (let x = minX; x <= maxX; x++) {
     const om = overmapsByPoint.get(`${x}|${y}`);
     if (om) {
-      const omt_id = om.overmap.replace(/_(north|south|east|west)$/, "");
-      const appearance = omtAppearance(omt_id);
+      const [, omt_id, dir] = /^(.+?)(?:_(north|south|east|west))?$/.exec(
+        om.overmap
+      );
+      const appearance = omtAppearance(omt_id, dir || "north");
       appearanceRow.push(appearance);
     } else {
       appearanceRow.push({ color: "black", sym: " ", name: "" });
@@ -58,14 +60,42 @@ function isEmpty(
   return row.every((cell) => cell.sym === " ");
 }
 
-function omtAppearance(omt_id: string): {
+function rotateSymbol(symbol: string, dir: string) {
+  const dirNum =
+    dir === "north"
+      ? 0
+      : dir === "east"
+      ? 1
+      : dir === "south"
+      ? 2
+      : dir === "west"
+      ? 3
+      : 0;
+  if (dirNum === 0) return symbol;
+  const rotatable = data
+    .byType("rotatable_symbol")
+    .find((r) => r.tuple.some((x) => x === symbol));
+  if (!rotatable) return symbol;
+  return rotatable.tuple[
+    (rotatable.tuple.indexOf(symbol) + dirNum) % rotatable.tuple.length
+  ];
+}
+
+function omtAppearance(
+  omt_id: string,
+  dir: string = "north"
+): {
   color: string;
   sym: string;
   name: string;
 } {
   const omt = data.byId("overmap_terrain", omt_id);
   return omt
-    ? { color: omt.color, sym: omt.sym, name: singular(omt.name) }
+    ? {
+        color: omt.color,
+        sym: rotateSymbol(omt.sym, dir),
+        name: singular(omt.name),
+      }
     : { color: "black", sym: " ", name: "" };
 }
 </script>

@@ -1384,6 +1384,11 @@ export type Achievement = {
   };
 };
 
+export type RotatableSymbol = {
+  type: "rotatable_symbol";
+  tuple: [string, string] | [string, string, string, string];
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1436,6 +1441,7 @@ export type SupportedTypes = {
   proficiency: Proficiency;
   recipe: { type: "recipe" } & Recipe;
   requirement: Requirement;
+  rotatable_symbol: RotatableSymbol;
   skill: Skill;
   technique: Technique;
   terrain: Terrain;
