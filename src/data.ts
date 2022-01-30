@@ -11,31 +11,10 @@ import type {
   DamageInstance,
   DamageUnit,
   RequirementData,
-  Monster,
   SupportedTypesWithMapped,
   SupportedTypeMapped,
   Vehicle,
 } from "./types";
-
-const idlessTypes = new Set([
-  "MONSTER_BLACKLIST",
-  "MONSTER_FACTION",
-  "charge_removal_blacklist",
-  "dream",
-  "hit_range",
-  "mapgen",
-  "monstergroup",
-  "obsolete_terrain",
-  "overlay_order",
-  "overmap_land_use_code",
-  "overmap_terrain",
-  "profession_item_substitutions",
-  "recipe",
-  "rotatable_symbol",
-  "snippet",
-  "speech",
-  "uncraft",
-]);
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["AMMO", "item"],
@@ -345,14 +324,14 @@ export class CddaData {
       if (Array.isArray(ret.delete[k])) {
         // Some 'delete' entries delete qualities, which are arrays. As a rough
         // heuristic, compare recursively.
-        const isEqual = (x, y) =>
+        const isEqual = (x: any, y: any) =>
           x === y ||
           (Array.isArray(x) &&
             Array.isArray(y) &&
             x.length === y.length &&
             x.every((j, i) => isEqual(j, y[i])));
         ret[k] = (ret[k] ?? []).filter(
-          (x) => !ret.delete[k].some((y) => isEqual(y, x))
+          (x: any) => !ret.delete[k].some((y: any) => isEqual(y, x))
         );
       }
     }
@@ -872,7 +851,7 @@ export function normalize<T>(xs: (T | T[])[]): T[][] {
   return xs.map((x: T | T[]) => (Array.isArray(x) ? (x as T[]) : [x]));
 }
 
-export const countsByCharges = (item): boolean => {
+export const countsByCharges = (item: any): boolean => {
   return item.type === "AMMO" || item.type === "COMESTIBLE" || item.stackable;
 };
 

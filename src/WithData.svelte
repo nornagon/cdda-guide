@@ -1,8 +1,8 @@
 <script lang="ts">
 import { setContext } from "svelte";
 
-export let Component;
-export let data;
+export let Component: any;
+export let data: any;
 
 setContext("data", data);
 </script>

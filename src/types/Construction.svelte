@@ -132,7 +132,7 @@ const byproducts = data.flattenItemGroup(
       <dt>Byproducts</dt>
       <dd>
         <ul class="comma-separated">
-          {#each byproducts as { id, prob, count }}
+          {#each byproducts as { id, count }}
             <li>
               <ItemSymbol item={data.byId("item", id)} />
               <ThingLink type="item" {id} {count} />
