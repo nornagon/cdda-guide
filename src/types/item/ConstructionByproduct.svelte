@@ -3,7 +3,7 @@ import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
-import FurnitureSymbol from "./FurnitureSymbol.svelte";
+import ItemSymbol from "./ItemSymbol.svelte";
 
 export let item_id: string;
 
@@ -26,7 +26,7 @@ const constructions = data
     <LimitedList items={constructions} let:item={f}>
       <ThingLink id={f.group} type="construction_group" />
       {#if f.pre_terrain}
-        on <FurnitureSymbol
+        on <ItemSymbol
           item={data.byId(
             f.pre_terrain.startsWith("f_") ? "furniture" : "terrain",
             f.pre_terrain

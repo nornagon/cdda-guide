@@ -4,7 +4,7 @@ import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import type { Terrain, Furniture } from "../../types";
 import ThingLink from "../ThingLink.svelte";
-import FurnitureSymbol from "./FurnitureSymbol.svelte";
+import ItemSymbol from "./ItemSymbol.svelte";
 
 export let item_id: string;
 
@@ -32,7 +32,7 @@ let bashFrom = (data.byType("terrain") as (Terrain | Furniture)[])
   <section>
     <h1>Bash</h1>
     <LimitedList items={bashFrom} let:item={f}>
-      <FurnitureSymbol item={data.byId(f.type, f.id)} />
+      <ItemSymbol item={data.byId(f.type, f.id)} />
       <ThingLink id={f.id} type={f.type} />
     </LimitedList>
   </section>

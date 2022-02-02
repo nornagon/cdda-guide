@@ -3,7 +3,6 @@ import { getContext } from "svelte";
 
 import { CddaData, showProbability, singular, singularName } from "../data";
 import type { Terrain } from "../types";
-import FurnitureSymbol from "./item/FurnitureSymbol.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -45,7 +44,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
 </script>
 
 <h1>
-  <FurnitureSymbol {item} />
+  <ItemSymbol {item} />
   {singularName(item)}
 </h1>
 
@@ -58,7 +57,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
     {#if item.transforms_into}
       <dt>Transforms Into</dt>
       <dd>
-        <FurnitureSymbol item={data.byId("terrain", item.transforms_into)} />
+        <ItemSymbol item={data.byId("terrain", item.transforms_into)} />
         <ThingLink id={item.transforms_into} type="terrain" />
       </dd>
     {/if}

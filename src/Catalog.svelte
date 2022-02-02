@@ -12,6 +12,7 @@ import type {
 } from "./types";
 import MutationCategory from "./types/MutationCategory.svelte";
 import ThingLink from "./types/ThingLink.svelte";
+import ItemSymbol from "./types/item/ItemSymbol.svelte";
 
 export let type: string;
 export let data: CddaData;
@@ -65,6 +66,8 @@ const groupFilter =
         items={groups.get(groupName).filter(groupFilter)}
         let:item
         limit={groupKeys.length === 1 ? Infinity : 10}>
+        {#if type === "item" || type === "terrain" || type === "furniture" || type === "monster"}<ItemSymbol
+            {item} />{/if}
         <ThingLink type={typeWithCorrectType} id={item.id} />
       </LimitedList>
     </section>

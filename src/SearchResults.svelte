@@ -2,7 +2,6 @@
 import { mapType, singularName } from "./data";
 import type { CddaData } from "./data";
 import * as fuzzysort from "fuzzysort";
-import FurnitureSymbol from "./types/item/FurnitureSymbol.svelte";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
 import type { SupportedTypesWithMapped } from "./types";
 
@@ -75,11 +74,7 @@ $: history.replaceState({ search }, "");
     <ul>
       {#each matchingObjects.get(type) as obj}
         <li>
-          {#if type === "furniture" || type === "terrain"}
-            <FurnitureSymbol item={data._flatten(obj)} />
-          {:else if type === "item" || type === "monster"}
-            <ItemSymbol item={data._flatten(obj)} />
-          {/if}
+          <ItemSymbol item={data._flatten(obj)} />
           <a href="#/{mapType(obj.type)}/{obj.id}"
             >{singularName(data._flatten(obj))}</a>
         </li>

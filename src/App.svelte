@@ -2,6 +2,7 @@
 import { onMount } from "svelte";
 import Thing from "./Thing.svelte";
 import { data } from "./data";
+import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
 
@@ -20,6 +21,52 @@ fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
 const url = new URL(location.href);
 const version = url.searchParams.get("v") ?? "latest";
 data.setVersion(version);
+
+const tilesets = [
+  {
+    name: "AltiCa",
+    url: "https://raw.githubusercontent.com/CleverRaven/Cataclysm-DDA/{version}/gfx/Altica",
+  },
+  {
+    name: "BrownLikeBears",
+    url: "https://raw.githubusercontent.com/CleverRaven/Cataclysm-DDA/{version}/gfx/BrownLikeBears",
+  },
+  {
+    name: "Chibi_Ultica",
+    url: "https://raw.githubusercontent.com/CleverRaven/Cataclysm-DDA/{version}/gfx/ChibiUltica",
+  },
+  {
+    name: "Cuteclysm(Alpha)",
+    url: "https://raw.githubusercontent.com/CleverRaven/Cataclysm-DDA/{version}/gfx/Cuteclysm",
+  },
+  {
+    name: "Hollow Moon",
+    url: "https://raw.githubusercontent.com/CleverRaven/Cataclysm-DDA/{version}/gfx/HollowMoon",
+  },
+  {
+    name: "MSXotto+",
+    url: "https://raw.githubusercontent.com/CleverRaven/Cataclysm-DDA/{version}/gfx/MshockXotto%2B",
+  },
+  {
+    name: "NeoDays",
+    url: "https://raw.githubusercontent.com/CleverRaven/Cataclysm-DDA/{version}/gfx/NeoDaysTileset",
+  },
+  {
+    name: "RetroDays",
+    url: "https://raw.githubusercontent.com/CleverRaven/Cataclysm-DDA/{version}/gfx/RetroDaysTileset",
+  },
+  {
+    name: "UltiCa",
+    url: "https://raw.githubusercontent.com/CleverRaven/Cataclysm-DDA/{version}/gfx/UltimateCataclysm",
+  },
+];
+
+let tilesetUrlTemplate = localStorage.getItem("cdda-guide:tileset");
+$: localStorage.setItem("cdda-guide:tileset", tilesetUrlTemplate);
+$: tilesetUrl = $data
+  ? tilesetUrlTemplate.replace("{version}", $data.build_number)
+  : null;
+$: tileData.setURL(tilesetUrl);
 
 function hashchange() {
   // the poor man's router!
@@ -209,6 +256,18 @@ function maybeFocusSearch(e: KeyboardEvent) {
     {:else}
       <em style="color: var(--cata-color-gray)">(loading...)</em>
     {/if}
+    Tiles:
+    <!-- svelte-ignore a11y-no-onchange -->
+    <select
+      value={tilesetUrlTemplate}
+      on:change={(e) => {
+        tilesetUrlTemplate = e.currentTarget.value;
+      }}>
+      <option value="">None (ASCII)</option>
+      {#each tilesets as { name, url }}
+        <option value={url}>{name}</option>
+      {/each}
+    </select>
   </p>
 </main>
 
@@ -224,6 +283,8 @@ header {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 100;
+  box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
   width: 100%;
   height: 4rem;
   background: rgba(33, 33, 33, 0.98);

@@ -3,7 +3,6 @@ import { getContext } from "svelte";
 import type { CddaData } from "../data";
 import { singularName } from "../data";
 import type { Construction, RequirementData } from "../types";
-import FurnitureSymbol from "./item/FurnitureSymbol.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -72,7 +71,7 @@ const byproducts = data.flattenItemGroup(
     {#if construction.pre_terrain}
       <dt>Requires</dt>
       <dd>
-        <FurnitureSymbol
+        <ItemSymbol
           item={data.byId(
             construction.pre_terrain.startsWith("f_") ? "furniture" : "terrain",
             construction.pre_terrain

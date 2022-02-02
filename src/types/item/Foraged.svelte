@@ -3,7 +3,7 @@ import { getContext } from "svelte";
 import type { CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
-import FurnitureSymbol from "./FurnitureSymbol.svelte";
+import ItemSymbol from "./ItemSymbol.svelte";
 
 export let item_id: string;
 
@@ -33,7 +33,7 @@ const forageSources = data
   <section>
     <h1>Forage</h1>
     <LimitedList items={forageSources} let:item>
-      <FurnitureSymbol {item} />
+      <ItemSymbol {item} />
       <ThingLink type="terrain" id={item.id} /> in
       <ul class="comma-separated or">
         {#each forageable as [season, _prob /* TODO: probability is a bit messy here. */]}

@@ -4,7 +4,6 @@ import type { Furniture } from "../types";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import Construction from "./Construction.svelte";
-import FurnitureSymbol from "./item/FurnitureSymbol.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 
 const data = getContext<CddaData>("data");
@@ -54,7 +53,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
 }
 </script>
 
-<h1><FurnitureSymbol {item} /> {singularName(item)}</h1>
+<h1><ItemSymbol {item} /> {singularName(item)}</h1>
 
 <section>
   <h1>General</h1>

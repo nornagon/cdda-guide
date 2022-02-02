@@ -4,7 +4,7 @@ import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import type { Furniture, Terrain } from "../../types";
-import FurnitureSymbol from "./FurnitureSymbol.svelte";
+import ItemSymbol from "./ItemSymbol.svelte";
 
 export let item_id: string;
 
@@ -34,7 +34,7 @@ harvestedFrom.sort((a, b) => singularName(a).localeCompare(singularName(b)));
   <section>
     <h1>Harvest</h1>
     <LimitedList items={harvestedFrom} let:item>
-      <FurnitureSymbol {item} />
+      <ItemSymbol {item} />
       <ThingLink type={item.type} id={item.id} />
     </LimitedList>
   </section>
