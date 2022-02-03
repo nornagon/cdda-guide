@@ -61,8 +61,14 @@ const tilesets = [
   },
 ];
 
-let tilesetUrlTemplate = localStorage.getItem("cdda-guide:tileset");
-$: localStorage.setItem("cdda-guide:tileset", tilesetUrlTemplate);
+const normalizeTemplate = (t: string) => (t === "null" || !t ? "" : t);
+let tilesetUrlTemplate = normalizeTemplate(
+  localStorage.getItem("cdda-guide:tileset")
+);
+$: localStorage.setItem(
+  "cdda-guide:tileset",
+  normalizeTemplate(tilesetUrlTemplate)
+);
 $: tilesetUrl = $data
   ? tilesetUrlTemplate.replace("{version}", $data.build_number)
   : null;
