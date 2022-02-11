@@ -15,6 +15,7 @@ import type {
   SupportedTypeMapped,
   Vehicle,
 } from "./types";
+import { __, setLocale } from "./lang";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["AMMO", "item"],
@@ -42,16 +43,16 @@ export const mapType = (
 ): keyof SupportedTypesWithMapped => typeMappings.get(type) ?? type;
 
 export const singular = (name: Translation): string =>
-  typeof name === "string" ? name : "str_sp" in name ? name.str_sp : name.str;
+  typeof name === "string" ? __(name) : "str_sp" in name ? __(name.str_sp) : __(name.str);
 
 export const plural = (name: Translation): string =>
   typeof name === "string"
-    ? name + "s"
+    ? __(name + "s")
     : "str_sp" in name
-    ? name.str_sp
+    ? __(name.str_sp)
     : "str_pl" in name
-    ? name.str_pl
-    : name.str + "s";
+    ? __(name.str_pl)
+    : __(name.str + "s");
 
 export const singularName = (obj: any): string =>
   singular(obj?.name ?? obj?.id ?? obj?.abstract);
@@ -952,6 +953,7 @@ export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroup {
 }
 
 const fetchJson = async (version: string) => {
+  await setLocale('ja');
   const res = await fetch(
     `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/all.json`,
     {
