@@ -321,6 +321,10 @@ export type WheelSlot = {
   width: integer;
 };
 
+export type UseFunction = {
+  type: string;
+};
+
 export type ItemBasicInfo = {
   id: string;
   color?: string;
@@ -357,6 +361,10 @@ export type ItemBasicInfo = {
   };
   ascii_picture?: string;
   weapon_category?: string[]; // weapon_category_id
+  use_action?:
+    | string
+    | UseFunction
+    | (string | UseFunction | [string] | [string, number])[];
 };
 
 export type Item =
@@ -1389,6 +1397,12 @@ export type RotatableSymbol = {
   tuple: [string, string] | [string, string, string, string];
 };
 
+export type ItemAction = {
+  type: "item_action";
+  id: string;
+  name: Translation;
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1425,6 +1439,7 @@ export type SupportedTypes = {
   furniture: Furniture;
   harvest: Harvest;
   harvest_drop_type: HarvestDropType;
+  item_action: ItemAction;
   item_group: { type: "item_group" } & ItemGroup;
   json_flag: JsonFlag;
   mapgen: Mapgen;

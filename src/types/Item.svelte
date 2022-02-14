@@ -144,6 +144,23 @@ const vparts = data
   .byType("vehicle_part")
   .filter((vp) => vp.id && vp.item === item.id);
 
+function normalizeUseAction(action: Item["use_action"]) {
+  if (typeof action === "string") return [{ type: action }];
+  else if (Array.isArray(action)) {
+    return action.map((s) => {
+      if (typeof s === "string") return { type: s };
+      else if (Array.isArray(s)) {
+        return { type: s[0] };
+      } else {
+        return s;
+      }
+    });
+  } else {
+    return action ? [action] : [];
+  }
+}
+const usage = normalizeUseAction(item.use_action);
+
 const ascii_picture =
   item.ascii_picture && data.byId("ascii_art", item.ascii_picture);
 </script>
@@ -276,6 +293,17 @@ const ascii_picture =
             <ul class="comma-separated">
               {#each uncraft.components as { id, count }}
                 <li><ThingLink {id} {count} type="item" /></li>
+              {/each}
+            </ul>
+          </dd>
+        {/if}
+
+        {#if usage.length}
+          <dt>Usage</dt>
+          <dd>
+            <ul class="comma-separated">
+              {#each usage as u}
+                <li>{singularName(data.byId("item_action", u.type))}</li>
               {/each}
             </ul>
           </dd>
