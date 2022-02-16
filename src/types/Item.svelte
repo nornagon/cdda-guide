@@ -380,6 +380,10 @@ const ascii_picture =
         {/if}
         <dt>Moves to Remove Item</dt>
         <dd>{pocket.moves}</dd>
+        {#if pocket.holster}
+          <dt>Max Items</dt>
+          <dd>1</dd>
+        {/if}
         {#if (pocket.sealed_data?.spoil_multiplier ?? 1) !== 1.0}
           <dt>Spoil Multiplier</dt>
           <dd>{pocket.sealed_data.spoil_multiplier}</dd>
