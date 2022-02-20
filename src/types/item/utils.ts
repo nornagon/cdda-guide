@@ -13,3 +13,15 @@ export function multimap<K, V>(entries: [K, V][]): Map<K, V[]> {
   }
   return ret;
 }
+
+export function groupBy<T>(things: T[], groupsFor: (x: T) => string[]) {
+  const map = new Map<string, T[]>();
+  for (const thing of things) {
+    const groups = groupsFor(thing);
+    for (const group of groups) {
+      if (!map.has(group)) map.set(group, []);
+      map.get(group).push(thing);
+    }
+  }
+  return map;
+}

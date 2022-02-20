@@ -293,11 +293,38 @@ export type ComestibleSlot = {
 };
 
 export type ArmorPortionData = {
-  encumbrance?: number | [number, number];
-  coverage?: number;
+  encumbrance?: integer | [integer, integer];
+  coverage?: integer;
+  cover_melee?: integer; // default = coverage
+  cover_ranged?: integer; // default = coverage
+  cover_vitals?: integer; // default 0
   covers?: string[]; // bp_id
+  specifically_covers?: string[]; // sub_bodypart_str_id
   sided?: boolean;
+  material_thickness?: number; // default to parent thickness
+  environmental_protection?: integer; // default 0
+  environmental_protection_with_filter?: integer;
+  volume_encumber_modifier?: number; // default 1
+
+  material?: PartMaterial[] | string[];
+
+  layers?: LayerLevel[];
 };
+
+export type PartMaterial = {
+  type: string; // material_id
+  covered_by_mat?: integer; // %, default 100
+  thickness?: number; // default 0
+};
+
+export type LayerLevel =
+  | "PERSONAL"
+  | "SKINTIGHT"
+  | "NORMAL"
+  | "WAIST"
+  | "OUTER"
+  | "BELTED"
+  | "AURA";
 
 export type ArmorSlot = {
   covers?: string[];
@@ -309,6 +336,7 @@ export type ArmorSlot = {
   max_encumbrance?: number;
   coverage?: number;
   environmental_protection?: number;
+  environmental_protection_with_filter?: number;
   material_thickness?: number;
 };
 
@@ -1130,7 +1158,20 @@ export type BodyPart = {
 
   side: "left" | "right" | "both";
 
+  sub_parts?: string[]; // sub_body_part_id
   // ...
+};
+
+export type SubBodyPart = {
+  id: string;
+  type: "sub_body_part";
+  name: Translation;
+  parent: string;
+  secondary?: boolean;
+  max_coverage?: integer; // default 0
+  side: "left" | "right" | "both";
+  name_multiple?: Translation;
+  opposite?: string; // sub_body_part_id
 };
 
 export type EffectType = {
@@ -1430,6 +1471,7 @@ export type SupportedTypes = {
   ammunition_type: AmmunitionType;
   ascii_art: AsciiArt;
   body_part: BodyPart;
+  city_building: { type: "city_building" } & OvermapSpecial;
   conduct: Achievement;
   construction: Construction;
   construction_group: ConstructionGroup;
@@ -1450,7 +1492,6 @@ export type SupportedTypes = {
   mutation_category: MutationCategory;
   mutation_type: MutationType;
   overmap_special: { type: "overmap_special" } & OvermapSpecial;
-  city_building: { type: "city_building" } & OvermapSpecial;
   overmap_terrain: OvermapTerrain;
   palette: Palette;
   proficiency: Proficiency;
@@ -1458,6 +1499,7 @@ export type SupportedTypes = {
   requirement: Requirement;
   rotatable_symbol: RotatableSymbol;
   skill: Skill;
+  sub_body_part: SubBodyPart;
   technique: Technique;
   terrain: Terrain;
   tool_quality: ToolQuality;

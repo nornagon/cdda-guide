@@ -12,6 +12,7 @@ import LimitedList from "../LimitedList.svelte";
 
 import type { Vehicle } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import { groupBy } from "./item/utils";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: Vehicle;
@@ -169,17 +170,6 @@ for (let x = maxX; x >= minX; x--) {
 const items = data.flattenItemGroup(itemGroupFromVehicle(item));
 items.sort((a, b) => b.prob - a.prob);
 
-function groupBy<T>(things: T[], groupsFor: (x: T) => string[]) {
-  const map = new Map<string, T[]>();
-  for (const thing of things) {
-    const groups = groupsFor(thing);
-    for (const group of groups) {
-      if (!map.has(group)) map.set(group, []);
-      map.get(group).push(thing);
-    }
-  }
-  return map;
-}
 const parts = normalizedParts.flatMap((np) => np.parts);
 const partsGrouped = groupBy(parts, (p) => [p.partId]);
 const partsCounted = [...partsGrouped.entries()].map(([id, list]) => ({

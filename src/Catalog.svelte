@@ -13,6 +13,7 @@ import type {
 import MutationCategory from "./types/MutationCategory.svelte";
 import ThingLink from "./types/ThingLink.svelte";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
+import { groupBy } from "./types/item/utils";
 
 export let type: string;
 export let data: CddaData;
@@ -21,18 +22,6 @@ setContext("data", data);
 
 const things = data.byType(type as any).filter((o) => o.id);
 things.sort((a, b) => singularName(a).localeCompare(singularName(b)));
-
-function groupBy<T>(things: T[], groupsFor: (x: T) => string[]) {
-  const map = new Map<string, T[]>();
-  for (const thing of things) {
-    const groups = groupsFor(thing);
-    for (const group of groups) {
-      if (!map.has(group)) map.set(group, []);
-      map.get(group).push(thing);
-    }
-  }
-  return map;
-}
 
 const groupingFn =
   {

@@ -1,48 +1,148 @@
 <script lang="ts">
 import { getContext } from "svelte";
-import type { CddaData } from "../../data";
-import type { ArmorPortionData, ArmorSlot, ItemBasicInfo } from "../../types";
+import { CddaData, singular } from "../../data";
+import type {
+  ArmorPortionData,
+  ArmorSlot,
+  BodyPart,
+  ItemBasicInfo,
+  Material,
+  PartMaterial,
+} from "../../types";
+import { groupBy } from "./utils";
 
 export let item: ItemBasicInfo & ArmorSlot;
 let data = getContext<CddaData>("data");
 
-function isStrings<T>(array: string[] | T[]): array is string[] {
-  return typeof array[0] === "string";
+function addRange(
+  x: number | [number, number],
+  y: number | [number, number]
+): [number, number] {
+  const [xlo, xhi] = typeof x === "number" ? [x, x] : x;
+  const [ylo, yhi] = typeof y === "number" ? [y, y] : y;
+  return [xlo + ylo, xhi + yhi];
 }
 
-const normalizedMaterial =
-  item.material == null
-    ? []
-    : typeof item.material === "string"
-    ? [{ type: item.material, portion: 1 }]
-    : isStrings(item.material)
-    ? item.material.map((s) => ({ type: s, portion: 1 }))
-    : item.material;
-
-let materials = normalizedMaterial.map((m) => ({
-  material: data.byId("material", m.type),
-  portion: m.portion,
-}));
-const totalMaterialPortion = materials.reduce((m, o) => m + o.portion, 0);
-
-function covers(body_part_id: string): boolean {
-  return (
-    (item.covers ?? []).includes(body_part_id) ||
-    (item.armor ?? []).some((apd) => (apd.covers ?? []).includes(body_part_id))
-  );
+function normalizeApdMaterial(m: ArmorPortionData["material"][0]) {
+  return typeof m === "string" ? { type: m } : m;
 }
-let covers_anything = (item.covers ?? []).length || (item.armor ?? []).length;
 
-const armor =
-  item.armor ?? ((item as any).armor_portion_data as ArmorPortionData[]);
+const normalizedPortionData: ArmorPortionData[] = [];
+for (const apd of item.armor ?? []) {
+  if (apd.covers ?? item.covers) {
+    for (const bp_id of apd.covers ?? item.covers) {
+      const bp = data.byId("body_part", bp_id);
+      const existing = normalizedPortionData.find((apd2) =>
+        apd2.covers.includes(bp_id)
+      );
+      if (existing) {
+        existing.encumbrance = addRange(
+          existing.encumbrance ?? 0,
+          apd.encumbrance ?? 0
+        );
+        const scale = maxCoverage(bp, apd) / 100;
+        const existingScale = maxCoverage(bp, existing) / 100;
 
-function coverageLabel(apd: ArmorPortionData): string[] {
+        existing.coverage += ((apd.coverage ?? 0) * scale) | 0;
+        existing.cover_melee += ((apd.cover_melee ?? 0) * scale) | 0;
+        existing.cover_ranged += ((apd.cover_ranged ?? 0) * scale) | 0;
+        existing.cover_vitals =
+          (existing.cover_vitals ?? 0) + (apd.cover_vitals ?? 0);
+
+        existing.material_thickness =
+          ((apd.material_thickness ?? item.material_thickness ?? 0) * scale +
+            (existing.material_thickness ?? item.material_thickness ?? 0) *
+              existingScale) /
+          (scale + existingScale);
+        existing.environmental_protection =
+          (((apd.environmental_protection ??
+            item.environmental_protection ??
+            0) *
+            scale +
+            (existing.environmental_protection ??
+              item.environmental_protection ??
+              0) *
+              existingScale) /
+            (scale + existingScale)) |
+          0;
+        existing.environmental_protection_with_filter =
+          (((apd.environmental_protection_with_filter ??
+            item.environmental_protection_with_filter ??
+            0) *
+            scale +
+            (existing.environmental_protection_with_filter ??
+              item.environmental_protection_with_filter ??
+              0) *
+              existingScale) /
+            (scale + existingScale)) |
+          0;
+
+        existing.layers = existing.layers ?? [];
+        for (const layer of apd.layers ?? [])
+          if (!existing.layers.includes(layer)) existing.layers.push(layer);
+        for (const newMat of apd.material?.map(normalizeApdMaterial) ?? []) {
+          const existingMat = (existing.material! as PartMaterial[]).find(
+            (s) => s.type === newMat.type
+          );
+          if (existingMat) {
+            const maxCoverageNew = maxCoverage(bp, apd);
+            const maxCoverageMats = maxCoverage(bp, existing);
+            existingMat.covered_by_mat =
+              ((existingMat.covered_by_mat ?? 100) +
+                ((newMat.covered_by_mat ?? 100) * maxCoverageNew) / 100) |
+              0;
+
+            existingMat.thickness =
+              (maxCoverageNew * (newMat.thickness ?? 0) +
+                maxCoverageMats * (existingMat.thickness ?? 0)) /
+              (maxCoverageMats + maxCoverageNew);
+          } else {
+            const maxCoverageNew = maxCoverage(bp, apd);
+            const modifiedMat = JSON.parse(
+              JSON.stringify(newMat)
+            ) as PartMaterial;
+            modifiedMat.covered_by_mat =
+              ((newMat.covered_by_mat ?? 100) * maxCoverageNew) / 100;
+            (existing.material as PartMaterial[]).push(modifiedMat);
+          }
+        }
+        for (const sbp of apd.specifically_covers) {
+          if (!existing.specifically_covers?.includes(sbp)) {
+            if (existing.specifically_covers == null)
+              existing.specifically_covers = [];
+            existing.specifically_covers!.push(sbp);
+          }
+        }
+      } else {
+        const newApd = JSON.parse(JSON.stringify(apd)) as ArmorPortionData;
+        newApd.covers = [bp_id];
+        const scale = maxCoverage(bp, newApd) / 100;
+
+        const oldCoverage = newApd.coverage ?? 0;
+        newApd.coverage = (oldCoverage * scale) | 0;
+        newApd.cover_melee = ((newApd.cover_melee ?? oldCoverage) * scale) | 0;
+        newApd.cover_ranged =
+          ((newApd.cover_ranged ?? oldCoverage) * scale) | 0;
+        newApd.material = newApd.material?.map(normalizeApdMaterial);
+        normalizedPortionData.push(newApd);
+      }
+    }
+  }
+}
+for (const apd of normalizedPortionData) {
+  for (const mat of (apd.material ?? []) as PartMaterial[]) {
+    mat.covered_by_mat =
+      ((mat.covered_by_mat ?? 100) / ((apd.coverage ?? 0) / 100)) | 0;
+  }
+}
+
+function coverageLabel(covers: string[]): string[] {
   const covered = new Set();
   const labels = [];
-  for (const bp_id of apd.covers ?? []) {
+  for (const bp_id of covers ?? []) {
     if (covered.has(bp_id)) continue;
     const bp = data.byId("body_part", bp_id);
-    if (bp.opposite_part && apd.covers.includes(bp.opposite_part)) {
+    if (bp.opposite_part && covers.includes(bp.opposite_part)) {
       labels.push(bp.heading_multiple);
       covered.add(bp.opposite_part);
     } else {
@@ -52,33 +152,207 @@ function coverageLabel(apd: ArmorPortionData): string[] {
   }
   return labels;
 }
+
+function subCoverageLabel(covers: string[]): string[] {
+  const covered = new Set();
+  const labels = [];
+  for (const bp_id of covers ?? []) {
+    if (covered.has(bp_id)) continue;
+    const bp = data.byId("sub_body_part", bp_id);
+    if (bp.opposite && covers.includes(bp.opposite)) {
+      labels.push(singular(bp.name_multiple));
+      covered.add(bp.opposite);
+    } else {
+      labels.push(singular(bp.name));
+    }
+    covered.add(bp_id);
+  }
+  return labels;
+}
+
+// group body parts by ArmorPortionData equivalence modulo |covers|.
+
+const allCoveredPartIds = [
+  ...new Set(normalizedPortionData.flatMap((x) => x.covers)),
+];
+
+const grouped = groupBy(allCoveredPartIds, (bp_id) => {
+  const { covers, ...apdModuloCovers } = normalizedPortionData.find((x) =>
+    x.covers.includes(bp_id)
+  )!; // we know there is exactly 1
+  return [JSON.stringify(apdModuloCovers)];
+});
+
+const coveredPartGroups = [...grouped.values()].map((bp_ids) => {
+  const apdCoveringBp = normalizedPortionData.find((x) =>
+    x.covers.includes(bp_ids[0])
+  )!;
+  return {
+    bp_ids,
+    apd: apdCoveringBp,
+  };
+});
+
+const cpGroupHeading = (cpGroup: string[]) => {
+  return coverageLabel(cpGroup).join(", ");
+};
+const encumbrance = (cp: typeof coveredPartGroups[0]) => {
+  const [encumbMin, encumbMax] =
+    typeof cp.apd.encumbrance === "number"
+      ? [cp.apd.encumbrance, cp.apd.encumbrance]
+      : cp.apd.encumbrance;
+  if (encumbMin === encumbMax) {
+    return `${encumbMin}`;
+  } else {
+    return `${encumbMin} (${encumbMax} when full)`;
+  }
+};
+function maxCoverage(bp: BodyPart, apd: ArmorPortionData): number {
+  if (!bp.sub_parts?.length) return 100;
+
+  let primaryMaxCoverage = 0;
+  let secondaryMaxCoverage = 0;
+  const subCovers = (apd.specifically_covers ?? []).length
+    ? apd.specifically_covers.map((x) => data.byId("sub_body_part", x))
+    : data.byType("sub_body_part").filter((x) => x.parent === bp.id);
+  for (const sub of subCovers) {
+    if (bp.id !== sub.parent) continue;
+    if (sub.secondary) {
+      secondaryMaxCoverage += sub.max_coverage;
+    } else {
+      primaryMaxCoverage += sub.max_coverage;
+    }
+  }
+  return Math.max(primaryMaxCoverage, secondaryMaxCoverage);
+}
+
+function armorMadeOf(bp_id: string): PartMaterial[] {
+  for (const apd of normalizedPortionData)
+    if (apd.covers?.includes(bp_id)) return apd.material as PartMaterial[];
+  return [];
+}
+
+function resist(
+  bp_id: string,
+  roll: number,
+  resistFn: (m: Material) => number
+) {
+  {
+    const mats = armorMadeOf(bp_id);
+    if (mats?.length) {
+      let resist = 0;
+      for (const mat of mats) {
+        const effThic = Math.max(0.1, mat.thickness);
+        const internalRoll = roll < 0 ? (Math.random() * 100) | 0 : roll;
+        if (internalRoll < mat.covered_by_mat ?? 0)
+          resist += resistFn(data.byId("material", mat.type)) * effThic;
+      }
+      return resist;
+    }
+  }
+
+  let resist = 0;
+  const avgThickness = getThickness(bp_id);
+  const { mats, total } = computeMats();
+  if (mats.length) {
+    for (const m of mats)
+      resist += resistFn(data.byId("material", m.type)) * m.portion;
+    resist = resist / total;
+  }
+  return resist * avgThickness;
+}
+function getEnvResist() {
+  if (normalizedPortionData.length === 0) return 0;
+  const avgEnvResist =
+    normalizedPortionData.reduce(
+      (m, o) =>
+        m + (o.environmental_protection ?? item.environmental_protection ?? 0),
+      0
+    ) / normalizedPortionData.length;
+  return avgEnvResist;
+}
+
+function acidResist(bp_id: string) {
+  {
+    const mats = armorMadeOf(bp_id);
+    if (mats?.length) {
+      let resist = 0;
+      for (const mat of mats)
+        resist +=
+          data.byId("material", mat.type).acid_resist *
+          (mat.covered_by_mat ?? 0) *
+          0.01;
+      const env = getEnvResist();
+      if (env < 10) resist *= env / 10;
+      return resist;
+    }
+  }
+
+  let resist = 0;
+  const { mats, total } = computeMats();
+  if (mats.length) {
+    for (const m of mats) resist += data.byId("material", m.type).acid_resist;
+  }
+  resist /= total;
+  const env = getEnvResist();
+  if (env < 10) resist *= env / 10;
+  return resist;
+}
+
+function fireResist(bp_id: string) {
+  {
+    const mats = armorMadeOf(bp_id);
+    if (mats?.length) {
+      let resist = 0;
+      for (const mat of mats)
+        resist +=
+          data.byId("material", mat.type).fire_resist *
+          (mat.covered_by_mat ?? 0) *
+          0.01;
+      const env = getEnvResist();
+      if (env < 10) resist *= env / 10;
+      return resist;
+    }
+  }
+
+  let resist = 0;
+  const { mats, total } = computeMats();
+  if (mats.length) {
+    for (const m of mats) resist += data.byId("material", m.type).fire_resist;
+  }
+  resist /= total;
+  const env = getEnvResist();
+  if (env < 10) resist *= env / 10;
+  return resist;
+}
+
+function getThickness(bp_id: string): number {
+  for (const apd of normalizedPortionData)
+    if (apd.covers?.includes(bp_id))
+      return apd.material_thickness ?? item.material_thickness ?? 0;
+}
+
+function computeMats() {
+  let matPortionTotal = 0;
+  const mats: { type: string; portion: number }[] = [];
+  if (Array.isArray(item.material)) {
+    for (const mat of item.material) {
+      if (typeof mat === "string") {
+        mats.push({ type: mat, portion: 1 });
+        matPortionTotal += 1;
+      } else if (typeof mat === "object") {
+        matPortionTotal += mat.portion ?? 1;
+        mats.push(mat);
+      }
+    }
+  }
+  return { mats, total: matPortionTotal };
+}
 </script>
 
 <section>
   <h1>Armor</h1>
   <dl>
-    <dt>Covers</dt>
-    <dd>
-      {#if covers("head")}The <strong>head</strong>.{/if}
-      {#if covers("eyes")}The <strong>eyes</strong>.{/if}
-      {#if covers("mouth")}The <strong>mouth</strong>.{/if}
-      {#if covers("torso")}The <strong>torso</strong>.{/if}
-
-      {#each [["arm", "arms"], ["hand", "hands"], ["leg", "legs"], ["foot", "feet"]] as [sg, pl]}
-        {#if item.sided && (covers(`${sg}_l`) || covers(`${sg}_r`))}
-          Either <strong>{sg}</strong>.
-        {:else if covers(`${sg}_l`) && covers(`${sg}_r`)}
-          The <strong>{pl}</strong>.
-        {:else if covers(`${sg}_l`)}
-          The <strong>left {sg}</strong>.
-        {:else if covers(`${sg}_r`)}
-          The <strong>right {sg}</strong>.
-        {/if}
-        {" "}
-      {/each}
-
-      {#if !covers_anything}Nothing.{/if}
-    </dd>
     <dt>Layer</dt>
     <dd>
       {#if (item.flags ?? []).includes("PERSONAL")}Personal aura
@@ -92,118 +366,82 @@ function coverageLabel(apd: ArmorPortionData): string[] {
     </dd>
     <dt>Warmth</dt>
     <dd>{item.warmth ?? 0}</dd>
-    <dt>Encumbrance</dt>
-    <dd>
-      {#if armor}
-        <dl>
-          {#each armor as apd}
-            <dt>
-              {#each coverageLabel(apd) as label, i}{#if i !== 0}{", "}{/if}{label}{/each}
-            </dt>
-            <dd>
-              {#if Array.isArray(apd.encumbrance)}
-                {apd.encumbrance[0]}
-                {#if apd.encumbrance[1] !== apd.encumbrance[0]}
-                  ({apd.encumbrance[1]} when full)
-                {/if}
-              {:else}
-                {apd.encumbrance ?? 0}
-              {/if}
-            </dd>
-          {/each}
-        </dl>
-      {:else}
-        {item.encumbrance ??
-          0}{#if item.max_encumbrance}{" "}({item.max_encumbrance} when full){/if}
-      {/if}
-    </dd>
-    <dt
-      title="This determines how likely it is that an attack hits the item instead of the player.">
-      Coverage
-    </dt>
-    <dd>
-      {#if item.armor}
-        <dl>
-          {#each item.armor as apd}
-            <dt>
-              {#each coverageLabel(apd) as label, i}{#if i !== 0}{", "}{/if}{label}{/each}
-            </dt>
-            <dd>{apd.coverage ?? 0}%</dd>
-          {/each}
-        </dl>
-      {:else}
-        {item.coverage ?? 0}%
-      {/if}
-    </dd>
-    {#if materials.length || item.environmental_protection}
-      <dt>Protection</dt>
-      <dd>
-        <dl>
-          {#if materials.length}
-            <dt>Bash</dt>
-            <dd>
-              {(
-                (materials.reduce(
-                  (m, o) => m + (o.material.bash_resist ?? 0) * o.portion,
-                  0
-                ) *
-                  (item.material_thickness ?? 0)) /
-                totalMaterialPortion
-              ).toFixed(2)}
-            </dd>
-            <dt>Cut</dt>
-            <dd>
-              {(
-                (materials.reduce(
-                  (m, o) => m + (o.material.cut_resist ?? 0) * o.portion,
-                  0
-                ) *
-                  (item.material_thickness ?? 0)) /
-                totalMaterialPortion
-              ).toFixed(2)}
-            </dd>
-            <dt>Ballistic</dt>
-            <dd>
-              {(
-                (materials.reduce(
-                  (m, o) => m + (o.material.bullet_resist ?? 0) * o.portion,
-                  0
-                ) *
-                  (item.material_thickness ?? 0)) /
-                totalMaterialPortion
-              ).toFixed(2)}
-            </dd>
-            <dt>Acid</dt>
-            <dd>
-              {(() => {
-                let resist =
-                  materials.reduce(
-                    (m, o) => m + (o.material.acid_resist ?? 0) * o.portion,
-                    0
-                  ) / totalMaterialPortion;
-                const env = item.environmental_protection ?? 0;
-                if (env < 10) resist *= env / 10;
-                return resist;
-              })().toFixed(2)}
-            </dd>
-            <dt>Fire</dt>
-            <dd>
-              {(() => {
-                let resist =
-                  materials.reduce(
-                    (m, o) => m + (o.material.fire_resist ?? 0) * o.portion,
-                    0
-                  ) / totalMaterialPortion;
-                const env = item.environmental_protection ?? 0;
-                if (env < 10) resist *= env / 10;
-                return resist;
-              })().toFixed(2)}
-            </dd>
-          {/if}
-          <dt title="Environmental">Environ.</dt>
-          <dd>{item.environmental_protection ?? 0}</dd>
-        </dl>
-      </dd>
-    {/if}
   </dl>
+
+  <div class="body-parts">
+    {#each coveredPartGroups as cp}
+      <div class="body-part">
+        <h2>
+          {cpGroupHeading(cp.bp_ids)}
+          {#if cp.apd.specifically_covers?.length}
+            ({subCoverageLabel(cp.apd.specifically_covers).join(", ")})
+          {/if}
+        </h2>
+        <dl>
+          <dt>Encumbrance</dt>
+          <dd>{encumbrance(cp)}</dd>
+          <dt>Coverage</dt>
+          <dd>
+            {#if cp.apd.coverage === cp.apd.cover_melee && cp.apd.coverage === cp.apd.cover_ranged && cp.apd.cover_vitals === 0}
+              {cp.apd.coverage}%
+            {:else}
+              <dl>
+                <dt>Default</dt>
+                <dd>{cp.apd.coverage}%</dd>
+                {#if cp.apd.coverage !== cp.apd.cover_melee}
+                  <dt>Melee</dt>
+                  <dd>{cp.apd.cover_melee}%</dd>
+                {/if}
+                {#if cp.apd.coverage !== cp.apd.cover_ranged}
+                  <dt>Ranged</dt>
+                  <dd>{cp.apd.cover_ranged}%</dd>
+                {/if}
+                {#if cp.apd.cover_vitals}
+                  <dt>Vitals</dt>
+                  <dd>{cp.apd.cover_vitals}%</dd>
+                {/if}
+              </dl>
+            {/if}
+          </dd>
+          <dt>Protection</dt>
+          <dd>
+            <dl style="font-variant: tabular-nums">
+              <dt>Bash</dt>
+              <dd>
+                {resist(cp.bp_ids[0], 0, (x) => x.bash_resist).toFixed(2)}
+              </dd>
+              <dt>Cut</dt>
+              <dd>{resist(cp.bp_ids[0], 0, (x) => x.cut_resist).toFixed(2)}</dd>
+              <dt>Ballistic</dt>
+              <dd>
+                {resist(cp.bp_ids[0], 0, (x) => x.bullet_resist).toFixed(2)}
+              </dd>
+              {#if getEnvResist()}
+                <dt>Acid</dt>
+                <dd>{acidResist(cp.bp_ids[0]).toFixed(2)}</dd>
+                <dt>Fire</dt>
+                <dd>{fireResist(cp.bp_ids[0]).toFixed(2)}</dd>
+                <dt>Environ.</dt>
+                <dd>{getEnvResist()}</dd>
+              {/if}
+            </dl>
+          </dd>
+        </dl>
+      </div>
+    {/each}
+  </div>
 </section>
+
+<style>
+.body-parts {
+  display: flex;
+  flex-direction: row;
+}
+
+.body-part h2 {
+  font-size: 1rem;
+  margin: 0;
+  text-transform: capitalize;
+  color: var(--cata-color-gray);
+}
+</style>
