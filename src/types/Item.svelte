@@ -18,6 +18,7 @@ import type {
 import AsciiPicture from "./AsciiPicture.svelte";
 import AmmoInfo from "./item/AmmoInfo.svelte";
 import ArmorInfo from "./item/ArmorInfo.svelte";
+import ArmorInfo0F from "./item/ArmorInfo0F.svelte";
 import Bash from "./item/Bash.svelte";
 import BookInfo from "./item/BookInfo.svelte";
 import ComestibleInfo from "./item/ComestibleInfo.svelte";
@@ -324,7 +325,11 @@ const ascii_picture =
   <BookInfo {item} />
 {/if}
 {#if item.type === "ARMOR" || item.type === "TOOL_ARMOR"}
-  <ArmorInfo {item} />
+  {#if data.build_number?.startsWith("0.F")}
+    <ArmorInfo0F {item} />
+  {:else}
+    <ArmorInfo {item} />
+  {/if}
 {/if}
 {#if item.type === "TOOL" || item.type === "TOOL_ARMOR"}
   <ToolInfo {item} />
