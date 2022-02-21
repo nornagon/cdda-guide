@@ -9,7 +9,7 @@ import type {
   Material,
   PartMaterial,
 } from "../../types";
-import { groupBy } from "./utils";
+import { groupBy, uniq } from "./utils";
 
 export let item: ItemBasicInfo & ArmorSlot;
 let data = getContext<CddaData>("data");
@@ -30,7 +30,7 @@ function normalizeApdMaterial(m: ArmorPortionData["material"][0]) {
 const normalizedPortionData: ArmorPortionData[] = [];
 for (const apd of item.armor ?? []) {
   if (apd.covers ?? item.covers) {
-    for (const bp_id of apd.covers ?? item.covers) {
+    for (const bp_id of uniq(apd.covers ?? item.covers)) {
       const bp = data.byId("body_part", bp_id);
       const existing = normalizedPortionData.find((apd2) =>
         apd2.covers.includes(bp_id)
@@ -106,7 +106,7 @@ for (const apd of item.armor ?? []) {
             (existing.material as PartMaterial[]).push(modifiedMat);
           }
         }
-        for (const sbp of apd.specifically_covers) {
+        for (const sbp of apd.specifically_covers ?? []) {
           if (!existing.specifically_covers?.includes(sbp)) {
             if (existing.specifically_covers == null)
               existing.specifically_covers = [];
@@ -366,6 +366,10 @@ function computeMats() {
     </dd>
     <dt>Warmth</dt>
     <dd>{item.warmth ?? 0}</dd>
+    {#if item.sided}
+      <dt>Sided</dt>
+      <dd>Yes</dd>
+    {/if}
   </dl>
 
   <div class="body-parts">

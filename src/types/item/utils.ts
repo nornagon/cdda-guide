@@ -25,3 +25,14 @@ export function groupBy<T>(things: T[], groupsFor: (x: T) => string[]) {
   }
   return map;
 }
+
+export function uniq<T>(things: T[], id: (a: T) => any = (a) => a): T[] {
+  const seen = new Set();
+  const result = [];
+  for (const thing of things) {
+    const thingId = id(thing);
+    if (!seen.has(thingId)) result.push(thing);
+    seen.add(thingId);
+  }
+  return result;
+}
