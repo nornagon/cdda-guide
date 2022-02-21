@@ -160,7 +160,12 @@ function normalizeUseAction(action: Item["use_action"]) {
     return action ? [action] : [];
   }
 }
-const usage = normalizeUseAction(item.use_action);
+const usage = normalizeUseAction(item.use_action).map((s) => {
+  if (s.type === "repair_item") {
+    return { type: (s as any).item_action_type };
+  }
+  return s;
+});
 
 const ascii_picture =
   item.ascii_picture && data.byId("ascii_art", item.ascii_picture);
