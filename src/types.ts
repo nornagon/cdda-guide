@@ -1169,7 +1169,7 @@ export type SubBodyPart = {
   parent: string;
   secondary?: boolean;
   max_coverage?: integer; // default 0
-  side: "left" | "right" | "both";
+  side: 0 | 1 | 2; // left / right / both
   name_multiple?: Translation;
   opposite?: string; // sub_body_part_id
 };
