@@ -200,7 +200,7 @@ const encumbrance = (cp: typeof coveredPartGroups[0]) => {
   const [encumbMin, encumbMax] =
     typeof cp.apd.encumbrance === "number"
       ? [cp.apd.encumbrance, cp.apd.encumbrance]
-      : cp.apd.encumbrance;
+      : cp.apd.encumbrance ?? [0, 0];
   if (encumbMin === encumbMax) {
     return `${encumbMin}`;
   } else {
