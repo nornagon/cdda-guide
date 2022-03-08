@@ -341,8 +341,9 @@ function computeMats() {
         mats.push({ type: mat, portion: 1 });
         matPortionTotal += 1;
       } else if (typeof mat === "object") {
-        matPortionTotal += mat.portion ?? 1;
-        mats.push(mat);
+        const nmat = { type: mat.type, portion: mat.portion ?? 1 };
+        matPortionTotal += nmat.portion;
+        mats.push(nmat);
       }
     }
   }

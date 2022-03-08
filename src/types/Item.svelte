@@ -70,7 +70,10 @@ const materials =
     : isStrings(item.material)
     ? item.material.map((s) => ({ type: s, portion: 1 }))
     : item.material;
-const totalMaterialPortion = materials.reduce((m, o) => m + o.portion, 0);
+const totalMaterialPortion = materials.reduce(
+  (m, o) => m + (o.portion ?? 1),
+  0
+);
 let flags = (item.flags ?? []).map(
   (id) => data.byId("json_flag", id) ?? { id }
 );
@@ -186,7 +189,7 @@ const ascii_picture =
                   <ThingLink
                     type="material"
                     id={m.type} />{#if materials.length > 1}{" "}({(
-                      (m.portion / totalMaterialPortion) *
+                      ((m.portion ?? 1) / totalMaterialPortion) *
                       100
                     ).toFixed(0)}%){/if}
                 </li>
