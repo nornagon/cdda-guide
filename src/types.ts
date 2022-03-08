@@ -1207,12 +1207,12 @@ export type Material = {
 
   density: integer; // default 1
 
-  bash_resist: integer;
-  cut_resist: integer;
-  acid_resist: integer;
-  elec_resist: integer;
-  fire_resist: integer;
-  bullet_resist: integer;
+  bash_resist: number;
+  cut_resist: number;
+  bullet_resist: number;
+  acid_resist: number;
+  elec_resist: number;
+  fire_resist: number;
   chip_resist: integer;
 
   wind_resist?: integer;
