@@ -58,7 +58,11 @@ export type Construction = {
   pre_terrain?: string; // if starts with f_, then furniture_id, else terrain_id
   post_terrain?: string; // as above
 
-  pre_flags?: string | string[];
+  pre_flags?:
+    | string
+    | string[]
+    | { flag: string; force_terrain: boolean }
+    | { flag: string; force_terrain: boolean }[];
   post_flags?: string[];
 
   byproducts?: string | ItemGroup | ItemGroupEntry[]; // subtype collection
