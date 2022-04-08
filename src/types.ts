@@ -1209,7 +1209,7 @@ export type Material = {
   id: string;
   name: Translation;
 
-  density: integer; // default 1
+  density: number; // default 1
 
   bash_resist: number;
   cut_resist: number;
