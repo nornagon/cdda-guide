@@ -7,12 +7,15 @@ export let item: {
   color?: string | string[];
   bgcolor?: string | [string] | [string, string, string, string];
   symbol?: string | string[];
+  type: string;
 };
 
 $: tile_info = $tileData?.tile_info[0];
 $: tile =
-  findTile($tileData, item.id) ??
-  findTile($tileData, item.looks_like) ??
+  (item.type === "vehicle_part"
+    ? findTile($tileData, item.id ? "vp_" + item.id : undefined) ??
+      findTile($tileData, item.looks_like ? "vp_" + item.looks_like : undefined)
+    : findTile($tileData, item.id) ?? findTile($tileData, item.looks_like)) ??
   fallbackTile($tileData, item.symbol, item.color);
 $: baseUrl = $tileData?.baseUrl;
 
@@ -38,8 +41,10 @@ function findTile(tileData: any, id: string) {
   for (const chunk of tileData["tiles-new"]) {
     for (const info of chunk.tiles) {
       if ((Array.isArray(info.id) && info.id.includes(id)) || info.id === id) {
-        const fg = Array.isArray(info.fg) ? info.fg[0]?.sprite : info.fg;
-        const bg = Array.isArray(info.bg) ? info.bg[0]?.sprite : info.bg;
+        let fg = Array.isArray(info.fg) ? info.fg[0] : info.fg;
+        let bg = Array.isArray(info.bg) ? info.bg[0] : info.bg;
+        if (fg && typeof fg === "object") fg = fg.sprite;
+        if (bg && typeof bg === "object") bg = bg.sprite;
         return {
           file: chunk.file,
           fg: fg - offset,

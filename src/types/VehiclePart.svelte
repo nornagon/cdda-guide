@@ -13,6 +13,7 @@ import {
 import LimitedList from "../LimitedList.svelte";
 
 import type { ItemGroup, VehiclePart } from "../types";
+import ItemSymbol from "./item/ItemSymbol.svelte";
 import RequirementData from "./item/RequirementData.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -103,6 +104,7 @@ vehiclesContainingPart.sort((a, b) =>
 </script>
 
 <h1>
+  <ItemSymbol {item} />
   {item.name ? singularName(item) : singularName(data.byId("item", item.item))}
 </h1>
 

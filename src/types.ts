@@ -1027,7 +1027,7 @@ export type VehiclePartRequirements = {
 export type VehiclePart = {
   type: "vehicle_part";
   name?: Translation;
-  id?: string;
+  id: string;
   abstract?: string;
   item?: string; // item_id
   location?: string;
