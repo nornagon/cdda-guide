@@ -25,6 +25,7 @@ import Terrain from "./types/Terrain.svelte";
 import WeaponCategory from "./types/WeaponCategory.svelte";
 import ConstructionGroup from "./types/ConstructionGroup.svelte";
 import Achievement from "./types/Achievement.svelte";
+import ObsoletionWarning from "./ObsoletionWarning.svelte";
 
 export let item: { id: string; type: string };
 
@@ -110,6 +111,9 @@ const displays = {
     <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
   {:else}
     <ErrorBoundary {onError}>
+      {#if /obsolet/.test(obj.__filename)}
+        <ObsoletionWarning item={obj} />
+      {/if}
       <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
     </ErrorBoundary>
   {/if}

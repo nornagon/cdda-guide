@@ -77,6 +77,9 @@ $: history.replaceState({ search }, "");
           <ItemSymbol item={data._flatten(obj)} />
           <a href="#/{mapType(obj.type)}/{obj.id}"
             >{singularName(data._flatten(obj))}</a>
+          {#if /obsolet/.test(obj.__filename)}
+            <em style="color: var(--cata-color-gray)">(obsolete)</em>
+          {/if}
         </li>
       {/each}
     </ul>
