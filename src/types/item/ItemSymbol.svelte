@@ -1,7 +1,8 @@
 <script lang="ts">
 import { tileData } from "../../tile-data";
 import { colorForName } from "../../colors";
-import { data, mapType } from "../../data";
+import { CddaData, mapType } from "../../data";
+import { getContext } from "svelte";
 export let item: {
   id: string;
   looks_like?: string;
@@ -10,6 +11,8 @@ export let item: {
   symbol?: string | string[];
   type: string;
 };
+
+let data: CddaData = getContext("data");
 
 $: tile_info = $tileData?.tile_info[0];
 $: tile = typeHasTile(item)
@@ -56,8 +59,8 @@ function findTileOrLooksLike(
   if (looksLikeTile) return looksLikeTile;
   if (jumps > 0) {
     const parent =
-      $data.byId(mapType(item.type), looksLikeId) ??
-      $data.abstractById(mapType(item.type), looksLikeId);
+      data.byId(mapType(item.type), looksLikeId) ??
+      data.abstractById(mapType(item.type), looksLikeId);
     if (parent) return findTileOrLooksLike(tileData, parent, jumps - 1);
   }
 }
