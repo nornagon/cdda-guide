@@ -240,6 +240,10 @@ let harvest: Harvest = item.harvest
   ? data.byId("harvest", item.harvest)
   : undefined;
 
+let dissect: Harvest = item.dissect
+  ? data.byId("harvest", item.dissect)
+  : undefined;
+
 function showProbability(prob: number) {
   const ret = (prob * 100).toFixed(2);
   if (ret === "0.00") return "< 0.01%";
@@ -460,6 +464,28 @@ let upgrades =
     <h1>Butchering Results</h1>
     <ul>
       {#each harvest.entries as harvest_entry}
+        {#if data.byId("harvest_drop_type", harvest_entry.type)?.group}
+          {#each data.flattenItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
+            <li>
+              <ItemSymbol item={data.byId("item", id)} />
+              <ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)
+            </li>
+          {/each}
+        {:else}
+          <li>
+            <ItemSymbol item={data.byId("item", harvest_entry.drop)} />
+            <ThingLink type="item" id={harvest_entry.drop} />
+          </li>
+        {/if}
+      {/each}
+    </ul>
+  </section>
+{/if}
+{#if dissect && (dissect.entries ?? []).length}
+  <section>
+    <h1>Dissection Results</h1>
+    <ul>
+      {#each dissect.entries as harvest_entry}
         {#if data.byId("harvest_drop_type", harvest_entry.type)?.group}
           {#each data.flattenItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
             <li>

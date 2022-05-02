@@ -944,7 +944,8 @@ export type Monster = {
   volume?: string | number;
   weight?: string;
   flags?: string[];
-  harvest?: string;
+  harvest?: string; // harvest_id
+  dissect?: string; // harvest_id
   bodytype?: string;
   species?: string[];
   speed?: number;
