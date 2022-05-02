@@ -40,7 +40,11 @@ function colorFromBgcolor(
   return typeof color === "string" ? `i_${color}` : colorFromBgcolor(color[0]);
 }
 
-function findTileOrLooksLike(tileData: any, item: any, jumps: number = 10) {
+function findTileOrLooksLike(
+  tileData: any,
+  item: any,
+  jumps: number = 10
+): TileInfo {
   function resolveId(id: string): string {
     return item.type === "vehicle_part" ? `vp_${id}` : id;
   }
@@ -58,9 +62,52 @@ function findTileOrLooksLike(tileData: any, item: any, jumps: number = 10) {
   }
 }
 
-function findTile(tileData: any, id: string) {
+type TilePosition = {
+  file: string;
+  tx: number;
+  ty: number;
+  width: number;
+  height: number;
+  offx: number;
+  offy: number;
+};
+type TileInfo = {
+  fg?: TilePosition;
+  bg?: TilePosition;
+};
+
+function findTile(tileData: any, id: string): TileInfo {
   if (!tileData || !id) return;
   let offset = 0;
+  const ranges = [];
+  for (const chunk of tileData["tiles-new"]) {
+    ranges.push({
+      from: offset,
+      to: offset + chunk.nx * chunk.ny,
+      chunk,
+    });
+    offset += chunk.nx * chunk.ny;
+  }
+  function findRange(id: number) {
+    for (const range of ranges)
+      if (id >= range.from && id < range.to) return range;
+  }
+  function tileInfoForId(id: number | undefined): TilePosition | undefined {
+    if (id == null) return;
+    const range = findRange(id);
+    const offsetInFile = id - range.from;
+    const fgTx = offsetInFile % range.chunk.nx;
+    const fgTy = (offsetInFile / range.chunk.nx) | 0;
+    return {
+      file: range.chunk.file,
+      width: range.chunk.sprite_width ?? tileData.tile_info[0].width,
+      height: range.chunk.sprite_height ?? tileData.tile_info[0].height,
+      offx: range.chunk.sprite_offset_x ?? 0,
+      offy: range.chunk.sprite_offset_y ?? 0,
+      tx: fgTx,
+      ty: fgTy,
+    };
+  }
   for (const chunk of tileData["tiles-new"]) {
     for (const info of chunk.tiles) {
       if ((Array.isArray(info.id) && info.id.includes(id)) || info.id === id) {
@@ -69,15 +116,8 @@ function findTile(tileData: any, id: string) {
         if (fg && typeof fg === "object") fg = fg.sprite;
         if (bg && typeof bg === "object") bg = bg.sprite;
         return {
-          file: chunk.file,
-          fg: fg - offset,
-          bg: bg != null ? bg - offset : null,
-          nx: chunk.nx,
-          ny: chunk.ny,
-          sprite_width: chunk.sprite_width ?? tileData.tile_info[0].width,
-          sprite_height: chunk.sprite_height ?? tileData.tile_info[0].height,
-          sprite_offset_x: chunk.sprite_offset_x ?? 0,
-          sprite_offset_y: chunk.sprite_offset_y ?? 0,
+          fg: tileInfoForId(fg),
+          bg: tileInfoForId(bg),
         };
       }
     }
@@ -89,7 +129,7 @@ function fallbackTile(
   tileData: any,
   symbolMaybeArr: string | string[],
   color: string | string[]
-) {
+): TileInfo {
   if (!tileData) return;
   const symbol = [symbolMaybeArr].flat()[0];
   const sym = !symbol ? " " : /^LINE_/.test(symbol) ? "|" : symbol;
@@ -98,16 +138,19 @@ function fallbackTile(
     for (const entry of chunk.ascii ?? []) {
       const fg = parseEntryColor(entry.color) + (entry.bold ? 8 : 0);
       if (fg === c) {
+        const index = entry.offset + sym.charCodeAt(0);
+        const tx = index % chunk.nx;
+        const ty = (index / chunk.nx) | 0;
         return {
-          file: chunk.file,
-          fg: entry.offset + sym.charCodeAt(0),
-          bg: null,
-          nx: chunk.nx,
-          ny: chunk.ny,
-          sprite_width: tileData.tile_info[0].width,
-          sprite_height: tileData.tile_info[0].height,
-          sprite_offset_x: 0,
-          sprite_offset_y: 0,
+          fg: {
+            file: chunk.file,
+            tx,
+            ty,
+            width: tileData.tile_info[0].width,
+            height: tileData.tile_info[0].height,
+            offx: 0,
+            offy: 0,
+          },
         };
       }
     }
@@ -155,30 +198,32 @@ function css(obj: Record<string, string>) {
       <div
         class="icon-layer bg"
         style={css({
-          width: `${tile.sprite_width}px`,
-          height: `${tile.sprite_height}px`,
+          width: `${tile.bg.width}px`,
+          height: `${tile.bg.height}px`,
           "background-image": `url(${`${baseUrl}/${encodeURIComponent(
-            tile.file
+            tile.bg.file
           )}`})`,
-          "background-position": `${
-            -(tile.bg % tile.nx) * tile.sprite_width
-          }px ${-((tile.bg / tile.nx) | 0) * tile.sprite_height}px`,
-          transform: `scale(${tile_info.pixelscale}) translate(${tile.sprite_offset_x}px, ${tile.sprite_offset_y}px)`,
+          "background-position": `${-tile.bg.tx * tile.bg.width}px ${
+            -tile.bg.ty * tile.bg.height
+          }px`,
+          transform: `scale(${tile_info.pixelscale}) translate(${tile.bg.offx}px, ${tile.bg.offy}px)`,
         })} />
     {/if}
-    <div
-      class="icon-layer fg"
-      style={css({
-        width: `${tile.sprite_width}px`,
-        height: `${tile.sprite_height}px`,
-        "background-image": `url(${`${baseUrl}/${encodeURIComponent(
-          tile.file
-        )}`})`,
-        "background-position": `${-(tile.fg % tile.nx) * tile.sprite_width}px ${
-          -((tile.fg / tile.nx) | 0) * tile.sprite_height
-        }px`,
-        transform: `scale(${tile_info.pixelscale}) translate(${tile.sprite_offset_x}px, ${tile.sprite_offset_y}px)`,
-      })} />
+    {#if tile.fg != null}
+      <div
+        class="icon-layer fg"
+        style={css({
+          width: `${tile.fg.width}px`,
+          height: `${tile.fg.height}px`,
+          "background-image": `url(${`${baseUrl}/${encodeURIComponent(
+            tile.fg.file
+          )}`})`,
+          "background-position": `${-tile.fg.tx * tile.fg.width}px ${
+            -tile.fg.ty * tile.fg.height
+          }px`,
+          transform: `scale(${tile_info.pixelscale}) translate(${tile.fg.offx}px, ${tile.fg.offy}px)`,
+        })} />
+    {/if}
   </div>
 {:else}
   <span style="font-family: monospace;" class="c_{color}">{symbol}</span>
