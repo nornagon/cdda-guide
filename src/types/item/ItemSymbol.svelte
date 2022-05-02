@@ -1,6 +1,7 @@
 <script lang="ts">
 import { tileData } from "../../tile-data";
 import { colorForName } from "../../colors";
+import { data, mapType } from "../../data";
 export let item: {
   id: string;
   looks_like?: string;
@@ -12,10 +13,7 @@ export let item: {
 
 $: tile_info = $tileData?.tile_info[0];
 $: tile =
-  (item.type === "vehicle_part"
-    ? findTile($tileData, item.id ? "vp_" + item.id : undefined) ??
-      findTile($tileData, item.looks_like ? "vp_" + item.looks_like : undefined)
-    : findTile($tileData, item.id) ?? findTile($tileData, item.looks_like)) ??
+  findTileOrLooksLike($tileData, item) ??
   fallbackTile($tileData, item.symbol, item.color);
 $: baseUrl = $tileData?.baseUrl;
 
@@ -35,8 +33,26 @@ function colorFromBgcolor(
   return typeof color === "string" ? `i_${color}` : colorFromBgcolor(color[0]);
 }
 
+function findTileOrLooksLike(tileData: any, item: any, jumps: number = 10) {
+  function resolveId(id: string): string {
+    return item.type === "vehicle_part" ? `vp_${id}` : id;
+  }
+  const idTile = findTile(tileData, resolveId(item.id ?? item.abstract));
+  if (idTile) return idTile;
+  const looksLikeId = item.looks_like ?? item["copy-from"];
+  if (!looksLikeId) return;
+  const looksLikeTile = findTile(tileData, resolveId(looksLikeId));
+  if (looksLikeTile) return looksLikeTile;
+  if (jumps > 0) {
+    const parent =
+      $data.byId(mapType(item.type), looksLikeId) ??
+      $data.abstractById(mapType(item.type), looksLikeId);
+    if (parent) return findTileOrLooksLike(tileData, parent, jumps - 1);
+  }
+}
+
 function findTile(tileData: any, id: string) {
-  if (!tileData) return;
+  if (!tileData || !id) return;
   let offset = 0;
   for (const chunk of tileData["tiles-new"]) {
     for (const info of chunk.tiles) {

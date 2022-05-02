@@ -183,6 +183,15 @@ export class CddaData {
     return this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
   }
 
+  abstractById<TypeName extends keyof SupportedTypesWithMapped>(
+    type: TypeName,
+    id: string
+  ): any /* abstracts don't have ids, for instance */ {
+    if (typeof id !== "string") throw new Error("Requested non-string id");
+    const obj = this._abstractsByType.get(type)?.get(id);
+    if (obj) return this._flatten(obj);
+  }
+
   replacementTools(type: string): string[] {
     if (!this._toolReplacements) {
       this._toolReplacements = new Map();
@@ -233,7 +242,8 @@ export class CddaData {
       this._flattenCache.set(obj, obj);
       return obj;
     }
-    const ret = { ...this._flatten(parent), ...obj };
+    const { abstract, ...parentProps } = this._flatten(parent);
+    const ret = { ...parentProps, ...obj };
     for (const k of Object.keys(ret.relative ?? {})) {
       if (typeof ret.relative[k] === "number") {
         ret[k] = (ret[k] ?? 0) + ret.relative[k];
