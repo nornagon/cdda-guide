@@ -126,46 +126,52 @@ function fallbackTile(
     } else return -1;
   }
 }
+
+// Simple CSS helper to fight Prettier, which wants to mangle inline CSS strings.
+function css(obj: Record<string, string>) {
+  let result = "";
+  for (const [k, v] of Object.entries(obj)) {
+    result += `${k}: ${v};`;
+  }
+  return result;
+}
 </script>
 
 {#if tile}
   <div
-    style={`display: inline-block; width:
-${tile_info.width * tile_info.pixelscale}px; height:
-${tile_info.height * tile_info.pixelscale}px; position: relative;`}
+    style={css({
+      width: `${tile_info.width * tile_info.pixelscale}px`,
+      height: `${tile_info.height * tile_info.pixelscale}px`,
+    })}
     class="tile-icon">
     {#if tile.bg != null}
       <div
-        style={`
-position: absolute;
-width: ${tile.sprite_width}px;
-height: ${tile.sprite_height}px;
-background-image: url(${`${baseUrl}/${encodeURIComponent(tile.file)}`});
-background-position: ${-(tile.bg % tile.nx) * tile.sprite_width}px ${
-          -((tile.bg / tile.nx) | 0) * tile.sprite_height
-        }px;
-transform-origin: top left;
-transform: scale(${tile_info.pixelscale}) translate(${
-          tile.sprite_offset_x
-        }px, ${tile.sprite_offset_y}px) ;
-image-rendering: pixelated;
-`} />
+        class="icon-layer bg"
+        style={css({
+          width: `${tile.sprite_width}px`,
+          height: `${tile.sprite_height}px`,
+          "background-image": `url(${`${baseUrl}/${encodeURIComponent(
+            tile.file
+          )}`})`,
+          "background-position": `${
+            -(tile.bg % tile.nx) * tile.sprite_width
+          }px ${-((tile.bg / tile.nx) | 0) * tile.sprite_height}px`,
+          transform: `scale(${tile_info.pixelscale}) translate(${tile.sprite_offset_x}px, ${tile.sprite_offset_y}px)`,
+        })} />
     {/if}
     <div
-      style={`
-position: absolute;
-width: ${tile.sprite_width}px;
-height: ${tile.sprite_height}px;
-background-image: url(${`${baseUrl}/${encodeURIComponent(tile.file)}`});
-background-position: ${-(tile.fg % tile.nx) * tile.sprite_width}px ${
-        -((tile.fg / tile.nx) | 0) * tile.sprite_height
-      }px;
-transform-origin: top left;
-transform: scale(${tile_info.pixelscale}) translate(${
-        tile.sprite_offset_x
-      }px, ${tile.sprite_offset_y}px) ;
-image-rendering: pixelated;
-`} />
+      class="icon-layer fg"
+      style={css({
+        width: `${tile.sprite_width}px`,
+        height: `${tile.sprite_height}px`,
+        "background-image": `url(${`${baseUrl}/${encodeURIComponent(
+          tile.file
+        )}`})`,
+        "background-position": `${-(tile.fg % tile.nx) * tile.sprite_width}px ${
+          -((tile.fg / tile.nx) | 0) * tile.sprite_height
+        }px`,
+        transform: `scale(${tile_info.pixelscale}) translate(${tile.sprite_offset_x}px, ${tile.sprite_offset_y}px)`,
+      })} />
   </div>
 {:else}
   <span style="font-family: monospace;" class="c_{color}">{symbol}</span>
@@ -174,5 +180,13 @@ image-rendering: pixelated;
 <style>
 .tile-icon {
   vertical-align: middle;
+  display: inline-block;
+  position: relative;
+}
+
+.icon-layer {
+  position: absolute;
+  transform-origin: top left;
+  image-rendering: pixelated;
 }
 </style>
