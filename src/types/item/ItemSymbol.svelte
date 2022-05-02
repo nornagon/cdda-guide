@@ -12,9 +12,10 @@ export let item: {
 };
 
 $: tile_info = $tileData?.tile_info[0];
-$: tile =
-  findTileOrLooksLike($tileData, item) ??
-  fallbackTile($tileData, item.symbol, item.color);
+$: tile = typeHasTile(item)
+  ? findTileOrLooksLike($tileData, item) ??
+    fallbackTile($tileData, item.symbol, item.color)
+  : null;
 $: baseUrl = $tileData?.baseUrl;
 
 const sym = [item.symbol].flat()[0] ?? " ";
@@ -26,6 +27,12 @@ const color = item.color
   : item.bgcolor
   ? colorFromBgcolor(item.bgcolor)
   : null;
+
+function typeHasTile(item: any): boolean {
+  return ["item", "monster", "terrain", "furniture", "vehicle_part"].includes(
+    mapType(item.type)
+  );
+}
 
 function colorFromBgcolor(
   color: string | [string] | [string, string, string, string]
