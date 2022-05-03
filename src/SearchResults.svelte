@@ -4,6 +4,7 @@ import type { CddaData } from "./data";
 import * as fuzzysort from "fuzzysort";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
 import type { SupportedTypesWithMapped } from "./types";
+import { setContext } from "svelte";
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -18,6 +19,7 @@ const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
 ]);
 
 export let data: CddaData;
+$: setContext("data", data);
 
 let targets: {
   id: string;
