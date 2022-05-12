@@ -1216,7 +1216,7 @@ export type Material = {
   cut_resist: number;
   bullet_resist: number;
   acid_resist: number;
-  elec_resist: number;
+  elec_resist?: number;
   fire_resist: number;
   chip_resist: integer;
 
@@ -1227,6 +1227,7 @@ export type Material = {
   latent_heat?: number; // default 334.0
   freezing_point?: number;
 
+  conductive?: boolean;
   edible?: boolean;
   rotting?: boolean;
   soft?: boolean;

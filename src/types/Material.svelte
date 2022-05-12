@@ -56,10 +56,14 @@ let itemsWithMaterial = data
         <dd>{item.bullet_resist ?? 0}</dd>
         <dt>Acid</dt>
         <dd>{item.acid_resist ?? 0}</dd>
-        <dt>Electricity</dt>
-        <dd>{item.elec_resist ?? 0}</dd>
         <dt title="Resistance to physical damage of the item itself">Chip</dt>
         <dd>{item.chip_resist ?? 0}</dd>
+        <dt>Conductive</dt>
+        <dd>
+          {item.elec_resist === 0 || item.elec_resist === 1 || item.conductive
+            ? "yes"
+            : "no"}
+        </dd>
       </dl>
     </dd>
     {#if item.repaired_with}
