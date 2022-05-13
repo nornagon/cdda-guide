@@ -176,6 +176,16 @@ vehiclesContainingPart.sort((a, b) =>
       <dt>{bonusLabel(item)}</dt>
       <dd>{item.bonus}</dd>
     {/if}
+    {#if item.pseudo_tools?.length}
+      <dt>Provides</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.pseudo_tools as { id }}
+            <ThingLink type="item" {id} />
+          {/each}
+        </ul>
+      </dd>
+    {/if}
     {#if breaksIntoGroupFlattened?.length}
       <dt>Breaks Into</dt>
       <dd>
@@ -277,7 +287,7 @@ vehiclesContainingPart.sort((a, b) =>
   </section>
 {/if}
 
-{#if vehiclesContainingPart}
+{#if vehiclesContainingPart.length}
   <section>
     <h1>Vehicles</h1>
     <LimitedList items={vehiclesContainingPart} let:item>

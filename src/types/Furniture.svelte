@@ -69,6 +69,10 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
     <dd>{item.coverage ?? 0}%</dd>
     <dt>Comfort</dt>
     <dd>{item.comfort ?? 0}</dd>
+    {#if item.crafting_pseudo_item}
+      <dt>Provides</dt>
+      <dd><ThingLink type="item" id={item.crafting_pseudo_item} /></dd>
+    {/if}
     {#each bits as [title, arr]}
       {#if arr.length}
         <dt>{title}</dt>
