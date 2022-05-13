@@ -16,10 +16,10 @@ const toolRecipes: Set<string> = byTool.get(item_id) ?? new Set();
 
 const providedByVparts = data
   .byType("vehicle_part")
-  .filter((vp) => vp.pseudo_tools?.some((t) => t.id === item_id));
+  .filter((vp) => vp.id && vp.pseudo_tools?.some((t) => t.id === item_id));
 const providedByFurniture = data
   .byType("furniture")
-  .filter((f) => f.crafting_pseudo_item === item_id);
+  .filter((f) => f.id && f.crafting_pseudo_item === item_id);
 const results = [...recipes].sort((a, b) =>
   singularName(data.byId("item", a)).localeCompare(
     singularName(data.byId("item", b))
