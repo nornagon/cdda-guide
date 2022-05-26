@@ -52,7 +52,12 @@ export type Construction = {
   category?: string; // construction_category_id, default: OTHER
   time?: string | number /* minutes */;
 
-  using?: string | [string /* requirement_id */, number /* count */][];
+  using?:
+    | string
+    | (
+        | [string /* requirement_id */, number /* count */]
+        | [string, number, "LIST"]
+      )[];
   pre_note?: string;
 
   pre_terrain?: string; // if starts with f_, then furniture_id, else terrain_id
