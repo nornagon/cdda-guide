@@ -248,10 +248,14 @@ function addLoot(loots: Loot[]): Loot {
   return ret;
 }
 
+let onStack = 0;
 function lootForChunks(
   data: CddaData,
   chunks: (string | [string, number])[]
 ): Loot {
+  onStack += 1;
+  // TODO: See https://github.com/nornagon/cdda-guide/issues/73
+  if (onStack > 4) return new Map();
   const normalizedChunks = (chunks ?? []).map((c) =>
     typeof c === "string" ? ([c, 100] as [string, number]) : c
   );
@@ -268,6 +272,7 @@ function lootForChunks(
       return { loot, weight };
     })
   );
+  onStack -= 1;
   return loot;
 }
 
