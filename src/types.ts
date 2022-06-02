@@ -151,7 +151,7 @@ export type Recipe = {
   activity_level?: string;
 
   delete_flags?: string[]; // flag_id
-  using?: string | [string, number][]; // requirement_id
+  using?: string | ([string, number] | [string, number, "LIST"])[]; // requirement_id
 
   // for type: 'recipe' only
   category?: string;
