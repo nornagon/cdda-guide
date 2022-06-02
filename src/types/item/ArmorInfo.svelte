@@ -257,7 +257,7 @@ function resist(
   if (mats.length) {
     for (const m of mats)
       resist += resistFn(data.byId("material", m.type)) * m.portion;
-    resist = resist / total;
+    resist /= total;
   }
   return resist * avgThickness;
 }
@@ -292,8 +292,8 @@ function acidResist(bp_id: string) {
   const { mats, total } = computeMats();
   if (mats.length) {
     for (const m of mats) resist += data.byId("material", m.type).acid_resist;
+    resist /= total;
   }
-  resist /= total;
   const env = getEnvResist();
   if (env < 10) resist *= env / 10;
   return resist;
@@ -319,8 +319,8 @@ function fireResist(bp_id: string) {
   const { mats, total } = computeMats();
   if (mats.length) {
     for (const m of mats) resist += data.byId("material", m.type).fire_resist;
+    resist /= total;
   }
-  resist /= total;
   const env = getEnvResist();
   if (env < 10) resist *= env / 10;
   return resist;
