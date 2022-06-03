@@ -246,7 +246,15 @@ export class CddaData {
     const ret = { ...parentProps, ...obj };
     for (const k of Object.keys(ret.relative ?? {})) {
       if (typeof ret.relative[k] === "number") {
-        ret[k] = (ret[k] ?? 0) + ret.relative[k];
+        if (k === "melee_damage") {
+          const di = normalizeDamageInstance(
+            JSON.parse(JSON.stringify(ret.melee_damage))
+          );
+          for (const du of di) du.amount = (du.amount ?? 0) + ret.relative[k];
+          ret.melee_damage = di;
+        } else {
+          ret[k] = (ret[k] ?? 0) + ret.relative[k];
+        }
       } else if (k === "damage" && ret[k]) {
         ret.damage = JSON.parse(JSON.stringify(ret.damage));
         const relativeDamage = normalizeDamageInstance(ret.relative.damage);
