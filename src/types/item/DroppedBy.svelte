@@ -20,7 +20,7 @@ mons.sort((a, b) => b.prob - a.prob);
 
 const itemsFromHarvest = (h: Harvest): string[] =>
   h.entries?.flatMap((e) =>
-    e.type === "bionic_group"
+    e.type && data.byId("harvest_drop_type", e.type)?.group
       ? data.flattenItemGroup(data.byId("item_group", e.drop)).map((x) => x.id)
       : [e.drop]
   ) ?? [];
@@ -31,6 +31,9 @@ const harvests = data
 const harvestableFrom = data
   .byType("monster")
   .filter((m) => m.id && harvests.some((h) => h.id === m.harvest));
+const dissectableFrom = data
+  .byType("monster")
+  .filter((m) => m.id && harvests.some((h) => h.id === m.dissect));
 </script>
 
 {#if mons.length}
@@ -47,6 +50,16 @@ const harvestableFrom = data
   <section>
     <h1>Butcher</h1>
     <LimitedList items={harvestableFrom} let:item={m}>
+      <ItemSymbol item={m} />
+      <ThingLink id={m.id} type="monster" />
+    </LimitedList>
+  </section>
+{/if}
+
+{#if dissectableFrom.length}
+  <section>
+    <h1>Dissect</h1>
+    <LimitedList items={dissectableFrom} let:item={m}>
       <ItemSymbol item={m} />
       <ThingLink id={m.id} type="monster" />
     </LimitedList>
