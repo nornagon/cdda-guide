@@ -10,23 +10,18 @@ export let item: JsonFlag;
 
 let data = getContext<CddaData>("data");
 
-let itemsWithFlag = new Array<Item>();
-for (const it of data.byType("item")) {
-  if (!it.id) continue;
-  const q = (it.flags ?? []).find((id) => id === item.id);
-  if (q) {
-    itemsWithFlag.push(it);
-  }
-}
-
-let vpartsWithFlag = new Array<VehiclePart>();
-for (const it of data.byType("vehicle_part")) {
-  if (!it.id) continue;
-  const q = (it.flags ?? []).find((id) => id === item.id);
-  if (q) {
-    vpartsWithFlag.push(it);
-  }
-}
+const itemsWithFlag = data
+  .byType("item")
+  .filter((f) => f.id && f.flags?.includes(item.id));
+const vpartsWithFlag = data
+  .byType("vehicle_part")
+  .filter((f) => f.id && f.flags?.includes(item.id));
+const furnitureWithFlag = data
+  .byType("furniture")
+  .filter((f) => f.id && f.flags?.includes(item.id));
+const terrainWithFlag = data
+  .byType("terrain")
+  .filter((f) => f.id && f.flags?.includes(item.id));
 
 function parseColorText(text: string): { string: string; color: string }[] {
   let color = ["gray"];
@@ -103,7 +98,34 @@ const colorLookup = (color: string): string => {
         singularName(a).localeCompare(singularName(b))
       )}
       let:item>
+      <ItemSymbol {item} />
       <ThingLink type="vehicle_part" id={item.id} />
+    </LimitedList>
+  </section>
+{/if}
+{#if terrainWithFlag.length}
+  <section>
+    <h1>Terrain</h1>
+    <LimitedList
+      items={terrainWithFlag.sort((a, b) =>
+        singularName(a).localeCompare(singularName(b))
+      )}
+      let:item>
+      <ItemSymbol {item} />
+      <ThingLink type="terrain" id={item.id} />
+    </LimitedList>
+  </section>
+{/if}
+{#if furnitureWithFlag.length}
+  <section>
+    <h1>Furniture</h1>
+    <LimitedList
+      items={furnitureWithFlag.sort((a, b) =>
+        singularName(a).localeCompare(singularName(b))
+      )}
+      let:item>
+      <ItemSymbol {item} />
+      <ThingLink type="furniture" id={item.id} />
     </LimitedList>
   </section>
 {/if}

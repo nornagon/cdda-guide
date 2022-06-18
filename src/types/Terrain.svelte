@@ -114,7 +114,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
     <dd>
       <ul class="comma-separated">
         {#each item.flags ?? [] as flag}
-          <li>{flag}</li>
+          <li><ThingLink type="json_flag" id={flag} /></li>
         {:else}
           <li><em>none</em></li>
         {/each}
