@@ -5,7 +5,15 @@ export let limit = 10;
 
 export let grace = 4;
 
-let realLimit = items.length <= limit + grace ? limit + grace : limit;
+// In test mode, always render the expanded list to catch any render bugs that
+// only show up when the full list is shown.
+const isTesting = (globalThis as any).__isTesting__;
+
+let realLimit = isTesting
+  ? Infinity
+  : items.length <= limit + grace
+  ? limit + grace
+  : limit;
 </script>
 
 <ul>
