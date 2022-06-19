@@ -13,15 +13,19 @@ let data = getContext<CddaData>("data");
 const item = data.byId("item", item_id);
 
 function itemsWithOnlyMaterial(soughtMat: Material): Item[] {
-  return data.byType("item").filter((it) => {
-    const mat =
-      typeof it.material === "string" ? [it.material] : it.material ?? [];
-    return mat.length === 1 && mat[0] === soughtMat.id;
-  });
+  return data
+    .byType("item")
+    .filter((it) => it.id)
+    .filter((it) => {
+      const mat =
+        typeof it.material === "string" ? [it.material] : it.material ?? [];
+      return mat.length === 1 && mat[0] === soughtMat.id;
+    });
 }
 
 const salvagedFromMaterials = data
   .byType("material")
+  .filter((m) => m.id)
   .filter((mat) => mat.salvaged_into === item_id)
   .flatMap((mat) => itemsWithOnlyMaterial(mat))
   .filter((it) => !(it.flags ?? []).includes("NO_SALVAGE"))
