@@ -956,7 +956,7 @@ export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroup {
         };
       } else if (it.item_groups) {
         return {
-          distribution: (typeof it.item_groups === "string"
+          collection: (typeof it.item_groups === "string"
             ? [it.item_groups]
             : it.item_groups
           ).map((ig_id) => ({ group: ig_id })),
