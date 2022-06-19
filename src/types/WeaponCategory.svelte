@@ -12,12 +12,14 @@ const data = getContext<CddaData>("data");
 
 const itemsInCategory = data
   .byType("item")
-  .filter((i) => (i.weapon_category ?? []).some((i) => i === item.id));
+  .filter((i) => i.id)
+  .filter((i) => (i.weapon_category ?? []).some((c) => c === item.id));
 itemsInCategory.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 
 const martialArts = data
   .byType("martial_art")
-  .filter((ma) => ma.weapon_category?.some((i) => i === item.id));
+  .filter((ma) => ma.id)
+  .filter((ma) => ma.weapon_category?.some((c) => c === item.id));
 martialArts.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
