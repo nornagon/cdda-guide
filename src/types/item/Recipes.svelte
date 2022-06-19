@@ -1,29 +1,38 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
+import LimitedList from "../../LimitedList.svelte";
 import Recipe from "../Recipe.svelte";
+import ThingLink from "../ThingLink.svelte";
+import ItemSymbol from "./ItemSymbol.svelte";
 
 export let item_id: string;
 
 let data = getContext<CddaData>("data");
 
-let recipes = data
+const nonAbstractRecipes = data
   .byType("recipe")
-  .filter(
-    (x) =>
-      (x.result === item_id ||
-        (x.byproducts ?? []).some((b) => b[0] === item_id)) &&
-      !x.obsolete
-  )
-  .sort((a, b) => {
-    const aScore = a.result === item_id ? 0 : 1;
-    const bScore = b.result === item_id ? 0 : 1;
-    return aScore - bScore;
-  });
+  .filter((r) => r.result && !r.obsolete);
+
+let recipes = nonAbstractRecipes.filter((x) => x.result === item_id);
+
+const byproducts = nonAbstractRecipes.filter((x) =>
+  (x.byproducts ?? []).some((b) => b[0] === item_id)
+);
 </script>
 
 {#if recipes.length}
   {#each recipes as recipe (recipe)}
     <Recipe {recipe} showResult={recipe.result !== item_id} />
   {/each}
+{/if}
+
+{#if byproducts.length}
+  <section>
+    <h1>Byproduct when crafting</h1>
+    <LimitedList items={byproducts} let:item>
+      <ItemSymbol item={data.byId("item", item.result)} />
+      <ThingLink type="item" id={item.result} />
+    </LimitedList>
+  </section>
 {/if}
