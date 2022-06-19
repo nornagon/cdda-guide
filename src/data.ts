@@ -982,6 +982,17 @@ const fetchJson = async (version: string) => {
   return new CddaData(json.data, json.build_number, json.release);
 };
 
+async function retry<T>(promiseGenerator: () => Promise<T>) {
+  while (true) {
+    try {
+      return await promiseGenerator();
+    } catch (e) {
+      console.error(e);
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+}
+
 let _hasSetVersion = false;
 const { subscribe, set } = writable<CddaData>(null);
 export const data = {
@@ -989,6 +1000,6 @@ export const data = {
   setVersion(version: string) {
     if (_hasSetVersion) throw new Error("can only set version once");
     _hasSetVersion = true;
-    fetchJson(version).then(set);
+    retry(() => fetchJson(version)).then(set);
   },
 };
