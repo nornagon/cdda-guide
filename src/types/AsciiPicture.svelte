@@ -35,7 +35,8 @@ for (const line of picture.picture) {
 }
 </script>
 
-<pre
-  style="font-family: Unifont, monospace; line-height: 1">
-{#each parsed as line}{#each line as span}<span class="c_{span.color}">{span.string}</span>{/each}{'\n'}{/each}
+<pre style="font-family: Unifont, monospace; line-height: 1">
+{#each parsed as line}{#each line as span}<span class="c_{span.color}"
+        >{span.string}</span
+      >{/each}{"\n"}{/each}
 </pre>

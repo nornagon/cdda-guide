@@ -188,10 +188,13 @@ partsCounted.sort((a, b) => {
 <h1>{singularName(item)}</h1>
 
 <section>
-  <pre
-    style="font-family: Unifont, monospace; line-height: 1">
+  <pre style="font-family: Unifont, monospace; line-height: 1">
     {#each grid as row}
-    {#each row as part}{#if part}<span title={`${part.partId}_${part.variant}`} class={`c_${colorForVehiclePart(part.partId)}`}>{symbolForVehiclePartVariant(part.partId, part.variant)}</span>{:else}{" "}{/if}{/each}{'\n'}
+      {#each row as part}{#if part}<span
+            title={`${part.partId}_${part.variant}`}
+            class={`c_${colorForVehiclePart(part.partId)}`}
+            >{symbolForVehiclePartVariant(part.partId, part.variant)}</span
+          >{:else}{" "}{/if}{/each}{"\n"}
     {/each}
   </pre>
 </section>
