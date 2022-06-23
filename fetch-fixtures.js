@@ -2,6 +2,7 @@ import * as fs from "fs/promises";
 import { createWriteStream, createReadStream, readFileSync } from "fs";
 import * as crypto from "crypto";
 import * as url from "url";
+import fetch from "node-fetch";
 const { buildNum, sha } = JSON.parse(
   readFileSync("./_test/all.meta.json", "utf8")
 );
@@ -41,7 +42,7 @@ async function matchesSha(file, sha) {
   } else {
     return;
   }
-  const res = await require("node-fetch")(dataUrl);
+  const res = await fetch(dataUrl);
   const dest = createWriteStream(filename);
   res.body.pipe(dest);
   res.body.on("end", async () => {
