@@ -12,7 +12,7 @@
     "test:latest": "node fetch-fixtures.js latest && npm run validate && jest src",
     "test:watch": "npm run test -- --watch",
     "update-test-data": "node fetch-fixtures.js latest",
-    "deploy": "npm run build && gh-pages -d public",
+    "deploy": "npm run build && gh-pages -d dist",
     "lint": "prettier -c .",
     "lint:fix": "prettier -w .",
     "precommit": "lint-staged",
