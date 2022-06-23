@@ -1,5 +1,6 @@
 /node_modules/
-/public/build/
+dist
+dev-dist
 
 .DS_Store
 _test/

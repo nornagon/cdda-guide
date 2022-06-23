@@ -5,6 +5,7 @@ import { data } from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
+import dontPanic from "./assets/dont_panic.png";
 
 let item: { type: string; id: string } | null = null;
 
@@ -164,7 +165,7 @@ function maybeFocusSearch(e: KeyboardEvent) {
     {/key}
   {:else}
     <img
-      src="dont_panic.png"
+      src={dontPanic}
       height="200"
       width="343"
       style="float:right"

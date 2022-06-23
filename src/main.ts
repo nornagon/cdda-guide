@@ -2,6 +2,7 @@ import App from "./App.svelte";
 import * as Sentry from "@sentry/browser";
 import { Integrations } from "@sentry/tracing";
 import "@fontsource/unifont";
+import { registerSW } from "virtual:pwa-register";
 
 if (location.hostname !== "localhost")
   Sentry.init({
@@ -10,6 +11,7 @@ if (location.hostname !== "localhost")
     tracesSampleRate: 0.2,
   });
 
+/*
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js").catch((err) => {
     console.log("ServiceWorker registration failed: ", err);
@@ -18,11 +20,16 @@ if ("serviceWorker" in navigator) {
 } else {
   start();
 }
+*/
 
 function start() {
-  const app = new App({
+  return new App({
     target: document.body,
   });
 }
 
-//export default app;
+registerSW({});
+
+const app = start();
+
+export default app;

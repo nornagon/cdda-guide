@@ -158,7 +158,7 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
       <dt>Written In</dt>
       <dd>
         <ul class="comma-separated">
-          {#each writtenIn as [item_id, /* prettier-ignore */ level = 0]}
+          {#each writtenIn as [item_id, level = 0]}
             <!-- prettier-ignore -->
             <li><span style="white-space: nowrap"><ThingLink id={item_id} type="item" /> ({level})</span></li>
           {/each}

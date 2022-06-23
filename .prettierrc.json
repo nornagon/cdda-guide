@@ -1,4 +1,4 @@
 {
-  "svelteBracketNewLine": false,
+  "bracketSameLine": true,
   "svelteIndentScriptAndStyle": false
 }
