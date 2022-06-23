@@ -10,7 +10,7 @@ $: if ($error && onError) onError($error);
   <div class="error">
     <b>{$error.message}</b>
     <pre class="trace">
-      {DEV ? $error.stack : ""}
+      {DEV ? $error.stack : ''}
     </pre>
   </div>
 {:else}

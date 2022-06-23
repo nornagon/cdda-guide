@@ -21,7 +21,6 @@ const forageable = Object.keys(forageGroups)
     const flattened = data.flattenItemGroup(
       data.byId("item_group", forageGroups[season])
     );
-    // TODO: probability is a bit messy here.
     return [season, flattened.find((f) => f.id === item_id)?.prob] as const;
   })
   .filter((x) => x[1]);
@@ -37,7 +36,7 @@ const forageSources = data
       <ItemSymbol {item} />
       <ThingLink type="terrain" id={item.id} /> in
       <ul class="comma-separated or">
-        {#each forageable as [season, _prob]}
+        {#each forageable as [season, _prob /* TODO: probability is a bit messy here. */]}
           <li>{season}</li>
         {/each}
       </ul>

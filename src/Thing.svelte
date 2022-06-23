@@ -16,7 +16,7 @@ import Fault from "./types/Fault.svelte";
 import Vitamin from "./types/Vitamin.svelte";
 import VehiclePart from "./types/VehiclePart.svelte";
 import MartialArt from "./types/MartialArt.svelte";
-import ErrorBoundary from "./ErrorBoundary.mjs";
+import ErrorBoundary from "./ErrorBoundary";
 import Mutation from "./types/Mutation.svelte";
 import MutationCategory from "./types/MutationCategory.svelte";
 import MutationType from "./types/MutationType.svelte";

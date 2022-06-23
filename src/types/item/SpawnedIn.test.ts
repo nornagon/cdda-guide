@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import "@testing-library/jest-dom";
 import { render } from "@testing-library/svelte";
 import SpawnedIn from "./SpawnedIn.svelte";
