@@ -36,6 +36,7 @@ const types = [
   "terrain",
   "weapon_category",
   "construction_group",
+  "bionic",
 ];
 
 // This lets LimitedList always render expanded.

@@ -20,6 +20,7 @@ import AmmoInfo from "./item/AmmoInfo.svelte";
 import ArmorInfo from "./item/ArmorInfo.svelte";
 import ArmorInfo0F from "./item/ArmorInfo0F.svelte";
 import Bash from "./item/Bash.svelte";
+import BionicInfo from "./item/BionicInfo.svelte";
 import BookInfo from "./item/BookInfo.svelte";
 import ComestibleInfo from "./item/ComestibleInfo.svelte";
 import ComponentOf from "./item/ComponentOf.svelte";
@@ -338,6 +339,9 @@ const ascii_picture =
   {:else}
     <ArmorInfo {item} />
   {/if}
+{/if}
+{#if item.type === "BIONIC_ITEM"}
+  <BionicInfo {item} />
 {/if}
 {#if item.type === "TOOL" || item.type === "TOOL_ARMOR"}
   <ToolInfo {item} />

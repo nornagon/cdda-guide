@@ -2,6 +2,7 @@ type integer = number;
 type volume = number | string;
 type mass = number | string;
 type duration = number | string;
+type energy = number | string;
 
 export type Translation =
   | string
@@ -347,6 +348,13 @@ export type ArmorSlot = {
   environmental_protection?: number;
   environmental_protection_with_filter?: number;
   material_thickness?: number;
+};
+
+export type BionicSlot = {
+  bionic_id?: string;
+  difficulty?: integer;
+  is_upgrade?: boolean;
+  installation_data?: string;
 };
 
 export type EngineSlot = {
@@ -1455,13 +1463,91 @@ export type ItemAction = {
   name: Translation;
 };
 
+export type Bionic = {
+  type: "bionic";
+  id: string;
+  name: Translation;
+  description?: Translation;
+  cant_remove_reason?: Translation;
+
+  react_cost?: energy;
+  capacity?: energy;
+  weight_capacity_bonus?: mass;
+  act_cost?: energy;
+  deact_cost?: energy;
+  trigger_cost?: energy;
+  power_trickle?: energy;
+  time?: integer;
+
+  flags?: string[];
+  active_flags?: string[];
+  inactive_flags?: string[];
+
+  fuel_efficiency?: number;
+  passive_fuel_efficiency?: number;
+
+  passive_pseudo_items?: string[];
+  toggled_pseudo_items?: string[];
+  fake_weapon?: string;
+  installable_weapon_flags?: string[];
+
+  spell_on_activation?: string;
+  weight_capacity_modifier?: number; // default 1
+  exothermic_power_gen?: boolean;
+  power_gen_emission?: string;
+  coverage_power_gen_penalty?: number;
+  is_remote_fueled?: boolean;
+
+  known_ma_styles?: string[];
+  learned_spells?: Record<string, number>;
+  learned_proficiencies?: string[];
+  canceled_mutations?: string[];
+  mutation_conflicts?: string[];
+  included_bionics?: string[];
+  included?: boolean;
+  upgraded_bionic?: string;
+  fuel_options?: string[]; // material_id
+  fuel_capacity?: integer;
+  activated_on_install?: boolean;
+
+  available_upgrades?: string[]; // bionic_id
+  installation_requirement?: string; // requirement_id
+
+  vitamin_absorb_mod?: number; // default 1
+
+  dupes_allowed?: boolean;
+  auto_deactivates?: string[];
+
+  activated_close_ui?: boolean;
+  deactivated_close_ui?: boolean;
+
+  activated_eocs?: any; // TODO
+  processed_eocs?: any; // TODO
+  deactivated_eocs?: any; // TODO
+  enchantments?: any; // TODO
+
+  stat_bonus?: [string, integer][];
+  encumbrance?: [string /* bodypart_id */, integer][];
+  occupied_bodyparts?: [string /* bodypart_id */, integer][];
+  env_protec?: [string /* bodypart_id */, integer][];
+  bash_protec?: [string /* bodypart_id */, integer][];
+  cut_protec?: [string /* bodypart_id */, integer][];
+  bullet_protec?: [string /* bodypart_id */, integer][];
+
+  social_modifiers?: {
+    lie?: integer;
+    persuade?: integer;
+    intimidate?: integer;
+  };
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
   AMMO: { type: "AMMO" } & ItemBasicInfo & AmmoSlot;
   ARMOR: { type: "ARMOR" } & ItemBasicInfo & ArmorSlot;
   BATTERY: { type: "BATTERY" } & ItemBasicInfo;
-  BIONIC_ITEM: { type: "BIONIC_ITEM" } & ItemBasicInfo;
+  BIONIC_ITEM: { type: "BIONIC_ITEM" } & ItemBasicInfo & BionicSlot;
   BOOK: { type: "BOOK" } & ItemBasicInfo & BookSlot;
   COMESTIBLE: { type: "COMESTIBLE" } & ItemBasicInfo & ComestibleSlot;
   ENGINE: { type: "ENGINE" } & ItemBasicInfo & EngineSlot;
@@ -1481,6 +1567,7 @@ export type SupportedTypes = {
   achievement: Achievement;
   ammunition_type: AmmunitionType;
   ascii_art: AsciiArt;
+  bionic: Bionic;
   body_part: BodyPart;
   city_building: { type: "city_building" } & OvermapSpecial;
   conduct: Achievement;

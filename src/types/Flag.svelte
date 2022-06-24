@@ -22,6 +22,15 @@ const furnitureWithFlag = data
 const terrainWithFlag = data
   .byType("terrain")
   .filter((f) => f.id && f.flags?.includes(item.id));
+const bionicWithFlag = data
+  .byType("bionic")
+  .filter(
+    (f) =>
+      f.id &&
+      (f.flags?.includes(item.id) ||
+        f.active_flags?.includes(item.id) ||
+        f.inactive_flags?.includes(item.id))
+  );
 
 function parseColorText(text: string): { string: string; color: string }[] {
   let color = ["gray"];
@@ -126,6 +135,19 @@ const colorLookup = (color: string): string => {
       let:item>
       <ItemSymbol {item} />
       <ThingLink type="furniture" id={item.id} />
+    </LimitedList>
+  </section>
+{/if}
+{#if bionicWithFlag.length}
+  <section>
+    <h1>Bionics</h1>
+    <LimitedList
+      items={bionicWithFlag.sort((a, b) =>
+        singularName(a).localeCompare(singularName(b))
+      )}
+      let:item>
+      <ItemSymbol {item} />
+      <ThingLink type="bionic" id={item.id} />
     </LimitedList>
   </section>
 {/if}

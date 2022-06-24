@@ -26,6 +26,7 @@ import WeaponCategory from "./types/WeaponCategory.svelte";
 import ConstructionGroup from "./types/ConstructionGroup.svelte";
 import Achievement from "./types/Achievement.svelte";
 import ObsoletionWarning from "./ObsoletionWarning.svelte";
+import Bionic from "./types/Bionic.svelte";
 
 export let item: { id: string; type: string };
 
@@ -86,6 +87,7 @@ const displays = {
   construction_group: ConstructionGroup,
   achievement: Achievement,
   conduct: Achievement,
+  bionic: Bionic,
 };
 </script>
 
