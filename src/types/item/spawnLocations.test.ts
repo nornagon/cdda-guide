@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import {
   collection,
   getLootForMapgen,
@@ -320,7 +323,7 @@ describe("repeatChance()", () => {
 });
 
 describe("nested mapgen", () => {
-  it("reads place_nested", () => {
+  it("reads place_nested", async () => {
     const data = new CddaData([
       {
         type: "mapgen",
@@ -345,11 +348,11 @@ describe("nested mapgen", () => {
         },
       } as Mapgen,
     ]);
-    const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
+    const loot = await getLootForMapgen(data, data.byType("mapgen")[0]);
     expect([...loot.entries()]).toEqual([["test_item", 1]]);
   });
 
-  it("handles chunk weights", () => {
+  it("handles chunk weights", async () => {
     const data = new CddaData([
       {
         type: "mapgen",
@@ -395,14 +398,14 @@ describe("nested mapgen", () => {
         },
       } as Mapgen,
     ]);
-    const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
+    const loot = await getLootForMapgen(data, data.byType("mapgen")[0]);
     expect([...loot.entries()]).toEqual([
       ["test_item", 0.25],
       ["test_item_2", 0.75],
     ]);
   });
 
-  it("handles repeat", () => {
+  it("handles repeat", async () => {
     const data = new CddaData([
       {
         type: "mapgen",
@@ -427,13 +430,13 @@ describe("nested mapgen", () => {
         },
       } as Mapgen,
     ]);
-    const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
+    const loot = await getLootForMapgen(data, data.byType("mapgen")[0]);
     expect([...loot.entries()]).toEqual([["test_item", 0.51]]);
   });
 
   it.todo("handles repeat range");
 
-  it("reads nested", () => {
+  it("reads nested", async () => {
     const data = new CddaData([
       {
         type: "mapgen",
@@ -461,7 +464,7 @@ describe("nested mapgen", () => {
       } as Mapgen,
     ]);
     // NB, lootByOmSpecial is what handles mapgen offsets, so we have to call through that.
-    const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
+    const loot = await getLootForMapgen(data, data.byType("mapgen")[0]);
     expect([...loot.entries()]).toEqual([["test_item", 1]]);
   });
 });
