@@ -11,25 +11,8 @@ if (location.hostname !== "localhost")
     tracesSampleRate: 0.2,
   });
 
-/*
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js").catch((err) => {
-    console.log("ServiceWorker registration failed: ", err);
-  });
-  navigator.serviceWorker.ready.then(start, start);
-} else {
-  start();
-}
-*/
-
-function start() {
-  return new App({
-    target: document.body,
-  });
-}
-
 registerSW({});
 
-const app = start();
-
-export default app;
+export default new App({
+  target: document.body,
+});
