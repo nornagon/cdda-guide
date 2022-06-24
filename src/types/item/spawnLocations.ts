@@ -78,8 +78,40 @@ function offsetMapgen(mapgen: raw.Mapgen, x: number, y: number): raw.Mapgen {
   return { ...mapgen, object };
 }
 
+const requestIdleCallback: typeof window.requestIdleCallback =
+  "requestIdleCallback" in window
+    ? window.requestIdleCallback
+    : function (cb: IdleRequestCallback): number {
+        var start = Date.now();
+        return setTimeout(function () {
+          cb({
+            didTimeout: false,
+            timeRemaining: function () {
+              return Math.max(0, 50 - (Date.now() - start));
+            },
+          });
+        }, 0) as unknown as number;
+      };
+
+function yieldUntilIdle(): Promise<IdleDeadline> {
+  return new Promise<IdleDeadline>((resolve) => {
+    requestIdleCallback(resolve, { timeout: 100 });
+  });
+}
+
+async function yieldable<T>(
+  f: (wait: () => Promise<void>) => Promise<T>
+): Promise<T> {
+  let deadline = await yieldUntilIdle();
+  return f(async () => {
+    if (deadline.timeRemaining() <= 0) {
+      deadline = await yieldUntilIdle();
+    }
+  });
+}
+
 const lootByOmSpecialCache = new WeakMap<CddaData, Map<string, Loot>>();
-export function lootByOmSpecial(data: CddaData) {
+export async function lootByOmSpecial(data: CddaData) {
   if (lootByOmSpecialCache.has(data)) return lootByOmSpecialCache.get(data);
   const mapgensByOmt = new Map<string, raw.Mapgen[]>();
   const add = (id: string, mapgen: raw.Mapgen) => {
@@ -110,22 +142,25 @@ export function lootByOmSpecial(data: CddaData) {
   const overmap_specials = data.byType("overmap_special");
 
   const lootByOmSpecial = new Map<string, Loot>();
-  for (const om_special of overmap_specials) {
-    if (om_special.subtype === "mutable") continue;
-    const loots = [];
-    for (const om of om_special.overmaps ?? []) {
-      const overmap_id = om.overmap.replace(/_(north|east|west|south)$/, "");
-      const mapgens = mapgensByOmt.get(overmap_id) ?? [];
-      const loot = mergeLoot(
-        mapgens.map((mg) => ({
-          weight: mg.weight ?? 1000,
-          loot: getLootForMapgen(data, mg),
-        }))
-      );
-      loots.push(loot);
+  await yieldable(async (relinquish) => {
+    for (const om_special of overmap_specials) {
+      if (om_special.subtype === "mutable") continue;
+      const loots = [];
+      for (const om of om_special.overmaps ?? []) {
+        const overmap_id = om.overmap.replace(/_(north|east|west|south)$/, "");
+        const mapgens = mapgensByOmt.get(overmap_id) ?? [];
+        const loot = mergeLoot(
+          mapgens.map((mg) => ({
+            weight: mg.weight ?? 1000,
+            loot: getLootForMapgen(data, mg),
+          }))
+        );
+        loots.push(loot);
+        await relinquish();
+      }
+      lootByOmSpecial.set(om_special.id, addLoot(loots));
     }
-    lootByOmSpecial.set(om_special.id, addLoot(loots));
-  }
+  });
   lootByOmSpecialCache.set(data, lootByOmSpecial);
   return lootByOmSpecial;
 }
@@ -188,35 +223,40 @@ const hiddenLocations = new Set([
 ]);
 const lootByOmAppearanceCache = new WeakMap<
   CddaData,
-  Map<string, { loot: Map<string, number>; ids: string[] }>
+  Promise<Map<string, { loot: Map<string, number>; ids: string[] }>>
 >();
 export function lootByOMSAppearance(data: CddaData) {
-  if (lootByOmAppearanceCache.has(data))
-    return lootByOmAppearanceCache.get(data);
-  const lootByOMS = lootByOmSpecial(data);
+  if (!lootByOmAppearanceCache.has(data))
+    lootByOmAppearanceCache.set(data, computeLootByOMSAppearance(data));
+  return lootByOmAppearanceCache.get(data);
+}
+async function computeLootByOMSAppearance(data: CddaData) {
+  const lootByOMS = await lootByOmSpecial(data);
   const lootByOMSAppearance = new Map<
     string,
     { loot: Map<string, number>; ids: string[] }
   >();
-  for (const [oms_id, loot] of lootByOMS.entries()) {
-    if (hiddenLocations.has(oms_id)) continue;
-    const appearance = overmapAppearance(
-      data,
-      data.byId("overmap_special", oms_id)
-    );
-    if (!appearance) continue;
-    if (!lootByOMSAppearance.has(appearance))
-      lootByOMSAppearance.set(appearance, { loot: undefined, ids: [] });
-    const l = lootByOMSAppearance.get(appearance);
-    if (l.loot)
-      l.loot = mergeLoot([
-        { loot: l.loot, weight: 1 },
-        { loot: loot, weight: 1 },
-      ]);
-    else l.loot = loot;
-    l.ids.push(oms_id);
-  }
-  lootByOmAppearanceCache.set(data, lootByOMSAppearance);
+  await yieldable(async (relinquish) => {
+    for (const [oms_id, loot] of lootByOMS.entries()) {
+      if (hiddenLocations.has(oms_id)) continue;
+      const appearance = overmapAppearance(
+        data,
+        data.byId("overmap_special", oms_id)
+      );
+      if (!appearance) continue;
+      if (!lootByOMSAppearance.has(appearance))
+        lootByOMSAppearance.set(appearance, { loot: undefined, ids: [] });
+      const l = lootByOMSAppearance.get(appearance);
+      if (l.loot)
+        l.loot = mergeLoot([
+          { loot: l.loot, weight: 1 },
+          { loot: loot, weight: 1 },
+        ]);
+      else l.loot = loot;
+      await relinquish();
+      l.ids.push(oms_id);
+    }
+  });
   return lootByOMSAppearance;
 }
 

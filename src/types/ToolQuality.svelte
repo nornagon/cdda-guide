@@ -3,6 +3,7 @@ import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { Item, VehiclePart, ToolQuality } from "../types";
+import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: ToolQuality;
@@ -91,6 +92,7 @@ for (const [level, set] of recipesUsingQualitySet)
             .sort((a, b) => singularName(a).localeCompare(singularName(b)))}
           limit={20}
           let:item>
+          <ItemSymbol {item} />
           <ThingLink type="item" id={item.id} />
         </LimitedList>
       </dd>
@@ -110,6 +112,7 @@ for (const [level, set] of recipesUsingQualitySet)
               .sort((a, b) => singularName(a).localeCompare(singularName(b)))}
             limit={20}
             let:item>
+            <ItemSymbol {item} />
             <ThingLink type="vehicle_part" id={item.id} />
           </LimitedList>
         </dd>
@@ -128,6 +131,7 @@ for (const [level, set] of recipesUsingQualitySet)
             items={recipesUsingQuality.get(level)}
             let:item
             limit={20}>
+            <ItemSymbol item={data.byId("item", item)} />
             <ThingLink type="item" id={item} />
           </LimitedList>
         </dd>

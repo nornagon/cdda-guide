@@ -10,20 +10,25 @@ export let item_id: string;
 
 const data = getContext<CddaData>("data");
 
-const lootByAppearance = lootByOMSAppearance(data);
-
-const spawnLocations: {
-  overmap_special: OvermapSpecial;
-  ids: string[];
-  chance: number;
-}[] = [];
-for (const { loot, ids } of lootByAppearance.values()) {
-  if (loot.has(item_id)) {
-    const chance = loot.get(item_id);
-    const oms = data.byId("overmap_special", ids[0]);
-    spawnLocations.push({ overmap_special: oms, ids, chance });
+const spawnLocationsPromise = lootByOMSAppearance(data).then(
+  (lootByAppearance) => {
+    const spawnLocations: {
+      overmap_special: OvermapSpecial;
+      ids: string[];
+      chance: number;
+    }[] = [];
+    for (const { loot, ids } of lootByAppearance.values()) {
+      if (loot.has(item_id)) {
+        const chance = loot.get(item_id);
+        const oms = data.byId("overmap_special", ids[0]);
+        spawnLocations.push({ overmap_special: oms, ids, chance });
+      }
+    }
+    spawnLocations.sort((a, b) => b.chance - a.chance);
+    realLimit = spawnLocations.length <= limit + grace ? limit + grace : limit;
+    return spawnLocations;
   }
-}
+);
 
 function omsName(oms: OvermapSpecial): string {
   if (oms.subtype === "mutable") return oms.id;
@@ -65,41 +70,47 @@ function omsName(oms: OvermapSpecial): string {
   return oms.id;
 }
 
-spawnLocations.sort((a, b) => b.chance - a.chance);
-
 let limit = 10;
 
 let grace = 4;
 
-let realLimit = spawnLocations.length <= limit + grace ? limit + grace : limit;
+let realLimit = 0; // Filled in later
 </script>
 
-{#if spawnLocations.length}
+{#await spawnLocationsPromise}
   <section>
     <h1>Loot</h1>
-    <table class="alternating">
-      <tbody>
-        {#each spawnLocations.slice(0, realLimit) as loc}
-          <tr>
-            <td style="text-align: center">
-              <OvermapAppearance overmapSpecial={loc.overmap_special} />
-            </td>
-            <td style="vertical-align: middle">
-              <span title={loc.ids.join(", ")}
-                >{omsName(loc.overmap_special)}</span>
-              ({showProbability(loc.chance)})
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-    {#if spawnLocations.length > realLimit}
-      <button
-        class="disclosure"
-        on:click={(e) => {
-          e.preventDefault();
-          realLimit = Infinity;
-        }}>See all {Number(spawnLocations.length).toLocaleString()}...</button>
-    {/if}
+    <p style="color: var(--cata-color-gray)"><em>Loading...</em></p>
   </section>
-{/if}
+{:then spawnLocations}
+  {#if spawnLocations.length}
+    <section>
+      <h1>Loot</h1>
+      <table class="alternating">
+        <tbody>
+          {#each spawnLocations.slice(0, realLimit) as loc}
+            <tr>
+              <td style="text-align: center">
+                <OvermapAppearance overmapSpecial={loc.overmap_special} />
+              </td>
+              <td style="vertical-align: middle">
+                <span title={loc.ids.join(", ")}
+                  >{omsName(loc.overmap_special)}</span>
+                ({showProbability(loc.chance)})
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+      {#if spawnLocations.length > realLimit}
+        <button
+          class="disclosure"
+          on:click={(e) => {
+            e.preventDefault();
+            realLimit = Infinity;
+          }}
+          >See all {Number(spawnLocations.length).toLocaleString()}...</button>
+      {/if}
+    </section>
+  {/if}
+{/await}
