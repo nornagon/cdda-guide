@@ -6,10 +6,10 @@ import { render } from "@testing-library/svelte";
 import SpawnedIn from "./SpawnedIn.svelte";
 import WithData from "../../WithData.svelte";
 import { CddaData } from "../../data";
+import { lootByOMSAppearance } from "./spawnLocations";
 
 describe("the loot section", () => {
-  it("displays the name of the spawn location and chance", () => {
-    const spawnLocations = [{ singularName: "fake place", chance: 0.5 }];
+  it("displays the name of the spawn location and chance", async () => {
     const item_id = "fake_item";
     const data = new CddaData([
       {
@@ -39,16 +39,19 @@ describe("the loot section", () => {
       },
     ]);
 
+    await lootByOMSAppearance(data);
+
     const { getByText } = render(WithData, {
       Component: SpawnedIn,
       item_id,
       data,
     });
+    await new Promise((r) => setTimeout(r));
 
     expect(getByText(/fake place/)).toBeInTheDocument();
     expect(getByText(/50.00%/)).toBeInTheDocument();
   });
-  it("displays a composite chance", () => {
+  it("displays a composite chance", async () => {
     const data = new CddaData([
       {
         type: "mapgen",
@@ -78,13 +81,15 @@ describe("the loot section", () => {
       },
     ]);
 
+    await lootByOMSAppearance(data);
+
     const { getByText } = render(WithData, {
       Component: SpawnedIn,
       item_id: "fake_item",
       data,
     });
+    await new Promise((r) => setTimeout(r));
 
     expect(getByText(/75.00%/)).toBeInTheDocument();
   });
 });
-//getItemSpawnLocations

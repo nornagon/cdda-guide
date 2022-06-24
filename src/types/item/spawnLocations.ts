@@ -79,7 +79,7 @@ function offsetMapgen(mapgen: raw.Mapgen, x: number, y: number): raw.Mapgen {
 }
 
 const requestIdleCallback: typeof window.requestIdleCallback =
-  "requestIdleCallback" in window
+  typeof window !== "undefined" && "requestIdleCallback" in window
     ? window.requestIdleCallback
     : function (cb: (deadline: IdleDeadline) => void): number {
         var start = Date.now();
