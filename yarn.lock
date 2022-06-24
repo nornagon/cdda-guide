@@ -1522,6 +1522,11 @@
   resolved "https://registry.yarnpkg.com/@types/pug/-/pug-2.0.6.tgz#f830323c88172e66826d0bde413498b61054b5a6"
   integrity sha512-SnHmG9wN1UVmagJOnyo/qkk0Z7gejYxOYYmaAwr5u2yFYfsupN3sg10kyzN8Hep/2zbHxCnsumxOoRIRMBwKCg==
 
+"@types/requestidlecallback@^0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@types/requestidlecallback/-/requestidlecallback-0.3.4.tgz#819e22b8994cf547e1f17f9cb79805a5a3bb1db5"
+  integrity sha512-aTSyiZuRemRLTQkJPb25L7A4/eR2Teo5l4yJ1V6P3+MFxEZckTDkNKNtr/V1zEOMzS6H8DgxF22U6jPAPrzQvw==
+
 "@types/resolve@1.17.1":
   version "1.17.1"
   resolved "https://registry.yarnpkg.com/@types/resolve/-/resolve-1.17.1.tgz#3afd6ad8967c77e4376c598a82ddd58f46ec45d6"
