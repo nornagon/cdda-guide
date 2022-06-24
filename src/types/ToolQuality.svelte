@@ -73,7 +73,7 @@ for (const [level, set] of recipesUsingQualitySet)
         <dd>
           <ul class="comma-separated">
             {#each usages as usage}
-              <li>{usage}</li>
+              <li>{singularName(data.byId("item_action", usage))}</li>
             {/each}
           </ul>
         </dd>
