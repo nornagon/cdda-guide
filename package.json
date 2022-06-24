@@ -58,7 +58,10 @@
       "^.+\\.svelte$": [
         "svelte-jester",
         {
-          "preprocess": true
+          "preprocess": true,
+          "compilerOptions": {
+            "dev": false
+          }
         }
       ],
       "^.+\\.ts$": "ts-jest",
