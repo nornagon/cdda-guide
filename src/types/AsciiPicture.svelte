@@ -13,15 +13,17 @@ for (const line of picture.picture) {
     if (nextColorTag) {
       if (nextColorTag.index > 0)
         spans.push({
-          string: remaining.substr(0, nextColorTag.index),
+          string: remaining.substring(0, nextColorTag.index),
           color: color[0],
         });
       if (nextColorTag[0][1] === "/" && color.length > 1) {
         color.shift();
       } else {
-        color.unshift(nextColorTag[1].substr(1));
+        color.unshift(nextColorTag[1].substring(1));
       }
-      remaining = remaining.substr(nextColorTag.index + nextColorTag[0].length);
+      remaining = remaining.substring(
+        nextColorTag.index + nextColorTag[0].length
+      );
     } else break;
   }
   if (remaining.length) {

@@ -2,7 +2,7 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
-import type { Item, VehiclePart, JsonFlag } from "../types";
+import type { JsonFlag } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
