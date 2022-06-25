@@ -86,8 +86,7 @@ function hashchange() {
       item = null;
       search = decodeURIComponent(id ?? "");
     } else {
-      if (id) item = { type, id: decodeURIComponent(id) };
-      else item = { type, id: "" };
+      item = { type, id: id ? decodeURIComponent(id) : "" };
     }
 
     window.scrollTo(0, 0);
