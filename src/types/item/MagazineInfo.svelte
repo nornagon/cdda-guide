@@ -15,9 +15,10 @@ const compatibleItems = data
   .filter((i) => {
     return i.pocket_data?.some(
       (p) =>
-        p.item_restriction?.includes(item.id) ||
-        p.allowed_speedloaders?.includes(item.id) ||
-        p.flag_restriction?.some((f) => item.flags?.includes(f))
+        (p.pocket_type === "MAGAZINE_WELL" || p.pocket_type === "MAGAZINE") &&
+        (p.item_restriction?.includes(item.id) ||
+          p.allowed_speedloaders?.includes(item.id) ||
+          p.flag_restriction?.some((f) => item.flags?.includes(f)))
     );
   });
 
