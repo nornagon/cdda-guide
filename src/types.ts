@@ -434,6 +434,7 @@ export type PocketData = {
   pocket_type?: string;
   ammo_restriction?: Record<string, number>;
   item_restriction?: Array<string>;
+  allowed_speedloaders?: Array<string>;
   min_item_volume?: string;
   max_item_volume?: string;
   max_contains_volume?: string;

@@ -33,6 +33,7 @@ import GrownFrom from "./item/GrownFrom.svelte";
 import GunInfo from "./item/GunInfo.svelte";
 import HarvestedFrom from "./item/HarvestedFrom.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import MagazineInfo from "./item/MagazineInfo.svelte";
 import MeleeInfo from "./item/MeleeInfo.svelte";
 import Recipes from "./item/Recipes.svelte";
 import Salvaged from "./item/Salvaged.svelte";
@@ -360,6 +361,9 @@ const ascii_picture =
 {/if}
 {#if item.type === "WHEEL"}
   <WheelInfo {item} />
+{/if}
+{#if item.type === "MAGAZINE"}
+  <MagazineInfo {item} />
 {/if}
 {#if item.seed_data}
   <section>
