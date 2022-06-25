@@ -102,6 +102,10 @@ const data = getContext<CddaData>("data");
       <dt>Charge Time</dt>
       <dd>{item.time} turn{item.time !== 1 ? "s" : ""}</dd>
     {/if}
+    {#if item.capacity}
+      <dt>Capacity</dt>
+      <dd>{item.capacity}</dd>
+    {/if}
     {#if item.fake_weapon}
       <dt>Acts As</dt>
       <dd><ThingLink type="item" id={item.fake_weapon} /></dd>
