@@ -81,25 +81,27 @@ for (const [level, set] of recipesUsingQualitySet)
     </dl>
   </section>
 {/if}
-<section>
-  <h1>Tools</h1>
-  <dl>
-    {#each [...toolsWithQualityByLevel.keys()].sort((a, b) => a - b) as level}
-      <dt style="font-variant: tabular-nums">Level {level}</dt>
-      <dd>
-        <LimitedList
-          items={toolsWithQualityByLevel
-            .get(level)
-            .sort((a, b) => singularName(a).localeCompare(singularName(b)))}
-          limit={20}
-          let:item>
-          <ItemSymbol {item} />
-          <ThingLink type="item" id={item.id} />
-        </LimitedList>
-      </dd>
-    {/each}
-  </dl>
-</section>
+{#if toolsWithQualityByLevel.size > 0}
+  <section>
+    <h1>Tools</h1>
+    <dl>
+      {#each [...toolsWithQualityByLevel.keys()].sort((a, b) => a - b) as level}
+        <dt style="font-variant: tabular-nums">Level {level}</dt>
+        <dd>
+          <LimitedList
+            items={toolsWithQualityByLevel
+              .get(level)
+              .sort((a, b) => singularName(a).localeCompare(singularName(b)))}
+            limit={20}
+            let:item>
+            <ItemSymbol {item} />
+            <ThingLink type="item" id={item.id} />
+          </LimitedList>
+        </dd>
+      {/each}
+    </dl>
+  </section>
+{/if}
 {#if vpartsWithQualityByLevel.size > 0}
   <section>
     <h1>Vehicle Parts</h1>
