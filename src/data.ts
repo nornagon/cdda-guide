@@ -713,7 +713,7 @@ export class CddaData {
 
   normalizeRequirementsForDisassembly(
     requirement: RequirementData & { using?: Recipe["using"] }
-  ): ReturnType<typeof this.normalizeRequirements> {
+  ) {
     const { tools, qualities, components } = this.normalizeRequirements(
       requirement,
       { onlyRecoverable: true }
