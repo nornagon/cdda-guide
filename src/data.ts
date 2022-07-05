@@ -732,12 +732,12 @@ export class CddaData {
           ].includes(tool.id)
         ) {
           toolOpts.length = 0;
-          newQualities.push([{ id: "SAW_M_FINE" }]);
+          newQualities.push([{ id: "SAW_M_FINE", level: 1 }]);
           break;
         }
         if (["sewing_kit", "mold_plastic"].includes(tool.id)) {
           toolOpts.length = 0;
-          newQualities.push([{ id: "CUT" }]);
+          newQualities.push([{ id: "CUT", level: 1 }]);
           break;
         }
         if (tool.id === "crucible") {
@@ -747,7 +747,7 @@ export class CddaData {
         if (tool.id === "press") {
           toolOpts.length = 0;
           removeFire = true;
-          newQualities.push([{ id: "PULL" }]);
+          newQualities.push([{ id: "PULL", level: 1 }]);
           break;
         }
         if (tool.id === "fire" && removeFire) {
