@@ -507,9 +507,9 @@ export type MapBashInfo = {
   // TODO:
   // sound
   // sound_fail
-  // furn_set
   // ter_set
   // move_cost
+  furn_set?: string;
 
   items?: string | ItemGroupEntry[];
 

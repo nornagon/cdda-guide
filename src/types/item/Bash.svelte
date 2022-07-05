@@ -34,6 +34,10 @@ let bashFrom = (data.byType("terrain") as (Terrain | Furniture)[])
     <LimitedList items={bashFrom} let:item={f}>
       <ItemSymbol item={data.byId(f.type, f.id)} />
       <ThingLink id={f.id} type={f.type} />
+      {#if f.bash.str_min}
+        <span style="color: var(--cata-color-gray)"
+          >(≥ {f.bash.str_min} STR)</span>
+      {/if}
     </LimitedList>
   </section>
 {/if}

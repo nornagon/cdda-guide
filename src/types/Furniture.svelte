@@ -40,11 +40,6 @@ const constructions = data
   .byType("construction")
   .filter((c) => c.post_terrain === item.id);
 
-const bits = [
-  ["Deconstruct", deconstruct],
-  ["Bash", bash],
-] as const;
-
 const harvestBySeason: Map<string, string> = new Map();
 for (const { seasons, id } of item.harvest_by_season ?? []) {
   for (const season of seasons) {
@@ -67,27 +62,66 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
     <dd>{item.required_str >= 0 ? item.required_str : "not movable"}</dd>
     <dt>Coverage</dt>
     <dd>{item.coverage ?? 0}%</dd>
-    <dt>Comfort</dt>
-    <dd>{item.comfort ?? 0}</dd>
+    {#if item.comfort}
+      <dt>Comfort</dt>
+      <dd>{item.comfort}</dd>
+    {/if}
+    {#if item.max_volume}
+      <dt>Max Volume</dt>
+      <dd>{item.max_volume}</dd>
+    {/if}
     {#if item.crafting_pseudo_item}
       <dt>Provides</dt>
       <dd><ThingLink type="item" id={item.crafting_pseudo_item} /></dd>
     {/if}
-    {#each bits as [title, arr]}
-      {#if arr.length}
-        <dt>{title}</dt>
-        <dd>
-          <ul class="comma-separated">
-            <!-- prettier-ignore -->
-            {#each arr as {id, prob, count}}
+    {#if deconstruct.length}
+      <dt>Deconstruct</dt>
+      <dd>
+        <ul class="comma-separated">
+          <!-- prettier-ignore -->
+          {#each deconstruct as {id, prob, count}}
             <li><span style="white-space: nowrap"><ThingLink type="item" {id} />{
               ''}{#if count[0] === count[1]}{#if count[0] !== 1}&nbsp;({count[0]}){/if}{:else}&nbsp;({count[0]}–{count[1]}){/if}{
               ''}{#if prob !== 1}&nbsp;({showProbability(prob)}){/if}</span></li>
             {/each}
-          </ul>
-        </dd>
-      {/if}
-    {/each}
+        </ul>
+        {#if item.deconstruct?.furn_set}
+          {@const becomes = item.deconstruct.furn_set}
+          <dl>
+            <dt>Becomes</dt>
+            <dd>
+              <ItemSymbol item={data.byId("furniture", becomes)} />
+              <ThingLink type="furniture" id={becomes} />
+            </dd>
+          </dl>
+        {/if}
+      </dd>
+    {/if}
+    {#if bash.length}
+      <dt>Bash</dt>
+      <dd>
+        <ul class="comma-separated">
+          <!-- prettier-ignore -->
+          {#each bash as {id, prob, count}}
+            <li><span style="white-space: nowrap"><ThingLink type="item" {id} />{
+              ''}{#if count[0] === count[1]}{#if count[0] !== 1}&nbsp;({count[0]}){/if}{:else}&nbsp;({count[0]}–{count[1]}){/if}{
+              ''}{#if prob !== 1}&nbsp;({showProbability(prob)}){/if}</span></li>
+            {/each}
+        </ul>
+        <dl>
+          <dt>Strength Required</dt>
+          <dd>{item.bash?.str_min ?? 0}</dd>
+          {#if item.bash?.furn_set}
+            {@const becomes = item.bash.furn_set}
+            <dt>Becomes</dt>
+            <dd>
+              <ItemSymbol item={data.byId("furniture", becomes)} />
+              <ThingLink type="furniture" id={becomes} />
+            </dd>
+          {/if}
+        </dl>
+      </dd>
+    {/if}
     {#if harvestBySeason.size}
       <dt>Harvest</dt>
       <dd>
