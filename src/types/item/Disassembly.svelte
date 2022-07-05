@@ -2,7 +2,7 @@
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Recipe, RequirementData } from "../../types";
+import type { Recipe } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
@@ -15,24 +15,7 @@ for (const recipe of (data.byType("recipe") as Recipe[]).concat(
   data.byType("uncraft")
 )) {
   if (recipe.result && (recipe.reversible || recipe.type === "uncraft")) {
-    const normalizedUsing = recipe.using
-      ? Array.isArray(recipe.using)
-        ? recipe.using
-        : [[recipe.using, 1] as [string, number]]
-      : [];
-    const requirements = normalizedUsing
-      .map(
-        ([id, count]) =>
-          [data.byId("requirement", id) as RequirementData, count] as const
-      )
-      .concat([[recipe, 1]]);
-    const components = requirements.flatMap(([req, count]) => {
-      return data
-        .flattenRequirement(req.components ?? [], (x) => x.components, {
-          onlyRecoverable: true,
-        })
-        .map((x) => x.map((x) => ({ ...x, count: x.count * count })));
-    });
+    const { components } = data.normalizeRequirementsForDisassembly(recipe);
     const defaultComponents = components.map((c) => c[0]);
     if (defaultComponents.some((c) => c.id === item_id))
       uncraftableFromSet.add(recipe.result);

@@ -711,8 +711,92 @@ export class CddaData {
     return ret;
   }
 
-  normalizeRequirements(
+  normalizeRequirementsForDisassembly(
     requirement: RequirementData & { using?: Recipe["using"] }
+  ): ReturnType<typeof this.normalizeRequirements> {
+    const { tools, qualities, components } = this.normalizeRequirements(
+      requirement,
+      { onlyRecoverable: true }
+    );
+    let removeFire = false;
+    const newQualities: typeof qualities = [];
+    for (const toolOpts of tools) {
+      for (const tool of toolOpts) {
+        if (
+          [
+            "welder",
+            "welder_crude",
+            "oxy_torch",
+            "forge",
+            "char_forge",
+          ].includes(tool.id)
+        ) {
+          toolOpts.length = 0;
+          newQualities.push([{ id: "SAW_M_FINE" }]);
+          break;
+        }
+        if (["sewing_kit", "mold_plastic"].includes(tool.id)) {
+          toolOpts.length = 0;
+          newQualities.push([{ id: "CUT" }]);
+          break;
+        }
+        if (tool.id === "crucible") {
+          toolOpts.length = 0;
+          break;
+        }
+        if (tool.id === "press") {
+          toolOpts.length = 0;
+          removeFire = true;
+          newQualities.push([{ id: "PULL" }]);
+          break;
+        }
+        if (tool.id === "fire" && removeFire) {
+          toolOpts.length = 0;
+          break;
+        }
+      }
+    }
+    const filteredTools = tools.filter((t) => t.length);
+
+    for (const qualityOpts of qualities) {
+      for (const quality of qualityOpts) {
+        if (quality.id === "SEW") {
+          newQualities.push([{ id: "CUT", level: quality.level }]);
+          qualityOpts.length = 0;
+          break;
+        }
+        if (quality.id === "GLARE" || quality.id === "KNIT") {
+          qualityOpts.length = 0;
+          break;
+        }
+      }
+    }
+    const filteredQualities = qualities.filter((t) => t.length);
+
+    const finalQualities = filteredQualities.concat(
+      newQualities.filter(
+        (q) => !filteredQualities.some((q2) => q2[0].id === q[0].id)
+      )
+    );
+
+    const filteredComponents = components
+      .map((c) =>
+        c.filter(
+          (c) => !this.byId("item", c.id).flags?.includes("UNRECOVERABLE")
+        )
+      )
+      .filter((c) => c.length);
+
+    return {
+      tools: filteredTools,
+      qualities: finalQualities,
+      components: filteredComponents,
+    };
+  }
+
+  normalizeRequirements(
+    requirement: RequirementData & { using?: Recipe["using"] },
+    opts?: { onlyRecoverable?: boolean }
   ) {
     const using =
       typeof requirement.using === "string"
@@ -739,9 +823,11 @@ export class CddaData {
       (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x]))
     );
     const components = requirements.flatMap(([req, count]) =>
-      this.flattenRequirement(req.components ?? [], (x) => x.components).map(
-        (x) => x.map((x) => ({ ...x, count: x.count * count }))
-      )
+      this.flattenRequirement(
+        req.components ?? [],
+        (x) => x.components,
+        opts
+      ).map((x) => x.map((x) => ({ ...x, count: x.count * count })))
     );
     return { tools, qualities, components };
   }

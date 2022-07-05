@@ -9,12 +9,7 @@ import {
   singular,
   singularName,
 } from "../data";
-import type {
-  RequirementData,
-  ItemBasicInfo,
-  Item,
-  SupportedTypesWithMapped,
-} from "../types";
+import type { ItemBasicInfo, Item, SupportedTypesWithMapped } from "../types";
 import AsciiPicture from "./AsciiPicture.svelte";
 import AmmoInfo from "./item/AmmoInfo.svelte";
 import ArmorInfo from "./item/ArmorInfo.svelte";
@@ -36,6 +31,7 @@ import ItemSymbol from "./item/ItemSymbol.svelte";
 import MagazineInfo from "./item/MagazineInfo.svelte";
 import MeleeInfo from "./item/MeleeInfo.svelte";
 import Recipes from "./item/Recipes.svelte";
+import RequirementDataTools from "./item/RequirementDataTools.svelte";
 import Salvaged from "./item/Salvaged.svelte";
 import SpawnedIn from "./item/SpawnedIn.svelte";
 import SpawnedInVehicle from "./item/SpawnedInVehicle.svelte";
@@ -123,28 +119,15 @@ let ammo = pockets.flatMap((pocket) =>
     : []
 );
 
-const uncraft = (() => {
-  const recipe = data.uncraftRecipe(item.id);
-  if (!recipe) return undefined;
-  const normalizedUsing = recipe.using
-    ? Array.isArray(recipe.using)
-      ? recipe.using
-      : [[recipe.using, 1] as [string, number]]
-    : [];
-  const requirements = normalizedUsing
-    .map(
-      ([id, count]) =>
-        [data.byId("requirement", id) as RequirementData, count] as const
-    )
-    .concat([[recipe, 1]]);
-  const components = requirements.flatMap(([req, count]) => {
-    return data
-      .flattenRequirement(req.components ?? [], (x) => x.components)
-      .map((x) => x.map((x) => ({ ...x, count: x.count * count })));
-  });
-  const defaultComponents = components.map((c) => c[0]);
-  return { components: defaultComponents };
-})();
+const uncraftRecipe = data.uncraftRecipe(item.id);
+const uncraft = uncraftRecipe
+  ? (() => {
+      const { components, qualities, tools } =
+        data.normalizeRequirementsForDisassembly(uncraftRecipe);
+      const defaultComponents = components.map((c) => c[0]);
+      return { components: defaultComponents, qualities, tools };
+    })()
+  : undefined;
 
 const vparts = data
   .byType("vehicle_part")
@@ -306,6 +289,13 @@ const ascii_picture =
                 <li><ThingLink {id} {count} type="item" /></li>
               {/each}
             </ul>
+            {#if uncraft.qualities?.length || uncraft.tools?.length}
+              <dl>
+                <RequirementDataTools
+                  requirement={uncraftRecipe}
+                  direction="uncraft" />
+              </dl>
+            {/if}
           </dd>
         {/if}
 
