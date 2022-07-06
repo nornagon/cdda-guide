@@ -443,6 +443,10 @@ function computeMats() {
   flex-direction: row;
 }
 
+.body-part {
+  margin-right: 1em;
+}
+
 .body-part h2 {
   font-size: 1rem;
   margin: 0;

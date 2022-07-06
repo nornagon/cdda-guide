@@ -101,14 +101,20 @@ dl {
 	line-height: 1.4;
 }
 dt {
-	grid-column-start: 1;
 	text-align: right;
 	font-weight: bold;
 	color: var(--cata-color-gray);
 }
 dd {
 	margin-inline-start: 1rem;
-	grid-column-start: 2;
+}
+@media (max-width: 600px) {
+	dl {
+		grid-template-columns: auto;
+	}
+	dt {
+		text-align: left;
+	}
 }
 
 dd ul, dd dl {
