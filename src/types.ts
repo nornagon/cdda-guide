@@ -372,7 +372,7 @@ export type UseFunction = {
 
 export type ItemBasicInfo = {
   id: string;
-  category: string; // item_category_id
+  category?: string; // item_category_id
   color?: string;
   symbol?: string;
   description?: Translation;
