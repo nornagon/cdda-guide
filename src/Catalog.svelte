@@ -23,10 +23,31 @@ setContext("data", data);
 const things = data.byType(type as any).filter((o) => o.id);
 things.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 
+// Ref https://github.com/CleverRaven/Cataclysm-DDA/blob/658bbe419fb652086fd4d46bf5bbf9e137228464/src/item_factory.cpp#L4774
+function getCategory(i: Item) {
+  if (i.category) return i.category.toLowerCase();
+  if (i.type === "GUN") return "guns";
+  if (i.type === "MAGAZINE") return "magazines";
+  if (i.type === "AMMO") return "ammo";
+  if (i.type === "TOOL") return "tools";
+  if (i.type === "ARMOR") return "clothing";
+  if (i.type === "COMESTIBLE")
+    return i.comestible_type === "MED" ? "drugs" : "food";
+  if (i.type === "BOOK") return "books";
+  if (i.type === "GUNMOD") return "mods";
+  if (i.type === "BIONIC_ITEM") return "bionics";
+  if (i.bashing || i.cutting) return "weapons";
+  return "other";
+}
+
+function getCategoryName(category: string) {
+  return singularName(data.byId("ITEM_CATEGORY", category));
+}
+
 const groupingFn =
   {
     monster: (m: Monster) => [m.default_faction ?? ""],
-    item: (i: Item) => [i.type],
+    item: (i: Item) => [`${i.type} (${getCategoryName(getCategory(i))})`],
     vehicle_part: (vp: VehiclePart) => vp.categories ?? [""],
     mutation: (m: Mutation) => m.category ?? [""],
   }[type] ?? (() => [""]);

@@ -372,6 +372,7 @@ export type UseFunction = {
 
 export type ItemBasicInfo = {
   id: string;
+  category: string; // item_category_id
   color?: string;
   symbol?: string;
   description?: Translation;
@@ -1542,6 +1543,14 @@ export type Bionic = {
   };
 };
 
+export type ItemCategory = {
+  id: string;
+  type: "ITEM_CATEGORY";
+  name: Translation;
+  sort_rank: integer;
+  // TODO: zones
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1563,6 +1572,7 @@ export type SupportedTypes = {
   WHEEL: { type: "WHEEL" } & ItemBasicInfo & WheelSlot;
 
   // Non-item types.
+  ITEM_CATEGORY: ItemCategory;
   MONSTER: Monster;
   SPELL: Spell;
   achievement: Achievement;
