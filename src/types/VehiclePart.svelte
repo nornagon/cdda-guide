@@ -115,7 +115,16 @@ vehiclesContainingPart.sort((a, b) =>
     <dd><ThingLink id={item.item} type="item" /></dd>
     <dt>Weight</dt>
     <dd>{asKilograms(data.byId("item", item.item).weight)}</dd>
-    {#if item.fuel_type}
+    {#if item.fuel_options?.length}
+      <dt>Charge</dt>
+      <dd>
+        <ul class="comma-separated or">
+          {#each item.fuel_options as fuel_id}
+            <li><ThingLink type="item" id={fuel_id} /></li>
+          {/each}
+        </ul>
+      </dd>
+    {:else if item.fuel_type}
       <dt>Charge</dt>
       <dd><ThingLink type="item" id={item.fuel_type} /></dd>
     {/if}
