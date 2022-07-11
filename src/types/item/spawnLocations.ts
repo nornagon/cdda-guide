@@ -220,6 +220,7 @@ const hiddenLocations = new Set([
   "Lab_SECURITY_1x1x6",
   "Lab_CARGO_Surface",
   "hub_01",
+  "aircraft_carrier",
 ]);
 const lootByOmAppearanceCache = new WeakMap<
   CddaData,
