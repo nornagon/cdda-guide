@@ -378,11 +378,18 @@ export class CddaData {
     return ret;
   }
 
+  _cachedUncraftRecipes: Map<string, Recipe> = null;
   uncraftRecipe(item_id: string): Recipe | undefined {
-    for (const recipe of this.byType("uncraft"))
-      if (recipe.result === item_id) return recipe;
-    for (const recipe of this.byType("recipe"))
-      if (recipe.result === item_id && recipe.reversible) return recipe;
+    if (!this._cachedUncraftRecipes) {
+      this._cachedUncraftRecipes = new Map();
+      for (const recipe of this.byType("recipe"))
+        if (recipe.result && recipe.reversible)
+          this._cachedUncraftRecipes.set(recipe.result, recipe);
+      for (const recipe of this.byType("uncraft"))
+        if (recipe.result)
+          this._cachedUncraftRecipes.set(recipe.result, recipe);
+    }
+    return this._cachedUncraftRecipes.get(item_id);
   }
 
   _cachedMapgenSpawnItems = new Map<Mapgen, string[]>();

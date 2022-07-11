@@ -11,10 +11,13 @@ export let item_id: string;
 let data = getContext<CddaData>("data");
 
 const uncraftableFromSet = new Set<string>();
-for (const recipe of (data.byType("recipe") as Recipe[]).concat(
-  data.byType("uncraft")
-)) {
-  if (recipe.result && (recipe.reversible || recipe.type === "uncraft")) {
+const allCraftableThings = (data.byType("recipe") as Recipe[])
+  .concat(data.byType("uncraft"))
+  .map((x) => x.result)
+  .filter((x) => x);
+for (const id of allCraftableThings) {
+  const recipe = data.uncraftRecipe(id);
+  if (recipe) {
     const { components } = data.normalizeRequirementsForDisassembly(recipe);
     const defaultComponents = components.map((c) => c[0]);
     if (defaultComponents.some((c) => c.id === item_id))
