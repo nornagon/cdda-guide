@@ -107,7 +107,8 @@ export class CddaData {
   constructor(raw: any[], build_number?: string, release?: any) {
     this.release = release;
     this.build_number = build_number;
-    this._raw = raw;
+    // For some reason O—G has the string "mapgen" as one of its objects.
+    this._raw = raw.filter((x) => typeof x === "object");
     for (const obj of raw) {
       if (!Object.hasOwnProperty.call(obj, "type")) continue;
       if (obj.type === "MIGRATION") {
