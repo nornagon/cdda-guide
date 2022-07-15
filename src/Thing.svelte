@@ -27,6 +27,7 @@ import ConstructionGroup from "./types/ConstructionGroup.svelte";
 import Achievement from "./types/Achievement.svelte";
 import ObsoletionWarning from "./ObsoletionWarning.svelte";
 import Bionic from "./types/Bionic.svelte";
+import * as Sentry from "@sentry/browser";
 
 export let item: { id: string; type: string };
 
@@ -36,6 +37,14 @@ let error: Error = null;
 
 function onError(e: Error) {
   error = e;
+  Sentry.captureException(e, {
+    contexts: {
+      item: {
+        type: item.type,
+        id: item.id,
+      },
+    },
+  });
 }
 
 function defaultItem(id: string, type: string) {
