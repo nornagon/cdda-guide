@@ -17,6 +17,9 @@ fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
   .then((d) => d.json())
   .then((b) => {
     builds = b;
+  })
+  .catch((e) => {
+    console.error(e);
   });
 
 const url = new URL(location.href);
