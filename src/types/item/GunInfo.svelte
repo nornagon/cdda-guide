@@ -8,6 +8,8 @@ export let item: GunSlot & ItemBasicInfo;
 // TODO: handle multiple ranged_damage type
 const ranged_damage = Array.isArray(item.ranged_damage)
   ? item.ranged_damage[0]
+  : typeof item.ranged_damage === "number"
+  ? item.ranged_damage
   : item.ranged_damage && "values" in item.ranged_damage
   ? item.ranged_damage.values[0]
   : (item.ranged_damage as DamageUnit) ?? {

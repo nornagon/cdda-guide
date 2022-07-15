@@ -371,7 +371,10 @@ export class CddaData {
     const mon = this.byId("monster", mon_id);
     const ret = mon.death_drops
       ? this.flattenItemGroup(
-          this.normalizeItemGroup(mon.death_drops, "distribution")
+          this.normalizeItemGroup(mon.death_drops, "distribution") ?? {
+            subtype: "collection",
+            entries: [],
+          }
         )
       : [];
     ret.sort((a, b) => b.prob - a.prob);
@@ -710,7 +713,9 @@ export class CddaData {
         onlyRecoverable
           ? x.filter(
               (c) =>
-                !(this.byId("item", c.id).flags ?? []).includes("UNRECOVERABLE")
+                !(this.byId("item", c.id)?.flags ?? []).includes(
+                  "UNRECOVERABLE"
+                )
             )
           : x
       )
@@ -790,7 +795,7 @@ export class CddaData {
     const filteredComponents = components
       .map((c) =>
         c.filter(
-          (c) => !this.byId("item", c.id).flags?.includes("UNRECOVERABLE")
+          (c) => !this.byId("item", c.id)?.flags?.includes("UNRECOVERABLE")
         )
       )
       .filter((c) => c.length);
