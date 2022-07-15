@@ -10,7 +10,9 @@ export default defineConfig({
     sourcemap: true,
   },
   plugins: [
-    EnvironmentPlugin(["GITHUB_SHA"]),
+    EnvironmentPlugin({
+      GITHUB_SHA: null,
+    }),
     svelte(),
     VitePWA({
       devOptions: {

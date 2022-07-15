@@ -6,6 +6,7 @@ import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
 import dontPanic from "./assets/dont_panic.png";
+import throttle from "lodash.throttle";
 
 let item: { type: string; id: string } | null = null;
 
@@ -108,9 +109,12 @@ function urlWithHash(newHash: string) {
   return url.toString();
 }
 
+// Throttle replaceState to avoid browser warnings.
+const replaceState = throttle(history.replaceState.bind(history), 100);
+
 const clearItem = () => {
   if (item) history.pushState(null, "", location.href.replace(/#.*$/, ""));
-  else history.replaceState(null, "", urlWithHash("/search/" + search));
+  else replaceState(null, "", urlWithHash("/search/" + search));
   item = null;
 };
 
