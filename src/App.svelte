@@ -67,13 +67,22 @@ const tilesets = [
 ];
 
 const normalizeTemplate = (t: string) => (t === "null" || !t ? "" : t);
-let tilesetUrlTemplate = normalizeTemplate(
-  localStorage.getItem("cdda-guide:tileset")
-);
-$: localStorage.setItem(
-  "cdda-guide:tileset",
-  normalizeTemplate(tilesetUrlTemplate)
-);
+function loadTileset() {
+  try {
+    return normalizeTemplate(localStorage.getItem("cdda-guide:tileset"));
+  } catch (e) {
+    return null;
+  }
+}
+function saveTileset(url: string) {
+  try {
+    localStorage.setItem("cdda-guide:tileset", normalizeTemplate(url));
+  } catch (e) {
+    /* swallow security errors, which can happen when in incognito mode */
+  }
+}
+let tilesetUrlTemplate = loadTileset();
+$: saveTileset(tilesetUrlTemplate);
 $: tilesetUrl = $data
   ? tilesetUrlTemplate.replace("{version}", $data.build_number)
   : null;
