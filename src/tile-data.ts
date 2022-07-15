@@ -37,9 +37,14 @@ export const tileData = {
   subscribe,
   setURL(url: string) {
     if (url) {
-      fetchJson(url).then((x) => {
-        set({ ...x, baseUrl: url });
-      });
+      fetchJson(url).then(
+        (x) => {
+          set({ ...x, baseUrl: url });
+        },
+        (err) => {
+          console.error("Error fetching tiles", err);
+        }
+      );
     } else {
       set(null);
     }
