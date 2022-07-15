@@ -368,6 +368,8 @@ export type WheelSlot = {
 
 export type UseFunction = {
   type: string;
+  target?: string;
+  menu_text?: string;
 };
 
 export type ItemBasicInfo = {

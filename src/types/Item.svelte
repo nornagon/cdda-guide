@@ -9,7 +9,12 @@ import {
   singular,
   singularName,
 } from "../data";
-import type { ItemBasicInfo, Item, SupportedTypesWithMapped } from "../types";
+import type {
+  ItemBasicInfo,
+  Item,
+  SupportedTypesWithMapped,
+  UseFunction,
+} from "../types";
 import AsciiPicture from "./AsciiPicture.svelte";
 import AmmoInfo from "./item/AmmoInfo.svelte";
 import ArmorInfo from "./item/ArmorInfo.svelte";
@@ -133,7 +138,7 @@ const vparts = data
   .byType("vehicle_part")
   .filter((vp) => vp.id && vp.item === item.id);
 
-function normalizeUseAction(action: Item["use_action"]) {
+function normalizeUseAction(action: Item["use_action"]): UseFunction[] {
   if (typeof action === "string") return [{ type: action }];
   else if (Array.isArray(action)) {
     return action.map((s) => {
@@ -148,7 +153,7 @@ function normalizeUseAction(action: Item["use_action"]) {
     return action ? [action] : [];
   }
 }
-const usage = normalizeUseAction(item.use_action).map((s) => {
+const usage: UseFunction[] = normalizeUseAction(item.use_action).map((s) => {
   if (s.type === "repair_item") {
     return { type: (s as any).item_action_type };
   }
@@ -304,7 +309,14 @@ const ascii_picture =
           <dd>
             <ul class="comma-separated">
               {#each usage as u}
-                <li>{singularName(data.byId("item_action", u.type))}</li>
+                <li>
+                  {u.menu_text ??
+                    singularName(
+                      data.byId("item_action", u.type)
+                    )}{#if u.type === "transform"}{" "}(⟹ <ThingLink
+                      type="item"
+                      id={u.target} />){/if}
+                </li>
               {/each}
             </ul>
           </dd>
