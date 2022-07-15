@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { VitePWA } from "vite-plugin-pwa";
+import EnvironmentPlugin from "vite-plugin-environment";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -9,6 +10,7 @@ export default defineConfig({
     sourcemap: true,
   },
   plugins: [
+    EnvironmentPlugin(["GITHUB_SHA"]),
     svelte(),
     VitePWA({
       devOptions: {
