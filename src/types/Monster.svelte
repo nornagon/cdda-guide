@@ -464,7 +464,7 @@ let upgrades =
     <h1>Butchering Results</h1>
     <ul>
       {#each harvest.entries as harvest_entry}
-        {#if data.byId("harvest_drop_type", harvest_entry.type)?.group}
+        {#if data.byId("harvest_drop_type", harvest_entry.type)?.group || harvest_entry.type === "bionic_group"}
           {#each data.flattenItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
             <li>
               <ItemSymbol item={data.byId("item", id)} />
@@ -486,7 +486,7 @@ let upgrades =
     <h1>Dissection Results</h1>
     <ul>
       {#each dissect.entries as harvest_entry}
-        {#if data.byId("harvest_drop_type", harvest_entry.type)?.group}
+        {#if data.byId("harvest_drop_type", harvest_entry.type)?.group || harvest_entry.type === "bionic_group"}
           {#each data.flattenItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
             <li>
               <ItemSymbol item={data.byId("item", id)} />
