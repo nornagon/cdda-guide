@@ -59,7 +59,6 @@ function filter(text: string): Map<string, any[]> {
     if (!SEARCHABLE_TYPES.has(mappedType)) continue;
     if (!byType.has(mappedType)) byType.set(mappedType, []);
     const obj = data.byId(mappedType, item.id);
-    if (!obj) debugger;
     byType.get(mappedType).push(obj);
   }
   return byType;

@@ -11,7 +11,12 @@ import throttle from "lodash.throttle";
 let item: { type: string; id: string } | null = null;
 
 let builds:
-  | { build_number: string; prerelease: boolean; created_at: string }[]
+  | {
+      build_number: string;
+      prerelease: boolean;
+      created_at: string;
+      langs?: string[];
+    }[]
   | null = null;
 
 fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
@@ -25,7 +30,8 @@ fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
 
 const url = new URL(location.href);
 const version = url.searchParams.get("v") ?? "latest";
-data.setVersion(version);
+const locale = url.searchParams.get("lang");
+data.setVersion(version, locale);
 
 const tilesets = [
   {
@@ -292,6 +298,32 @@ function maybeFocusSearch(e: KeyboardEvent) {
         <option value={url}>{name}</option>
       {/each}
     </select>
+    Language:
+    {#if builds}
+      {@const build_number =
+        version === "latest" ? builds[0].build_number : version}
+      <select
+        value={locale ?? "en"}
+        on:change={(e) => {
+          const url = new URL(location.href);
+          const lang = e.currentTarget.value;
+          if (lang === "en") url.searchParams.delete("lang");
+          else url.searchParams.set("lang", lang);
+          location.href = url.toString();
+        }}>
+        <option value="en">English</option>
+        {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b) ) as lang}
+          {@const lcid = lang.replace(/_/, "-")}
+          <option value={lang}
+            >{new Intl.DisplayNames([lcid], {
+              type: "language",
+              languageDisplay: "standard",
+            }).of(lcid)}</option>
+        {/each}
+      </select>
+    {:else}
+      <select disabled><option>Loading...</option></select>
+    {/if}
   </p>
 </main>
 

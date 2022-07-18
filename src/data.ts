@@ -1,4 +1,6 @@
 import { writable } from "svelte/store";
+import makeI18n, { Gettext } from "gettext.js";
+
 import type {
   Translation,
   Requirement,
@@ -41,23 +43,65 @@ export const mapType = (
   type: keyof SupportedTypesWithMapped
 ): keyof SupportedTypesWithMapped => typeMappings.get(type) ?? type;
 
+export let i18n: Gettext = makeI18n();
+
+const needsPlural = [
+  "AMMO",
+  "ARMOR",
+  "BATTERY",
+  "BIONIC_ITEM",
+  "BOOK",
+  "COMESTIBLE",
+  "CONTAINER",
+  "ENGINE",
+  "GENERIC",
+  "GUN",
+  "GUNMOD",
+  "MAGAZINE",
+  "PET_ARMOR",
+  "TOOL",
+  "TOOLMOD",
+  "TOOL_ARMOR",
+  "WHEEL",
+];
+
+function getMsgId(t: Translation) {
+  return typeof t === "string" ? t : "str_sp" in t ? t.str_sp : t.str;
+}
+
+function getMsgIdPlural(t: Translation) {
+  return typeof t === "string"
+    ? t + "s"
+    : "str_sp" in t
+    ? t.str_sp
+    : "str_pl" in t
+    ? t.str_pl
+    : t.str + "s";
+}
+
+export function translate(
+  t: Translation,
+  needsPlural: boolean,
+  n: number
+): string {
+  const sg = getMsgId(t);
+  const pl = needsPlural ? getMsgIdPlural(t) : undefined;
+  return i18n.ngettext(sg, pl, n) || (n === 1 ? sg : pl ?? sg);
+}
+
 export const singular = (name: Translation): string =>
-  typeof name === "string" ? name : "str_sp" in name ? name.str_sp : name.str;
+  translate(name, false, 1);
 
-export const plural = (name: Translation): string =>
-  typeof name === "string"
-    ? name + "s"
-    : "str_sp" in name
-    ? name.str_sp
-    : "str_pl" in name
-    ? name.str_pl
-    : name.str + "s";
+export const plural = (name: Translation, n: number = 2): string =>
+  translate(name, true, n);
 
-export const singularName = (obj: any): string =>
-  singular(obj?.name ?? obj?.id ?? obj?.abstract);
+export const singularName = (obj: any): string => pluralName(obj, 1);
 
-export const pluralName = (obj: any): string =>
-  plural(obj?.name ?? obj?.id ?? obj?.abstract);
+export const pluralName = (obj: any, n: number = 2): string => {
+  const name: Translation = obj?.name;
+  if (name == null) return obj?.id ?? obj?.abstract;
+  return translate(name, needsPlural.includes(obj.type), n);
+};
 
 export function showProbability(prob: number) {
   const ret = (prob * 100).toFixed(2);
@@ -1077,8 +1121,21 @@ const fetchJson = async (version: string) => {
   );
   if (!res.ok)
     throw new Error(`Error ${res.status} (${res.statusText}) fetching data`);
-  const json = await res.json();
-  return new CddaData(json.data, json.build_number, json.release);
+  return res.json();
+};
+
+const fetchLocaleJson = async (version: string, locale: string) => {
+  const res = await fetch(
+    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/lang/${locale}.json`,
+    {
+      mode: "cors",
+    }
+  );
+  if (!res.ok)
+    throw new Error(
+      `Error ${res.status} (${res.statusText}) fetching locale data`
+    );
+  return res.json();
 };
 
 async function retry<T>(promiseGenerator: () => Promise<T>) {
@@ -1096,9 +1153,23 @@ let _hasSetVersion = false;
 const { subscribe, set } = writable<CddaData>(null);
 export const data = {
   subscribe,
-  setVersion(version: string) {
+  async setVersion(version: string, locale: string | undefined) {
     if (_hasSetVersion) throw new Error("can only set version once");
     _hasSetVersion = true;
-    retry(() => fetchJson(version)).then(set);
+    const [dataJson, localeJson] = await Promise.all([
+      retry(() => fetchJson(version)),
+      locale && retry(() => fetchLocaleJson(version, locale)),
+    ]);
+    if (localeJson) {
+      i18n.loadJSON(localeJson);
+      i18n.setLocale(locale);
+    }
+    console.log(i18n?.gettext("Internal Chronometer"));
+    const cddaData = new CddaData(
+      dataJson.data,
+      dataJson.build_number,
+      dataJson.release
+    );
+    set(cddaData);
   },
 };
