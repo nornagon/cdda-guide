@@ -49,8 +49,8 @@ const data = getContext<CddaData>("data");
       </dd>
     {/if}
     {#if item.cant_remove_reason}
-      <dt>Cannot Be Removed</dt>
-      <dd>{singular(item.cant_remove_reason)}</dd>
+      <dt>Removable</dt>
+      <dd>no</dd>
     {/if}
     {#if item.act_cost}
       <dt>Activation Cost</dt>
