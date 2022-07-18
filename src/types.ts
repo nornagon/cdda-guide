@@ -1481,7 +1481,7 @@ export type Bionic = {
   deact_cost?: energy;
   trigger_cost?: energy;
   power_trickle?: energy;
-  time?: integer;
+  time?: duration;
 
   flags?: string[];
   active_flags?: string[];
