@@ -144,6 +144,44 @@ function maybeFocusSearch(e: KeyboardEvent) {
     e.preventDefault();
   }
 }
+
+function getLanguageName(code: string) {
+  // from src/options.cpp
+  return (
+    {
+      en: "English",
+      ar: "العربية",
+      cs: "Český Jazyk",
+      da: "Dansk",
+      de: "Deutsch",
+      el: "Ελληνικά",
+      es_AR: "Español (Argentina)",
+      es_ES: "Español (España)",
+      fr: "Français",
+      hu: "Magyar",
+      id: "Bahasa Indonesia",
+      is: "Íslenska",
+      it_IT: "Italiano",
+      ja: "日本語",
+      ko: "한국어",
+      nb: "Norsk",
+      nl: "Nederlands",
+      pl: "Polski",
+      pt_BR: "Português (Brasil)",
+      ru: "Русский",
+      sr: "Српски",
+      tr: "Türkçe",
+      uk_UA: "український",
+      zh_CN: "中文 (天朝)",
+      zh_TW: "中文 (台灣)",
+    }[code] ??
+    (Intl?.DisplayNames
+      ? new Intl.DisplayNames([code.replace(/_/, "-")], {
+          type: "language",
+        }).of(code.replace(/_/, "-"))
+      : code)
+  );
+}
 </script>
 
 <svelte:window on:hashchange={hashchange} on:keydown={maybeFocusSearch} />
@@ -313,12 +351,7 @@ function maybeFocusSearch(e: KeyboardEvent) {
         }}>
         <option value="en">English</option>
         {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b) ) as lang}
-          {@const lcid = lang.replace(/_/, "-")}
-          <option value={lang}
-            >{new Intl.DisplayNames([lcid], {
-              type: "language",
-              languageDisplay: "standard",
-            }).of(lcid)}</option>
+          <option value={lang}>{getLanguageName(lang)}</option>
         {/each}
       </select>
     {:else}
