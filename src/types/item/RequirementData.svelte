@@ -22,7 +22,9 @@ let { tools, qualities, components } = data.normalizeRequirements(requirement);
     <ul>
       {#each components as componentChoices}
         <li>
-          {#each componentChoices.map( (c) => ({ ...c, item: data.byId("item", c.id) }) ) as { id, count }, i}
+          {#each componentChoices
+            .map((c) => ({ ...c, item: data.byId("item", c.id) }))
+            .filter((c) => c.item) as { id, count }, i}
             {#if i !== 0}{" OR "}{/if}
             <ThingLink type="item" {id} {count} />
           {/each}
