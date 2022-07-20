@@ -44,7 +44,7 @@ function computeLoudness(item: AmmoSlot): number {
       <dt title="Base loudness of ammo (possibly modified by gun/gunmods)">
         Loudness
       </dt>
-      <dd>{computeLoudness(item)}</dd>
+      <dd>{computeLoudness(item).toFixed(0)}</dd>
       <dt>Critical Multiplier</dt>
       <dd>{item.critical_multiplier ?? 2}</dd>
       {#if item.casing}

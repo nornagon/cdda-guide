@@ -50,7 +50,7 @@ const ranged_damage = Array.isArray(item.ranged_damage)
     <dt title="Modifies base loudness as provided by the currently loaded ammo">
       Loudness Modifier
     </dt>
-    <dd>{item.loudness ?? 0}</dd>
+    <dd>{(item.loudness ?? 0).toFixed(0)}</dd>
     <dt>Reload Time</dt>
     <dd>{item.reload ?? 100} moves</dd>
     <dt title="Volume of the noise made when reloading this weapon">
