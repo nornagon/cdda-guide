@@ -301,16 +301,16 @@ export class CddaData {
         } else {
           ret[k] = (ret[k] ?? 0) + ret.relative[k];
         }
-      } else if (k === "damage" && ret[k]) {
-        ret.damage = JSON.parse(JSON.stringify(ret.damage));
-        const relativeDamage = normalizeDamageInstance(ret.relative.damage);
+      } else if ((k === "damage" || k === "ranged_damage") && ret[k]) {
+        ret[k] = JSON.parse(JSON.stringify(ret[k]));
+        const relativeDamage = normalizeDamageInstance(ret.relative[k]);
         for (const rdu of relativeDamage) {
-          const modified: DamageUnit = Array.isArray(ret.damage)
-            ? ret.damage.find(
+          const modified: DamageUnit = Array.isArray(ret[k])
+            ? ret[k].find(
                 (du: DamageUnit) => du.damage_type === rdu.damage_type
               )
-            : ret.damage.damage_type === rdu.damage_type
-            ? ret.damage
+            : ret[k].damage_type === rdu.damage_type
+            ? ret[k]
             : null;
           if (modified) {
             modified.amount = (modified.amount ?? 0) + (rdu.amount ?? 0);
