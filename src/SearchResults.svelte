@@ -64,7 +64,13 @@ function filter(text: string): Map<string, any[]> {
   return byType;
 }
 
-$: matchingObjects = search && search.length > 1 && data && filter(search);
+const cjkRegex =
+  /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f\u3131-\ud79d]/;
+$: matchingObjects =
+  search &&
+  (search.length >= 2 || cjkRegex.test(search)) &&
+  data &&
+  filter(search);
 
 $: history.replaceState({ search }, "");
 </script>
