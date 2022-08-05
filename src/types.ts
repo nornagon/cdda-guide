@@ -370,6 +370,7 @@ export type UseFunction = {
   type: string;
   target?: string;
   menu_text?: string;
+  transform_age?: integer; // turns
 };
 
 export type ItemBasicInfo = {

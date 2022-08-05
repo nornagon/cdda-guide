@@ -5,6 +5,7 @@ import {
   asKilograms,
   asLiters,
   CddaData,
+  normalizeUseAction,
   parseVolume,
   singular,
   singularName,
@@ -41,6 +42,7 @@ import Salvaged from "./item/Salvaged.svelte";
 import SpawnedIn from "./item/SpawnedIn.svelte";
 import SpawnedInVehicle from "./item/SpawnedInVehicle.svelte";
 import ToolInfo from "./item/ToolInfo.svelte";
+import TransformedFrom from "./item/TransformedFrom.svelte";
 import WheelInfo from "./item/WheelInfo.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -138,21 +140,6 @@ const vparts = data
   .byType("vehicle_part")
   .filter((vp) => vp.id && vp.item === item.id);
 
-function normalizeUseAction(action: Item["use_action"]): UseFunction[] {
-  if (typeof action === "string") return [{ type: action }];
-  else if (Array.isArray(action)) {
-    return action.map((s) => {
-      if (typeof s === "string") return { type: s };
-      else if (Array.isArray(s)) {
-        return { type: s[0] };
-      } else {
-        return s;
-      }
-    });
-  } else {
-    return action ? [action] : [];
-  }
-}
 const usage: UseFunction[] = normalizeUseAction(item.use_action).map((s) => {
   if (s.type === "repair_item") {
     return { type: (s as any).item_action_type };
@@ -326,9 +313,8 @@ const ascii_picture =
                   {u.menu_text ??
                     singularName(
                       data.byId("item_action", u.type)
-                    )}{#if u.type === "transform"}{" "}(⟹ <ThingLink
-                      type="item"
-                      id={u.target} />){/if}
+                    )}{#if u.type === "transform" || u.type === "delayed_transform"}{" "}(⟹
+                    <ThingLink type="item" id={u.target} />){/if}
                 </li>
               {/each}
             </ul>
@@ -485,6 +471,7 @@ const ascii_picture =
   <Foraged item_id={item.id} />
   <GrownFrom item_id={item.id} />
   <HarvestedFrom item_id={item.id} />
+  <TransformedFrom item_id={item.id} />
   <Disassembly item_id={item.id} />
   <Salvaged item_id={item.id} />
   <ConstructionByproduct item_id={item.id} />

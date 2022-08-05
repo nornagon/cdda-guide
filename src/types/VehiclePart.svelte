@@ -4,8 +4,10 @@ import { getContext } from "svelte";
 import {
   asKilograms,
   asLiters,
+  asMinutes,
   CddaData,
   getVehiclePartIdAndVariant,
+  parseDuration,
   showProbability,
   singular,
   singularName,
@@ -52,41 +54,6 @@ const breaksIntoGroup: ItemGroup | null =
     : null;
 const breaksIntoGroupFlattened =
   breaksIntoGroup && data.flattenItemGroup(breaksIntoGroup);
-
-function parseDuration(duration: string | number) {
-  if (typeof duration === "number") return duration / 100;
-  const turns = 1;
-  const seconds = 1;
-  const minutes = 60;
-  const hours = minutes * 60;
-  const days = hours * 24;
-  const units: [string, number][] = [
-    ["turns", 1 * turns],
-    ["turn", 1 * turns],
-    ["t", 1 * turns],
-    ["seconds", 1 * seconds],
-    ["second", 1 * seconds],
-    ["s", 1 * seconds],
-    ["minutes", 1 * minutes],
-    ["minute", 1 * minutes],
-    ["m", 1 * minutes],
-    ["hours", 1 * hours],
-    ["hour", 1 * hours],
-    ["h", 1 * hours],
-    ["days", 1 * days],
-    ["day", 1 * days],
-    ["d", 1 * days],
-  ];
-  const [num, unit] = duration.trim().split(/\s+/);
-  const multiplier = units.find((x) => x[0] === unit);
-  if (!multiplier) throw new Error(`bad duration: ${JSON.stringify(duration)}`);
-  return Number(num) * multiplier[1];
-}
-
-function asMinutes(duration: string | number) {
-  const seconds = parseDuration(duration);
-  return `${Math.round(seconds / 60)} m`;
-}
 
 const vehiclesContainingPart = data.byType("vehicle").filter((v) =>
   v.parts.some((part) => {

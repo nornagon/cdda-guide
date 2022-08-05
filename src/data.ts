@@ -16,6 +16,8 @@ import type {
   SupportedTypesWithMapped,
   SupportedTypeMapped,
   Vehicle,
+  Item,
+  UseFunction,
 } from "./types";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
@@ -123,6 +125,62 @@ export function parseMass(string: string | number): number {
   if (string.endsWith("mg")) return parseInt(string) / 1000;
   if (string.endsWith("kg")) return parseInt(string) * 1000;
   if (string.endsWith("g")) return parseInt(string);
+}
+
+export function parseDuration(duration: string | number) {
+  if (typeof duration === "number") return duration / 100;
+  const turns = 1;
+  const seconds = 1;
+  const minutes = 60;
+  const hours = minutes * 60;
+  const days = hours * 24;
+  const units: [string, number][] = [
+    ["turns", 1 * turns],
+    ["turn", 1 * turns],
+    ["t", 1 * turns],
+    ["seconds", 1 * seconds],
+    ["second", 1 * seconds],
+    ["s", 1 * seconds],
+    ["minutes", 1 * minutes],
+    ["minute", 1 * minutes],
+    ["m", 1 * minutes],
+    ["hours", 1 * hours],
+    ["hour", 1 * hours],
+    ["h", 1 * hours],
+    ["days", 1 * days],
+    ["day", 1 * days],
+    ["d", 1 * days],
+  ];
+  const [num, unit] = duration.trim().split(/\s+/);
+  const multiplier = units.find((x) => x[0] === unit);
+  if (!multiplier) throw new Error(`bad duration: ${JSON.stringify(duration)}`);
+  return Number(num) * multiplier[1];
+}
+
+export function asMinutes(duration: string | number) {
+  const seconds = parseDuration(duration);
+  return `${Math.round(seconds / 60)} m`;
+}
+
+export function asHumanReadableDuration(duration: string | number) {
+  let seconds = parseDuration(duration);
+  let minutes = (seconds / 60) | 0;
+  seconds -= minutes * 60;
+  let hours = (minutes / 60) | 0;
+  minutes -= hours * 60;
+  let days = (hours / 24) | 0;
+  hours -= days * 24;
+  return (
+    [
+      [days, "d"],
+      [hours, "h"],
+      [minutes, "m"],
+      [seconds, "s"],
+    ] as [number, string][]
+  )
+    .filter(([n]) => n)
+    .map((x) => x.join(""))
+    .join(" ");
 }
 
 export function asLiters(string: string | number): string {
@@ -1111,6 +1169,22 @@ export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroup {
       }
     }),
   };
+}
+
+export function normalizeUseAction(action: Item["use_action"]): UseFunction[] {
+  if (typeof action === "string") return [{ type: action }];
+  else if (Array.isArray(action)) {
+    return action.map((s) => {
+      if (typeof s === "string") return { type: s };
+      else if (Array.isArray(s)) {
+        return { type: s[0] };
+      } else {
+        return s;
+      }
+    });
+  } else {
+    return action ? [action] : [];
+  }
 }
 
 const fetchJson = async (version: string) => {
