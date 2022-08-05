@@ -170,6 +170,19 @@ const ascii_picture =
   <div class="side-by-side no-margin">
     <div>
       <dl>
+        {#if item.variants?.length}
+          <dt>AKA</dt>
+          <dd>
+            <ul class="comma-separated">
+              {#each item.variants as va}
+                {@const name = singular(va.name)}
+                {#if name !== singularName(item)}
+                  <li>{singular(va.name)}</li>
+                {/if}
+              {/each}
+            </ul>
+          </dd>
+        {/if}
         {#if materials.length}
           <dt>Material</dt>
           <dd>

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { mapType, singularName } from "./data";
+import { mapType, singular, singularName } from "./data";
 import type { CddaData } from "./data";
 import * as fuzzysort from "fuzzysort";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
@@ -39,18 +39,31 @@ $: targets = [...(data?.all() ?? [])]
     }
     return true;
   })
-  .map((x) => ({
-    id: (x as any).id,
-    name: singularName(x),
-    type: mapType(x.type),
-  }));
+  .flatMap((x) =>
+    [
+      {
+        id: (x as any).id,
+        name: singularName(x),
+        type: mapType(x.type),
+      },
+    ].concat(
+      "variants" in x
+        ? x.variants.map((v) => ({
+            id: (x as any).id,
+            variant_id: v.id,
+            name: singular(v.name),
+            type: mapType(x.type),
+          }))
+        : []
+    )
+  );
 
 export let search: string;
 
 function filter(text: string): Map<string, any[]> {
   const results = fuzzysort.go(text, targets, {
     limit: 100,
-    keys: ["id", "name"],
+    keys: ["id", "name", "variant_id"],
     threshold: -10000,
   });
   const byType = new Map<string, any[]>();
@@ -58,6 +71,7 @@ function filter(text: string): Map<string, any[]> {
     const mappedType = item.type;
     if (!SEARCHABLE_TYPES.has(mappedType)) continue;
     if (!byType.has(mappedType)) byType.set(mappedType, []);
+    if (byType.get(mappedType).some((x) => x.id === item.id)) continue;
     const obj = data.byId(mappedType, item.id);
     byType.get(mappedType).push(obj);
   }

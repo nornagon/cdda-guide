@@ -413,6 +413,17 @@ export type ItemBasicInfo = {
     | string
     | UseFunction
     | (string | UseFunction | [string] | [string, number])[];
+  variant_type?: "gun" | "generic";
+  variants?: {
+    id: string;
+    name: Translation;
+    description: Translation;
+    symbol?: string;
+    color?: string;
+    ascii_picture?: string; // id
+    weight?: integer;
+    append?: boolean;
+  }[];
 };
 
 export type Item =
