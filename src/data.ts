@@ -348,6 +348,14 @@ export class CddaData {
     }
     const { abstract, ...parentProps } = this._flatten(parent);
     const ret = { ...parentProps, ...obj };
+    if (parentProps.vitamins && obj.vitamins) {
+      ret.vitamins = [
+        ...parentProps.vitamins.filter(
+          (x) => !obj.vitamins.some((y) => y[0] === x[0])
+        ),
+        ...obj.vitamins,
+      ];
+    }
     for (const k of Object.keys(ret.relative ?? {})) {
       if (typeof ret.relative[k] === "number") {
         if (k === "melee_damage") {
