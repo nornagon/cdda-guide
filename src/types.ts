@@ -304,10 +304,24 @@ export type ComestibleSlot = {
 
 export type ArmorPortionData = {
   encumbrance?: integer | [integer, integer];
+  encumbrance_modifiers?: (
+    | "IMBALANCED"
+    | "RESTRICTS_NECK"
+    | "WELL_SUPPORTED"
+    | "NONE"
+  )[];
   coverage?: integer;
+  breathability?:
+    | "IMPERMEABLE"
+    | "POOR"
+    | "AVERAGE"
+    | "GOOD"
+    | "MOISTURE_WICKING"
+    | "SECOND_SKIN";
   cover_melee?: integer; // default = coverage
   cover_ranged?: integer; // default = coverage
   cover_vitals?: integer; // default 0
+  rigid_layer_only?: boolean;
   covers?: string[]; // bp_id
   specifically_covers?: string[]; // sub_bodypart_str_id
   sided?: boolean;
@@ -342,12 +356,19 @@ export type ArmorSlot = {
   sided?: boolean;
   flags?: string[];
   warmth?: number;
-  encumbrance?: number;
-  max_encumbrance?: number;
-  coverage?: number;
   environmental_protection?: number;
   environmental_protection_with_filter?: number;
   material_thickness?: number;
+  non_functional?: string;
+  weight_capacity_modifier?: number; // default 1.0
+  weight_capacity_bonus?: mass;
+  power_armor?: boolean;
+  valid_mods?: string[];
+
+  // For 0.F
+  coverage?: number;
+  encumbrance?: number;
+  max_encumbrance?: number;
 };
 
 export type BionicSlot = {
