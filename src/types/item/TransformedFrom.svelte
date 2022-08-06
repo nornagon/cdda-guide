@@ -2,10 +2,8 @@
 import { getContext } from "svelte";
 import {
   asHumanReadableDuration,
-  asMinutes,
   CddaData,
   normalizeUseAction,
-  showProbability,
 } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
