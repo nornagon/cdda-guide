@@ -441,9 +441,9 @@ function fixApd(
             {/if}
           </dd>
           <dt>Protection</dt>
-          <dd style="margin-left: -4em; margin-right: -1em;">
+          <dd class="protection">
             {#if getEnvResist()}
-              <dl style="font-variant: tabular-nums; margin-left: 4em;">
+              <dl class="protection-env">
                 <dt>Acid</dt>
                 <dd>{acidResist(cp.bp_ids[0]).toFixed(2)}</dd>
                 <dt>Fire</dt>
@@ -452,7 +452,7 @@ function fixApd(
                 <dd>{getEnvResist()}</dd>
               </dl>
             {/if}
-            <table style="font-variant: tabular-nums; text-align: center;">
+            <table style="text-align: center;">
               <tbody>
                 <tr>
                   <td />
@@ -508,6 +508,7 @@ function fixApd(
 .body-parts {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .body-part {
@@ -529,5 +530,29 @@ table tr > td:first-child {
   font-weight: bold;
   color: var(--cata-color-gray);
   text-align: right;
+}
+
+.protection {
+  margin-left: -4em;
+  margin-right: -1em;
+  font-variant: tabular-nums;
+}
+
+.protection-env {
+  margin-left: 4em;
+}
+
+@media (max-width: 600px) {
+  .protection {
+    margin-left: -1em;
+  }
+
+  .protection-env {
+    margin-left: 1em;
+  }
+
+  .body-part dl {
+    padding-left: 1em;
+  }
 }
 </style>

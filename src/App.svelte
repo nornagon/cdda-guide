@@ -324,39 +324,43 @@ function getLanguageName(code: string) {
     {:else}
       <em style="color: var(--cata-color-gray)">(loading...)</em>
     {/if}
-    Tiles:
-    <!-- svelte-ignore a11y-no-onchange -->
-    <select
-      value={tilesetUrlTemplate}
-      on:change={(e) => {
-        tilesetUrlTemplate = e.currentTarget.value;
-      }}>
-      <option value="">None (ASCII)</option>
-      {#each tilesets as { name, url }}
-        <option value={url}>{name}</option>
-      {/each}
-    </select>
-    Language:
-    {#if builds}
-      {@const build_number =
-        version === "latest" ? builds[0].build_number : version}
+    <span style="white-space: nowrap">
+      Tiles:
+      <!-- svelte-ignore a11y-no-onchange -->
       <select
-        value={locale ?? "en"}
+        value={tilesetUrlTemplate}
         on:change={(e) => {
-          const url = new URL(location.href);
-          const lang = e.currentTarget.value;
-          if (lang === "en") url.searchParams.delete("lang");
-          else url.searchParams.set("lang", lang);
-          location.href = url.toString();
+          tilesetUrlTemplate = e.currentTarget.value;
         }}>
-        <option value="en">English</option>
-        {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b) ) as lang}
-          <option value={lang}>{getLanguageName(lang)}</option>
+        <option value="">None (ASCII)</option>
+        {#each tilesets as { name, url }}
+          <option value={url}>{name}</option>
         {/each}
       </select>
-    {:else}
-      <select disabled><option>Loading...</option></select>
-    {/if}
+    </span>
+    <span style="white-space: nowrap">
+      Language:
+      {#if builds}
+        {@const build_number =
+          version === "latest" ? builds[0].build_number : version}
+        <select
+          value={locale ?? "en"}
+          on:change={(e) => {
+            const url = new URL(location.href);
+            const lang = e.currentTarget.value;
+            if (lang === "en") url.searchParams.delete("lang");
+            else url.searchParams.set("lang", lang);
+            location.href = url.toString();
+          }}>
+          <option value="en">English</option>
+          {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b) ) as lang}
+            <option value={lang}>{getLanguageName(lang)}</option>
+          {/each}
+        </select>
+      {:else}
+        <select disabled><option>Loading...</option></select>
+      {/if}
+    </span>
   </p>
 </main>
 
