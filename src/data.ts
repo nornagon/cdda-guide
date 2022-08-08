@@ -1247,7 +1247,6 @@ export const data = {
       i18n.loadJSON(localeJson);
       i18n.setLocale(locale);
     }
-    console.log(i18n?.gettext("Internal Chronometer"));
     const cddaData = new CddaData(
       dataJson.data,
       dataJson.build_number,
