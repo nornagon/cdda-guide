@@ -76,7 +76,7 @@ const groupFilter =
         items={groups.get(groupName).filter(groupFilter)}
         let:item
         limit={groupKeys.length === 1 ? Infinity : 10}>
-        {#if type === "item" || type === "terrain" || type === "furniture" || type === "monster"}<ItemSymbol
+        {#if type === "item" || type === "terrain" || type === "furniture" || type === "monster" || type === "vehicle_part"}<ItemSymbol
             {item} />{/if}
         <ThingLink type={typeWithCorrectType} id={item.id} />
       </LimitedList>
