@@ -3,6 +3,7 @@ import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { JsonFlag } from "../types";
+import ColorText from "./ColorText.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -31,59 +32,12 @@ const bionicWithFlag = data
         f.active_flags?.includes(item.id) ||
         f.inactive_flags?.includes(item.id))
   );
-
-function parseColorText(text: string): { string: string; color: string }[] {
-  let color = ["gray"];
-  const spans: { string: string; color: string }[] = [];
-  let remaining = text;
-  while (true) {
-    const nextColorTag = remaining.match(
-      /<\/?(info|good|bad|color|color_[^>]+)>/
-    );
-    if (nextColorTag) {
-      if (nextColorTag.index > 0)
-        spans.push({
-          string: remaining.substring(0, nextColorTag.index),
-          color: color[0],
-        });
-      if (nextColorTag[0][1] === "/" && color.length > 1) {
-        color.shift();
-      } else {
-        color.unshift(nextColorTag[1]);
-      }
-      remaining = remaining.substring(
-        nextColorTag.index + nextColorTag[0].length
-      );
-    } else break;
-  }
-  if (remaining.length) {
-    spans.push({ string: remaining, color: color[0] });
-  }
-
-  return spans;
-}
-
-const spans = parseColorText(item.info ?? "");
-
-const colorLookup = (color: string): string => {
-  if (color === "info") return "cyan";
-  else if (color === "good") return "green";
-  else if (color === "bad") return "red";
-  const m = /^color_(.+)$/.exec(color);
-  if (m) return m[1];
-  return "gray";
-};
 </script>
 
 <h1>Flag: {item.id}</h1>
 {#if item.info}
   <section>
-    <p>
-      {#each spans as { color, string }}
-        <span style="color: var(--cata-color-{colorLookup(color)})"
-          >{string}</span>
-      {/each}
-    </p>
+    <p><ColorText text={item.info} /></p>
   </section>
 {/if}
 {#if itemsWithFlag.length}
