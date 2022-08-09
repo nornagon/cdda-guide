@@ -18,3 +18,9 @@ The Hitchhiker's Guide to the Cataclysm is maintained by [**@nornagon**](https:/
 - [**@CalKerethi**](https://github.com/CalKerethi)
 
 Further, thanks to everyone who files bugs and feature requests in the issue tracker. You all help make the Guide what it is!
+
+## Translation
+
+The Guide is available in every language that Cataclysm supports. The game data will be presented using the translations from the game itself, but the Guide's UI is not yet translated into every language. You can help! Translations are [crowdsourced on Transifex](https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/). If you do: thanks so much for your help! 感謝! Gracias! Merci! Obrigado! Danke! 谢谢! 감사해요! Благодарность! ευχαριστώ! Terima kasih! !شكرًا Takk! Dziękuję! Спасибі! 🙇‍♂️
+
+[:globe_with_meridians: **Help translate the Guide!**](https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/)
