@@ -1,4 +1,5 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import { getContext } from "svelte";
 
 import {
@@ -48,6 +49,8 @@ import ThingLink from "./ThingLink.svelte";
 
 export let item: Item;
 let data: CddaData = getContext("data");
+
+const _context = "Item Basic Info";
 
 function length(item: ItemBasicInfo) {
   if (item.longest_side) return item.longest_side;
@@ -153,7 +156,7 @@ const ascii_picture =
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
 <section>
-  <h1>General</h1>
+  <h1>{t("General", { _context })}</h1>
   <div class="side-by-side no-margin">
     <div>
       <dl>
@@ -171,7 +174,7 @@ const ascii_picture =
           </dd>
         {/if}
         {#if materials.length}
-          <dt>Material</dt>
+          <dt>{t("Material")}</dt>
           <dd>
             <ul class="comma-separated">
               {#each materials as m}
@@ -187,15 +190,15 @@ const ascii_picture =
             </ul>
           </dd>
         {/if}
-        <dt>Volume</dt>
+        <dt>{t("Volume")}</dt>
         <dd>{asLiters(item.volume)}</dd>
-        <dt>Weight</dt>
+        <dt>{t("Weight")}</dt>
         <dd>{asKilograms(item.weight)}</dd>
-        <dt>Length</dt>
+        <dt>{t("Length")}</dt>
         <dd>{length(item)}</dd>
 
         {#if ammo.length}
-          <dt>Ammo</dt>
+          <dt>{t("Ammo", { _context })}</dt>
           <dd>
             <ul class="no-bullets">
               {#each ammo.map( (id) => ({ id, max_charges: maxCharges(id) }) ) as { id: ammo_id, max_charges }}
@@ -212,7 +215,7 @@ const ascii_picture =
         {/if}
 
         {#if magazine_compatible.length}
-          <dt>Compatible Magazines</dt>
+          <dt>{t("Compatible Magazines", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
               {#each magazine_compatible as { type, id }}
@@ -223,7 +226,12 @@ const ascii_picture =
         {/if}
 
         {#if item.weapon_category?.length}
-          <dt>Category</dt>
+          <dt>
+            {t("Category", {
+              _context,
+              _comment: "Weapon category for martial arts",
+            })}
+          </dt>
           <dd>
             <ul class="comma-separated">
               {#each item.weapon_category as category_id}
@@ -233,16 +241,16 @@ const ascii_picture =
           </dd>
         {/if}
 
-        <dt>Flags</dt>
+        <dt>{t("Flags")}</dt>
         <dd>
           <ul class="comma-separated">
             <!-- prettier-ignore -->
-            {#each flags as f}<li><ThingLink type="json_flag" id={f.id} /></li>{:else}<li><em>none</em></li>{/each}
+            {#each flags as f}<li><ThingLink type="json_flag" id={f.id} /></li>{:else}<li><em>{t('none')}</em></li>{/each}
           </ul>
         </dd>
 
         {#if faults.length}
-          <dt>Possible Faults</dt>
+          <dt>{t("Possible Faults", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
               {#each faults as fault}
@@ -253,7 +261,7 @@ const ascii_picture =
         {/if}
 
         {#if qualities.length || chargedQualities.length}
-          <dt>Qualities</dt>
+          <dt>{t("Qualities", { _context })}</dt>
           <dd>
             <ul class="no-bullets">
               {#each qualities as { quality, level }}
@@ -276,7 +284,7 @@ const ascii_picture =
         {/if}
 
         {#if vparts.length}
-          <dt>Vehicle Parts</dt>
+          <dt>{t("Vehicle Parts", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
               {#each vparts as vpart}
@@ -287,7 +295,7 @@ const ascii_picture =
         {/if}
 
         {#if uncraft}
-          <dt>Disassembles Into</dt>
+          <dt>{t("Disassembles Into", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
               {#each uncraft.components as { id, count }}
@@ -305,7 +313,7 @@ const ascii_picture =
         {/if}
 
         {#if usage.length}
-          <dt>Usage</dt>
+          <dt>{t("Usage", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
               {#each usage as u}
@@ -368,9 +376,9 @@ const ascii_picture =
 {/if}
 {#if item.seed_data}
   <section>
-    <h1>Grows Into</h1>
+    <h1>{t("Grows Into", { _context: "Seed Data" })}</h1>
     <dl>
-      <dt>Harvest Results</dt>
+      <dt>{t("Harvest Results", { _context: "Seed Data" })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each [item.seed_data.fruit].concat(item.seed_data.byproducts ?? []) as id}
@@ -378,7 +386,7 @@ const ascii_picture =
           {/each}
         </ul>
       </dd>
-      <dt>Growing Time</dt>
+      <dt>{t("Growing Time", { _context: "Seed Data" })}</dt>
       <dd>{item.seed_data.grow}</dd>
     </dl>
   </section>
@@ -395,19 +403,21 @@ const ascii_picture =
 {/if}
 {#if pockets.filter((p) => p.pocket_type === "CONTAINER").length}
   <section>
-    <h1>Pockets</h1>
+    <h1>{t("Pockets", { _context })}</h1>
     {#each pockets.filter((p) => p.pocket_type === "CONTAINER") as pocket}
       <dl>
         {#if pocket.max_contains_volume != null}
-          <dt>Volume Capacity</dt>
+          <dt>{t("Volume Capacity", { _context })}</dt>
           <dd>{pocket.max_contains_volume}</dd>
         {/if}
         {#if pocket.max_contains_weight != null}
-          <dt>Weight Capacity</dt>
+          <dt>{t("Weight Capacity", { _context })}</dt>
           <dd>{pocket.max_contains_weight}</dd>
         {/if}
         {#if pocket.ammo_restriction}
-          <dt>Ammo Restriction</dt>
+          <dt>
+            {t("Ammo Restriction", { _context, _comment: "For a pocket" })}
+          </dt>
           <dd>
             <ul>
               {#each [...Object.entries(pocket.ammo_restriction)] as [id, count]}
@@ -421,25 +431,37 @@ const ascii_picture =
           </dd>
         {/if}
         {#if pocket.max_item_length}
-          <dt>Max Item Length</dt>
+          <dt>{t("Max Item Length", { _context })}</dt>
           <dd>{pocket.max_item_length}</dd>
         {/if}
         {#if pocket.min_item_volume !== "0 ml"}
-          <dt>Min Item Volume</dt>
+          <dt>{t("Min Item Volume", { _context })}</dt>
           <dd>{pocket.min_item_volume}</dd>
         {/if}
-        <dt>Moves to Remove Item</dt>
+        <dt>{t("Moves to Remove Item", { _context })}</dt>
         <dd>{pocket.moves}</dd>
         {#if pocket.holster}
-          <dt>Max Items</dt>
+          <dt>
+            {t("Max Items", {
+              _context,
+              _comment:
+                "Maximum number of items allowed in the pocket. 1 for holsters, not shown for anything else.",
+            })}
+          </dt>
           <dd>1</dd>
         {/if}
         {#if (pocket.sealed_data?.spoil_multiplier ?? 1) !== 1.0}
-          <dt>Spoil Multiplier</dt>
+          <dt>
+            {t("Spoil Multiplier", {
+              _context,
+              _comment:
+                "Items contained in this pocket will spoil faster or slower according to this multiplier.",
+            })}
+          </dt>
           <dd>{pocket.sealed_data.spoil_multiplier}</dd>
         {/if}
         {#if pocket.flag_restriction}
-          <dt>Flag Restriction</dt>
+          <dt>{t("Flag Restriction", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
               {#each pocket.flag_restriction as flag}
@@ -449,7 +471,7 @@ const ascii_picture =
           </dd>
         {/if}
         {#if pocket.item_restriction}
-          <dt>Item Restriction</dt>
+          <dt>{t("Item Restriction", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
               {#each pocket.item_restriction as item}
@@ -465,7 +487,7 @@ const ascii_picture =
 <ComponentOf item_id={item.id} />
 
 <div class="hide-header-if-no-sections">
-  <h2>Obtaining</h2>
+  <h2>{t("Obtaining", { _context })}</h2>
   <Recipes item_id={item.id} />
   <DroppedBy item_id={item.id} />
   <Foraged item_id={item.id} />

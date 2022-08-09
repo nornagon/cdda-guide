@@ -1,4 +1,5 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import { CddaData, singular } from "../../data";
 import type {
@@ -13,6 +14,8 @@ import { groupBy, uniq } from "./utils";
 
 export let item: ItemBasicInfo & ArmorSlot;
 let data = getContext<CddaData>("data");
+
+const _context = "Item Armor Info";
 
 function addRange(
   x: number | [number, number],
@@ -383,24 +386,36 @@ function fixApd(
 </script>
 
 <section>
-  <h1>Armor</h1>
+  <h1>{t("Armor", { _context, _comment: "Section heading" })}</h1>
   <dl>
-    <dt>Layer</dt>
+    <dt>{t("Layer", { _context })}</dt>
     <dd>
-      {#if (item.flags ?? []).includes("PERSONAL")}Personal aura
-      {:else if (item.flags ?? []).includes("SKINTIGHT")}Close to skin
-      {:else if (item.flags ?? []).includes("BELTED")}Strapped
-      {:else if (item.flags ?? []).includes("OUTER")}Outer
-      {:else if (item.flags ?? []).includes("WAIST")}Waist
-      {:else if (item.flags ?? []).includes("AURA")}Outer aura
-      {:else}Normal
+      {#if (item.flags ?? []).includes("PERSONAL")}{t("Personal aura", {
+          _context: "Armor Layer",
+        })}
+      {:else if (item.flags ?? []).includes("SKINTIGHT")}{t("Close to skin", {
+          _context: "Armor Layer",
+        })}
+      {:else if (item.flags ?? []).includes("BELTED")}{t("Strapped", {
+          _context: "Armor Layer",
+        })}
+      {:else if (item.flags ?? []).includes("OUTER")}{t("Outer", {
+          _context: "Armor Layer",
+        })}
+      {:else if (item.flags ?? []).includes("WAIST")}{t("Waist", {
+          _context: "Armor Layer",
+        })}
+      {:else if (item.flags ?? []).includes("AURA")}{t("Outer aura", {
+          _context: "Armor Layer",
+        })}
+      {:else}{t("Normal", { _context: "Armor Layer" })}
       {/if}
     </dd>
-    <dt>Warmth</dt>
+    <dt>{t("Warmth", { _context })}</dt>
     <dd>{item.warmth ?? 0}</dd>
     {#if item.sided}
-      <dt>Sided</dt>
-      <dd>Yes</dd>
+      <dt>{t("Sided", { _context })}</dt>
+      <dd>{t("Yes")}</dd>
     {/if}
   </dl>
 
@@ -415,40 +430,40 @@ function fixApd(
           {/if}
         </h2>
         <dl>
-          <dt>Encumbrance</dt>
+          <dt>{t("Encumbrance", { _context })}</dt>
           <dd>{encumbrance(cp)}</dd>
-          <dt>Coverage</dt>
+          <dt>{t("Coverage", { _context })}</dt>
           <dd>
             {#if cp.apd.coverage === cp.apd.cover_melee && cp.apd.coverage === cp.apd.cover_ranged && cp.apd.cover_vitals === 0}
               {cp.apd.coverage}%
             {:else}
               <dl>
-                <dt>Default</dt>
+                <dt>{t("Default", { _context: "Armor Coverage" })}</dt>
                 <dd>{cp.apd.coverage}%</dd>
                 {#if cp.apd.coverage !== cp.apd.cover_melee}
-                  <dt>Melee</dt>
+                  <dt>{t("Melee", { _context: "Armor Coverage" })}</dt>
                   <dd>{cp.apd.cover_melee}%</dd>
                 {/if}
                 {#if cp.apd.coverage !== cp.apd.cover_ranged}
-                  <dt>Ranged</dt>
+                  <dt>{t("Ranged", { _context: "Armor Coverage" })}</dt>
                   <dd>{cp.apd.cover_ranged}%</dd>
                 {/if}
                 {#if cp.apd.cover_vitals}
-                  <dt>Vitals</dt>
+                  <dt>{t("Vitals", { _context: "Armor Coverage" })}</dt>
                   <dd>{cp.apd.cover_vitals}%</dd>
                 {/if}
               </dl>
             {/if}
           </dd>
-          <dt>Protection</dt>
+          <dt>{t("Protection", { _context })}</dt>
           <dd class="protection">
             {#if getEnvResist()}
               <dl class="protection-env">
-                <dt>Acid</dt>
+                <dt>{t("Acid", { _context: "Damage Type" })}</dt>
                 <dd>{acidResist(cp.bp_ids[0]).toFixed(2)}</dd>
-                <dt>Fire</dt>
+                <dt>{t("Fire", { _context: "Damage Type" })}</dt>
                 <dd>{fireResist(cp.bp_ids[0]).toFixed(2)}</dd>
-                <dt>Environ.</dt>
+                <dt>{t("Environ.", { _context })}</dt>
                 <dd>{getEnvResist()}</dd>
               </dl>
             {/if}
@@ -463,33 +478,33 @@ function fixApd(
                   {/each}
                 </tr>
                 <tr>
-                  <td>Thickness</td>
+                  <td>{t("Thickness", { _context })}</td>
                   {#each apd.material as mat}
                     <td>{(mat.thickness ?? 0).toFixed(1)}mm</td>
                   {/each}
                 </tr>
                 <tr>
-                  <td>Coverage</td>
+                  <td>{t("Coverage", { _context })}</td>
                   {#each apd.material as mat}
                     <td>{(mat.covered_by_mat ?? 100).toFixed(0)}%</td>
                   {/each}
                 </tr>
                 <tr>
-                  <td>Bash</td>
+                  <td>{t("Bash", { _context: "Damage Type" })}</td>
                   {#each apd.material as mat}
                     {@const m = data.byId("material", mat.type)}
                     <td>{(m.bash_resist * mat.thickness).toFixed(2)}</td>
                   {/each}
                 </tr>
                 <tr>
-                  <td>Cut</td>
+                  <td>{t("Cut", { _context: "Damage Type" })}</td>
                   {#each apd.material as mat}
                     {@const m = data.byId("material", mat.type)}
                     <td>{(m.cut_resist * mat.thickness).toFixed(2)}</td>
                   {/each}
                 </tr>
                 <tr>
-                  <td>Ballistic</td>
+                  <td>{t("Ballistic", { _context: "Damage Type" })}</td>
                   {#each apd.material as mat}
                     {@const m = data.byId("material", mat.type)}
                     <td>{(m.bullet_resist * mat.thickness).toFixed(2)}</td>

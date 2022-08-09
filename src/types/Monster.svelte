@@ -1,10 +1,12 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import { getContext } from "svelte";
 
 import {
   asKilograms,
   asLiters,
   CddaData,
+  i18n,
   normalizeDamageInstance,
   singular,
   singularName,
@@ -14,6 +16,9 @@ import type { Harvest, Monster, MonsterGroup } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import SpecialAttack from "./monster/SpecialAttack.svelte";
 import LimitedList from "../LimitedList.svelte";
+import ColorText from "./ColorText.svelte";
+
+const _context = "Monster";
 
 export let item: Monster;
 
@@ -51,32 +56,17 @@ function difficulty(item: Monster): number {
 
 function difficultyDescription(diff: number) {
   if (diff < 3) {
-    return "Minimal threat.";
+    return i18n.__("<color_light_gray>Minimal threat.</color>");
   } else if (diff < 10) {
-    return "Mildly dangerous.";
+    return i18n.__("<color_light_gray>Mildly dangerous.</color>");
   } else if (diff < 20) {
-    return "Dangerous.";
+    return i18n.__("<color_light_red>Dangerous.</color>");
   } else if (diff < 30) {
-    return "Very dangerous.";
+    return i18n.__("<color_red>Very dangerous.</color>");
   } else if (diff < 50) {
-    return "Extremely dangerous.";
+    return i18n.__("<color_red>Extremely dangerous.</color>");
   }
-  return "Fatally dangerous!";
-}
-
-function difficultyColor(diff: number) {
-  if (diff < 3) {
-    return "light_gray";
-  } else if (diff < 10) {
-    return "light_gray";
-  } else if (diff < 20) {
-    return "light_red";
-  } else if (diff < 30) {
-    return "red";
-  } else if (diff < 50) {
-    return "red";
-  }
-  return "red";
+  return i18n.__("<color_red>Fatally dangerous!</color>");
 }
 
 function damage(mon: Monster) {
@@ -271,19 +261,19 @@ let upgrades =
 <section>
   <dl>
     {#if item.bodytype}
-      <dt>Body Type</dt>
+      <dt>{t("Body Type", { _context })}</dt>
       <dd>{item.bodytype}</dd>
     {/if}
     {#if item.species && item.species.length}
-      <dt>Species</dt>
+      <dt>{t("Species", { _context })}</dt>
       <dd>{(item.species ?? []).join(", ")}</dd>
     {/if}
-    <dt>Volume</dt>
+    <dt>{t("Volume")}</dt>
     <dd>{asLiters(item.volume)}</dd>
-    <dt>Weight</dt>
+    <dt>{t("Weight")}</dt>
     <dd>{asKilograms(item.weight)}</dd>
     {#if materials.length}
-      <dt>Material</dt>
+      <dt>{t("Material")}</dt>
       <dd>
         <ul class="comma-separated">
           {#each materials as id}
@@ -292,27 +282,26 @@ let upgrades =
         </ul>
       </dd>
     {/if}
-    <dt>Difficulty</dt>
+    <dt>{t("Difficulty", { _context })}</dt>
     <dd>
       {difficulty(item)}
-      <span class="c_{difficultyColor(difficulty(item))} fg_only"
-        >({difficultyDescription(difficulty(item))})</span>
+      <ColorText text={difficultyDescription(difficulty(item))} fgOnly={true} />
     </dd>
   </dl>
-  <p style="color: var(--cata-color-gray)">{item.description}</p>
+  <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
 </section>
 <div class="side-by-side">
   <section>
-    <h1>Attack</h1>
+    <h1>{t("Attack", { _context, _comment: "Section heading" })}</h1>
     <dl>
-      <dt>Speed</dt>
+      <dt>{t("Speed", { _context })}</dt>
       <dd>{item.speed ?? 0}</dd>
-      <dt>Melee Skill</dt>
+      <dt>{t("Melee Skill", { _context })}</dt>
       <dd>{item.melee_skill ?? 0}</dd>
-      <dt>Damage</dt>
+      <dt>{t("Damage", { _context })}</dt>
       <dd>{damage(item)}</dd>
       {#if item.special_attacks}
-        <dt>Special Attacks</dt>
+        <dt>{t("Special Attacks", { _context })}</dt>
         <dd>
           <ul class="no-bullets">
             {#each item.special_attacks as special_attack}
@@ -330,56 +319,61 @@ let upgrades =
     </dl>
   </section>
   <section>
-    <h1>Defense</h1>
+    <h1>{t("Defense", { _context, _comment: "Section heading" })}</h1>
     <dl style="flex: 1">
-      <dt>HP</dt>
+      <dt>{t("HP", { _context })}</dt>
       <dd>{item.hp}</dd>
       {#if item.regenerates}
-        <dt>Regenerates</dt>
+        <dt>{t("Regenerates", { _context })}</dt>
         <dd>{item.regenerates} hp/turn</dd>
       {/if}
-      <dt>Dodge</dt>
+      <dt>{t("Dodge", { _context })}</dt>
       <dd>{item.dodge ?? 0}</dd>
-      <dt>Armor</dt>
+      <dt>{t("Armor", { _context })}</dt>
       <dd>
         <dl>
-          <dt>Bash</dt>
+          <dt>{t("Bash", { _context: "Damage Type" })}</dt>
           <dd>{item.armor_bash ?? 0}</dd>
-          <dt>Cut</dt>
+          <dt>{t("Cut", { _context: "Damage Type" })}</dt>
           <dd>{item.armor_cut ?? 0}</dd>
-          <dt>Stab</dt>
+          <dt>{t("Stab", { _context: "Damage Type" })}</dt>
           <dd>{item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}</dd>
-          <dt>Bullet</dt>
+          <dt>{t("Ballistic", { _context: "Damage Type" })}</dt>
           <dd>{item.armor_bullet ?? 0}</dd>
-          <dt>Acid</dt>
+          <dt>{t("Acid", { _context: "Damage Type" })}</dt>
           <dd>{item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}</dd>
-          <dt>Fire</dt>
+          <dt>{t("Fire", { _context: "Damage Type" })}</dt>
           <dd>{item.armor_fire ?? 0}</dd>
         </dl>
       </dd>
       {#if item.special_when_hit}
-        <dt>When Hit</dt>
+        <dt>{t("When Hit", { _context })}</dt>
         <dd>{item.special_when_hit[0]} ({item.special_when_hit[1]}%)</dd>
       {/if}
     </dl>
   </section>
 </div>
 <section>
-  <h1>Behavior</h1>
+  <h1>{t("Behavior", { _context, _comment: "Section heading" })}</h1>
   <dl>
     <dt
       title="Monsters with high aggression are more likely to be hostile. Ranges from -100 to 100">
-      Aggression
+      {t("Aggression", { _context })}
     </dt>
     <dd>{item.aggression ?? 0}</dd>
-    <dt title="Morale at spawn. Monsters with low morale will flee.">Morale</dt>
+    <dt title="Morale at spawn. Monsters with low morale will flee.">
+      {t("Morale", { _context })}
+    </dt>
     <dd>{item.morale ?? 0}</dd>
-    <dt>Vision Range</dt>
-    <dd>{item.vision_day ?? 40} (day) / {item.vision_night ?? 1} (night)</dd>
-    <dt>Default Faction</dt>
+    <dt>{t("Vision Range", { _context })}</dt>
+    <dd>
+      {item.vision_day ?? 40} ({t("day", { _context })}) / {item.vision_night ??
+        1} ({t("night", { _context })})
+    </dd>
+    <dt>{t("Default Faction", { _context })}</dt>
     <dd>{item.default_faction}</dd>
     {#if item.anger_triggers?.length}
-      <dt>Anger Triggers</dt>
+      <dt>{t("Anger Triggers", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.anger_triggers as t}
@@ -389,7 +383,7 @@ let upgrades =
       </dd>
     {/if}
     {#if item.placate_triggers?.length}
-      <dt>Placate Triggers</dt>
+      <dt>{t("Placate Triggers", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.placate_triggers as t}
@@ -399,7 +393,7 @@ let upgrades =
       </dd>
     {/if}
     {#if item.fear_triggers?.length}
-      <dt>Fear Triggers</dt>
+      <dt>{t("Fear Triggers", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.fear_triggers as t}
@@ -409,7 +403,7 @@ let upgrades =
       </dd>
     {/if}
     {#if item.flags?.length}
-      <dt>Flags</dt>
+      <dt>{t("Flags")}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.flags ?? [] as flag}
@@ -419,7 +413,7 @@ let upgrades =
       </dd>
     {/if}
     {#if item.death_function}
-      <dt>On Death</dt>
+      <dt>{t("On Death", { _context })}</dt>
       <dd>
         {#if item.death_function.effect?.id && data.byId("SPELL", item.death_function.effect.id)}
           {singularName(data.byId("SPELL", item.death_function.effect.id))} ({singular(
@@ -433,7 +427,7 @@ let upgrades =
       </dd>
     {/if}
     {#if upgrades}
-      <dt>Upgrades Into</dt>
+      <dt>{t("Upgrades Into", { _context })}</dt>
       <dd>
         <ul class="comma-separated or">
           <!-- prettier-ignore -->
@@ -452,7 +446,7 @@ let upgrades =
 </section>
 {#if deathDrops?.length}
   <section>
-    <h1>Drops</h1>
+    <h1>{t("Drops", { _context })}</h1>
     <LimitedList items={deathDrops} let:item>
       <ItemSymbol item={data.byId("item", item.id)} />
       <ThingLink type="item" id={item.id} /> ({showProbability(item.prob)})
@@ -461,7 +455,7 @@ let upgrades =
 {/if}
 {#if harvest && (harvest.entries ?? []).length}
   <section>
-    <h1>Butchering Results</h1>
+    <h1>{t("Butchering Results", { _context })}</h1>
     <ul>
       {#each harvest.entries as harvest_entry}
         {#if data.byId("harvest_drop_type", harvest_entry.type)?.group || harvest_entry.type === "bionic_group"}
@@ -483,7 +477,7 @@ let upgrades =
 {/if}
 {#if dissect && (dissect.entries ?? []).length}
   <section>
-    <h1>Dissection Results</h1>
+    <h1>{t("Dissection Results", { _context })}</h1>
     <ul>
       {#each dissect.entries as harvest_entry}
         {#if data.byId("harvest_drop_type", harvest_entry.type)?.group || harvest_entry.type === "bionic_group"}

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import type { CddaData } from "../data";
 
@@ -10,6 +11,7 @@ export let recipe: Recipe;
 export let showResult: boolean = false;
 
 const data = getContext<CddaData>("data");
+const _context = "Recipe";
 
 function normalizeSkillsRequired(
   skills_required: [string, number] | [string, number][] | undefined
@@ -43,34 +45,37 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
 
 <section class="recipe">
   <h1>
-    {#if showResult}Byproduct{:else}Craft{/if}
+    {#if showResult}{t("Byproduct", {
+        _context,
+        _comment: "Section heading",
+      })}{:else}{t("Craft", { _context, _comment: "Section heading" })}{/if}
   </h1>
   <dl>
     {#if showResult}
-      <dt>Result</dt>
+      <dt>{t("Result", { _context })}</dt>
       <dd><ThingLink id={recipe.result} type="item" /></dd>
     {/if}
-    <dt>Primary Skill</dt>
+    <dt>{t("Primary Skill", { _context })}</dt>
     <dd>
       {#if recipe.skill_used}
         <ThingLink type="skill" id={recipe.skill_used} /> ({recipe.difficulty ??
           0})
       {:else}
-        none
+        {t("none")}
       {/if}
     </dd>
     {#if skillsRequired.length}
-      <dt>Other Skills</dt>
+      <dt>{t("Other Skills", { _context })}</dt>
       <dd>
         {#each skillsRequired as [skill, level], i}
           <ThingLink type="skill" id={skill} /> ({level}){#if i === skillsRequired.length - 2}{" and "}{:else if i !== skillsRequired.length - 1}{", "}{/if}
         {:else}
-          none
+          {t("none")}
         {/each}
       </dd>
     {/if}
     {#if proficiencies.length}
-      <dt>Proficiencies</dt>
+      <dt>{t("Proficiencies", { _context })}</dt>
       <dd>
         <ul>
           {#each proficiencies as prof}
@@ -78,9 +83,21 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
               <ThingLink type="proficiency" id={prof.proficiency} />
               {#if prof.time_multiplier !== 1 || prof.fail_multiplier !== 1 || prof.learning_time_multiplier !== 1}
                 ({[
-                  [prof.time_multiplier, "time"],
-                  [prof.fail_multiplier, "fail"],
-                  [prof.learning_time_multiplier, "learning speed"],
+                  [
+                    prof.time_multiplier,
+                    t("time", { _context, _comment: "proficiency multiplier" }),
+                  ],
+                  [
+                    prof.fail_multiplier,
+                    t("fail", { _context, _comment: "proficiency multiplier" }),
+                  ],
+                  [
+                    prof.learning_time_multiplier,
+                    t("learning speed", {
+                      _context,
+                      _comment: "proficiency multiplier",
+                    }),
+                  ],
                 ]
                   .filter((x) => x[0] !== 1)
                   .map(([num, name]) => `${num}× ${name}`)
@@ -91,11 +108,11 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
         </ul>
       </dd>
     {/if}
-    <dt>Time to Complete</dt>
+    <dt>{t("Time to Complete", { _context })}</dt>
     <dd>{recipe.time ?? "0 m"}</dd>
-    <dt>Activity Level</dt>
+    <dt>{t("Activity Level", { _context })}</dt>
     <dd>{recipe.activity_level ?? "MODERATE_EXERCISE"}</dd>
-    <dt>Batch Time Savings</dt>
+    <dt>{t("Batch Time Savings", { _context })}</dt>
     <dd>
       {#if recipe.batch_time_factors}
         {recipe.batch_time_factors[0]}% at >{recipe.batch_time_factors[1]} unit{recipe
@@ -103,16 +120,16 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
           ? ""
           : "s"}
       {:else}
-        <em>none</em>
+        <em>{t("none")}</em>
       {/if}
     </dd>
     {#if recipe.charges}
-      <dt>Recipe Makes</dt>
+      <dt>{t("Recipe Makes", { _context })}</dt>
       <dd>{recipe.charges}<!-- TODO: properly switch on result type --></dd>
     {/if}
     <RequirementData requirement={recipe} />
     {#if recipe.byproducts?.length}
-      <dt>Byproducts</dt>
+      <dt>{t("Byproducts", { _context })}</dt>
       <dd>
         <ul>
           {#each recipe.byproducts as c}
@@ -123,7 +140,7 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
     {/if}
     <dt
       title="Learned at these skill levels, otherwise only learnable from a book">
-      Autolearn
+      {t("Autolearn", { _context })}
     </dt>
     <dd>
       <!-- prettier-ignore-->
@@ -146,7 +163,7 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
               {/each}
             {/if}
             {#if !recipe.skill_used && !skillsRequired.length}
-            <li>At birth</li>
+            <li>{t('At birth', {_context})}</li>
             {/if}
           {/if}
         </ul>
@@ -155,7 +172,12 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
       {/if}
     </dd>
     {#if writtenIn.length}
-      <dt>Written In</dt>
+      <dt>
+        {t("Written In", {
+          _context,
+          _comment: "List of books that contain the recipe",
+        })}
+      </dt>
       <dd>
         <ul class="comma-separated">
           {#each writtenIn as [item_id, level = 0]}
@@ -167,7 +189,7 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
     {/if}
   </dl>
   <details>
-    <summary>Recipe JSON</summary>
+    <summary>{t("Recipe JSON")}</summary>
     <pre>{JSON.stringify(recipe, null, 2)}</pre>
   </details>
 </section>
