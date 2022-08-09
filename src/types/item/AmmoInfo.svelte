@@ -1,8 +1,11 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+import { i18n } from "../../data";
 import type { AmmoSlot, DamageUnit } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
 export let item: AmmoSlot;
+const _context = "Item Ammo Info";
 
 // TODO: handle multiple damage type
 const damage = Array.isArray(item.damage)
@@ -27,32 +30,37 @@ function computeLoudness(item: AmmoSlot): number {
 
 {#if item.damage || item.show_stats}
   <section>
-    <h1>Ammunition</h1>
+    <h1>{t("Ammunition", { _context })}</h1>
     <dl>
-      <dt>Ammunition Type</dt>
+      <dt>{t("Ammunition Type", { _context })}</dt>
       <dd><ThingLink type="ammunition_type" id={item.ammo_type} /></dd>
-      <dt>Damage</dt>
-      <dd>{damage.amount ?? 0} ({damage.damage_type ?? "bullet"})</dd>
-      <dt>Armor Penetration</dt>
+      <dt>{t("Damage", { _context })}</dt>
+      <dd>
+        {damage.amount ?? 0} ({i18n._p(
+          "damage_type",
+          damage.damage_type ?? "bullet"
+        )})
+      </dd>
+      <dt>{t("Armor Penetration", { _context })}</dt>
       <dd>{damage.armor_penetration ?? 0}</dd>
-      <dt>Range</dt>
+      <dt>{t("Range", { _context })}</dt>
       <dd>{item.range ?? 0}</dd>
-      <dt>Dispersion</dt>
+      <dt>{t("Dispersion", { _context })}</dt>
       <dd>{item.dispersion ?? 0}</dd>
-      <dt>Recoil</dt>
+      <dt>{t("Recoil", { _context })}</dt>
       <dd>{item.recoil ?? 0}</dd>
       <dt title="Base loudness of ammo (possibly modified by gun/gunmods)">
-        Loudness
+        {t("Loudness", { _context })}
       </dt>
       <dd>{computeLoudness(item).toFixed(0)}</dd>
-      <dt>Critical Multiplier</dt>
+      <dt>{t("Critical Multiplier", { _context })}</dt>
       <dd>{item.critical_multiplier ?? 2}</dd>
       {#if item.casing}
-        <dt>Casing</dt>
+        <dt>{t("Casing", { _context })}</dt>
         <dd><ThingLink id={item.casing} type="item" /></dd>
       {/if}
       {#if item.effects?.length}
-        <dt>Effects</dt>
+        <dt>{t("Effects", { _context })}</dt>
         <dd>{item.effects.join(", ")}</dd>
       {/if}
     </dl>

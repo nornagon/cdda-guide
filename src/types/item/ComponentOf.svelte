@@ -1,4 +1,5 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
@@ -6,6 +7,7 @@ import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
 export let item_id: string;
+const _context = "Item Basic Info";
 
 const data = getContext<CddaData>("data");
 
@@ -34,7 +36,12 @@ const toolResults = [...toolRecipes].sort((a, b) =>
 
 {#if providedByVparts.length}
   <section>
-    <h1>Provided By Vehicle Parts</h1>
+    <h1>
+      {t("Provided By Vehicle Parts", {
+        _context,
+        _comment: "Section heading",
+      })}
+    </h1>
     <LimitedList items={providedByVparts} let:item>
       <ItemSymbol {item} />
       <ThingLink type={item.type} id={item.id} />
@@ -44,7 +51,9 @@ const toolResults = [...toolRecipes].sort((a, b) =>
 
 {#if providedByFurniture.length}
   <section>
-    <h1>Provided By Furniture</h1>
+    <h1>
+      {t("Provided By Furniture", { _context, _comment: "Section heading" })}
+    </h1>
     <LimitedList items={providedByFurniture} let:item>
       <ItemSymbol {item} />
       <ThingLink type={item.type} id={item.id} />
@@ -55,7 +64,7 @@ const toolResults = [...toolRecipes].sort((a, b) =>
 <div class="side-by-side">
   {#if results.length}
     <section>
-      <h1>Component Of</h1>
+      <h1>{t("Component Of", { _context, _comment: "Section heading" })}</h1>
       <LimitedList items={results} let:item>
         <ItemSymbol item={data.byId("item", item)} />
         <ThingLink type="item" id={item} />
@@ -65,7 +74,9 @@ const toolResults = [...toolRecipes].sort((a, b) =>
 
   {#if toolResults.length}
     <section>
-      <h1>Tool For Crafting</h1>
+      <h1>
+        {t("Tool For Crafting", { _context, _comment: "Section heading" })}
+      </h1>
       <LimitedList items={toolResults} let:item>
         <ItemSymbol item={data.byId("item", item)} />
         <ThingLink type="item" id={item} />
