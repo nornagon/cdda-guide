@@ -19,6 +19,7 @@ import type {
   Item,
   UseFunction,
 } from "./types";
+import { tx } from "@transifex/native";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["AMMO", "item"],
@@ -1242,6 +1243,7 @@ export const data = {
     const [dataJson, localeJson] = await Promise.all([
       retry(() => fetchJson(version)),
       locale && retry(() => fetchLocaleJson(version, locale)),
+      locale && tx.setCurrentLocale(locale),
     ]);
     if (localeJson) {
       i18n.loadJSON(localeJson);

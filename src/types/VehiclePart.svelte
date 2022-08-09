@@ -1,4 +1,5 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import { getContext } from "svelte";
 
 import {
@@ -19,6 +20,8 @@ import ItemSymbol from "./item/ItemSymbol.svelte";
 import RequirementData from "./item/RequirementData.svelte";
 import ThingLink from "./ThingLink.svelte";
 
+const _context = "Vehicle Part";
+
 export let item: VehiclePart;
 
 function bonusLabel(item: VehiclePart) {
@@ -34,12 +37,13 @@ function bonusLabel(item: VehiclePart) {
     "ATOMIC_LIGHT",
   ];
   const flags = item.flags ?? [];
-  if (flags.includes("SEATBELT")) return "Strength";
-  else if (flags.includes("HORN")) return "Noise";
-  else if (flags.includes("MUFFLER")) return "Noise Reduction";
-  else if (flags.includes("VISION")) return "Range";
-  else if (light_flags.some((lf) => flags.includes(lf))) return "Light";
-  else if (flags.includes("REAPER")) return "Plant Harvested";
+  if (flags.includes("SEATBELT")) return t("Strength", { _context });
+  else if (flags.includes("HORN")) return t("Noise", { _context });
+  else if (flags.includes("MUFFLER")) return t("Noise Reduction", { _context });
+  else if (flags.includes("VISION")) return t("Range", { _context });
+  else if (light_flags.some((lf) => flags.includes(lf)))
+    return t("Light", { _context });
+  else if (flags.includes("REAPER")) return t("Plant Harvested", { _context });
 }
 
 const data = getContext<CddaData>("data");
@@ -76,14 +80,14 @@ vehiclesContainingPart.sort((a, b) =>
 </h1>
 
 <section>
-  <h1>Vehicle Part</h1>
+  <h1>{t("Vehicle Part")}</h1>
   <dl>
-    <dt>Item</dt>
+    <dt>{t("Item", { _context })}</dt>
     <dd><ThingLink id={item.item} type="item" /></dd>
-    <dt>Weight</dt>
+    <dt>{t("Weight")}</dt>
     <dd>{asKilograms(data.byId("item", item.item).weight)}</dd>
     {#if item.fuel_options?.length}
-      <dt>Charge</dt>
+      <dt>{t("Charge", { _context })}</dt>
       <dd>
         <ul class="comma-separated or">
           {#each item.fuel_options as fuel_id}
@@ -92,23 +96,23 @@ vehiclesContainingPart.sort((a, b) =>
         </ul>
       </dd>
     {:else if item.fuel_type}
-      <dt>Charge</dt>
+      <dt>{t("Charge", { _context })}</dt>
       <dd><ThingLink type="item" id={item.fuel_type} /></dd>
     {/if}
     <dt title="Maximum damage part can sustain before being destroyed">
-      Durability
+      {t("Durability", { _context })}
     </dt>
     <dd>{item.durability ?? 0}</dd>
     {#if item.size}
-      <dt>Capacity</dt>
+      <dt>{t("Capacity", { _context })}</dt>
       <dd>{asLiters(item.size)}</dd>
     {/if}
     {#if item.folded_volume}
-      <dt>Folded Volume</dt>
+      <dt>{t("Folded Volume", { _context })}</dt>
       <dd>{asLiters(item.folded_volume)}</dd>
     {/if}
     {#if item.qualities?.length}
-      <dt>Qualities</dt>
+      <dt>{t("Qualities", { _context })}</dt>
       <dd>
         <ul class="no-bullets">
           {#each item.qualities as [quality, level]}
@@ -122,25 +126,25 @@ vehiclesContainingPart.sort((a, b) =>
       </dd>
     {/if}
     {#if item.comfort}
-      <dt>Comfort</dt>
+      <dt>{t("Comfort", { _context })}</dt>
       <dd>{item.comfort}</dd>
     {/if}
     {#if item.floor_bedding_warmth}
-      <dt>Bedding Warmth</dt>
+      <dt>{t("Bedding Warmth", { _context })}</dt>
       <dd>{item.floor_bedding_warmth}</dd>
     {/if}
-    <dt>Damage</dt>
+    <dt>{t("Damage", { _context })}</dt>
     <dd>{item.damage_modifier ?? 100}%</dd>
     {#if item.epower}
-      <dt>Electric Power</dt>
+      <dt>{t("Electric Power", { _context })}</dt>
       <dd>{item.epower}</dd>
     {/if}
     {#if item.energy_consumption}
-      <dt>Drain</dt>
+      <dt>{t("Drain", { _context })}</dt>
       <dd>{-item.energy_consumption}</dd>
     {/if}
     {#if item.power}
-      <dt>Power</dt>
+      <dt>{t("Power", { _context })}</dt>
       <dd>
         {item.power}
         {#if item.muscle_power_factor}
@@ -153,7 +157,12 @@ vehiclesContainingPart.sort((a, b) =>
       <dd>{item.bonus}</dd>
     {/if}
     {#if item.pseudo_tools?.length}
-      <dt>Provides</dt>
+      <dt>
+        {t("Provides", {
+          _context,
+          _comment: "List of tools that the vehicle part acts as",
+        })}
+      </dt>
       <dd>
         <ul class="comma-separated">
           {#each item.pseudo_tools as { id }}
@@ -163,7 +172,13 @@ vehiclesContainingPart.sort((a, b) =>
       </dd>
     {/if}
     {#if breaksIntoGroupFlattened?.length}
-      <dt>Breaks Into</dt>
+      <dt>
+        {t("Breaks Into", {
+          _context,
+          _comment:
+            "List of possible parts obtained by bashing the vehicle part",
+        })}
+      </dt>
       <dd>
         <ul class="comma-separated">
           {#each breaksIntoGroupFlattened as { id, count, prob }}
@@ -173,13 +188,13 @@ vehiclesContainingPart.sort((a, b) =>
         </ul>
       </dd>
     {/if}
-    <dt>Flags</dt>
+    <dt>{t("Flags")}</dt>
     <dd>
       <ul class="comma-separated">
         {#each item.flags ?? [] as flag}
           <li><ThingLink type="json_flag" id={flag} /></li>
         {:else}
-          <em>none</em>
+          <em>{t("none")}</em>
         {/each}
       </ul>
     </dd>
@@ -192,17 +207,19 @@ vehiclesContainingPart.sort((a, b) =>
 
 <div class="side-by-side">
   <section>
-    <h1>Install</h1>
+    <h1>{t("Install", { _context })}</h1>
     <dl>
-      <dt>Skills Required</dt>
+      <dt>{t("Skills Required")}</dt>
       <dd>
         {#each item.requirements?.install?.skills ?? [] as [skill, level], i}
           <ThingLink type="skill" id={skill} /> ({level}){#if i === item.requirements.install.skills.length - 2}{" and "}{:else if i !== item.requirements.install.skills.length - 1}{", "}{/if}
         {:else}
-          none
+          {t("none")}
         {/each}
       </dd>
-      <dt title="Time required goes down with better skills">Time</dt>
+      <dt title="Time required goes down with better skills">
+        {t("Time", { _context, _comment: "Time taken to perform the action" })}
+      </dt>
       <dd>{item.requirements?.install?.time ?? "1 hour"}</dd>
       <RequirementData
         requirement={{
@@ -215,9 +232,9 @@ vehiclesContainingPart.sort((a, b) =>
   </section>
 
   <section>
-    <h1>Remove</h1>
+    <h1>{t("Remove", { _context })}</h1>
     <dl>
-      <dt>Skills Required</dt>
+      <dt>{t("Skills Required")}</dt>
       <dd>
         {#each item.requirements?.removal?.skills ?? [] as [skill, level], i}
           <ThingLink type="skill" id={skill} /> ({level}){#if i === item.requirements.removal.skills.length - 2}{" and "}{:else if i !== item.requirements.removal.skills.length - 1}{", "}{/if}
@@ -225,7 +242,9 @@ vehiclesContainingPart.sort((a, b) =>
           none
         {/each}
       </dd>
-      <dt title="Time required goes down with better skills">Time</dt>
+      <dt title="Time required goes down with better skills">
+        {t("Time", { _context, _comment: "Time taken to perform the action" })}
+      </dt>
       <dd>
         {item.requirements?.removal?.time ??
           asMinutes(
@@ -243,9 +262,9 @@ vehiclesContainingPart.sort((a, b) =>
 
 {#if item.requirements?.repair}
   <section>
-    <h1>Repair</h1>
+    <h1>{t("Repair", { _context })}</h1>
     <dl>
-      <dt>Skills Required</dt>
+      <dt>{t("Skills Required")}</dt>
       <dd>
         {#each item.requirements.repair?.skills ?? [] as [skill, level], i}
           <ThingLink type="skill" id={skill} /> ({level}){#if i === item.requirements.repair.skills.length - 2}{" and "}{:else if i !== item.requirements.repair.skills.length - 1}{", "}{/if}
@@ -253,19 +272,29 @@ vehiclesContainingPart.sort((a, b) =>
           none
         {/each}
       </dd>
-      <dt title="Time required goes down with better skills">Time</dt>
+      <dt title="Time required goes down with better skills">
+        {t("Time", { _context, _comment: "Time taken to perform the action" })}
+      </dt>
       <dd>{item.requirements?.repair?.time ?? "1 hour"}</dd>
       <RequirementData requirement={item.requirements.repair} />
     </dl>
     <p style="color: var(--cata-color-gray); font-style: italic">
-      Repair time and requirements are lower for parts that are less damaged.
+      {t(
+        "Repair time and requirements are lower for parts that are less damaged."
+      )}
     </p>
   </section>
 {/if}
 
 {#if vehiclesContainingPart.length}
   <section>
-    <h1>Vehicles</h1>
+    <h1>
+      {t("Vehicles", {
+        _context,
+        _comment:
+          "Heading for list of vehicles which contain this vehicle part",
+      })}
+    </h1>
     <LimitedList items={vehiclesContainingPart} let:item>
       <ThingLink type="vehicle" id={item.id} />
     </LimitedList>
