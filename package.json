@@ -13,7 +13,7 @@
     "test:latest": "node fetch-fixtures.js latest && npm run validate && jest src",
     "test:watch": "npm run test -- --watch",
     "update-test-data": "node fetch-fixtures.js latest",
-    "transifex-push": "npx @transifex/cli push dist",
+    "transifex-push": "txjs-cli push dist",
     "deploy": "npm run build && gh-pages -d dist",
     "lint": "prettier -c .",
     "lint:fix": "prettier -w .",
