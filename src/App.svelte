@@ -270,6 +270,15 @@ function getLanguageName(code: string) {
       <a href="https://github.com/nornagon/cdda-guide/issues">file an issue</a>!
     </p>
 
+    {#if locale}
+      <p style="font-weight: bold">
+        You can help translate the Guide into your language on <a
+          href="https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/"
+          >Transifex</a
+        >.
+      </p>
+    {/if}
+
     <h2>Catalogs</h2>
     <ul>
       <li><a href="#/item">Items</a></li>
