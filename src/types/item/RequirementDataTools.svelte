@@ -1,8 +1,9 @@
 <script lang="ts">
 import { t } from "@transifex/native";
+import InterpolatedTranslation from "../../InterpolatedTranslation.svelte";
 
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../../data";
+import { CddaData, i18n, singularName } from "../../data";
 
 import type { Recipe, RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
@@ -26,9 +27,19 @@ let { tools, qualities } =
       <li>
         {#each qualityChoices as quality, i}
           {#if i !== 0}{" OR "}{/if}
-          {quality.amount ?? 1} tool{(quality.amount ?? 1) === 1 ? "" : "s"}
-          with <ThingLink type="tool_quality" id={quality.id} /> of {quality.level}
-          or more{""}{/each}.
+          <InterpolatedTranslation
+            str={i18n
+              ._n(
+                "%1$d tool with %2$s of %3$d or more.",
+                "%1$d tools with %2$s of %3$d or more.",
+                quality.amount ?? 1,
+                quality.amount ?? 1,
+                "\x000",
+                quality.level
+              )
+              .replace(/\$./g, "")}>
+            <ThingLink type="tool_quality" id={quality.id} slot="0" />
+          </InterpolatedTranslation>{/each}
       </li>
     {/each}
     {#each tools as toolChoices}
