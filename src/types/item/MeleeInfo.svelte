@@ -1,10 +1,13 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, parseMass, parseVolume, singular } from "../../data";
 import type { Item } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
 let data = getContext<CddaData>("data");
+const _context = "Item Melee Info";
 export let item: Item;
 
 let techniques = (item.techniques ?? []).map((t) => data.byId("technique", t));
@@ -61,20 +64,20 @@ const piercing =
 
 {#if item.bashing || item.cutting}
   <section>
-    <h1>Melee</h1>
+    <h1>{t("Melee", { _context, _comment: "Section heading" })}</h1>
     <dl>
-      <dt>Bash</dt>
+      <dt>{t("Bash", { _context: "Damage Type" })}</dt>
       <dd>{item.bashing ?? 0}</dd>
       <dt>
-        {#if piercing}Pierce{:else}Cut{/if}
+        {t(piercing ? "Pierce" : "Cut", { _context: "Damage Type" })}
       </dt>
       <dd>{item.cutting ?? 0}</dd>
-      <dt>To Hit</dt>
+      <dt>{t("To Hit", { _context })}</dt>
       <dd>{to_hit}</dd>
-      <dt>Moves Per Attack</dt>
+      <dt>{t("Moves Per Attack", { _context })}</dt>
       <dd>{attackTime(item)}</dd>
       {#if techniques.length}
-        <dt>Techniques</dt>
+        <dt>{t("Techniques", { _context })}</dt>
         <dd>
           <ul class="no-bullets">
             {#each techniques as technique}

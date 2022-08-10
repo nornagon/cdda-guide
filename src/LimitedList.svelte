@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 export let items: any[];
 
 export let limit = 10;
@@ -28,5 +30,8 @@ let realLimit = isTesting
     on:click={(e) => {
       e.preventDefault();
       realLimit = Infinity;
-    }}>See all {Number(items.length).toLocaleString()}...</button>
+    }}
+    >{t("See all {n}...", {
+      n: Number(items.length).toLocaleString(),
+    })}</button>
 {/if}

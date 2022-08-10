@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
@@ -29,7 +31,7 @@ const byproducts = nonAbstractRecipes.filter((x) =>
 
 {#if byproducts.length}
   <section>
-    <h1>Byproduct when crafting</h1>
+    <h1>{t("Byproduct when crafting", { _context: "Obtaining" })}</h1>
     <LimitedList items={byproducts} let:item>
       <ItemSymbol item={data.byId("item", item.result)} />
       <ThingLink type="item" id={item.result} />

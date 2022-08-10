@@ -5,6 +5,7 @@ import { lootByOMSAppearance } from "./spawnLocations";
 import { showProbability } from "./utils";
 import type { OvermapSpecial } from "../../types";
 import OvermapAppearance from "./OvermapAppearance.svelte";
+import { t } from "@transifex/native";
 
 export let item_id: string;
 
@@ -79,13 +80,13 @@ let realLimit = 0; // Filled in later
 
 {#await spawnLocationsPromise}
   <section>
-    <h1>Loot</h1>
+    <h1>{t("Loot", { _context: "Obtaining" })}</h1>
     <p style="color: var(--cata-color-gray)"><em>Loading...</em></p>
   </section>
 {:then spawnLocations}
   {#if spawnLocations.length}
     <section>
-      <h1>Loot</h1>
+      <h1>{t("Loot", { _context: "Obtaining" })}</h1>
       <table class="alternating">
         <tbody>
           {#each spawnLocations.slice(0, realLimit) as loc}

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
 
@@ -6,6 +7,7 @@ import type { BookSlot } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
 export let item: BookSlot & { id: string; type: "BOOK" };
+const _context = "Item Book Info";
 
 let data = getContext<CddaData>("data");
 
@@ -29,32 +31,32 @@ for (const recipe of data.byType("recipe")) {
 </script>
 
 <section>
-  <h1>Book</h1>
+  <h1>{t("Book", { _context, _comment: "Section heading" })}</h1>
   <dl>
     {#if item.skill}
-      <dt>Skill</dt>
+      <dt>{t("Skill", { _context })}</dt>
       <dd><ThingLink id={item.skill} type="skill" /></dd>
-      <dt>Required Level</dt>
+      <dt>{t("Required Level", { _context })}</dt>
       <dd>{item.required_level ?? 0}</dd>
-      <dt>Maximum Level</dt>
+      <dt>{t("Maximum Level", { _context })}</dt>
       <dd>{item.max_level ?? 0}</dd>
     {/if}
-    <dt>Required Intelligence</dt>
+    <dt>{t("Required Intelligence", { _context })}</dt>
     <dd>{item.intelligence ?? 0}</dd>
-    <dt>Read Time</dt>
+    <dt>{t("Read Time", { _context })}</dt>
     <dd>{item.time ?? 0}</dd>
-    <dt>Fun</dt>
+    <dt>{t("Fun", { _context })}</dt>
     <dd>{item.fun ?? 0}</dd>
     {#if item.chapters}
-      <dt>Chapters</dt>
+      <dt>{t("Chapters", { _context })}</dt>
       <dd>{item.chapters}</dd>
     {/if}
     {#if item.martial_art}
-      <dt>Martial Art</dt>
+      <dt>{t("Martial Art", { _context })}</dt>
       <dd><ThingLink type="martial_art" id={item.martial_art} /></dd>
     {/if}
     {#if bookRecipes.size}
-      <dt>Recipes</dt>
+      <dt>{t("Recipes", { _context })}</dt>
       <dd>
         <ul>
           {#each [...bookRecipes.entries()].sort((a, b) => {

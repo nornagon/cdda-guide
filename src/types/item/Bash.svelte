@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
@@ -30,7 +32,7 @@ let bashFrom = (data.byType("terrain") as (Terrain | Furniture)[])
 
 {#if bashFrom.length}
   <section>
-    <h1>Bash</h1>
+    <h1>{t("Bash", { _context: "Obtaining" })}</h1>
     <LimitedList items={bashFrom} let:item={f}>
       <ItemSymbol item={data.byId(f.type, f.id)} />
       <ThingLink id={f.id} type={f.type} />

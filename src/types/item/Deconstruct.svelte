@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
@@ -30,7 +32,7 @@ let deconstructibleFrom = (data.byType("terrain") as (Terrain | Furniture)[])
 
 {#if deconstructibleFrom.length}
   <section>
-    <h1>Deconstruct</h1>
+    <h1>{t("Deconstruct", { _context: "Obtaining" })}</h1>
     <LimitedList items={deconstructibleFrom} let:item={f}>
       <ItemSymbol item={data.byId(f.type, f.id)} />
       <ThingLink id={f.id} type={f.type} />

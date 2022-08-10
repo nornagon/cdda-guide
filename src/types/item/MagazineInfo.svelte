@@ -5,6 +5,7 @@ import { CddaData, singularName } from "../../data";
 import type { ItemBasicInfo } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
+import { t } from "@transifex/native";
 
 export let item: ItemBasicInfo;
 const data = getContext<CddaData>("data");
@@ -27,7 +28,7 @@ compatibleItems.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 
 {#if compatibleItems.length}
   <section>
-    <h1>Compatible Items</h1>
+    <h1>{t("Compatible Items", { _context: "Item Magazine Info" })}</h1>
     <LimitedList items={compatibleItems} let:item>
       <ItemSymbol {item} />
       <ThingLink type="item" id={item.id} />

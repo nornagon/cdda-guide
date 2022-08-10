@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
@@ -22,7 +24,7 @@ const constructions = data
 
 {#if constructions.length}
   <section>
-    <h1>Construct</h1>
+    <h1>{t("Construct", { _context: "Obtaining" })}</h1>
     <LimitedList items={constructions} let:item={f}>
       <ThingLink id={f.group} type="construction_group" />
       {#if f.pre_terrain}

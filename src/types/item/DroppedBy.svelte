@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, showProbability } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
@@ -38,7 +40,7 @@ const dissectableFrom = data
 
 {#if mons.length}
   <section>
-    <h1>Dropped By</h1>
+    <h1>{t("Dropped By", { _context: "Obtaining" })}</h1>
     <LimitedList items={mons} let:item>
       <ItemSymbol item={data.byId("monster", item.id)} />
       <ThingLink type="monster" id={item.id} /> ({showProbability(item.prob)})
@@ -48,7 +50,7 @@ const dissectableFrom = data
 
 {#if harvestableFrom.length}
   <section>
-    <h1>Butcher</h1>
+    <h1>{t("Butcher", { _context: "Obtaining" })}</h1>
     <LimitedList items={harvestableFrom} let:item={m}>
       <ItemSymbol item={m} />
       <ThingLink id={m.id} type="monster" />
@@ -58,7 +60,7 @@ const dissectableFrom = data
 
 {#if dissectableFrom.length}
   <section>
-    <h1>Dissect</h1>
+    <h1>{t("Dissect", { _context: "Obtaining" })}</h1>
     <LimitedList items={dissectableFrom} let:item={m}>
       <ItemSymbol item={m} />
       <ThingLink id={m.id} type="monster" />

@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
 
@@ -6,6 +8,7 @@ import type { Recipe, RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import RequirementDataTools from "./RequirementDataTools.svelte";
 
+const _context = "Requirement";
 export let requirement: RequirementData & { using?: Recipe["using"] };
 
 const data = getContext<CddaData>("data");
@@ -17,7 +20,7 @@ let { tools, qualities, components } = data.normalizeRequirements(requirement);
   <RequirementDataTools {requirement} />
 {/if}
 {#if components.length}
-  <dt>Components</dt>
+  <dt>{t("Components", { _context })}</dt>
   <dd>
     <ul>
       {#each components as componentChoices}

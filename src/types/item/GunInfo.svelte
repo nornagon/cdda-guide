@@ -1,9 +1,12 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import type { DamageUnit, GunSlot, ItemBasicInfo } from "../../types";
 
 import ThingLink from "../ThingLink.svelte";
 
 export let item: GunSlot & ItemBasicInfo;
+export const _context = "Item Gun Info";
 
 // TODO: handle multiple ranged_damage type
 const ranged_damage = Array.isArray(item.ranged_damage)
@@ -20,52 +23,54 @@ const ranged_damage = Array.isArray(item.ranged_damage)
 </script>
 
 <section>
-  <h1>Ranged</h1>
+  <h1>{t("Ranged", { _context, _comment: "Section heading" })}</h1>
   <dl>
-    <dt>Skill</dt>
+    <dt>{t("Skill", { _context })}</dt>
     <dd><ThingLink type="skill" id={item.skill} /></dd>
     {#if item.min_strength}
-      <dt>Min Strength</dt>
+      <dt>{t("Min Strength", { _context })}</dt>
       <dd>{item.min_strength}</dd>
     {/if}
-    <dt>Base Damage</dt>
+    <dt>{t("Base Damage", { _context })}</dt>
     <dd>
       {ranged_damage.amount ?? 0} ({ranged_damage.damage_type ?? "bullet"})
     </dd>
-    <dt>Armor Penetration</dt>
+    <dt>{t("Armor Penetration", { _context })}</dt>
     <dd>{ranged_damage.armor_penetration ?? 0}</dd>
     <!-- TODO: Critical multiplier -->
-    <dt title="Added to ammo range">Range Bonus</dt>
+    <dt title="Added to ammo range">{t("Range Bonus", { _context })}</dt>
     <dd>{item.range ?? 0}</dd>
-    <dt title="Added to ammo dispersion">Base Dispersion</dt>
+    <dt title="Added to ammo dispersion">
+      {t("Base Dispersion", { _context })}
+    </dt>
     <dd>{item.dispersion ?? 0}</dd>
-    <dt>Sight Dispersion</dt>
+    <dt>{t("Sight Dispersion", { _context })}</dt>
     <dd>
       {(item.flags ?? []).includes("DISABLE_SIGHTS")
         ? 90
         : item.sight_dispersion ?? 30}
     </dd>
-    <dt>Base Recoil</dt>
+    <dt>{t("Base Recoil", { _context })}</dt>
     <dd>{item.recoil ?? 0}</dd>
     <dt title="Modifies base loudness as provided by the currently loaded ammo">
-      Loudness Modifier
+      {t("Loudness Modifier", { _context })}
     </dt>
     <dd>{(item.loudness ?? 0).toFixed(0)}</dd>
-    <dt>Reload Time</dt>
+    <dt>{t("Reload Time", { _context })}</dt>
     <dd>{item.reload ?? 100} moves</dd>
     <dt title="Volume of the noise made when reloading this weapon">
-      Reload Noise Volume
+      {t("Reload Noise Volume", { _context })}
     </dt>
     <dd>{item.reload_noise_volume ?? 0}</dd>
     {#if item.valid_mod_locations?.length}
-      <dt>Mod Slots</dt>
+      <dt>{t("Mod Slots", { _context })}</dt>
       <dd>
         {item.valid_mod_locations
           .map(([loc, num]) => `${loc} (${num})`)
           .join(", ")}
       </dd>
     {/if}
-    <dt>Durability</dt>
+    <dt>{t("Durability", { _context })}</dt>
     <dd>{item.durability ?? 0}</dd>
   </dl>
 </section>

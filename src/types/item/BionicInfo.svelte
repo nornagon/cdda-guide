@@ -1,21 +1,24 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import type { BionicSlot, ItemBasicInfo } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
 export let item: ItemBasicInfo & BionicSlot;
+
+const _context = "Item Bionic Info";
 </script>
 
 <section>
-  <h1>Bionic</h1>
+  <h1>{t("Bionic", { _context, _comment: "Section heading" })}</h1>
   <dl>
-    <dt>Installs as</dt>
+    <dt>{t("Installs as", { _context })}</dt>
     <dd><ThingLink type="bionic" id={item.bionic_id ?? item.id} /></dd>
-    <dt>Difficulty</dt>
+    <dt>{t("Difficulty", { _context })}</dt>
     <dd>{item.difficulty ?? 0}</dd>
-    <dt>Is upgrade</dt>
+    <dt>{t("Is upgrade", { _context })}</dt>
     <dd>{item.is_upgrade ? "yes" : "no"}</dd>
     {#if item.installation_data}
-      <dt>Installation data</dt>
+      <dt>{t("Installation data", { _context })}</dt>
       <dd><ThingLink type="item" id={item.installation_data} /></dd>
     {/if}
   </dl>

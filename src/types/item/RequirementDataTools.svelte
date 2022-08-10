@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 
@@ -8,6 +10,7 @@ import ThingLink from "../ThingLink.svelte";
 export let requirement: RequirementData & { using?: Recipe["using"] };
 export let direction: "uncraft" | "craft" = "craft";
 
+const _context = "Requirement";
 const data = getContext<CddaData>("data");
 
 let { tools, qualities } =
@@ -16,7 +19,7 @@ let { tools, qualities } =
     : data.normalizeRequirementsForDisassembly(requirement);
 </script>
 
-<dt>Tools Required</dt>
+<dt>{t("Tools Required", { _context })}</dt>
 <dd>
   <ul>
     {#each qualities ?? [] as qualityChoices}

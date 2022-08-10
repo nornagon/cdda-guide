@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import {
   asHumanReadableDuration,
@@ -21,7 +23,7 @@ const transformedFrom = data
 
 {#if transformedFrom.length}
   <section>
-    <h1>Transformed From</h1>
+    <h1>{t("Transformed From", { _context: "Obtaining" })}</h1>
     <LimitedList items={transformedFrom} let:item>
       {@const ua = normalizeUseAction(item.use_action).find(
         (a) => a.target === item_id

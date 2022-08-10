@@ -1,15 +1,19 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import type { WheelSlot } from "../../types";
+
+const _context = "Item Wheel Info";
 
 export let item: WheelSlot;
 </script>
 
 <section>
-  <h1>Wheel</h1>
+  <h1>{t("Wheel", { _context })}</h1>
   <dl>
-    <dt>Diameter</dt>
+    <dt>{t("Diameter", { _context })}</dt>
     <dd>{item.diameter ?? 0}"</dd>
-    <dt>Width</dt>
+    <dt>{t("Width", { _context })}</dt>
     <dd>{item.width ?? 0}"</dd>
   </dl>
 </section>

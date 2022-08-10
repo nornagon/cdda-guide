@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, parseMass, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
@@ -35,7 +37,7 @@ const salvagedFromMaterials = data
 
 {#if salvagedFromMaterials.length}
   <section>
-    <h1>Salvage</h1>
+    <h1>{t("Salvage", { _context: "Obtaining" })}</h1>
     <LimitedList items={salvagedFromMaterials} let:item>
       <ItemSymbol {item} />
       <ThingLink type="item" id={item.id} />

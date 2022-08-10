@@ -5,6 +5,7 @@ import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import type { Furniture, Terrain } from "../../types";
 import ItemSymbol from "./ItemSymbol.svelte";
+import { t } from "@transifex/native";
 
 export let item_id: string;
 
@@ -33,7 +34,7 @@ harvestedFrom.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 
 {#if harvestedFrom.length}
   <section>
-    <h1>Harvest</h1>
+    <h1>{t("Harvest", { _context: "Obtaining" })}</h1>
     <LimitedList items={harvestedFrom} let:item>
       <ItemSymbol {item} />
       <ThingLink type={item.type} id={item.id} />

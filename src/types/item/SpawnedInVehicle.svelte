@@ -4,6 +4,7 @@ import { CddaData, itemGroupFromVehicle } from "../../data";
 import { showProbability } from "./utils";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
+import { t } from "@transifex/native";
 
 export let item_id: string;
 
@@ -21,7 +22,7 @@ vehiclesAndProbabilities.sort((a, b) => b.prob - a.prob);
 
 {#if vehiclesAndProbabilities.length}
   <section>
-    <h1>In Vehicle</h1>
+    <h1>{t("In Vehicle", { _context: "Obtaining" })}</h1>
     <LimitedList items={vehiclesAndProbabilities} let:item={{ vehicle, prob }}>
       <ThingLink id={vehicle.id} type="vehicle" /> ({showProbability(prob)})
     </LimitedList>

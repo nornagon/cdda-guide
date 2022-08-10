@@ -1,4 +1,5 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
@@ -32,7 +33,7 @@ const forageSources = data
 
 {#if forageable.length}
   <section>
-    <h1>Forage</h1>
+    <h1>{t("Forage", { _context: "Obtaining" })}</h1>
     <LimitedList items={forageSources} let:item>
       <ItemSymbol {item} />
       <ThingLink type="terrain" id={item.id} /> in
