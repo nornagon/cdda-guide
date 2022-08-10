@@ -3278,10 +3278,9 @@ gettext-to-messageformat@0.3.1:
   dependencies:
     gettext-parser "^1.4.0"
 
-gettext.js@^1.2.0:
+gettext.js@nornagon/gettext.js#bdf27db:
   version "1.2.0"
-  resolved "https://registry.yarnpkg.com/gettext.js/-/gettext.js-1.2.0.tgz#783e166c604bc60c4b70f4656391038aa9e950b2"
-  integrity sha512-qOafHtn/xsXKiBOFO8enhdx8k09ViBYSnckhn4pn/QLCpQMF8S87q9f4cE2pVgbqWD9/9SyGpWRO0nWJsEDmlg==
+  resolved "https://codeload.github.com/nornagon/gettext.js/tar.gz/bdf27dbf5be79a05a2ee2ce9bddf72a101d9e4f3"
   dependencies:
     po2json "^1.0.0-beta-3"
 

@@ -45,14 +45,37 @@ let { tools, qualities } =
     {#each tools as toolChoices}
       <li>
         {#each toolChoices as tool, i}
-          {#if i !== 0}{" OR "}{/if}
-          {#if data.craftingPseudoItem(tool.id)}
-            <a href="#/furniture/{data.craftingPseudoItem(tool.id)}"
-              >{singularName(data.byId("item", tool.id))}</a>
+          {#if i !== 0}{i18n.__(" OR ")}{/if}
+          {#if tool.count <= 0}
+            {#if data.craftingPseudoItem(tool.id)}
+              <a href="#/furniture/{data.craftingPseudoItem(tool.id)}"
+                >{singularName(data.byId("item", tool.id))}</a>
+            {:else}
+              <ThingLink type="item" id={tool.id} />
+            {/if}
           {:else}
-            <ThingLink type="item" id={tool.id} />
+            <InterpolatedTranslation
+              str={i18n
+                .dcnpgettext(
+                  null,
+                  "requirement",
+                  "%1$s (%2$d charge)",
+                  "%1$s (%2$d charges)",
+                  tool.count,
+                  "\x000",
+                  tool.count
+                )
+                .replace(/\$./g, "")}>
+              <svelte:fragment slot="0">
+                {#if data.craftingPseudoItem(tool.id)}
+                  <a href="#/furniture/{data.craftingPseudoItem(tool.id)}"
+                    >{singularName(data.byId("item", tool.id))}</a>
+                {:else}
+                  <ThingLink type="item" id={tool.id} />
+                {/if}
+              </svelte:fragment>
+            </InterpolatedTranslation>
           {/if}
-          {#if tool.count > 0}({tool.count} charge{#if tool.count !== 1}s{/if}){/if}
         {/each}
       </li>
     {/each}
