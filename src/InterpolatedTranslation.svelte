@@ -15,8 +15,6 @@ const parts: ({ text: string } | { slot: number })[] = str
     if (i === 0) return [{ text: part }];
     else return [{ slot: Number(part[0]) }, { text: part.substring(1) }];
   });
-console.log(str);
-console.log(parts);
 </script>
 
 {#each parts as part}
