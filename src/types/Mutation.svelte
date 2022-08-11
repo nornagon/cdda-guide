@@ -50,6 +50,7 @@ const requiredBy = data
     <dt title="You can't have two mutations that share a type.">
       {t("{n, plural, =1 {Type} other {Types}}", {
         n: item.types?.length ?? 0,
+        _context,
       })}
     </dt>
     <dd>
