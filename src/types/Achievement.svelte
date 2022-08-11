@@ -1,12 +1,15 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 
-import { CddaData, plural, singularName } from "../data";
+import { CddaData, plural, singular, singularName } from "../data";
 import type { Achievement } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: Achievement;
 const data = getContext<CddaData>("data");
+const _context = "Achievement";
 
 const unlocks = data
   .byType("achievement")
@@ -23,11 +26,11 @@ const unlocks = data
 
 <section>
   {#if item.description}
-    <p style="color: var(--cata-color-gray)">{item.description}</p>
+    <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
   {/if}
   <dl>
     {#if item.hidden_by}
-      <dt>Hidden By</dt>
+      <dt>{t("Hidden By", { _context })}</dt>
       <dd>
         <ul class="comma-separated and">
           {#each [item.hidden_by].flat() as id}
@@ -37,7 +40,7 @@ const unlocks = data
       </dd>
     {/if}
     {#if unlocks.length}
-      <dt>Unlocks</dt>
+      <dt>{t("Unlocks", { _context })}</dt>
       <dd>
         <ul class="comma-separated and">
           {#each unlocks as a}
@@ -47,7 +50,7 @@ const unlocks = data
       </dd>
     {/if}
     {#if item.time_constraint}
-      <dt>Time Constraint</dt>
+      <dt>{t("Time Constraint", { _context })}</dt>
       <dd>
         Time since <strong>{item.time_constraint.since}</strong> is
         <strong
@@ -55,7 +58,7 @@ const unlocks = data
           {item.time_constraint.target ?? ""}</strong>
       </dd>
     {/if}
-    <dt>Requirements</dt>
+    <dt>{t("Requirements", { _context })}</dt>
     <dd>
       <ul>
         {#each item.requirements as req}

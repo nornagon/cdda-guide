@@ -1,4 +1,8 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
+import { i18n } from "../data";
+
 import type { BonusContainer } from "../types";
 
 function stringFromAffectedStat(stat: string): string {
@@ -53,23 +57,25 @@ export let item: BonusContainer;
 </script>
 
 {#if item.mult_bonuses || item.flat_bonuses}
-  <dt>Bonus</dt>
+  <dt>{t("Bonus")}</dt>
   <dd>
     <ul>
       {#each item.mult_bonuses ?? [] as bon}
         <li>
           {#if needsDamageType(bon.stat)}{bon.type}{/if}
-          {stringFromAffectedStat(bon.stat)}: {(bon.scale * 100).toFixed(0)}% {#if bon["scaling-stat"]}
-            of {stringFromScalingStat(bon["scaling-stat"])}{/if}
+          {i18n.__(stringFromAffectedStat(bon.stat))}: {(
+            bon.scale * 100
+          ).toFixed(0)}% {#if bon["scaling-stat"]}
+            of {i18n.__(stringFromScalingStat(bon["scaling-stat"]))}{/if}
         </li>
       {/each}
       {#each item.flat_bonuses ?? [] as bon}
         <li>
           {#if needsDamageType(bon.stat)}{bon.type}{/if}
-          {stringFromAffectedStat(bon.stat)}:
+          {i18n.__(stringFromAffectedStat(bon.stat))}:
           {#if bon["scaling-stat"]}
-            {bon.scale < 0 ? "" : "+"}{(bon.scale * 100).toFixed(0)}% of {stringFromScalingStat(
-              bon["scaling-stat"]
+            {bon.scale < 0 ? "" : "+"}{(bon.scale * 100).toFixed(0)}% of {i18n.__(
+              stringFromScalingStat(bon["scaling-stat"])
             )}
           {:else}
             {bon.scale < 0 ? "" : "+"}{bon.scale}

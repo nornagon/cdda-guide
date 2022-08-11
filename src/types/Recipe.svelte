@@ -108,7 +108,7 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
         </ul>
       </dd>
     {/if}
-    <dt>{t("Time to Complete", { _context })}</dt>
+    <dt>{t("Time to Complete")}</dt>
     <dd>{recipe.time ?? "0 m"}</dd>
     <dt>{t("Activity Level", { _context })}</dt>
     <dd>{recipe.activity_level ?? "MODERATE_EXERCISE"}</dd>

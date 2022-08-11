@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 
 import { CddaData, singular, singularName } from "../data";
@@ -7,13 +9,14 @@ import ThingLink from "./ThingLink.svelte";
 
 export let item: Bionic;
 const data = getContext<CddaData>("data");
+const _context = "Bionic";
 </script>
 
-<h1>{singularName(item)}</h1>
+<h1>{t("Bionic")}: {singularName(item)}</h1>
 <section>
-  <h1>General</h1>
+  <h1>{t("General", { _context, _comment: "Section heading" })}</h1>
   <dl>
-    <dt>Occupied Body Parts</dt>
+    <dt>{t("Occupied Body Parts", { _context })}</dt>
     <dd>
       {#if item.occupied_bodyparts}
         <ul class="comma-separated">
@@ -25,11 +28,11 @@ const data = getContext<CddaData>("data");
           {/each}
         </ul>
       {:else}
-        <em>none</em>
+        <em>{t("none")}</em>
       {/if}
     </dd>
     {#if item.encumbrance}
-      <dt>Encumbrance</dt>
+      <dt>{t("Encumbrance", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.encumbrance as [bp_id, encum]}
@@ -39,7 +42,7 @@ const data = getContext<CddaData>("data");
       </dd>
     {/if}
     {#if item.stat_bonus}
-      <dt>Stat Bonuses</dt>
+      <dt>{t("Stat Bonuses", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.stat_bonus as [stat_id, bonus]}
@@ -49,27 +52,27 @@ const data = getContext<CddaData>("data");
       </dd>
     {/if}
     {#if item.cant_remove_reason}
-      <dt>Removable</dt>
-      <dd>no</dd>
+      <dt>{t("Removable", { _context })}</dt>
+      <dd>{t("no")}</dd>
     {/if}
     {#if item.act_cost}
-      <dt>Activation Cost</dt>
+      <dt>{t("Activation Cost", { _context })}</dt>
       <dd>{item.act_cost}</dd>
     {/if}
     {#if item.trigger_cost}
-      <dt>Trigger Cost</dt>
+      <dt>{t("Trigger Cost", { _context })}</dt>
       <dd>{item.trigger_cost}</dd>
     {/if}
     {#if item.react_cost}
-      <dt>Power Over Time</dt>
+      <dt>{t("Power Over Time", { _context })}</dt>
       <dd>{item.react_cost}</dd>
     {/if}
     {#if (item.vitamin_absorb_mod ?? 1) !== 1}
-      <dt>Vitamin Absorption Modifier</dt>
+      <dt>{t("Vitamin Absorption Modifier", { _context })}</dt>
       <dd>{(item.vitamin_absorb_mod * 100).toFixed(0)}%</dd>
     {/if}
     {#if item.fuel_options?.length}
-      <dt>Fuel</dt>
+      <dt>{t("Fuel", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.fuel_options as material_id}
@@ -79,39 +82,39 @@ const data = getContext<CddaData>("data");
       </dd>
     {/if}
     {#if item.fuel_capacity}
-      <dt>Fuel Capacity</dt>
+      <dt>{t("Fuel Capacity", { _context })}</dt>
       <dd>{item.fuel_capacity}</dd>
     {/if}
     {#if item.fuel_efficiency}
-      <dt>Fuel Efficiency</dt>
+      <dt>{t("Fuel Efficiency", { _context })}</dt>
       <dd>{item.fuel_efficiency * 100}%</dd>
     {/if}
     {#if item.passive_fuel_efficiency}
-      <dt>Passive Fuel Efficiency</dt>
+      <dt>{t("Passive Fuel Efficiency", { _context })}</dt>
       <dd>{item.passive_fuel_efficiency * 100}%</dd>
     {/if}
     {#if item.exothermic_power_gen}
-      <dt>Emits Heat</dt>
-      <dd>yes</dd>
+      <dt>{t("Emits Heat", { _context })}</dt>
+      <dd>{t("yes")}</dd>
     {/if}
     {#if item.power_trickle}
-      <dt>Power Trickle</dt>
+      <dt>{t("Power Trickle", { _context })}</dt>
       <dd>{item.power_trickle}</dd>
     {/if}
     {#if item.time}
-      <dt>Charge Time</dt>
+      <dt>{t("Charge Time", { _context })}</dt>
       <dd>{item.time} turn{item.time !== 1 ? "s" : ""}</dd>
     {/if}
     {#if item.capacity}
-      <dt>Capacity</dt>
+      <dt>{t("Capacity", { _context })}</dt>
       <dd>{item.capacity}</dd>
     {/if}
     {#if item.fake_weapon}
-      <dt>Acts As</dt>
+      <dt>{t("Acts As", { _context })}</dt>
       <dd><ThingLink type="item" id={item.fake_weapon} /></dd>
     {/if}
     {#if item.toggled_pseudo_items?.length}
-      <dt>Acts As</dt>
+      <dt>{t("Acts As", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.toggled_pseudo_items as item_id}
@@ -121,7 +124,7 @@ const data = getContext<CddaData>("data");
       </dd>
     {/if}
     {#if item.passive_pseudo_items?.length}
-      <dt>Acts As</dt>
+      <dt>{t("Acts As", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.passive_pseudo_items as item_id}
@@ -131,7 +134,7 @@ const data = getContext<CddaData>("data");
       </dd>
     {/if}
     {#if item.included_bionics?.length}
-      <dt>Includes</dt>
+      <dt>{t("Includes", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.included_bionics as bionic_id}
@@ -140,9 +143,9 @@ const data = getContext<CddaData>("data");
         </ul>
       </dd>
     {/if}
-    <dt>Duplicates Allowed</dt>
-    <dd>{item.dupes_allowed ? "yes" : "no"}</dd>
-    <dt>Flags</dt>
+    <dt>{t("Duplicates Allowed", { _context })}</dt>
+    <dd>{item.dupes_allowed ? t("yes") : t("no")}</dd>
+    <dt>{t("Flags")}</dt>
     <dd>
       {#if item.flags?.length}
         <ul class="comma-separated">
@@ -151,11 +154,11 @@ const data = getContext<CddaData>("data");
           {/each}
         </ul>
       {:else}
-        <em>none</em>
+        <em>{t("none")}</em>
       {/if}
     </dd>
     {#if item.active_flags}
-      <dt>Flags When Active</dt>
+      <dt>{t("Flags When Active", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.active_flags as flag}
@@ -165,7 +168,7 @@ const data = getContext<CddaData>("data");
       </dd>
     {/if}
     {#if item.mutation_conflicts}
-      <dt>Conflicts With Mutations</dt>
+      <dt>{t("Conflicts With Mutations", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.mutation_conflicts as mutation_id}
@@ -177,7 +180,7 @@ const data = getContext<CddaData>("data");
       </dd>
     {/if}
     {#if item.canceled_mutations}
-      <dt>Removes Mutations</dt>
+      <dt>{t("Removes Mutations", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.canceled_mutations as mutation_id}

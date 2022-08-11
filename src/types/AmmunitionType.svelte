@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
@@ -7,6 +9,8 @@ import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: AmmunitionType;
+
+const _context = "Ammunition Type";
 
 const data = getContext<CddaData>("data");
 
@@ -45,21 +49,21 @@ const usedBy = data.byType("item").filter((w) => usesAmmoType(w, item));
 usedBy.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
-<h1>Ammunition Type: {singularName(item)}</h1>
+<h1>{t("Ammunition Type")}: {singularName(item)}</h1>
 <section>
-  <h1>Compatible Variants</h1>
+  <h1>{t("Compatible Variants", { _context })}</h1>
   <ul>
     {#each compatible as ammo}
       <li>
         <ThingLink type="item" id={ammo.id} />
-        {#if ammo.id === item.default}(default){/if}
+        {#if ammo.id === item.default}({t("default", { _context })}){/if}
       </li>
     {/each}
   </ul>
 </section>
 
 <section>
-  <h1>Used By</h1>
+  <h1>{t("Used By", { _context })}</h1>
   {#if usedBy.length > 0}
     <LimitedList items={usedBy} let:item>
       <ItemSymbol {item} />
@@ -67,7 +71,8 @@ usedBy.sort((a, b) => singularName(a).localeCompare(singularName(b)));
     </LimitedList>
   {:else}
     <p>
-      <em style="color: var(--cata-color-gray)">No items use this ammo.</em>
+      <em style="color: var(--cata-color-gray)"
+        >{t("No items use this ammo.", { _context })}</em>
     </p>
   {/if}
 </section>

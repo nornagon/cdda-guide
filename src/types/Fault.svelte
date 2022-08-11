@@ -1,11 +1,14 @@
 <script lang="ts">
-import { normalize, singularName } from "../data";
+import { i18n, normalize, singular, singularName } from "../data";
 import type { CddaData } from "../data";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import type { Fault } from "../types";
+import { t } from "@transifex/native";
+import RequirementDataTools from "./item/RequirementDataTools.svelte";
 
 const data = getContext<CddaData>("data");
+const _context = "Fault";
 
 export let item: Fault;
 
@@ -14,17 +17,11 @@ const mendingMethods = (item.mending_methods ?? []).map((mm) => {
     typeof mm.requirements === "string"
       ? data.byId("requirement", mm.requirements)
       : mm.requirements;
-  const tools = data.flattenRequirement(
-    requirement.tools ?? [],
-    (r) => r.tools,
-    { expandSubstitutes: true }
-  );
   const components = data.flattenRequirement(
     requirement.components ?? [],
     (r) => r.components
   );
-  const qualities = normalize(requirement.qualities ?? []); // TODO: flatten...?
-  return { mending_method: mm, tools, components, qualities };
+  return { mending_method: mm, components, requirement };
 });
 
 const fault_flag_descriptions = {
@@ -53,82 +50,51 @@ const fault_flag_descriptions = {
 };
 </script>
 
-<h1>Fault: {singularName(item)}</h1>
+<h1>{t("Fault")}: {singularName(item)}</h1>
 
 <section>
   <dl>
-    <dt>Flags</dt>
+    <dt>{t("Flags")}</dt>
     <dd>
       <ul class="comma-separated">
         {#each item.flags ?? [] as flag}
           <li><abbr title={fault_flag_descriptions[flag]}>{flag}</abbr></li>
         {:else}
-          <li><em>none</em></li>
+          <li><em>{t("none")}</em></li>
         {/each}
       </ul>
     </dd>
   </dl>
-  <p style="color: var(--cata-color-gray)">{item.description}</p>
+  <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
 </section>
 
 {#if mendingMethods.length}
-  <h2>Mending Methods</h2>
+  <h2>{t("Mending Methods", { _context })}</h2>
 {/if}
 
-{#each mendingMethods as { tools, components, qualities, mending_method }}
+{#each mendingMethods as { components, requirement, mending_method }}
   <section>
     <h1>{singularName(mending_method)}</h1>
     <dl>
-      <dt>Skills Used</dt>
+      <dt>{t("Skills Used", { _context })}</dt>
       <dd>
         {#each mending_method.skills as { id, level }, i}
           <ThingLink type="skill" {id} /> ({level}){#if i === mending_method.skills.length - 2}{" and "}{:else if i !== mending_method.skills.length - 1}{", "}{/if}
         {:else}
-          none
+          {t("none")}
         {/each}
       </dd>
-      <dt>Time to Complete</dt>
+      <dt>{t("Time to Complete")}</dt>
       <dd>{mending_method.time}</dd>
-      {#if qualities.length || tools.length}
-        <dt>Tools Required</dt>
-        <dd>
-          <ul>
-            {#each qualities ?? [] as qualityChoices}
-              <li>
-                {#each qualityChoices as quality, i}
-                  {#if i !== 0}{" OR "}{/if}
-                  {quality.amount ?? 1} tool{(quality.amount ?? 1) === 1
-                    ? ""
-                    : "s"}
-                  with <ThingLink type="tool_quality" id={quality.id} /> of {quality.level}
-                  or more{""}{/each}.
-              </li>
-            {/each}
-            {#each tools as toolChoices}
-              <li>
-                {#each toolChoices as tool, i}
-                  {#if i !== 0}{" OR "}{/if}
-                  {#if data.craftingPseudoItem(tool.id)}
-                    <a href="#/furniture/{data.craftingPseudoItem(tool.id)}"
-                      >{singularName(data.byId("item", tool.id))}</a>
-                  {:else}
-                    <ThingLink type="item" id={tool.id} />
-                  {/if}
-                  {#if tool.count > 0}({tool.count} charge{#if tool.count !== 1}s{/if}){/if}
-                {/each}
-              </li>
-            {/each}
-          </ul>
-        </dd>
-      {/if}
+      <RequirementDataTools {requirement} />
       {#if components.length}
-        <dt>Components</dt>
+        <dt>{t("Components", { _context: "Requirement" })}</dt>
         <dd>
           <ul>
             {#each components as componentChoices}
               <li>
                 {#each componentChoices.map( (c) => ({ ...c, item: data.byId("item", c.id) }) ) as { id, count }, i}
-                  {#if i !== 0}{" OR "}{/if}
+                  {#if i !== 0}{i18n.__(" OR ")}{/if}
                   <ThingLink {id} {count} type="item" />
                 {/each}
               </li>
@@ -137,7 +103,7 @@ const fault_flag_descriptions = {
         </dd>
       {/if}
       {#if mending_method.turns_into}
-        <dt>Turns Into</dt>
+        <dt>{t("Turns Into", { _context })}</dt>
         <dd><ThingLink type="fault" id={mending_method.turns_into} /></dd>
       {/if}
     </dl>
