@@ -1,12 +1,14 @@
 <script lang="ts">
-import { CddaData, singular, singularName } from "../data";
+import { CddaData, i18n, singular, singularName } from "../data";
 import type { Furniture } from "../types";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import Construction from "./Construction.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import { t } from "@transifex/native";
 
 const data = getContext<CddaData>("data");
+const _context = "Furniture";
 
 export let item: Furniture;
 
@@ -51,31 +53,31 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
 
 <section>
-  <h1>General</h1>
+  <h1>{t("General", { _context })}</h1>
   <dl>
-    <dt>Move Cost Modifier</dt>
+    <dt>{t("Move Cost Modifier", { _context })}</dt>
     <dd>
-      {#if item.move_cost_mod < 0}<em>impassable</em
+      {#if item.move_cost_mod < 0}<em>{t("impassable", { _context })}</em
         >{:else}+{item.move_cost_mod * 50}{/if}
     </dd>
-    <dt>Strength Required to Drag</dt>
+    <dt>{t("Strength Required to Drag", { _context })}</dt>
     <dd>{item.required_str >= 0 ? item.required_str : "not movable"}</dd>
-    <dt>Coverage</dt>
+    <dt>{t("Coverage", { _context })}</dt>
     <dd>{item.coverage ?? 0}%</dd>
     {#if item.comfort}
-      <dt>Comfort</dt>
+      <dt>{t("Comfort", { _context })}</dt>
       <dd>{item.comfort}</dd>
     {/if}
     {#if item.max_volume}
-      <dt>Max Volume</dt>
+      <dt>{t("Max Volume", { _context })}</dt>
       <dd>{item.max_volume}</dd>
     {/if}
     {#if item.crafting_pseudo_item}
-      <dt>Provides</dt>
+      <dt>{t("Provides", { _context })}</dt>
       <dd><ThingLink type="item" id={item.crafting_pseudo_item} /></dd>
     {/if}
     {#if deconstruct.length}
-      <dt>Deconstruct</dt>
+      <dt>{t("Deconstruct", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           <!-- prettier-ignore -->
@@ -88,7 +90,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
         {#if item.deconstruct?.furn_set}
           {@const becomes = item.deconstruct.furn_set}
           <dl>
-            <dt>Becomes</dt>
+            <dt>{t("Becomes", { _context })}</dt>
             <dd>
               <ItemSymbol item={data.byId("furniture", becomes)} />
               <ThingLink type="furniture" id={becomes} />
@@ -98,7 +100,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
       </dd>
     {/if}
     {#if bash.length}
-      <dt>Bash</dt>
+      <dt>{t("Bash", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           <!-- prettier-ignore -->
@@ -109,11 +111,11 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
             {/each}
         </ul>
         <dl>
-          <dt>Strength Required</dt>
+          <dt>{t("Strength Required", { _context })}</dt>
           <dd>{item.bash?.str_min ?? 0}</dd>
           {#if item.bash?.furn_set}
             {@const becomes = item.bash.furn_set}
-            <dt>Becomes</dt>
+            <dt>{t("Becomes", { _context })}</dt>
             <dd>
               <ItemSymbol item={data.byId("furniture", becomes)} />
               <ThingLink type="furniture" id={becomes} />
@@ -123,11 +125,11 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
       </dd>
     {/if}
     {#if harvestBySeason.size}
-      <dt>Harvest</dt>
+      <dt>{t("Harvest", { _context })}</dt>
       <dd>
         <dl>
           {#each ["winter", "spring", "summer", "autumn"].filter( (season) => harvestBySeason.has(season) ) as season}
-            <dt style="text-transform: capitalize;">{season}</dt>
+            <dt>{i18n.__(season.replace(/^(.)/, (x) => x.toUpperCase()))}</dt>
             <dd>
               {#each [data.byId("harvest", harvestBySeason.get(season))] as harvest}
                 <ul>
@@ -156,13 +158,13 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
         </dl>
       </dd>
     {/if}
-    <dt>Flags</dt>
+    <dt>{t("Flags")}</dt>
     <dd>
       <ul class="comma-separated">
         {#each item.flags ?? [] as flag}
           <li><ThingLink type="json_flag" id={flag} /></li>
         {:else}
-          <li><em>none</em></li>
+          <li><em>{t("none")}</em></li>
         {/each}
       </ul>
     </dd>
@@ -171,7 +173,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
 </section>
 
 {#if constructions.length}
-  <h2>Construction</h2>
+  <h2>{t("Construction", { _context })}</h2>
   {#each constructions as construction}
     <Construction {construction} includeTitle />
   {/each}

@@ -1,6 +1,8 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
-import type { CddaData } from "../data";
+import { CddaData, i18n, singular } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { MartialArtBuff, Technique } from "../types";
 import BonusContainer from "./BonusContainer.svelte";
@@ -11,6 +13,7 @@ export let item: Technique;
 export let buffMap: Map<string, MartialArtBuff> = new Map();
 
 const data = getContext<CddaData>("data");
+const _context = "Martial Art";
 
 const weapons = data
   .byType("item")
@@ -19,34 +22,52 @@ const weapons = data
   })
   .sort((a, b) => a.id.localeCompare(b.id));
 
-const type = item.block_counter
-  ? "Block Counter"
-  : item.dodge_counter
-  ? "Dodge Counter"
-  : item.miss_recovery
-  ? "Miss Recovery"
-  : item.grab_break
-  ? "Grab Break"
-  : item.defensive
-  ? "Defensive"
-  : "Offensive";
+const type = i18n.__(
+  item.block_counter
+    ? "Block Counter"
+    : item.dodge_counter
+    ? "Dodge Counter"
+    : item.miss_recovery
+    ? "Miss Recovery"
+    : item.grab_break
+    ? "Grab Break"
+    : item.defensive
+    ? "Defensive"
+    : "Offensive"
+);
 
+const extractInfo = (s: string) => /<info>(.+?)<\/info>/.exec(s)?.[1];
 const targetRequirements = [];
-if (item.human_target) targetRequirements.push("humanoid");
-if (item.downed_target) targetRequirements.push("downed");
-if (item.stunned_target) targetRequirements.push("stunned");
+if (item.human_target)
+  targetRequirements.push(
+    extractInfo(i18n.__("* Only works on a <info>humanoid</info> target"))
+  );
+if (item.downed_target)
+  targetRequirements.push(
+    extractInfo(i18n.__("* Only works on a <info>downed</info> target"))
+  );
+if (item.stunned_target)
+  targetRequirements.push(
+    extractInfo(i18n.__("* Only works on a <info>stunned</info> target"))
+  );
 </script>
 
 <section>
-  <h1>Technique: {item.name}</h1>
+  <h1>{t("Technique", { _context })}: {item.name}</h1>
   <dl>
-    <dt>Type</dt>
+    <dt>{t("Type", { _context })}</dt>
     <dd>{type}</dd>
     <MartialArtRequirements {item} {buffMap} />
-    <dt>Activate on Crit?</dt>
-    <dd>{item.crit_ok ? "Yes" : item.crit_tec ? "Only" : "No"}</dd>
+    <dt>{t("Activate on Crit?", { _context })}</dt>
+    <dd>
+      {item.crit_ok
+        ? t("Yes")
+        : item.crit_tec
+        ? t("Only", { _context: "Martial Art", _comment: "Activate on Crit?" })
+        : t("No")}
+    </dd>
     {#if item.weighting && item.weighting !== 1}
-      <dt>Chance to Activate</dt>
+      <dt>{t("Chance to Activate", { _context })}</dt>
       <dd>
         {#if item.weighting > 1}
           +{((item.weighting - 1) * 100).toFixed(0)}%
@@ -56,41 +77,41 @@ if (item.stunned_target) targetRequirements.push("stunned");
       </dd>
     {/if}
     {#if targetRequirements.length}
-      <dt>Target Requirements</dt>
+      <dt>{t("Target Requirements", { _context })}</dt>
       <dd>
         {targetRequirements.join(", ")}
       </dd>
     {/if}
     {#if item.aoe}
-      <dt>AoE Shape</dt>
+      <dt>{t("AoE Shape", { _context })}</dt>
       <dd>{item.aoe}</dd>
     {/if}
     <BonusContainer {item} />
     {#if item.stun_dur}
-      <dt>Stun Duration</dt>
+      <dt>{t("Stun Duration", { _context })}</dt>
       <dd>{item.stun_dur}</dd>
     {/if}
     {#if item.down_dur}
-      <dt>Down Duration</dt>
+      <dt>{t("Down Duration", { _context })}</dt>
       <dd>{item.down_dur}</dd>
     {/if}
     {#if item.knockback_dist}
-      <dt>Knockback Distance</dt>
+      <dt>{t("Knockback Distance", { _context })}</dt>
       <dd>{item.knockback_dist}</dd>
     {/if}
   </dl>
   {#if item.description}
-    <p style="color: var(--cata-color-gray)">{item.description}</p>
+    <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
   {/if}
   <details>
-    <summary>Technique JSON</summary>
+    <summary>{t("Technique JSON", { _context })}</summary>
     <pre>{JSON.stringify(item, null, 2)}</pre>
   </details>
 </section>
 
 {#if weapons.length}
   <section>
-    <h1>Weapons</h1>
+    <h1>{t("Weapons", { _context })}</h1>
     <LimitedList items={weapons} let:item limit={20}>
       <ThingLink type="item" id={item.id} />
     </LimitedList>

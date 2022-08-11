@@ -1,12 +1,13 @@
 <script lang="ts">
 import type { MartialArt, MartialArtBuff } from "../types";
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../data";
+import { CddaData, singular, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import ThingLink from "./ThingLink.svelte";
 import Technique from "./Technique.svelte";
 import BonusContainer from "./BonusContainer.svelte";
 import MartialArtRequirements from "./MartialArtRequirements.svelte";
+import { t } from "@transifex/native";
 
 const data = getContext<CddaData>("data");
 
@@ -25,6 +26,7 @@ function learnDifficultyAsText(difficulty: number): string {
 }
 
 export let item: MartialArt;
+const _context = "Martial Art";
 
 const books = data
   .byType("item")
@@ -49,14 +51,14 @@ const buffMap = new Map(
 );
 </script>
 
-<h1>Martial Art: {singularName(item)}</h1>
+<h1>{t("Martial Art")}: {singularName(item)}</h1>
 
 <section>
-  <h1>General</h1>
+  <h1>{t("General", { _context })}</h1>
   {#if item.learn_difficulty != null || item.autolearn?.length || (item.arm_block ?? 99) !== 99 || (item.leg_block ?? 99) !== 99 || item.arm_block_with_bio_armor_arms || item.leg_block_with_bio_armor_legs || books.length}
     <dl>
       {#if item.learn_difficulty != null}
-        <dt>Difficulty to Learn</dt>
+        <dt>{t("Difficulty to Learn", { _context })}</dt>
         <dd>
           {item.learn_difficulty} ({learnDifficultyAsText(
             item.learn_difficulty
@@ -66,7 +68,7 @@ const buffMap = new Map(
       {#if item.autolearn?.length}
         <dt
           title="Learned at these skill levels, otherwise only learnable from a book">
-          Autolearn
+          {t("Autolearn", { _context })}
         </dt>
         <dd>
           <!-- prettier-ignore-->
@@ -80,7 +82,7 @@ const buffMap = new Map(
         </dd>
       {/if}
       {#if books.length}
-        <dt>Found In</dt>
+        <dt>{t("Found In", { _context })}</dt>
         <dd>
           <ul class="comma-separated">
             {#each books as book}
@@ -90,7 +92,7 @@ const buffMap = new Map(
         </dd>
       {/if}
       {#if item.weapon_category}
-        <dt>Weapon Category</dt>
+        <dt>{t("Weapon Category", { _context })}</dt>
         <dd>
           <ul class="comma-separated">
             {#each item.weapon_category as category_id}
@@ -100,7 +102,7 @@ const buffMap = new Map(
         </dd>
       {/if}
       {#if (item.arm_block ?? 99) != 99 || item.arm_block_with_bio_armor_arms}
-        <dt>Arm Block</dt>
+        <dt>{t("Arm Block", { _context })}</dt>
         <dd>
           {#if item.arm_block_with_bio_armor_arms}
             with <ThingLink type="item" id="bio_armor_arms" />
@@ -110,7 +112,7 @@ const buffMap = new Map(
         </dd>
       {/if}
       {#if (item.leg_block ?? 99) !== 99 || item.leg_block_with_bio_armor_legs}
-        <dt>Leg Block</dt>
+        <dt>{t("Leg Block", { _context })}</dt>
         <dd>
           {#if item.leg_block_with_bio_armor_legs}
             with <ThingLink type="item" id="bio_armor_legs" />
@@ -121,12 +123,12 @@ const buffMap = new Map(
       {/if}
     </dl>
   {/if}
-  <p style="color: var(--cata-color-gray)">{item.description}</p>
+  <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
 </section>
 
 {#if item.weapons?.length}
   <section>
-    <h1>Weapons</h1>
+    <h1>{t("Weapons", { _context })}</h1>
     <LimitedList
       items={[...item.weapons].sort((a, b) =>
         singularName(data.byId("item", a)).localeCompare(
@@ -139,7 +141,7 @@ const buffMap = new Map(
   </section>
 {/if}
 
-<h1>Buffs</h1>
+<h1>{t("Buffs", { _context })}</h1>
 {#each buffss as [title, buffs]}
   {#each buffs as buff}
     <section>
@@ -148,37 +150,43 @@ const buffMap = new Map(
         <MartialArtRequirements item={buff} {buffMap} />
         <BonusContainer item={buff} />
         {#if buff.buff_duration}
-          <dt>Duration</dt>
+          <dt>{t("Duration", { _context })}</dt>
           <dd>{buff.buff_duration}</dd>
         {/if}
         {#if buff.max_stacks}
-          <dt>Max Stacks</dt>
+          <dt>{t("Max Stacks", { _context })}</dt>
           <dd>{buff.max_stacks}</dd>
         {/if}
         {#if buff.bonus_dodges}
-          <dt>Bonus Dodges</dt>
+          <dt>{t("Bonus Dodges", { _context })}</dt>
           <dd>{buff.bonus_dodges}</dd>
         {/if}
         {#if buff.bonus_blocks}
-          <dt>Bonus Blocks</dt>
+          <dt>{t("Bonus Blocks", { _context })}</dt>
           <dd>{buff.bonus_blocks}</dd>
         {/if}
         {#if buff.quiet}
-          <dt title="Attacks will be completely silent">Silent</dt>
-          <dd>Yes</dd>
+          <dt title="Attacks will be completely silent">
+            {t("Silent", { _context })}
+          </dt>
+          <dd>{t("Yes")}</dd>
         {/if}
         {#if buff.stealthy}
-          <dt title="Movement will make less noise">Stealthy</dt>
-          <dd>Yes</dd>
+          <dt title="Movement will make less noise">
+            {t("Stealthy", { _context })}
+          </dt>
+          <dd>{t("Yes")}</dd>
         {/if}
         {#if buff.throw_immune}
-          <dt title="Immune to throws/grabs">Throw Immune</dt>
-          <dd>Yes</dd>
+          <dt title="Immune to throws/grabs">
+            {t("Throw Immune", { _context })}
+          </dt>
+          <dd>{t("Yes")}</dd>
         {/if}
       </dl>
       {#if buff.description}
         <p style="color: var(--cata-color-gray); white-space: pre-wrap">
-          {buff.description}
+          {singular(buff.description)}
         </p>
       {/if}
     </section>
@@ -186,7 +194,7 @@ const buffMap = new Map(
 {/each}
 
 {#if item.techniques?.length}
-  <h1>Techniques</h1>
+  <h1>{t("Techniques", { _context })}</h1>
   {#each item.techniques as tec_id}
     <Technique item={data.byId("technique", tec_id)} {buffMap} />
   {/each}

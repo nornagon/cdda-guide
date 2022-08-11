@@ -1,6 +1,8 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../data";
+import { CddaData, singular, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { JsonFlag } from "../types";
 import ColorText from "./ColorText.svelte";
@@ -34,15 +36,15 @@ const bionicWithFlag = data
   );
 </script>
 
-<h1>Flag: {item.id}</h1>
+<h1>{t("Flag", { _comment: "Section heading" })}: {item.id}</h1>
 {#if item.info}
   <section>
-    <p><ColorText text={item.info} /></p>
+    <p><ColorText text={singular(item.info)} /></p>
   </section>
 {/if}
 {#if itemsWithFlag.length}
   <section>
-    <h1>Items</h1>
+    <h1>{t("Items", { _comment: "Section heading" })}</h1>
     <LimitedList
       items={itemsWithFlag.sort((a, b) =>
         singularName(a).localeCompare(singularName(b))
@@ -55,7 +57,7 @@ const bionicWithFlag = data
 {/if}
 {#if vpartsWithFlag.length}
   <section>
-    <h1>Vehicle Parts</h1>
+    <h1>{t("Vehicle Parts")}</h1>
     <LimitedList
       items={vpartsWithFlag.sort((a, b) =>
         singularName(a).localeCompare(singularName(b))
@@ -68,7 +70,7 @@ const bionicWithFlag = data
 {/if}
 {#if terrainWithFlag.length}
   <section>
-    <h1>Terrain</h1>
+    <h1>{t("Terrain")}</h1>
     <LimitedList
       items={terrainWithFlag.sort((a, b) =>
         singularName(a).localeCompare(singularName(b))
@@ -81,7 +83,7 @@ const bionicWithFlag = data
 {/if}
 {#if furnitureWithFlag.length}
   <section>
-    <h1>Furniture</h1>
+    <h1>{t("Furniture")}</h1>
     <LimitedList
       items={furnitureWithFlag.sort((a, b) =>
         singularName(a).localeCompare(singularName(b))
@@ -94,7 +96,7 @@ const bionicWithFlag = data
 {/if}
 {#if bionicWithFlag.length}
   <section>
-    <h1>Bionics</h1>
+    <h1>{t("Bionics")}</h1>
     <LimitedList
       items={bionicWithFlag.sort((a, b) =>
         singularName(a).localeCompare(singularName(b))
