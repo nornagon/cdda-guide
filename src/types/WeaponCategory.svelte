@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
@@ -23,9 +25,9 @@ const martialArts = data
 martialArts.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
-<h1>Weapon Category: {singularName(item)}</h1>
+<h1>{t("Weapon Category")}: {singularName(item)}</h1>
 <section>
-  <h1>Weapons</h1>
+  <h1>{t("Weapons", { _context: "Martial Art" })}</h1>
   {#if itemsInCategory.length}
     <LimitedList items={itemsInCategory} let:item>
       <ItemSymbol {item} />
@@ -33,13 +35,13 @@ martialArts.sort((a, b) => singularName(a).localeCompare(singularName(b)));
     </LimitedList>
   {:else}
     <p style="color: var(--cata-color-gray)">
-      There are no weapons in this category.
+      {t("There are no weapons in this category.")}
     </p>
   {/if}
 </section>
 
 <section>
-  <h1>Martial Arts</h1>
+  <h1>{t("Martial Arts")}</h1>
   {#if martialArts.length}
     <LimitedList items={martialArts} let:item>
       <ItemSymbol {item} />
@@ -47,7 +49,7 @@ martialArts.sort((a, b) => singularName(a).localeCompare(singularName(b)));
     </LimitedList>
   {:else}
     <p style="color: var(--cata-color-gray)">
-      There are no martial arts that use this weapon category.
+      {t("There are no martial arts that use this weapon category.")}
     </p>
   {/if}
 </section>

@@ -1,12 +1,21 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 
-import { CddaData, showProbability, singular, singularName } from "../data";
+import {
+  CddaData,
+  i18n,
+  showProbability,
+  singular,
+  singularName,
+} from "../data";
 import type { Terrain } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 const data = getContext<CddaData>("data");
+const _context = "Terrain / Furniture";
 
 export let item: Terrain;
 
@@ -31,8 +40,8 @@ const bash = item.bash?.items
   : [];
 
 const bits = [
-  ["Deconstruct", deconstruct],
-  ["Bash", bash],
+  [t("Deconstruct", { _context }), deconstruct],
+  [t("Bash", { _context }), bash],
 ] as const;
 
 const harvestBySeason: Map<string, string> = new Map();
@@ -50,12 +59,12 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
 
 <section>
   <dl>
-    <dt>Move Cost</dt>
+    <dt>{t("Move Cost", { _context })}</dt>
     <dd>{item.move_cost ?? 100}</dd>
-    <dt>Coverage</dt>
+    <dt>{t("Coverage", { _context })}</dt>
     <dd>{item.coverage ?? 0}%</dd>
     {#if item.transforms_into}
-      <dt>Transforms Into</dt>
+      <dt>{t("Transforms Into", { _context })}</dt>
       <dd>
         <ItemSymbol item={data.byId("terrain", item.transforms_into)} />
         <ThingLink id={item.transforms_into} type="terrain" />
@@ -77,11 +86,11 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
       {/if}
     {/each}
     {#if harvestBySeason.size}
-      <dt>Harvest</dt>
+      <dt>{t("Harvest", { _context })}</dt>
       <dd>
         <dl>
           {#each ["winter", "spring", "summer", "autumn"].filter( (season) => harvestBySeason.has(season) ) as season}
-            <dt style="text-transform: capitalize;">{season}</dt>
+            <dt>{i18n.__(season.replace(/^(.)/, (x) => x.toUpperCase()))}</dt>
             <dd>
               {#each [data.byId("harvest", harvestBySeason.get(season))] as harvest}
                 <ul>
@@ -110,13 +119,13 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
         </dl>
       </dd>
     {/if}
-    <dt>Flags</dt>
+    <dt>{t("Flags")}</dt>
     <dd>
       <ul class="comma-separated">
         {#each item.flags ?? [] as flag}
           <li><ThingLink type="json_flag" id={flag} /></li>
         {:else}
-          <li><em>none</em></li>
+          <li><em>{t("none")}</em></li>
         {/each}
       </ul>
     </dd>

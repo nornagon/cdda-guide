@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 
 import { CddaData, singularName } from "../data";
@@ -7,6 +9,7 @@ import type { Mutation, MutationCategory } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 let data = getContext<CddaData>("data");
+const _context = "Mutation";
 
 export let item: MutationCategory;
 export let inCatalog: boolean = false;
@@ -32,7 +35,7 @@ const postThreshold = topologicalSort(
 </script>
 
 {#if !inCatalog}
-  <h1>Mutation Category: {singularName(item)}</h1>
+  <h1>{t("Mutation Category")}: {singularName(item)}</h1>
 {/if}
 
 <section>
@@ -41,11 +44,11 @@ const postThreshold = topologicalSort(
   {/if}
   <dl>
     {#if item.threshold_mut}
-      <dt>Threshold Mutation</dt>
+      <dt>{t("Threshold Mutation", { _context })}</dt>
       <dd><ThingLink id={item.threshold_mut} type="mutation" /></dd>
     {/if}
     {#if preThreshold.length}
-      <dt>Pre-Threshold Mutations</dt>
+      <dt>{t("Pre-Threshold Mutations", { _context })}</dt>
       <dd>
         <ul>
           {#each preThreshold as m}
@@ -55,7 +58,7 @@ const postThreshold = topologicalSort(
       </dd>
     {/if}
     {#if postThreshold.length}
-      <dt>Post-Threshold Mutations</dt>
+      <dt>{t("Post-Threshold Mutations", { _context })}</dt>
       <dd>
         <ul>
           {#each postThreshold as m}

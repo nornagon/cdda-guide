@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, singular, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
@@ -9,6 +11,7 @@ import ThingLink from "./ThingLink.svelte";
 export let item: Vitamin;
 
 const data = getContext<CddaData>("data");
+const _context = "Vitamin";
 
 const containingComestibles = data
   .byType("item")
@@ -35,13 +38,13 @@ const deficiencyNames = item.deficiency
   : [];
 </script>
 
-<h1>Vitamin: {singularName(item)}</h1>
+<h1>{t("Vitamin")}: {singularName(item)}</h1>
 <section>
   <dl>
-    <dt>Type</dt>
+    <dt>{t("Type", { _context })}</dt>
     <dd>{item.vit_type}</dd>
     {#if item.excess}
-      <dt>Excess</dt>
+      <dt>{t("Excess", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each excessNames as n}<li>{singular(n)}</li>{/each}
@@ -49,23 +52,23 @@ const deficiencyNames = item.deficiency
       </dd>
     {/if}
     {#if item.deficiency}
-      <dt>Deficiency</dt>
+      <dt>{t("Deficiency", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each deficiencyNames as n}<li>{singular(n)}</li>{/each}
         </ul>
       </dd>
     {/if}
-    <dt>Min</dt>
+    <dt>{t("Min", { _context })}</dt>
     <dd>{item.min ?? 0}</dd>
-    <dt>Max</dt>
+    <dt>{t("Max", { _context })}</dt>
     <dd>{item.max ?? 0}</dd>
-    <dt>Rate</dt>
+    <dt>{t("Rate", { _context })}</dt>
     <dd>{item.rate ?? "0 m"}</dd>
   </dl>
 </section>
 <section>
-  <h1>Comestibles</h1>
+  <h1>{t("Comestibles", { _context })}</h1>
   <LimitedList items={containingComestibles} let:item>
     <ThingLink id={item.comestible.id} type="item" /> ({item.pct}% RDA)
   </LimitedList>

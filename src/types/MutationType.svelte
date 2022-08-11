@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 
 import { CddaData, singularName } from "../data";
@@ -21,10 +23,10 @@ const mutationsWithType = topologicalSort(
 );
 </script>
 
-<h1>Mutation Type: {singularName(item)}</h1>
+<h1>{t("Mutation Type")}: {singularName(item)}</h1>
 <section>
   <dl>
-    <dt>Mutations</dt>
+    <dt>{t("Mutations")}</dt>
     <dd>
       <ul>
         {#each mutationsWithType as m}

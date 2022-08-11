@@ -8,7 +8,7 @@ import ItemSymbol from "./item/ItemSymbol.svelte";
 import { t } from "@transifex/native";
 
 const data = getContext<CddaData>("data");
-const _context = "Furniture";
+const _context = "Terrain / Furniture";
 
 export let item: Furniture;
 

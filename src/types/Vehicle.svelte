@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 
 import {
@@ -18,6 +20,7 @@ import ThingLink from "./ThingLink.svelte";
 export let item: Vehicle;
 
 const data = getContext<CddaData>("data");
+const _context = "Vehicle";
 
 let minX = Infinity;
 let maxX = -Infinity;
@@ -201,7 +204,7 @@ partsCounted.sort((a, b) => {
 
 {#if partsCounted.length}
   <section>
-    <h1>Parts</h1>
+    <h1>{t("Parts", { _context })}</h1>
     <LimitedList items={partsCounted} let:item={{ id, count }}>
       <ThingLink {id} type="vehicle_part" /> ({count})
     </LimitedList>
@@ -210,7 +213,7 @@ partsCounted.sort((a, b) => {
 
 {#if items.length}
   <section>
-    <h1>Items</h1>
+    <h1>{t("Items")}</h1>
     <LimitedList {items} let:item>
       <ItemSymbol item={data.byId("item", item.id)} />
       <ThingLink id={item.id} type="item" />

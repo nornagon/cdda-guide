@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
@@ -9,6 +11,7 @@ import ThingLink from "./ThingLink.svelte";
 export let item: ToolQuality;
 
 let data = getContext<CddaData>("data");
+const _context = "Tool Quality";
 
 let toolsWithQualityByLevel = new Map<number, Item[]>();
 for (const it of data.byType("item")) {
@@ -63,13 +66,15 @@ for (const [level, set] of recipesUsingQualitySet)
   );
 </script>
 
-<h1>Quality: {singularName(item)}</h1>
+<h1>{t("Quality", { _comment: "Tool Quality" })}: {singularName(item)}</h1>
 {#if item.usages}
   <section>
-    <h1>Usages</h1>
+    <h1>{t("Usages", { _context })}</h1>
     <dl>
       {#each item.usages as [level, usages]}
-        <dt style="font-variant: tabular-nums">At Level {level}</dt>
+        <dt style="font-variant: tabular-nums">
+          {t("Level {level}", { level, _context })}
+        </dt>
         <dd>
           <ul class="comma-separated">
             {#each usages as usage}
@@ -83,10 +88,12 @@ for (const [level, set] of recipesUsingQualitySet)
 {/if}
 {#if toolsWithQualityByLevel.size > 0}
   <section>
-    <h1>Tools</h1>
+    <h1>{t("Tools", { _context })}</h1>
     <dl>
       {#each [...toolsWithQualityByLevel.keys()].sort((a, b) => a - b) as level}
-        <dt style="font-variant: tabular-nums">Level {level}</dt>
+        <dt style="font-variant: tabular-nums">
+          {t("Level {level}", { level, _context })}
+        </dt>
         <dd>
           <LimitedList
             items={toolsWithQualityByLevel
@@ -104,10 +111,12 @@ for (const [level, set] of recipesUsingQualitySet)
 {/if}
 {#if vpartsWithQualityByLevel.size > 0}
   <section>
-    <h1>Vehicle Parts</h1>
+    <h1>{t("Vehicle Parts")}</h1>
     <dl>
       {#each [...vpartsWithQualityByLevel.keys()].sort((a, b) => a - b) as level}
-        <dt style="font-variant: tabular-nums">Level {level}</dt>
+        <dt style="font-variant: tabular-nums">
+          {t("Level {level}", { level, _context })}
+        </dt>
         <dd>
           <LimitedList
             items={vpartsWithQualityByLevel
@@ -125,10 +134,12 @@ for (const [level, set] of recipesUsingQualitySet)
 {/if}
 {#if recipesUsingQuality.size > 0}
   <section>
-    <h1>Recipes</h1>
+    <h1>{t("Recipes")}</h1>
     <dl>
       {#each [...recipesUsingQuality.keys()].sort((a, b) => a - b) as level}
-        <dt style="font-variant: tabular-nums">Level {level}</dt>
+        <dt style="font-variant: tabular-nums">
+          {t("Level {level}", { level, _context })}
+        </dt>
         <dd>
           <LimitedList
             items={recipesUsingQuality.get(level)}

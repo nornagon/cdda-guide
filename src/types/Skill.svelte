@@ -1,4 +1,6 @@
 <script lang="ts">
+import { t } from "@transifex/native";
+
 import { getContext } from "svelte";
 
 import { CddaData, singularName } from "../data";
@@ -33,14 +35,14 @@ const itemsUsingSkill = data
 itemsUsingSkill.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
-<h1>Skill: {singularName(item)}</h1>
+<h1>{t("Skill")}: {singularName(item)}</h1>
 <section>
   <p style="color: var(--cata-color-gray)">{item.description}</p>
 </section>
 
 {#if booksWithSkill.length}
   <section>
-    <h1>Books</h1>
+    <h1>{t("Books", { _context: "Skill" })}</h1>
     <dl>
       {#each [...booksByLevel.keys()].sort((a, b) => a - b) as level}
         <dt style="font-variant: tabular-nums">Level {level}</dt>
@@ -60,7 +62,7 @@ itemsUsingSkill.sort((a, b) => singularName(a).localeCompare(singularName(b)));
 
 {#if itemsUsingSkill.length}
   <section>
-    <h1>Used By</h1>
+    <h1>{t("Used By", { _context: "Skill" })}</h1>
     <LimitedList items={itemsUsingSkill} let:item>
       <ItemSymbol {item} />
       <ThingLink type="item" id={item.id} />

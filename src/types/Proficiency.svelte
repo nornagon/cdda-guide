@@ -5,10 +5,12 @@ import type { Proficiency } from "../types";
 import { getContext } from "svelte";
 import LimitedList from "../LimitedList.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import { t } from "@transifex/native";
 
 export let item: Proficiency;
 
 const data = getContext<CddaData>("data");
+const _context = "Proficiency";
 
 const recipesUsingProficiency = [
   ...new Set(
@@ -28,17 +30,17 @@ const recipesUsingProficiency = [
 );
 </script>
 
-<h1>Proficiency: {singularName(item)}</h1>
+<h1>{t("Proficiency")}: {singularName(item)}</h1>
 <section>
   <dl>
-    <dt>Time to Learn</dt>
+    <dt>{t("Time to Learn", { _context })}</dt>
     <dd>{item.can_learn ? item.time_to_learn : "not learnable"}</dd>
-    <dt>Default Time Multiplier</dt>
+    <dt>{t("Default Time Multiplier", { _context })}</dt>
     <dd>{item.default_time_multiplier ?? 2}&times;</dd>
-    <dt>Default Fail Multiplier</dt>
+    <dt>{t("Default Fail Multiplier", { _context })}</dt>
     <dd>{item.default_fail_multiplier ?? 2}&times;</dd>
     {#if item.required_proficiencies}
-      <dt>Required Proficiencies</dt>
+      <dt>{t("Required Proficiencies", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.required_proficiencies as id}
@@ -53,7 +55,7 @@ const recipesUsingProficiency = [
 
 {#if recipesUsingProficiency.length}
   <section>
-    <h1>Recipes</h1>
+    <h1>{t("Recipes", { _context })}</h1>
     <LimitedList items={recipesUsingProficiency} let:item>
       <ItemSymbol item={data.byId("item", item)} />
       <ThingLink type="item" id={item} />
