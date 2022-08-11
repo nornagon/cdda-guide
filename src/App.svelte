@@ -7,6 +7,8 @@ import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
 import dontPanic from "./assets/dont_panic.png";
 import throttle from "lodash.throttle";
+import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
+import { t } from "@transifex/native";
 
 let item: { type: string; id: string } | null = null;
 
@@ -198,7 +200,9 @@ function getLanguageName(code: string) {
     <div class="search">
       <input
         style="margin: 0; width: 100%"
-        placeholder="Search..."
+        placeholder={t("Search...", {
+          _comment: "Placeholder text in the search box",
+        })}
         bind:value={search}
         on:input={clearItem}
         id="search" />
@@ -230,75 +234,112 @@ function getLanguageName(code: string) {
       style="float:right"
       alt="The words 'Don't Panic' in big friendly letters" />
     <p>
-      The <strong>Hitchhiker's Guide to the Cataclysm</strong> is a guide to the
-      zombie survival roguelike game
-      <a href="https://cataclysmdda.org/">Cataclysm: Dark Days Ahead</a>. You
-      can search for things in the game, like items (e.g. a
-      <a href="#/item/flashlight">flashlight</a>), furniture (e.g. a
-      <a href="#/furniture/f_table">table</a>), or monsters (e.g. a
-      <a href="#/monster/mon_zombie">zombie</a>), and find useful information
-      about them. The data in the Guide comes directly from the JSON files in
-      the game itself.
+      <InterpolatedTranslation
+        str={t(
+          `The {hhg} is a guide to the zombie survival roguelike game {link_cdda}. You can
+search for things in the game, like items (e.g. a {link_flashlight}), furniture
+(e.g. a {link_table}), or monsters (e.g. a {link_zombie}), and find useful
+information about them. The data in the Guide comes directly from the JSON
+files in the game itself.`
+        )}
+        slot0="hhg"
+        slot1="link_cdda"
+        slot2="link_flashlight"
+        slot3="link_table"
+        slot4="link_zombie">
+        <strong slot="0">Hitchhiker's Guide to the Cataclysm</strong>
+        <a slot="1" href="https://cataclysmdda.org/"
+          >Cataclysm: Dark Days Ahead</a>
+        <a slot="2" href="#/item/flashlight"
+          >{t("flashlight", { _comment: "Item name" })}</a>
+        <a slot="3" href="#/furniture/f_table"
+          >{t("table", { _comment: "Furniture" })}</a>
+        <a slot="4" href="#/monster/mon_zombie"
+          >{t("zombie", { _comment: "Monster name" })}</a>
+      </InterpolatedTranslation>
     </p>
     <p>
-      The Guide stores all its data locally and is offline-capable, so you can
-      take it with you whereever you go. There's nothing to do to make the Guide
-      work offline, just visit the page and it will work even without internet
-      access, as long as you've visited it once before.
+      {t(`The Guide stores all its data locally and is offline-capable, so you can
+take it with you whereever you go. There's nothing to do to make the Guide
+work offline, just visit the page and it will work even without internet
+access, as long as you've visited it once before.`)}
       {#if deferredPrompt}
-        It's also <button
-          class="disclosure"
-          on:click={(e) => {
-            e.preventDefault();
-            deferredPrompt.prompt();
-          }}>installable</button
-        >, so you can pop it out of your browser and use it like a regular app.
+        <InterpolatedTranslation
+          str={`It's also {installable_button}, so you can pop it out of your browser and use it like a regular app.`}
+          slot0="installable_button">
+          <button
+            slot="0"
+            class="disclosure"
+            on:click={(e) => {
+              e.preventDefault();
+              deferredPrompt.prompt();
+            }}
+            >{t("installable", {
+              _context: "Front page",
+              _comment: "Meaning, install the Hitchhiker's Guide app itself.",
+            })}</button>
+        </InterpolatedTranslation>
       {/if}
     </p>
     <p style="font-style: italic; color: var(--cata-color-gray)">
-      More popular than the Celestial Home Care Omnibus, better selling than
-      Fifty-three More Things to do in Zero Gravity, and more controversial than
-      Oolon Colluphid's trilogy of philosophical blockbusters Where God Went
-      Wrong, Some More of God's Greatest Mistakes and Who is this God Person
-      Anyway?
+      {t(
+        `More popular than the Celestial Home Care Omnibus, better selling than
+Fifty-three More Things to do in Zero Gravity, and more controversial than
+Oolon Colluphid's trilogy of philosophical blockbusters Where God Went
+Wrong, Some More of God's Greatest Mistakes and Who is this God Person
+Anyway?`,
+        {
+          _comment:
+            "This is a quote from the Hitchhiker's Guide to the Galaxy, by Douglas Adams",
+        }
+      )}
     </p>
     <p>
-      The guide is developed on <a href="https://github.com/nornagon/cdda-guide"
-        >GitHub</a>
-      by <a href="https://www.nornagon.net">nornagon</a>. If you notice any
-      problems, please
-      <a href="https://github.com/nornagon/cdda-guide/issues">file an issue</a>!
+      <InterpolatedTranslation
+        str={`The Guide is developed on {link_github} by {link_nornagon}. If you notice any problems, please {link_file_an_issue}!`}
+        slot0="link_github"
+        slot1="link_nornagon"
+        slot2="link_file_an_issue">
+        <a slot="0" href="https://github.com/nornagon/cdda-guide">GitHub</a>
+        <a slot="1" href="https://www.nornagon.net">nornagon</a>
+        <a slot="2" href="https://github.com/nornagon/cdda-guide/issues"
+          >{t("file an issue")}</a>
+      </InterpolatedTranslation>
     </p>
 
     {#if locale}
       <p style="font-weight: bold">
-        You can help translate the Guide into your language on <a
-          href="https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/"
-          >Transifex</a
-        >.
+        <InterpolatedTranslation
+          str={`You can help translate the Guide into your language on {link_transifex}.`}
+          slot0="link_transifex">
+          <a
+            slot="0"
+            href="https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/"
+            >Transifex</a>
+        </InterpolatedTranslation>
       </p>
     {/if}
 
-    <h2>Catalogs</h2>
+    <h2>{t("Catalogs")}</h2>
     <ul>
-      <li><a href="#/item">Items</a></li>
-      <li><a href="#/monster">Monsters</a></li>
-      <li><a href="#/furniture">Furniture</a></li>
-      <li><a href="#/terrain">Terrain</a></li>
-      <li><a href="#/vehicle_part">Vehicle Parts</a></li>
-      <li><a href="#/tool_quality">Qualities</a></li>
-      <li><a href="#/mutation">Mutations</a></li>
-      <li><a href="#/martial_art">Martial Arts</a></li>
-      <li><a href="#/json_flag">Flags</a></li>
+      <li><a href="#/item">{t("Items")}</a></li>
+      <li><a href="#/monster">{t("Monsters")}</a></li>
+      <li><a href="#/furniture">{t("Furniture")}</a></li>
+      <li><a href="#/terrain">{t("Terrain")}</a></li>
+      <li><a href="#/vehicle_part">{t("Vehicle Parts")}</a></li>
+      <li><a href="#/tool_quality">{t("Qualities")}</a></li>
+      <li><a href="#/mutation">{t("Mutations")}</a></li>
+      <li><a href="#/martial_art">{t("Martial Arts")}</a></li>
+      <li><a href="#/json_flag">{t("Flags")}</a></li>
       <li>
-        <a href="#/achievement">Achievements</a> /
-        <a href="#/conduct">Conducts</a>
+        <a href="#/achievement">{t("Achievements")}</a> /
+        <a href="#/conduct">{t("Conducts")}</a>
       </li>
     </ul>
   {/if}
 
   <p>
-    Build:
+    {t("Build")}:
     {#if $data || builds}
       {#if builds}
         <!-- svelte-ignore a11y-no-onchange -->
@@ -331,10 +372,10 @@ function getLanguageName(code: string) {
         </select>
       {/if}
     {:else}
-      <em style="color: var(--cata-color-gray)">(loading...)</em>
+      <em style="color: var(--cata-color-gray)">({t("Loading...")})</em>
     {/if}
     <span style="white-space: nowrap">
-      Tiles:
+      {t("Tiles:")}
       <!-- svelte-ignore a11y-no-onchange -->
       <select
         value={tilesetUrlTemplate}
@@ -348,7 +389,7 @@ function getLanguageName(code: string) {
       </select>
     </span>
     <span style="white-space: nowrap">
-      Language:
+      {t("Language:")}
       {#if builds}
         {@const build_number =
           version === "latest" ? builds[0].build_number : version}
@@ -367,7 +408,7 @@ function getLanguageName(code: string) {
           {/each}
         </select>
       {:else}
-        <select disabled><option>Loading...</option></select>
+        <select disabled><option>{t("Loading...")}</option></select>
       {/if}
     </span>
   </p>

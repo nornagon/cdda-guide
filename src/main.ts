@@ -25,6 +25,15 @@ if (location.hostname !== "localhost")
 
 registerSW({});
 
-export default new App({
-  target: document.body,
-});
+const url = new URL(location.href);
+const locale = url.searchParams.get("lang");
+if (locale) {
+  tx.setCurrentLocale(locale).then(start);
+} else {
+  start();
+}
+function start() {
+  new App({
+    target: document.body,
+  });
+}

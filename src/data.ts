@@ -1243,7 +1243,6 @@ export const data = {
     const [dataJson, localeJson] = await Promise.all([
       retry(() => fetchJson(version)),
       locale && retry(() => fetchLocaleJson(version, locale)),
-      locale && tx.setCurrentLocale(locale),
     ]);
     if (localeJson) {
       i18n.loadJSON(localeJson);
