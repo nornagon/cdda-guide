@@ -34,10 +34,11 @@ let { tools, qualities } =
                 "%1$d tools with %2$s of %3$d or more.",
                 quality.amount ?? 1,
                 quality.amount ?? 1,
-                "\x000",
+                "{tool_quality}",
                 quality.level
               )
-              .replace(/\$./g, "")}>
+              .replace(/\$./g, "")}
+            slot0="tool_quality">
             <ThingLink type="tool_quality" id={quality.id} slot="0" />
           </InterpolatedTranslation>{/each}
       </li>
@@ -62,10 +63,11 @@ let { tools, qualities } =
                   "%1$s (%2$d charge)",
                   "%1$s (%2$d charges)",
                   tool.count,
-                  "\x000",
+                  "{item}",
                   tool.count
                 )
-                .replace(/\$./g, "")}>
+                .replace(/\$./g, "")}
+              slot0="item">
               <svelte:fragment slot="0">
                 {#if data.craftingPseudoItem(tool.id)}
                   <a href="#/furniture/{data.craftingPseudoItem(tool.id)}"
