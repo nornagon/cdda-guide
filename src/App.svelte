@@ -220,7 +220,7 @@ function getLanguageName(code: string) {
         {/if}
       {/key}
     {:else}
-      <em style="color: var(--cata-color-gray)">Loading...</em>
+      <em style="color: var(--cata-color-gray)">{t("Loading...")}</em>
     {/if}
   {:else if search}
     {#key search}
@@ -240,7 +240,14 @@ function getLanguageName(code: string) {
 search for things in the game, like items (e.g. a {link_flashlight}), furniture
 (e.g. a {link_table}), or monsters (e.g. a {link_zombie}), and find useful
 information about them. The data in the Guide comes directly from the JSON
-files in the game itself.`
+files in the game itself.`,
+          {
+            hhg: "{hhg}",
+            link_cdda: "{link_cdda}",
+            link_flashlight: "{link_flashlight}",
+            link_table: "{link_table}",
+            link_zombie: "{link_zombie}",
+          }
         )}
         slot0="hhg"
         slot1="link_cdda"
@@ -266,7 +273,8 @@ access, as long as you've visited it once before.`)}
       {#if deferredPrompt}
         <InterpolatedTranslation
           str={t(
-            `It's also {installable_button}, so you can pop it out of your browser and use it like a regular app.`
+            `It's also {installable_button}, so you can pop it out of your browser and use it like a regular app.`,
+            { installable_button: "{installable_button}" }
           )}
           slot0="installable_button">
           <button
@@ -299,7 +307,12 @@ Anyway?`,
     <p>
       <InterpolatedTranslation
         str={t(
-          `The Guide is developed on {link_github} by {link_nornagon}. If you notice any problems, please {link_file_an_issue}!`
+          `The Guide is developed on {link_github} by {link_nornagon}. If you notice any problems, please {link_file_an_issue}!`,
+          {
+            link_github: "{link_github}",
+            link_nornagon: "{link_nornagon}",
+            link_file_an_issue: "{link_file_an_issue}",
+          }
         )}
         slot0="link_github"
         slot1="link_nornagon"
@@ -315,7 +328,8 @@ Anyway?`,
       <p style="font-weight: bold">
         <InterpolatedTranslation
           str={t(
-            `You can help translate the Guide into your language on {link_transifex}.`
+            `You can help translate the Guide into your language on {link_transifex}.`,
+            { link_transifex: "{link_transifex}" }
           )}
           slot0="link_transifex">
           <a
