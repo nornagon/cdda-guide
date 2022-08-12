@@ -166,10 +166,10 @@ function coverageLabel(covers: string[]): string[] {
     if (covered.has(bp_id)) continue;
     const bp = data.byId("body_part", bp_id);
     if (bp.opposite_part && covers.includes(bp.opposite_part)) {
-      labels.push(bp.heading_multiple);
+      labels.push(singular(bp.heading_multiple));
       covered.add(bp.opposite_part);
     } else {
-      labels.push(bp.heading);
+      labels.push(singular(bp.heading));
     }
     covered.add(bp_id);
   }
