@@ -3,8 +3,9 @@ import { mapType, singular, singularName } from "./data";
 import type { CddaData } from "./data";
 import * as fuzzysort from "fuzzysort";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
-import type { SupportedTypesWithMapped } from "./types";
+import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import { setContext } from "svelte";
+import { t } from "@transifex/native";
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -18,14 +19,21 @@ const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "terrain",
 ]);
 
+type SearchableType = SupportedTypeMapped & {
+  id: string;
+  type: keyof SupportedTypesWithMapped;
+} & { __filename?: string };
+
 export let data: CddaData;
 $: setContext("data", data);
 
-let targets: {
+type SearchTarget = {
   id: string;
+  variant_id?: string;
   name: string;
   type: keyof SupportedTypesWithMapped;
-}[];
+};
+let targets: SearchTarget[];
 $: targets = [...(data?.all() ?? [])]
   .filter(
     (x) =>
@@ -60,20 +68,34 @@ $: targets = [...(data?.all() ?? [])]
 
 export let search: string;
 
-function filter(text: string): Map<string, any[]> {
+function filter(
+  text: string
+): Map<
+  string,
+  { item: SearchableType; variant?: { name: string; id: string } }[]
+> {
   const results = fuzzysort.go(text, targets, {
     limit: 100,
     keys: ["id", "name", "variant_id"],
     threshold: -10000,
   });
-  const byType = new Map<string, any[]>();
+  const byType = new Map<
+    string,
+    { item: SearchableType; variant?: { name: string; id: string } }[]
+  >();
   for (const { obj: item } of results) {
     const mappedType = item.type;
     if (!SEARCHABLE_TYPES.has(mappedType)) continue;
     if (!byType.has(mappedType)) byType.set(mappedType, []);
-    if (byType.get(mappedType).some((x) => x.id === item.id)) continue;
-    const obj = data.byId(mappedType, item.id);
-    byType.get(mappedType).push(obj);
+    if (byType.get(mappedType).some((x) => x.item.id === item.id)) continue;
+    const obj = data.byId(mappedType, item.id) as SearchableType;
+    const variant = item.variant_id
+      ? {
+          id: item.variant_id,
+          name: item.name,
+        }
+      : undefined;
+    byType.get(mappedType).push({ item: obj, variant });
   }
   return byType;
 }
@@ -93,19 +115,25 @@ $: history.replaceState({ search }, "");
   {#each [...matchingObjects.keys()] as type}
     <h1>{type.replace(/_/g, " ")}</h1>
     <ul>
-      {#each matchingObjects.get(type) as obj}
+      {#each matchingObjects.get(type) as result}
         <li>
-          <ItemSymbol item={data._flatten(obj)} />
-          <a href="#/{mapType(obj.type)}/{obj.id}"
-            >{singularName(data._flatten(obj))}</a>
-          {#if /obsolet/.test(obj.__filename)}
-            <em style="color: var(--cata-color-gray)">(obsolete)</em>
+          <ItemSymbol item={data._flatten(result.item)} />
+          <a href="#/{mapType(result.item.type)}/{result.item.id}">
+            {#if result.variant}
+              {singular(result.variant.name)}
+            {:else}
+              {singularName(data._flatten(result.item))}
+            {/if}
+          </a>
+          {#if /obsolet/.test(result.item.__filename)}
+            <em style="color: var(--cata-color-gray)"
+              >({t("obsolete", { _context: "Search Results" })})</em>
           {/if}
         </li>
       {/each}
     </ul>
   {:else}
-    <em>No results.</em>
+    <em>{t("No results.", { _context: "Search Results" })}</em>
   {/each}
 {:else}
   <pre>...</pre>
