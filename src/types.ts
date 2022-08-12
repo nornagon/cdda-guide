@@ -446,6 +446,10 @@ export type ItemBasicInfo = {
     weight?: integer;
     append?: boolean;
   }[];
+  brewable?: {
+    results: string[]; // item_id
+    time?: duration;
+  };
 };
 
 export type Item =

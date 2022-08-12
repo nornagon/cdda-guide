@@ -24,6 +24,7 @@ import ArmorInfo0F from "./item/ArmorInfo0F.svelte";
 import Bash from "./item/Bash.svelte";
 import BionicInfo from "./item/BionicInfo.svelte";
 import BookInfo from "./item/BookInfo.svelte";
+import BrewedFrom from "./item/BrewedFrom.svelte";
 import ComestibleInfo from "./item/ComestibleInfo.svelte";
 import ComponentOf from "./item/ComponentOf.svelte";
 import ConstructionByproduct from "./item/ConstructionByproduct.svelte";
@@ -328,6 +329,18 @@ const ascii_picture =
             </ul>
           </dd>
         {/if}
+
+        {#if item.brewable}
+          <dt>{t("Ferments Into", { _context })}</dt>
+          <dd>
+            <ul class="comma-separated">
+              {#each item.brewable.results as result_id}
+                <li><ThingLink type="item" id={result_id} /></li>
+              {/each}
+            </ul>
+            ({item.brewable.time ?? "1 turn"})
+          </dd>
+        {/if}
       </dl>
       <p style="color: var(--cata-color-gray); margin-bottom: 0;">
         {singular(item.description)}
@@ -492,6 +505,7 @@ const ascii_picture =
   <DroppedBy item_id={item.id} />
   <Foraged item_id={item.id} />
   <GrownFrom item_id={item.id} />
+  <BrewedFrom item_id={item.id} />
   <HarvestedFrom item_id={item.id} />
   <TransformedFrom item_id={item.id} />
   <Disassembly item_id={item.id} />
