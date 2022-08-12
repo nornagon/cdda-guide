@@ -265,7 +265,9 @@ work offline, just visit the page and it will work even without internet
 access, as long as you've visited it once before.`)}
       {#if deferredPrompt}
         <InterpolatedTranslation
-          str={`It's also {installable_button}, so you can pop it out of your browser and use it like a regular app.`}
+          str={t(
+            `It's also {installable_button}, so you can pop it out of your browser and use it like a regular app.`
+          )}
           slot0="installable_button">
           <button
             slot="0"
@@ -296,7 +298,9 @@ Anyway?`,
     </p>
     <p>
       <InterpolatedTranslation
-        str={`The Guide is developed on {link_github} by {link_nornagon}. If you notice any problems, please {link_file_an_issue}!`}
+        str={t(
+          `The Guide is developed on {link_github} by {link_nornagon}. If you notice any problems, please {link_file_an_issue}!`
+        )}
         slot0="link_github"
         slot1="link_nornagon"
         slot2="link_file_an_issue">
@@ -310,7 +314,9 @@ Anyway?`,
     {#if locale}
       <p style="font-weight: bold">
         <InterpolatedTranslation
-          str={`You can help translate the Guide into your language on {link_transifex}.`}
+          str={t(
+            `You can help translate the Guide into your language on {link_transifex}.`
+          )}
           slot0="link_transifex">
           <a
             slot="0"
