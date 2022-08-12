@@ -345,7 +345,7 @@ Anyway?`,
   {/if}
 
   <p>
-    {t("Build")}:
+    {t("Build:")}
     {#if $data || builds}
       {#if builds}
         <!-- svelte-ignore a11y-no-onchange -->
