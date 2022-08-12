@@ -345,7 +345,7 @@ Anyway?`,
   {/if}
 
   <p>
-    {t("Build:")}
+    {t("Version:")}
     {#if $data || builds}
       {#if builds}
         <!-- svelte-ignore a11y-no-onchange -->
@@ -381,7 +381,7 @@ Anyway?`,
       <em style="color: var(--cata-color-gray)">({t("Loading...")})</em>
     {/if}
     <span style="white-space: nowrap">
-      {t("Tiles:")}
+      {t("Tileset:")}
       <!-- svelte-ignore a11y-no-onchange -->
       <select
         value={tilesetUrlTemplate}
