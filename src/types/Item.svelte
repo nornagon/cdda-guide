@@ -110,7 +110,7 @@ let magazine_compatible = pockets
         type: "item" as keyof SupportedTypesWithMapped,
         id,
       })) ??
-      p?.flag_restriction.map((id) => ({
+      p.flag_restriction?.map((id) => ({
         type: "json_flag" as keyof SupportedTypesWithMapped,
         id,
       })) ??
