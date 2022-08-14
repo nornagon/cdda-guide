@@ -19,7 +19,6 @@ import type {
   Item,
   UseFunction,
 } from "./types";
-import { tx } from "@transifex/native";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["AMMO", "item"],

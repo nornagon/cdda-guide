@@ -28,7 +28,7 @@ registerSW({});
 const url = new URL(location.href);
 const locale = url.searchParams.get("lang");
 if (locale) {
-  tx.setCurrentLocale(locale).then(start);
+  tx.setCurrentLocale(locale).then(start, start);
 } else {
   start();
 }
