@@ -111,9 +111,18 @@ function findTile(tileData: any, id: string): TileInfo {
       ty: fgTy,
     };
   }
+  const idMatches = (testId: string) =>
+    testId &&
+    (testId === id ||
+      (testId.startsWith(id) &&
+        /^_season_(autumn|spring|summer|winter)$/.test(
+          testId.substring(id.length)
+        )));
   for (const chunk of tileData["tiles-new"]) {
     for (const info of chunk.tiles) {
-      if ((Array.isArray(info.id) && info.id.includes(id)) || info.id === id) {
+      if (
+        Array.isArray(info.id) ? info.id.some(idMatches) : idMatches(info.id)
+      ) {
         let fg = Array.isArray(info.fg) ? info.fg[0] : info.fg;
         let bg = Array.isArray(info.bg) ? info.bg[0] : info.bg;
         if (fg && typeof fg === "object") fg = fg.sprite;
