@@ -278,6 +278,22 @@ export function mergeLoot(loots: { loot: Loot; weight: number }[]): Loot {
   return mergedLoot;
 }
 
+function attenuateLoot(loot: Loot, t: number): Loot {
+  const attenuatedLoot: Loot = new Map();
+  for (const [k, v] of loot.entries()) attenuatedLoot.set(k, v * t);
+  return attenuatedLoot;
+}
+
+function attenuatePalette(
+  palette: Map<string, Loot>,
+  t: number
+): Map<string, Loot> {
+  const attenuatedPalette: Map<string, Loot> = new Map();
+  for (const [k, v] of palette.entries())
+    attenuatedPalette.set(k, attenuateLoot(v, t));
+  return attenuatedPalette;
+}
+
 function addLoot(loots: Loot[]): Loot {
   const ret: Loot = new Map();
   for (const loot of loots) {
@@ -416,7 +432,7 @@ type RawPalette = {
   palettes?: (
     | string
     | { param: any }
-    | { distribution: any }
+    | { distribution: [string, number][] }
     | { switch: any }
   )[];
 };
@@ -484,11 +500,20 @@ export function parsePalette(
       chance: 1,
     };
   });
-  const palettes = (palette.palettes ?? [])
-    .flatMap((id) =>
-      typeof id !== "string" ? [] /*TODO*/ : [data.byId("palette", id)]
-    )
-    .map((p) => parsePalette(data, p));
+  const palettes = (palette.palettes ?? []).flatMap((id) => {
+    if (typeof id === "string") {
+      return [parsePalette(data, data.byId("palette", id))];
+    } else if ("distribution" in id) {
+      const opts = id.distribution;
+      const totalProb = opts.reduce((m, [, prob]) => m + prob, 0);
+      return opts.map(([subId, prob]) =>
+        attenuatePalette(
+          parsePalette(data, data.byId("palette", subId)),
+          prob / totalProb
+        )
+      );
+    } else return [];
+  });
   const ret = mergePalettes([item, items, sealed_item, nested, ...palettes]);
   paletteCache.set(palette, ret);
   return ret;
