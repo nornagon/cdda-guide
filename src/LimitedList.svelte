@@ -10,7 +10,7 @@ export let grace = 4;
 // In test mode, always render the expanded list to catch any render bugs that
 // only show up when the full list is shown.
 const isTesting =
-  typeof globalThis !== undefined && (globalThis as any)?.__isTesting__;
+  typeof globalThis !== undefined && (globalThis as any).process;
 
 let realLimit = isTesting
   ? Infinity
