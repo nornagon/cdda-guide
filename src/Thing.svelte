@@ -117,7 +117,7 @@ const displays = {
         </details>
       </p>
     </section>
-  {:else if globalThis?.process}
+  {:else if typeof globalThis !== "undefined" && globalThis.process}
     <!-- running in tests -->
     <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
   {:else}
