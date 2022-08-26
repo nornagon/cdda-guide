@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import Thing from "./Thing.svelte";
-import { data } from "./data";
+import { data, loadProgress } from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
@@ -220,7 +220,16 @@ function getLanguageName(code: string) {
         {/if}
       {/key}
     {:else}
-      <em style="color: var(--cata-color-gray)">{t("Loading...")}</em>
+      <span style="color: var(--cata-color-gray)">
+        <em>{t("Loading...")}</em>
+        {#if $loadProgress}
+          ({($loadProgress[0] / 1024 / 1024).toFixed(1)}/{(
+            $loadProgress[1] /
+            1024 /
+            1024
+          ).toFixed(1)} MB)
+        {/if}
+      </span>
     {/if}
   {:else if search}
     {#key search}

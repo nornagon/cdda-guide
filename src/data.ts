@@ -1195,30 +1195,81 @@ export function normalizeUseAction(action: Item["use_action"]): UseFunction[] {
   }
 }
 
-const fetchJson = async (version: string) => {
-  const res = await fetch(
-    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/all.json`,
-    {
-      mode: "cors",
-    }
-  );
-  if (!res.ok)
-    throw new Error(`Error ${res.status} (${res.statusText}) fetching data`);
-  return res.json();
+const fetchJsonWithProgress = (
+  url: string,
+  progress: (receivedBytes: number, totalBytes: number) => void
+): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = (e) => {
+      resolve(xhr.response);
+    };
+    xhr.onprogress = (e) => {
+      if (e.lengthComputable) progress(e.loaded, e.total);
+    };
+    xhr.onerror = () => {
+      reject(`Error ${xhr.status} (${xhr.statusText}) fetching ${url}`);
+    };
+    xhr.onabort = () => {
+      reject(`Aborted while fetching ${url}`);
+    };
+    xhr.open("GET", url);
+    xhr.responseType = "json";
+    xhr.send();
+  });
 };
 
-const fetchLocaleJson = async (version: string, locale: string) => {
-  const res = await fetch(
-    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/lang/${locale}.json`,
-    {
-      mode: "cors",
-    }
-  );
+// Sigh, the fetch spec has a bug: https://github.com/whatwg/fetch/issues/1358
+const fetchJsonWithIncorrectProgress = async (
+  url: string,
+  progress: (receivedBytes: number, totalBytes: number) => void
+) => {
+  const res = await fetch(url, { mode: "cors" });
   if (!res.ok)
-    throw new Error(
-      `Error ${res.status} (${res.statusText}) fetching locale data`
-    );
-  return res.json();
+    throw new Error(`Error ${res.status} (${res.statusText}) fetching ${url}`);
+  const reader = res.body.getReader();
+  const contentLength = +res.headers.get("Content-Length");
+  let receivedBytes = 0;
+  progress(receivedBytes, contentLength);
+  const chunks = [];
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    receivedBytes += value.length;
+    progress(receivedBytes, contentLength);
+  }
+  // Wait a tick to allow the 100% progress value to get through
+  await new Promise((resolve) => setTimeout(resolve));
+  const chunksAll = new Uint8Array(receivedBytes); // (4.1)
+  let position = 0;
+  for (const chunk of chunks) {
+    chunksAll.set(chunk, position); // (4.2)
+    position += chunk.length;
+  }
+  const result = new TextDecoder("utf-8").decode(chunksAll);
+  return JSON.parse(result);
+};
+
+const fetchJson = async (
+  version: string,
+  progress: (receivedBytes: number, totalBytes: number) => void
+) => {
+  return fetchJsonWithProgress(
+    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/all.json`,
+    progress
+  );
+};
+
+const fetchLocaleJson = async (
+  version: string,
+  locale: string,
+  progress: (receivedBytes: number, totalBytes: number) => void
+) => {
+  return fetchJsonWithProgress(
+    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/lang/${locale}.json`,
+    progress
+  );
 };
 
 async function retry<T>(promiseGenerator: () => Promise<T>) {
@@ -1232,6 +1283,8 @@ async function retry<T>(promiseGenerator: () => Promise<T>) {
   }
 }
 
+const loadProgressStore = writable<[number, number] | null>(null);
+export const loadProgress = { subscribe: loadProgressStore.subscribe };
 let _hasSetVersion = false;
 const { subscribe, set } = writable<CddaData>(null);
 export const data = {
@@ -1239,9 +1292,29 @@ export const data = {
   async setVersion(version: string, locale: string | undefined) {
     if (_hasSetVersion) throw new Error("can only set version once");
     _hasSetVersion = true;
+    let totals: [number, number] = [null, null];
+    let receiveds: [number, number] = [null, null];
+    const updateProgress = () => {
+      const total = totals[0] + totals[1];
+      const received = receiveds[0] + receiveds[1];
+      loadProgressStore.set([received, total]);
+    };
     const [dataJson, localeJson] = await Promise.all([
-      retry(() => fetchJson(version)),
-      locale && retry(() => fetchLocaleJson(version, locale)),
+      retry(() =>
+        fetchJson(version, (receivedBytes, totalBytes) => {
+          totals[0] = totalBytes;
+          receiveds[0] = receivedBytes;
+          updateProgress();
+        })
+      ),
+      locale &&
+        retry(() =>
+          fetchLocaleJson(version, locale, (receivedBytes, totalBytes) => {
+            totals[1] = totalBytes;
+            receiveds[1] = receivedBytes;
+            updateProgress();
+          })
+        ),
     ]);
     if (localeJson) {
       i18n.loadJSON(localeJson);

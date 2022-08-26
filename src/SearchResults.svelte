@@ -1,6 +1,7 @@
 <script lang="ts">
 import { mapType, singular, singularName } from "./data";
 import type { CddaData } from "./data";
+import { loadProgress } from "./data";
 import * as fuzzysort from "fuzzysort";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
@@ -135,6 +136,12 @@ $: history.replaceState({ search }, "");
   {:else}
     <em>{t("No results.", { _context: "Search Results" })}</em>
   {/each}
-{:else}
+{:else if data || !$loadProgress}
   <pre>...</pre>
+{:else}
+  <pre>{($loadProgress[0] / 1024 / 1024).toFixed(1)}/{(
+      $loadProgress[1] /
+      1024 /
+      1024
+    ).toFixed(1)} MB</pre>
 {/if}
