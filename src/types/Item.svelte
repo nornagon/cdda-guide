@@ -199,15 +199,14 @@ const fuelForItems = (fuelForVPs.sort(byName) as SupportedTypeMapped[]).concat(
           <dd>
             <ul class="comma-separated">
               {#each materials as m}
+                <!-- prettier-ignore -->
                 <li>
                   <ThingLink
                     type="material"
                     id={m.type} />{#if materials.length > 1}{" "}({(
-                      ((m.portion ?? 1) / totalMaterialPortion) *
+                      (m.portion / totalMaterialPortion) *
                       100
-                    ).toFixed(0)}%){/if}
-                </li>
-              {/each}
+                    ).toFixed(0)}%){/if}</li>{/each}
             </ul>
           </dd>
         {/if}
@@ -424,7 +423,7 @@ const fuelForItems = (fuelForVPs.sort(byName) as SupportedTypeMapped[]).concat(
     </dl>
   </section>
 {/if}
-{#if item.bashing || item.cutting || item.type === "GUN" || item.type === "AMMO"}
+{#if item.bashing || item.cutting || item.type === "GUN" || (item.type === "AMMO" && (item.show_stats || item.damage))}
   <div class="side-by-side">
     <MeleeInfo {item} />
     {#if item.type === "GUN"}

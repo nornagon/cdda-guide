@@ -25,11 +25,10 @@ const correspondingItem = data.itemForBionic(item);
       {#if item.occupied_bodyparts}
         <ul class="comma-separated">
           {#each item.occupied_bodyparts as [bp_id, slots]}
+            <!-- prettier-ignore -->
             <li>
               {singularName(data.byId("body_part", bp_id))} ({slots}
-              {slots === 1 ? "slot" : "slots"})
-            </li>
-          {/each}
+              {slots === 1 ? "slot" : "slots"})</li>{/each}
         </ul>
       {:else}
         <em>{t("none")}</em>
