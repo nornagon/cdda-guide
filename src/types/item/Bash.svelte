@@ -4,7 +4,7 @@ import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Terrain, Furniture } from "../../types";
+import type { Terrain, Furniture, ItemGroup, VehiclePart } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
@@ -12,7 +12,11 @@ export let item_id: string;
 
 const data = getContext<CddaData>("data");
 
-let bashFrom = (data.byType("terrain") as (Terrain | Furniture)[])
+const byName = (a: any, b: any) =>
+  singularName(a).localeCompare(singularName(b));
+let bashFromFurnitureOrTerrain = (
+  data.byType("terrain") as (Terrain | Furniture)[]
+)
   .concat(data.byType("furniture"))
   .filter((f) => {
     const bash = f.bash?.items
@@ -27,7 +31,29 @@ let bashFrom = (data.byType("terrain") as (Terrain | Furniture)[])
 
     return bash.some(({ id }) => id === item_id);
   })
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
+
+let bashFromVP = data
+  .byType("vehicle_part")
+  .filter((vp) => {
+    if (!vp.id) return;
+    const breaksIntoGroup: ItemGroup | null =
+      typeof vp.breaks_into === "string"
+        ? data.byId("item_group", vp.breaks_into)
+        : Array.isArray(vp.breaks_into)
+        ? { subtype: "collection", entries: vp.breaks_into }
+        : vp.breaks_into
+        ? vp.breaks_into
+        : null;
+    const breaksIntoGroupFlattened =
+      breaksIntoGroup && data.flattenItemGroup(breaksIntoGroup);
+    return breaksIntoGroupFlattened?.some((v) => v.id === item_id);
+  })
+  .sort(byName);
+
+let bashFrom = (
+  bashFromFurnitureOrTerrain as (Furniture | Terrain | VehiclePart)[]
+).concat(bashFromVP);
 </script>
 
 {#if bashFrom.length}
@@ -36,9 +62,10 @@ let bashFrom = (data.byType("terrain") as (Terrain | Furniture)[])
     <LimitedList items={bashFrom} let:item={f}>
       <ItemSymbol item={data.byId(f.type, f.id)} />
       <ThingLink id={f.id} type={f.type} />
-      {#if f.bash.str_min}
-        <span style="color: var(--cata-color-gray)"
-          >(≥ {f.bash.str_min} STR)</span>
+      {#if f.bash?.str_min}
+        <span style="color: var(--cata-color-gray)">
+          (≥ {f.bash.str_min} STR)
+        </span>
       {/if}
     </LimitedList>
   </section>
