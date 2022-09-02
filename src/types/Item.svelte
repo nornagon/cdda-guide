@@ -173,6 +173,23 @@ const fuelForBionics = data
 const fuelForItems = (fuelForVPs.sort(byName) as SupportedTypeMapped[]).concat(
   fuelForBionics.sort(byName)
 );
+
+const usedToRepair = data.byType("fault").filter((f) => {
+  const mendingMethods = (f.mending_methods ?? []).map((mm) => {
+    const requirement =
+      typeof mm.requirements === "string"
+        ? data.byId("requirement", mm.requirements)
+        : mm.requirements;
+    const components = data.flattenRequirement(
+      requirement.components ?? [],
+      (r) => r.components
+    );
+    return { mending_method: mm, components, requirement };
+  });
+  return mendingMethods.some((mm) =>
+    mm.components.some((c) => c.some((i) => i.id === item.id))
+  );
+});
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -522,6 +539,14 @@ const fuelForItems = (fuelForVPs.sort(byName) as SupportedTypeMapped[]).concat(
     <LimitedList items={fuelForItems} let:item>
       <ItemSymbol {item} />
       <ThingLink type={item.type} id={item.id} />
+    </LimitedList>
+  </section>
+{/if}
+{#if usedToRepair.length}
+  <section>
+    <h1>{t("Used to Repair", { _context })}</h1>
+    <LimitedList items={usedToRepair} let:item>
+      <ThingLink type="fault" id={item.id} />
     </LimitedList>
   </section>
 {/if}
