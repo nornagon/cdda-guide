@@ -12,14 +12,29 @@ const data = getContext<CddaData>("data");
 const _context = "Bionic";
 
 const correspondingItem = data.itemForBionic(item);
+const containingBionics = data
+  .byType("bionic")
+  .filter((x) => x.id && x.included_bionics?.includes(item.id));
 </script>
 
 <h1>{t("Bionic")}: {singularName(item)}</h1>
 <section>
   <h1>{t("General", { _context, _comment: "Section heading" })}</h1>
   <dl>
-    <dt>{t("Item")}</dt>
-    <dd><ThingLink type="item" id={correspondingItem.id} /></dd>
+    {#if correspondingItem}
+      <dt>{t("Item")}</dt>
+      <dd><ThingLink type="item" id={correspondingItem.id} /></dd>
+    {/if}
+    {#if containingBionics.length}
+      <dt>{t("Included In", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each containingBionics as b}
+            <li><ThingLink type="bionic" id={b.id} /></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
     <dt>{t("Occupied Body Parts", { _context })}</dt>
     <dd>
       {#if item.occupied_bodyparts}
