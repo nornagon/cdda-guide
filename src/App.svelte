@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import Thing from "./Thing.svelte";
-import { data, loadProgress } from "./data";
+import { data, loadProgress, mapType } from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
@@ -9,6 +9,7 @@ import dontPanic from "./assets/dont_panic.png";
 import throttle from "lodash.throttle";
 import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
 import { t } from "@transifex/native";
+import type { SupportedTypeMapped } from "./types";
 
 let item: { type: string; id: string } | null = null;
 
@@ -183,6 +184,39 @@ function getLanguageName(code: string) {
         }).of(code.replace(/_/, "-"))
       : code)
   );
+}
+
+const randomableItemTypes = new Set([
+  "item",
+  "monster",
+  "furniture",
+  "terrain",
+  "vehicle_part",
+  "tool_quality",
+  "mutation",
+  "martial_art",
+  "json_flag",
+  "achivement",
+  "conduct",
+]);
+let waitingForRandom = false;
+function randomPage(e: Event) {
+  e.preventDefault();
+  if (waitingForRandom) return;
+  waitingForRandom = true;
+  const unsubscribe = data.subscribe((data) => {
+    if (data) {
+      const items = data
+        .all()
+        .filter(
+          (x) => "id" in x && randomableItemTypes.has(mapType(x.type))
+        ) as (SupportedTypeMapped & { id: string })[];
+      const item = items[(Math.random() * items.length) | 0];
+      location.hash = `#/${mapType(item.type)}/${item.id}`;
+      waitingForRandom = false;
+      setTimeout(unsubscribe);
+    }
+  });
 }
 </script>
 
@@ -365,6 +399,15 @@ Anyway?`,
         <a href="#/conduct">{t("Conducts")}</a>
       </li>
     </ul>
+
+    <InterpolatedTranslation
+      str={t(`Or visit a {link_random_page}.`, {
+        link_random_page: "{link_random_page}",
+      })}
+      slot0="link_random_page">
+      <a slot="0" href="#/item/con_milk" on:click={randomPage}
+        >{t("random page")}</a>
+    </InterpolatedTranslation>
   {/if}
 
   <p>
