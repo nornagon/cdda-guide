@@ -104,7 +104,11 @@ export const singularName = (obj: any): string => pluralName(obj, 1);
 export const pluralName = (obj: any, n: number = 2): string => {
   const name: Translation = obj?.name;
   if (name == null) return obj?.id ?? obj?.abstract;
-  return translate(name, needsPlural.includes(obj.type), n);
+  const txed = Array.isArray(name)
+    ? translate(name[0], needsPlural.includes(obj.type), n)
+    : translate(name, needsPlural.includes(obj.type), n);
+  if (txed.length === 0) return obj?.id ?? obj?.abstract;
+  return txed;
 };
 
 export function showProbability(prob: number) {
