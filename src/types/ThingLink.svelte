@@ -7,6 +7,7 @@ export let type: keyof SupportedTypesWithMapped;
 export let id: string;
 export let plural: boolean = false;
 export let count: number | [number, number] | undefined = undefined;
+export let variantId: string | undefined = undefined;
 
 function countToString(count: number | [number, number]): string {
   if (typeof count === "number") return count.toString();
@@ -40,6 +41,10 @@ if (item?.type === "vehicle_part" && !item.name && item.item)
         count
       )}){/if}</span>
 {:else}
+  {@const nameSource =
+    item && variantId && "variants" in item
+      ? item.variants.find((v) => v.id === variantId) ?? item
+      : item}
   <a href="#/{type}/{id}"
-    >{item ? (plural ? pluralName : singularName)(item) : id}</a>
+    >{item ? (plural ? pluralName : singularName)(nameSource) : id}</a>
 {/if}

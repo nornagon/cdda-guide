@@ -7,6 +7,7 @@ import ItemSymbol from "./types/item/ItemSymbol.svelte";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import { setContext } from "svelte";
 import { t } from "@transifex/native";
+import ThingLink from "./types/ThingLink.svelte";
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -117,15 +118,13 @@ $: history.replaceState({ search }, "");
     <h1>{type.replace(/_/g, " ")}</h1>
     <ul>
       {#each matchingObjects.get(type) as result}
+        {@const item = data._flatten(result.item)}
         <li>
-          <ItemSymbol item={data._flatten(result.item)} />
-          <a href="#/{mapType(result.item.type)}/{result.item.id}">
-            {#if result.variant}
-              {singular(result.variant.name)}
-            {:else}
-              {singularName(data._flatten(result.item))}
-            {/if}
-          </a>
+          <ItemSymbol {item} />
+          <ThingLink
+            type={mapType(result.item.type)}
+            id={result.item.id}
+            variantId={result.variant?.id} />
           {#if /obsolet/.test(result.item.__filename)}
             <em style="color: var(--cata-color-gray)"
               >({t("obsolete", { _context: "Search Results" })})</em>
