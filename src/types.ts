@@ -191,7 +191,7 @@ export type ToolSlot = {
   charges_per_use?: integer;
   charge_factor?: integer; // default 1
   turns_per_charge?: integer;
-  power_draw?: integer;
+  power_draw?: energy;
   revert_to?: string; // item_id
   sub?: string; // item_id
   rand_charges?: integer[];

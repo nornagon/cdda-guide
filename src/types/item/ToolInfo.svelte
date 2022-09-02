@@ -19,7 +19,7 @@ export let item: ToolSlot;
       {/if}
       {#if item.power_draw}
         <dt>{t("Power Draw", { _context })}</dt>
-        <dd>{(item.power_draw / 1000).toFixed(1)} W</dd>
+        <dd>{item.power_draw} W</dd>
       {/if}
       {#if item.turns_per_charge}
         <dt>{t("Turns Per Charge", { _context })}</dt>
