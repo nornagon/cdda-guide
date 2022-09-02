@@ -36,6 +36,11 @@ type SearchTarget = {
   type: keyof SupportedTypesWithMapped;
 };
 let targets: SearchTarget[];
+function searchableName(data: CddaData, item: any) {
+  if (item?.type === "vehicle_part" && !item.name && item.item)
+    item = data.byId("item", item.item);
+  return singularName(item);
+}
 $: targets = [...(data?.all() ?? [])]
   .filter(
     (x) =>
@@ -53,7 +58,7 @@ $: targets = [...(data?.all() ?? [])]
     [
       {
         id: (x as any).id,
-        name: singularName(x),
+        name: searchableName(data, x),
         type: mapType(x.type),
       },
     ].concat(
