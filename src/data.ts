@@ -275,9 +275,10 @@ export class CddaData {
     id: string
   ): SupportedTypesWithMapped[TypeName] {
     if (typeof id !== "string") throw new Error("Requested non-string id");
-    if (type === "item" && this._migrations.has(id))
+    const byId = this._byTypeById.get(type);
+    if (type === "item" && !byId?.has(id) && this._migrations.has(id))
       return this.byId(type, this._migrations.get(id));
-    const obj = this._byTypeById.get(type)?.get(id);
+    const obj = byId?.get(id);
     if (obj) return this._flatten(obj);
   }
 
