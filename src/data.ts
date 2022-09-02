@@ -18,6 +18,7 @@ import type {
   Vehicle,
   Item,
   UseFunction,
+  Bionic,
 } from "./types";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
@@ -1023,6 +1024,14 @@ export class CddaData {
       }
     }
     return { subtype, entries: [] };
+  }
+
+  itemForBionic(bionic: Bionic): Item {
+    return (
+      this.byType("item").find(
+        (i) => "bionic_id" in i && i.id && i.bionic_id === bionic.id
+      ) ?? this.byId("item", bionic.id)
+    );
   }
 }
 

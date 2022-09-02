@@ -1,5 +1,6 @@
 <script lang="ts">
 import { t } from "@transifex/native";
+import LimitedList from "../LimitedList.svelte";
 import { getContext } from "svelte";
 
 import {
@@ -16,6 +17,7 @@ import type {
   Item,
   SupportedTypesWithMapped,
   UseFunction,
+  SupportedTypeMapped,
 } from "../types";
 import AsciiPicture from "./AsciiPicture.svelte";
 import AmmoInfo from "./item/AmmoInfo.svelte";
@@ -78,10 +80,11 @@ const materials =
     ? [{ type: item.material, portion: 1 }]
     : isStrings(item.material)
     ? item.material.map((s) => ({ type: s, portion: 1 }))
-    : item.material;
-const totalMaterialPortion = materials.reduce(
-  (m, o) => m + (o.portion ?? 1),
-  0
+    : item.material.map((s) => ({ type: s.type, portion: s.portion ?? 1 }));
+const totalMaterialPortion = materials.reduce((m, o) => m + o.portion, 0);
+const primaryMaterial = materials.reduce(
+  (m, o) => (!m || o.portion > m.portion ? o : m),
+  null
 );
 let flags = (item.flags ?? []).map(
   (id) => data.byId("json_flag", id) ?? { id }
@@ -154,6 +157,22 @@ const usage: UseFunction[] = normalizeUseAction(item.use_action).map((s) => {
 
 const ascii_picture =
   item.ascii_picture && data.byId("ascii_art", item.ascii_picture);
+
+const byName = (a: any, b: any) =>
+  singularName(a).localeCompare(singularName(b));
+// TODO: eventually vehicle_parts will probably switch to using materials for fuel_options
+const fuelForVPs = data
+  .byType("vehicle_part")
+  .filter(
+    (vp) =>
+      vp.id && (vp.fuel_options?.includes(item.id) || vp.fuel_type === item.id)
+  );
+const fuelForBionics = data
+  .byType("bionic")
+  .filter((b) => b.id && b.fuel_options?.includes(primaryMaterial?.type));
+const fuelForItems = (fuelForVPs.sort(byName) as SupportedTypeMapped[]).concat(
+  fuelForBionics.sort(byName)
+);
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -496,6 +515,15 @@ const ascii_picture =
         {/if}
       </dl>
     {/each}
+  </section>
+{/if}
+{#if fuelForItems.length}
+  <section>
+    <h1>{t("Fuel For", { _context })}</h1>
+    <LimitedList items={fuelForItems} let:item>
+      <ItemSymbol {item} />
+      <ThingLink type={item.type} id={item.id} />
+    </LimitedList>
   </section>
 {/if}
 <ComponentOf item_id={item.id} />

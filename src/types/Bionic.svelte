@@ -10,12 +10,16 @@ import ThingLink from "./ThingLink.svelte";
 export let item: Bionic;
 const data = getContext<CddaData>("data");
 const _context = "Bionic";
+
+const correspondingItem = data.itemForBionic(item);
 </script>
 
 <h1>{t("Bionic")}: {singularName(item)}</h1>
 <section>
   <h1>{t("General", { _context, _comment: "Section heading" })}</h1>
   <dl>
+    <dt>{t("Item")}</dt>
+    <dd><ThingLink type="item" id={correspondingItem.id} /></dd>
     <dt>{t("Occupied Body Parts", { _context })}</dt>
     <dd>
       {#if item.occupied_bodyparts}

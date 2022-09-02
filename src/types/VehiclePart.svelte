@@ -82,7 +82,7 @@ vehiclesContainingPart.sort((a, b) =>
 <section>
   <h1>{t("Vehicle Part")}</h1>
   <dl>
-    <dt>{t("Item", { _context })}</dt>
+    <dt>{t("Item")}</dt>
     <dd><ThingLink id={item.item} type="item" /></dd>
     <dt>{t("Weight")}</dt>
     <dd>{asKilograms(data.byId("item", item.item).weight)}</dd>
