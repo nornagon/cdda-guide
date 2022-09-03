@@ -103,6 +103,16 @@ vehiclesContainingPart.sort((a, b) =>
       {t("Durability", { _context })}
     </dt>
     <dd>{item.durability ?? 0}</dd>
+    {#if item.flags?.includes("WHEEL")}
+      {#if item.wheel_type}
+        <dt>Wheel Type</dt>
+        <dd>{item.wheel_type}</dd>
+      {/if}
+      <dt>Contact Area</dt>
+      <dd>{item.contact_area ?? 1} cm²</dd>
+      <dt>Rolling Resistance</dt>
+      <dd>{item.rolling_resistance ?? 1}</dd>
+    {/if}
     {#if item.size}
       <dt>{t("Capacity", { _context })}</dt>
       <dd>{asLiters(item.size)}</dd>
