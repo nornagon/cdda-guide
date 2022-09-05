@@ -1,5 +1,4 @@
 import { CddaData } from "./data";
-import { getLootForMapgen } from "./types/item/spawnLocations";
 
 test("flattened item group includes container item for distribution", () => {
   const data = new CddaData([

@@ -359,8 +359,7 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   const palette = parsePalette(data, mapgen.object);
   const place_items = (mapgen.object.place_items ?? []).map(
     ({ item, chance = 100, repeat }) => ({
-      loot: parseItemGroup(data, item),
-      chance: repeatChance(repeat, chance / 100),
+      loot: parseItemGroup(data, item, repeat, chance / 100),
     })
   );
   const place_item = [
@@ -372,8 +371,9 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   const place_loot = (mapgen.object.place_loot ?? []).map(
     ({ item, group, chance = 100, repeat }) => ({
       // This assumes that .item and .group are mutually exclusive
-      loot: item ? new Map([[item, 1]]) : parseItemGroup(data, group),
-      chance: repeatChance(repeat, chance / 100),
+      loot: item
+        ? new Map([[item, 1]])
+        : parseItemGroup(data, group, repeat, chance / 100),
     })
   );
   const place_nested = (mapgen.object.place_nested ?? []).map((nested) => {
@@ -413,9 +413,29 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   return loot;
 }
 
+function repeatThrough(
+  loot: Loot,
+  repeat: undefined | number | [number] | [number, number],
+  chance: number
+): Loot {
+  return new Map(repeatThroughArr([...loot.entries()], repeat, chance));
+}
+
+function repeatThroughArr(
+  loot: [string, chance][],
+  repeat: undefined | number | [number] | [number, number],
+  chance: number
+): [string, chance][] {
+  return loot.map(([id, v]) => {
+    return [id, repeatChance(repeat, chance * v)];
+  });
+}
+
 function parseItemGroup(
   data: CddaData,
-  group: string | raw.ItemGroup | raw.ItemGroupEntry[]
+  group: string | raw.ItemGroup | raw.ItemGroupEntry[],
+  repeat: undefined | number | [number] | [number, number],
+  chance: chance
 ): Loot {
   const g =
     typeof group === "string"
@@ -424,7 +444,13 @@ function parseItemGroup(
       ? { subtype: "collection" as "collection", entries: group }
       : group;
   const flat = data.flattenItemGroup(g);
-  return new Map(flat.map(({ id, prob }) => [id, prob]));
+  return new Map(
+    repeatThroughArr(
+      flat.map(({ id, prob }) => [id, prob]),
+      repeat,
+      chance
+    )
+  );
 }
 
 function mergePalettes(palettes: Map<string, Loot>[]): Map<string, Loot> {
@@ -480,11 +506,13 @@ export function parsePalette(
     function* ({ item, items, chance = 100 }) {
       if (items)
         yield {
-          loot: parseItemGroup(data, items.item),
-          chance: repeatChance(
+          loot: parseItemGroup(
+            data,
+            items.item,
             items.repeat,
-            (chance / 100) * ((items.chance ?? 100) / 100)
+            ((chance / 100) * (items.chance ?? 100)) / 100
           ),
+          chance: 1,
         };
       if (item)
         yield {
@@ -509,8 +537,8 @@ export function parsePalette(
     palette.items,
     function* ({ item, chance = 100, repeat }) {
       yield {
-        loot: parseItemGroup(data, item),
-        chance: repeatChance(repeat, chance / 100),
+        loot: parseItemGroup(data, item, repeat, chance / 100),
+        chance: 1,
       };
     }
   );

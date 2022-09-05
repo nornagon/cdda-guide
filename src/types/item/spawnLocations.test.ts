@@ -9,7 +9,7 @@ import {
   repeatChance,
 } from "./spawnLocations";
 import { CddaData } from "../../data";
-import type { Mapgen, OvermapSpecial } from "../../types";
+import type { ItemGroup, Mapgen, OvermapSpecial } from "../../types";
 
 describe("collection()", () => {
   it("returns nothing given no items", () => {
@@ -319,6 +319,46 @@ describe("repeatChance()", () => {
   });
   it.each([undefined, null])("handles %s repeat as 1", (nullish) => {
     expect(repeatChance(nullish, 0.5)).toBe(0.5);
+  });
+});
+
+describe("foo", () => {
+  it("place_loot", async () => {
+    const data = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        om_terrain: "test_ter",
+        object: {
+          fill_ter: "t_floor",
+          rows: [],
+          place_loot: [
+            { group: "test_group", x: 0, y: 0, repeat: 4, chance: 75 },
+          ],
+        },
+      } as Mapgen,
+      {
+        type: "item_group",
+        id: "test_group",
+        items: [
+          ["item_a", 50],
+          ["item_b", 100],
+        ],
+      } as ItemGroup,
+    ]);
+    const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
+    // prob for item_a:
+    //   4x 75% chances for a 33% chance to spawn.
+    //   = 4x 75%*33% = 24.75% chances to spawn
+    //   so prob(spawn) = 1-(1-24.75%)^4
+    //   ~= 68%
+    expect(loot.get("item_a").toFixed(2)).toEqual("0.68");
+    // prob for item_b:
+    //   4x 75% chances for a 2/3 chance to spawn.
+    //   = 4x 75%*2/3 = 50% chances to spawn
+    //   so prob(spawn) = 1-(1-50%)^4
+    //   ~= 93%
+    expect(loot.get("item_b").toFixed(2)).toEqual("0.94");
   });
 });
 
