@@ -378,12 +378,9 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   );
   const place_nested = (mapgen.object.place_nested ?? []).map((nested) => {
     const loot = lootForChunks(data, nested.chunks);
-    // TODO: do the probability correctly when repeat is a range, e.g. repeat: [2, 10]
-    const repeat =
-      (Array.isArray(nested.repeat) ? nested.repeat[0] : nested.repeat) ?? 1;
     const multipliedLoot: Loot = new Map();
     for (const [id, chance] of loot.entries()) {
-      multipliedLoot.set(id, 1 - Math.pow(1 - chance, repeat));
+      multipliedLoot.set(id, repeatChance(nested.repeat, chance));
     }
     return { loot: multipliedLoot };
   });
@@ -411,14 +408,6 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   const loot = collection(items);
   lootForMapgenCache.set(mapgen, loot);
   return loot;
-}
-
-function repeatThrough(
-  loot: Loot,
-  repeat: undefined | number | [number] | [number, number],
-  chance: number
-): Loot {
-  return new Map(repeatThroughArr([...loot.entries()], repeat, chance));
 }
 
 function repeatThroughArr(
