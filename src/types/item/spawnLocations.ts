@@ -241,6 +241,7 @@ const hiddenLocations = new Set([
   "airliner_crashed",
   "farm_abandoned",
   "ranch_camp",
+  "mil_base",
 ]);
 const lootByOmAppearanceCache = new WeakMap<
   CddaData,
