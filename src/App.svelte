@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import Thing from "./Thing.svelte";
-import { data, loadProgress, mapType } from "./data";
+import { CddaData, data, loadProgress, mapType } from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
@@ -199,25 +199,30 @@ const randomableItemTypes = new Set([
   "achivement",
   "conduct",
 ]);
-let waitingForRandom = false;
-function randomPage(e: Event) {
-  e.preventDefault();
-  if (waitingForRandom) return;
-  waitingForRandom = true;
-  const unsubscribe = data.subscribe((data) => {
-    if (data) {
-      const items = data
-        .all()
-        .filter(
-          (x) => "id" in x && randomableItemTypes.has(mapType(x.type))
-        ) as (SupportedTypeMapped & { id: string })[];
-      const item = items[(Math.random() * items.length) | 0];
-      location.hash = `#/${mapType(item.type)}/${item.id}`;
-      waitingForRandom = false;
-      setTimeout(unsubscribe);
-    }
+async function getRandomPage() {
+  const d = await new Promise<CddaData>((resolve) => {
+    const unsubscribe = data.subscribe((v) => {
+      if (v) {
+        resolve(v);
+        setTimeout(() => unsubscribe());
+      }
+    });
+  });
+  const items = d
+    .all()
+    .filter(
+      (x) => "id" in x && randomableItemTypes.has(mapType(x.type))
+    ) as (SupportedTypeMapped & { id: string })[];
+  return items[(Math.random() * items.length) | 0];
+}
+
+let randomPage: string | null = null;
+function newRandomPage() {
+  getRandomPage().then((r) => {
+    randomPage = `#/${mapType(r.type)}/${r.id}`;
   });
 }
+newRandomPage();
 </script>
 
 <svelte:window on:hashchange={hashchange} on:keydown={maybeFocusSearch} />
@@ -405,8 +410,11 @@ Anyway?`,
         link_random_page: "{link_random_page}",
       })}
       slot0="link_random_page">
-      <a slot="0" href="#/item/con_milk" on:click={randomPage}
-        >{t("random page")}</a>
+      <a
+        slot="0"
+        href={randomPage}
+        disabled={!randomPage}
+        on:click={() => setTimeout(newRandomPage)}>{t("random page")}</a>
     </InterpolatedTranslation>
   {/if}
 
