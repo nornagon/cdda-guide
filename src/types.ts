@@ -1088,7 +1088,7 @@ export type VehiclePart = {
   location?: string;
   durability?: integer;
   damage_modifier?: integer; // percentage, default 100
-  energy_consumption?: integer; // watts, default 0
+  energy_consumption?: energy; // per second, default 0
   power?: integer; // watts, default 0
   epower?: integer; // watts, default 0
   emissions?: string[]; // emit_id
