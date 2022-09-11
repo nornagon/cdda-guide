@@ -150,8 +150,8 @@ vehiclesContainingPart.sort((a, b) =>
       <dd>{item.epower}</dd>
     {/if}
     {#if item.energy_consumption}
-      <dt>{t("Drain", { _context })}</dt>
-      <dd>{-item.energy_consumption}</dd>
+      <dt>{t("Energy Consumption", { _context })}</dt>
+      <dd>{item.energy_consumption} / sec</dd>
     {/if}
     {#if item.power}
       <dt>{t("Power", { _context })}</dt>
