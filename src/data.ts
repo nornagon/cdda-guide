@@ -1216,7 +1216,10 @@ const fetchJsonWithProgress = (
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.onload = (e) => {
-      resolve(xhr.response);
+      if (xhr.response)
+        resolve(xhr.response);
+      else
+        reject(`Unknown error fetching JSON from ${url}`);
     };
     xhr.onprogress = (e) => {
       if (e.lengthComputable) progress(e.loaded, e.total);
