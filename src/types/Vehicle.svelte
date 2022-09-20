@@ -98,7 +98,12 @@ const symbolForVehiclePartVariant = (
   partId: string,
   variant: string
 ): string => {
-  const vehiclePart = data.byId("vehicle_part", partId);
+  // TODO: https://github.com/CleverRaven/Cataclysm-DDA/pull/59563
+  const vehiclePart =
+    data.byId("vehicle_part", partId) ??
+    (partId.startsWith("turret_")
+      ? data.byId("vehicle_part", "turret_generic")
+      : null);
   const symbol = vehiclePart.symbol ?? "=";
   const symbols = {
     ...(vehiclePart.standard_symbols ? standardSymbols : {}),
@@ -108,7 +113,12 @@ const symbolForVehiclePartVariant = (
 };
 
 const colorForVehiclePart = (partId: string) => {
-  const vehiclePart = data.byId("vehicle_part", partId);
+  // TODO: https://github.com/CleverRaven/Cataclysm-DDA/pull/59563
+  const vehiclePart =
+    data.byId("vehicle_part", partId) ??
+    (partId.startsWith("turret_")
+      ? data.byId("vehicle_part", "turret_generic")
+      : null);
   const color = vehiclePart.color;
   return color;
 };
@@ -142,6 +152,7 @@ const normalizedParts: NormalizedPartList[] = item.parts.map((part) => {
 const zForPart = (partId: string): number => {
   const vehiclePart = data.byId("vehicle_part", partId);
   if (!vehiclePart) {
+    // TODO: https://github.com/CleverRaven/Cataclysm-DDA/pull/59563
     if (partId.startsWith("turret_")) return zForPart("turret_generic");
     else {
       Sentry.captureException(new Error("Vehicle referenced unknown part"), {
@@ -187,7 +198,9 @@ for (let x = maxX; x >= minX; x--) {
 const items = data.flattenItemGroup(itemGroupFromVehicle(item));
 items.sort((a, b) => b.prob - a.prob);
 
-const parts = normalizedParts.flatMap((np) => np.parts);
+const parts = normalizedParts
+  .flatMap((np) => np.parts)
+  .filter((x) => data.byId("vehicle_part", x.partId));
 const partsGrouped = groupBy(parts, (p) => [p.partId]);
 const partsCounted = [...partsGrouped.entries()].map(([id, list]) => ({
   id,
