@@ -11,6 +11,7 @@ import {
   singularName,
 } from "../data";
 import LimitedList from "../LimitedList.svelte";
+import * as Sentry from "@sentry/browser";
 
 import type { Vehicle } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
@@ -140,6 +141,19 @@ const normalizedParts: NormalizedPartList[] = item.parts.map((part) => {
 
 const zForPart = (partId: string): number => {
   const vehiclePart = data.byId("vehicle_part", partId);
+  if (!vehiclePart) {
+    if (partId.startsWith("turret_")) return zForPart("turret_generic");
+    else {
+      Sentry.captureException(new Error("Vehicle referenced unknown part"), {
+        contexts: {
+          item: {
+            id: item.id,
+            partId,
+          },
+        },
+      });
+    }
+  }
   const location = vehiclePart.location;
   const z = zOrder[location] ?? 0;
   return z;
