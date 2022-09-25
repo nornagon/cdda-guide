@@ -197,6 +197,10 @@ const usedToRepair = data.byType("fault").filter((f) => {
     mm.components.some((c) => c.some((i) => i.id === item.id))
   );
 });
+
+const grantedByMutation = data
+  .byType("mutation")
+  .filter((m) => m.id && m.integrated_armor?.some((x) => x === item.id));
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -382,6 +386,17 @@ const usedToRepair = data.byType("fault").filter((f) => {
               {/each}
             </ul>
             ({item.brewable.time ?? "1 turn"})
+          </dd>
+        {/if}
+
+        {#if grantedByMutation}
+          <dt>{t("From Mutation", { _context })}</dt>
+          <dd>
+            <ul class="comma-separated">
+              {#each grantedByMutation as { id }}
+                <li><ThingLink type="mutation" {id} /></li>
+              {/each}
+            </ul>
           </dd>
         {/if}
       </dl>
