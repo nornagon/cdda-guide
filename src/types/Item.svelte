@@ -18,6 +18,7 @@ import type {
   SupportedTypesWithMapped,
   UseFunction,
   SupportedTypeMapped,
+  RequirementData,
 } from "../types";
 import AsciiPicture from "./AsciiPicture.svelte";
 import AmmoInfo from "./item/AmmoInfo.svelte";
@@ -176,12 +177,18 @@ const fuelForItems = (fuelForVPs.sort(byName) as SupportedTypeMapped[]).concat(
 
 const usedToRepair = data.byType("fault").filter((f) => {
   const mendingMethods = (f.mending_methods ?? []).map((mm) => {
-    const requirement =
+    const requirements: [RequirementData, number][] =
       typeof mm.requirements === "string"
-        ? data.byId("requirement", mm.requirements)
-        : mm.requirements;
+        ? [[data.byId("requirement", mm.requirements), 1]]
+        : Array.isArray(mm.requirements)
+        ? mm.requirements.map(
+            ([id, num]) =>
+              [data.byId("requirement", id), num] as [RequirementData, number]
+          )
+        : [[mm.requirements, 1]];
+    const requirement = data.normalizeRequirementUsing(requirements);
     const components = data.flattenRequirement(
-      requirement.components ?? [],
+      requirement.components,
       (r) => r.components
     );
     return { mending_method: mm, components, requirement };
@@ -335,7 +342,7 @@ const usedToRepair = data.byType("fault").filter((f) => {
           <dt>{t("Disassembles Into", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
-              {#each uncraft.components as { id, count }}
+              {#each uncraft.components as [id, count]}
                 <li><ThingLink {id} {count} type="item" /></li>
               {/each}
             </ul>

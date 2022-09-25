@@ -1,9 +1,9 @@
 <script lang="ts">
-import { i18n, normalize, singular, singularName } from "../data";
+import { i18n, singular, singularName } from "../data";
 import type { CddaData } from "../data";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
-import type { Fault } from "../types";
+import type { Fault, RequirementData } from "../types";
 import { t } from "@transifex/native";
 import RequirementDataTools from "./item/RequirementDataTools.svelte";
 
@@ -13,12 +13,18 @@ const _context = "Fault";
 export let item: Fault;
 
 const mendingMethods = (item.mending_methods ?? []).map((mm) => {
-  const requirement =
+  const requirements: [RequirementData, number][] =
     typeof mm.requirements === "string"
-      ? data.byId("requirement", mm.requirements)
-      : mm.requirements;
+      ? [[data.byId("requirement", mm.requirements), 1]]
+      : Array.isArray(mm.requirements)
+      ? mm.requirements.map(
+          ([id, num]) =>
+            [data.byId("requirement", id), num] as [RequirementData, number]
+        )
+      : [[mm.requirements, 1]];
+  const requirement = data.normalizeRequirementUsing(requirements);
   const components = data.flattenRequirement(
-    requirement.components ?? [],
+    requirement.components,
     (r) => r.components
   );
   return { mending_method: mm, components, requirement };

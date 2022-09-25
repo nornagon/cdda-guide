@@ -502,7 +502,7 @@ export type MendingMethod = {
   success_msg: Translation;
   time: string; // duration
   skills: { id: string; level: number }[];
-  requirements: string | Omit<Requirement, "id" | "type">;
+  requirements: string | [string, number][] | RequirementData;
   turns_into?: string; // fault_id
   also_mends?: string; // fault_id
 };

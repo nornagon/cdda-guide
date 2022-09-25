@@ -21,7 +21,7 @@ for (const id of allCraftableThings) {
   if (recipe) {
     const { components } = data.normalizeRequirementsForDisassembly(recipe);
     const defaultComponents = components.map((c) => c[0]);
-    if (defaultComponents.some((c) => c.id === item_id))
+    if (defaultComponents.some(([id]) => id === item_id))
       uncraftableFromSet.add(recipe.result);
   }
 }

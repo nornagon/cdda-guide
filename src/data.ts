@@ -19,6 +19,9 @@ import type {
   Item,
   UseFunction,
   Bionic,
+  ItemComponent,
+  QualityRequirement,
+  ToolComponent,
 } from "./types";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
@@ -851,7 +854,7 @@ export class CddaData {
     let removeFire = false;
     const newQualities: typeof qualities = [];
     for (const toolOpts of tools) {
-      for (const tool of toolOpts) {
+      for (const [toolId, _count] of toolOpts) {
         if (
           [
             "welder",
@@ -859,28 +862,28 @@ export class CddaData {
             "oxy_torch",
             "forge",
             "char_forge",
-          ].includes(tool.id)
+          ].includes(toolId)
         ) {
           toolOpts.length = 0;
           newQualities.push([{ id: "SAW_M_FINE", level: 1 }]);
           break;
         }
-        if (["sewing_kit", "mold_plastic"].includes(tool.id)) {
+        if (["sewing_kit", "mold_plastic"].includes(toolId)) {
           toolOpts.length = 0;
           newQualities.push([{ id: "CUT", level: 1 }]);
           break;
         }
-        if (tool.id === "crucible") {
+        if (toolId === "crucible") {
           toolOpts.length = 0;
           break;
         }
-        if (tool.id === "press") {
+        if (toolId === "press") {
           toolOpts.length = 0;
           removeFire = true;
           newQualities.push([{ id: "PULL", level: 1 }]);
           break;
         }
-        if (tool.id === "fire" && removeFire) {
+        if (toolId === "fire" && removeFire) {
           toolOpts.length = 0;
           break;
         }
@@ -912,7 +915,7 @@ export class CddaData {
     const filteredComponents = components
       .map((c) =>
         c.filter(
-          (c) => !this.byId("item", c.id)?.flags?.includes("UNRECOVERABLE")
+          (c) => !this.byId("item", c[0])?.flags?.includes("UNRECOVERABLE")
         )
       )
       .filter((c) => c.length);
@@ -922,6 +925,32 @@ export class CddaData {
       qualities: finalQualities,
       components: filteredComponents,
     };
+  }
+
+  normalizeRequirementUsing(
+    requirements: (readonly [RequirementData, number])[],
+    opts?: { onlyRecoverable?: boolean }
+  ): {
+    components: [string, number][][];
+    qualities: QualityRequirement[][];
+    tools: [string, number][][];
+  } {
+    const tools = requirements.flatMap(([req, count]) =>
+      this.flattenRequirement(req.tools ?? [], (x) => x.tools, {
+        expandSubstitutes: true,
+      }).map((x) => x.map((x) => [x.id, x.count * count] as [string, number]))
+    );
+    const qualities = requirements.flatMap(([req, _count]) =>
+      (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x]))
+    );
+    const components = requirements.flatMap(([req, count]) =>
+      this.flattenRequirement(
+        req.components ?? [],
+        (x) => x.components,
+        opts
+      ).map((x) => x.map((x) => [x.id, x.count * count] as [string, number]))
+    );
+    return { tools, qualities, components };
   }
 
   normalizeRequirements(
@@ -944,22 +973,7 @@ export class CddaData {
       .concat([[requirement, 1] as const])
       .filter((x) => x[0]); // NB. to cope with some data errors in obsolete parts
 
-    const tools = requirements.flatMap(([req, count]) =>
-      this.flattenRequirement(req.tools ?? [], (x) => x.tools, {
-        expandSubstitutes: true,
-      }).map((x) => x.map((x) => ({ ...x, count: x.count * count })))
-    );
-    const qualities = requirements.flatMap(([req, _count]) =>
-      (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x]))
-    );
-    const components = requirements.flatMap(([req, count]) =>
-      this.flattenRequirement(
-        req.components ?? [],
-        (x) => x.components,
-        opts
-      ).map((x) => x.map((x) => ({ ...x, count: x.count * count })))
-    );
-    return { tools, qualities, components };
+    return this.normalizeRequirementUsing(requirements, opts);
   }
 
   _itemComponentCache: {
