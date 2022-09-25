@@ -54,6 +54,11 @@ export default defineConfig({
               /^https:\/\/raw\.githubusercontent\.com\/.*\/all\.json$/,
             handler: "CacheFirst",
           },
+          {
+            // Use saved translations if possible, update in the background.
+            urlPattern: /^https:\/\/cds.svc.transifex.net\//,
+            handler: "StaleWhileRevalidate",
+          },
         ],
         // Without this, a stale service worker can be alive for a long time,
         // and get out of date with the server.
