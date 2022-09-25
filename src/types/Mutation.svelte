@@ -129,6 +129,16 @@ const requiredBy = data
         </ul>
       </dd>
     {/if}
+    {#if item.integrated_armor}
+      <dt>{t("Integrated Armor", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.integrated_armor as id}
+            <li><ThingLink {id} type="item" /></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
   </dl>
   <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
 </section>

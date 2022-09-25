@@ -1387,6 +1387,8 @@ export type Mutation = {
   types?: string[];
 
   threshold?: boolean;
+
+  integrated_armor?: string[];
 };
 
 export type MutationType = {
