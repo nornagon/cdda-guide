@@ -1095,7 +1095,10 @@ export type VehiclePart = {
   exhaust?: string[]; // emit_id
   fuel_type?: string; // item_id
   default_ammo?: string; // item_id
-  folded_volume?: volume | null;
+  folded_volume?:
+    | volume
+    | null
+    | any /* this is to appease json-schema, which doesn't generate a correct schema for just volume | null */;
   size?: volume;
   bonus?: integer /** seatbelt (str), muffler (%), horn (vol), light (intensity), recharging (power) */;
   cargo_weight_modifier?: integer; // percentage, default 100
