@@ -389,7 +389,7 @@ const grantedByMutation = data
           </dd>
         {/if}
 
-        {#if grantedByMutation}
+        {#if grantedByMutation.length}
           <dt>{t("From Mutation", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
