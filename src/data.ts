@@ -70,6 +70,7 @@ const needsPlural = [
   "TOOL_ARMOR",
   "WHEEL",
   "MONSTER",
+  "vehicle_part",
 ];
 
 function getMsgId(t: Translation) {
