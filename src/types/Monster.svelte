@@ -285,7 +285,9 @@ let upgrades =
     <dt>{t("Difficulty", { _context })}</dt>
     <dd>
       {difficulty(item)}
-      <ColorText text={difficultyDescription(difficulty(item))} fgOnly={true} />
+      (<ColorText
+        text={difficultyDescription(difficulty(item))}
+        fgOnly={true} />)
     </dd>
   </dl>
   <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
