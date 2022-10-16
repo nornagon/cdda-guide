@@ -11,6 +11,7 @@ import {
   singularName,
 } from "../data";
 import type { Terrain } from "../types";
+import Construction from "./Construction.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -50,6 +51,10 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
     harvestBySeason.set(season, id);
   }
 }
+
+const constructions = data
+  .byType("construction")
+  .filter((c) => c.post_terrain === item.id);
 </script>
 
 <h1>
@@ -134,3 +139,10 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
     {singular(item.description)}
   </p>
 </section>
+
+{#if constructions.length}
+  <h2>{t("Construction", { _context })}</h2>
+  {#each constructions as construction}
+    <Construction {construction} includeTitle />
+  {/each}
+{/if}
