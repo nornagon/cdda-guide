@@ -733,7 +733,7 @@ export type MeleeAttack = {
   body_parts?: [string /* bp_id */, number /* prob */][];
   effects?: {
     id: string;
-    duration?: number /* int */;
+    duration?: integer | [integer, integer] /* int */;
     affect_hit_bp?: boolean;
     bp?: string /* bp_id */;
     permanent?: boolean;
