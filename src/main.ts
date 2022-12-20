@@ -21,6 +21,11 @@ if (location.hostname !== "localhost")
     ...(process.env.GITHUB_SHA && {
       release: `cdda-guide@${last(8, process.env.GITHUB_SHA)}`,
     }),
+    denyUrls: [
+      // Chrome extensions
+      /^chrome-extension:/,
+      /cdda-guide.aloxaf.com\//,
+    ],
   });
 
 registerSW({});
