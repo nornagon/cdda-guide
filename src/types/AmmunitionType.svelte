@@ -55,6 +55,7 @@ usedBy.sort((a, b) => singularName(a).localeCompare(singularName(b)));
   <ul>
     {#each compatible as ammo}
       <li>
+        <ItemSymbol item={ammo} />
         <ThingLink type="item" id={ammo.id} />
         {#if ammo.id === item.default}({t("default", { _context })}){/if}
       </li>
