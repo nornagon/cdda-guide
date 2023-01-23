@@ -36,6 +36,14 @@ const components = requirements.flatMap(([req, count]) => {
 const byproducts = data.flattenItemGroup(
   data.normalizeItemGroup(construction.byproducts, "collection")
 );
+
+const preFlags: { flag: string; force_terrain?: boolean }[] = [];
+if (construction.pre_flags)
+  for (const flag of [construction.pre_flags].flat()) {
+    if (typeof flag === "string") {
+      preFlags.push({ flag });
+    } else preFlags.push(flag);
+  }
 </script>
 
 <section>
@@ -75,6 +83,16 @@ const byproducts = data.flattenItemGroup(
             ? "furniture"
             : "terrain"}
           id={construction.pre_terrain} />
+      </dd>
+    {/if}
+    {#if preFlags.length}
+      <dt>{t("Requires Flags", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each preFlags as { flag }}
+            <li><ThingLink type="json_flag" id={flag} /></li>
+          {/each}
+        </ul>
       </dd>
     {/if}
     <RequirementDataTools requirement={construction} />
