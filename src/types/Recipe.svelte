@@ -1,7 +1,7 @@
 <script lang="ts">
 import { t } from "@transifex/native";
 import { getContext } from "svelte";
-import type { CddaData } from "../data";
+import { CddaData, i18n } from "../data";
 
 import type { Recipe } from "../types";
 import RequirementData from "./item/RequirementData.svelte";
@@ -41,6 +41,33 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
     ...prof,
   };
 });
+
+const activityLevels = {
+  SLEEP_EXERCISE: 0.85,
+  NO_EXERCISE: 1.0,
+  LIGHT_EXERCISE: 2.0,
+  fake: 4.0,
+  MODERATE_EXERCISE: 4.0,
+  BRISK_EXERCISE: 6.0,
+  ACTIVE_EXERCISE: 8.0,
+  EXTRA_EXERCISE: 10.0,
+};
+
+function activityLevelName(level: number) {
+  const activity_descriptions = [
+    "None",
+    "Light",
+    "Moderate",
+    "Brisk",
+    "Active",
+    "Extreme",
+  ];
+  // Activity levels are 1, 2, 4, 6, 8, 10
+  // So we can easily cut them in half and round down for an index
+  const idx = Math.floor(level / 2);
+
+  return i18n.pgettext("activity description", activity_descriptions[idx]);
+}
 </script>
 
 <section class="recipe">
@@ -111,7 +138,13 @@ const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
     <dt>{t("Time to Complete")}</dt>
     <dd>{recipe.time ?? "0 m"}</dd>
     <dt>{t("Activity Level", { _context })}</dt>
-    <dd>{recipe.activity_level ?? "MODERATE_EXERCISE"}</dd>
+    <dd>
+      {t(
+        activityLevelName(
+          activityLevels[recipe.activity_level ?? "MODERATE_EXERCISE"]
+        )
+      )}
+    </dd>
     <dt>{t("Batch Time Savings", { _context })}</dt>
     <dd>
       {#if recipe.batch_time_factors}
