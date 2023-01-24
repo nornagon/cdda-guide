@@ -71,6 +71,7 @@ const needsPlural = [
   "WHEEL",
   "MONSTER",
   "vehicle_part",
+  "json_flag",
 ];
 
 function getMsgId(t: Translation) {
