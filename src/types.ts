@@ -267,6 +267,7 @@ export type AmmoSlot = {
   dispersion?: number; // int
   recoil?: number; // int
   count?: number; // int, default 1
+  stack_size?: number; // defaults to count
   loudness?: number; // int, default derived
   effects?: string[];
   critical_multiplier?: number; // float, default: 2
@@ -277,6 +278,7 @@ export type ComestibleSlot = {
   comestible_type?: string; // DRINK, FOOD or MED
   tool?: string; // item_id, needed to consume
   charges?: integer; // int, default 1
+  stack_size?: integer; // defaults to charges
   quench?: integer; // int, default 0
   fun?: integer; // int, default 0
   stim?: integer; // int, default 0

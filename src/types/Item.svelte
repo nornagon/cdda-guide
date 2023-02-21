@@ -201,6 +201,18 @@ const usedToRepair = data.byType("fault").filter((f) => {
 const grantedByMutation = data
   .byType("mutation")
   .filter((m) => m.id && m.integrated_armor?.some((x) => x === item.id));
+
+function normalizeStackVolume(item: Item) {
+  if (item.type === "AMMO") {
+    const { count } = item;
+    return `${parseVolume(item.volume) / (count ?? 1)} ml`;
+  }
+  if (item.type === "COMESTIBLE") {
+    const { charges } = item;
+    return `${parseVolume(item.volume) / (charges ?? 1)} ml`;
+  }
+  return item.volume;
+}
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -239,7 +251,7 @@ const grantedByMutation = data
           </dd>
         {/if}
         <dt>{t("Volume")}</dt>
-        <dd>{asLiters(item.volume)}</dd>
+        <dd>{asLiters(normalizeStackVolume(item))}</dd>
         <dt>{t("Weight")}</dt>
         <dd>{asKilograms(item.weight)}</dd>
         <dt>{t("Length")}</dt>
