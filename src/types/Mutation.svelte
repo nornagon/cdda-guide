@@ -26,6 +26,11 @@ const requiredBy = data
       (m.prereqs2 ?? []).includes(item.id)
   )
   .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+
+const cancelledBy = data
+  .byType("mutation")
+  .filter((m) => (m.cancels ?? []).includes(item.id))
+  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
 <h1>
@@ -120,10 +125,20 @@ const requiredBy = data
       </dd>
     {/if}
     {#if item.cancels}
-      <dt>{t("Conflicts With", { _context })}</dt>
+      <dt>{t("Cancels", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           {#each item.cancels as id}
+            <li><ThingLink {id} type="mutation" /></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if cancelledBy.length}
+      <dt>{t("Cancelled By", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each cancelledBy as { id }}
             <li><ThingLink {id} type="mutation" /></li>
           {/each}
         </ul>
