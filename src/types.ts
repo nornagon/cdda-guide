@@ -1380,6 +1380,8 @@ export type Mutation = {
   name: Translation;
   description: Translation;
   points: integer;
+  mixed_effect?: boolean;
+  profession?: boolean;
 
   prereqs?: string[];
   prereqs2?: string[];

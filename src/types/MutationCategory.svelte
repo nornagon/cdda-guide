@@ -6,6 +6,7 @@ import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import { topologicalSort } from "../toposort";
 import type { Mutation, MutationCategory } from "../types";
+import MutationColor from "./MutationColor.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 let data = getContext<CddaData>("data");
@@ -52,7 +53,10 @@ const postThreshold = topologicalSort(
       <dd>
         <ul>
           {#each preThreshold as m}
-            <li><ThingLink id={m.id} type="mutation" /></li>
+            <li>
+              <ThingLink id={m.id} type="mutation" />
+              <MutationColor mutation={m} />
+            </li>
           {/each}
         </ul>
       </dd>
@@ -62,7 +66,10 @@ const postThreshold = topologicalSort(
       <dd>
         <ul>
           {#each postThreshold as m}
-            <li><ThingLink id={m.id} type="mutation" /></li>
+            <li>
+              <ThingLink id={m.id} type="mutation" />
+              <MutationColor mutation={m} />
+            </li>
           {/each}
         </ul>
       </dd>

@@ -6,6 +6,7 @@ import { getContext } from "svelte";
 import { CddaData, singular, singularName } from "../data";
 
 import type { Mutation } from "../types";
+import MutationColor from "./MutationColor.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: Mutation;
@@ -41,7 +42,7 @@ const cancelledBy = data
 <section>
   <dl>
     <dt>{t("Points", { _context })}</dt>
-    <dd>{item.points}</dd>
+    <dd><MutationColor mutation={item}>{item.points}</MutationColor></dd>
     {#if item.category}
       <dt>{t("Category", { _context })}</dt>
       <dd>
