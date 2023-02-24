@@ -164,7 +164,10 @@ const cancelledBy = data
     <h1>{t("Post-Threshold Mutations", { _context })}</h1>
     <ul>
       {#each postThresholdMutations as m}
-        <li><ThingLink id={m.id} type="mutation" /></li>
+        <li>
+          <ThingLink id={m.id} type="mutation" />
+          <MutationColor mutation={m} />
+        </li>
       {/each}
     </ul>
   </section>
@@ -175,7 +178,10 @@ const cancelledBy = data
     <h1>{t("Required By", { _context })}</h1>
     <ul>
       {#each requiredBy as m}
-        <li><ThingLink id={m.id} type="mutation" /></li>
+        <li>
+          <ThingLink id={m.id} type="mutation" />
+          <MutationColor mutation={m} />
+        </li>
       {/each}
     </ul>
   </section>
