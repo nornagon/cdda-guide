@@ -3,7 +3,7 @@ import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
 
-import { CddaData, singularName } from "../data";
+import { byName, CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { Material } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
@@ -32,7 +32,7 @@ let itemsWithMaterial = data
         : i.material.map((m) => m.type);
     return i.id && normalizedMaterial.some((m) => m === item.id);
   })
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
 </script>
 
 <h1>{t("Material")}: {singularName(item)}</h1>

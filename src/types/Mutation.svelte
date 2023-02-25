@@ -3,7 +3,7 @@ import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
 
-import { CddaData, singular, singularName } from "../data";
+import { byName, CddaData, singular, singularName } from "../data";
 
 import type { Mutation } from "../types";
 import MutationColor from "./MutationColor.svelte";
@@ -17,7 +17,7 @@ const _context = "Mutation";
 const postThresholdMutations = data
   .byType("mutation")
   .filter((m) => (m.threshreq ?? []).includes(item.id))
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
 
 const requiredBy = data
   .byType("mutation")
@@ -26,22 +26,22 @@ const requiredBy = data
       (m.prereqs ?? []).includes(item.id) ||
       (m.prereqs2 ?? []).includes(item.id)
   )
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
 
 const canceledByMutations = data
   .byType("mutation")
   .filter((m) => (m.cancels ?? []).includes(item.id))
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
 
 const canceledByBionics = data
   .byType("bionic")
   .filter((b) => (b.canceled_mutations ?? []).includes(item.id))
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
 
 const conflictsWithBionics = data
   .byType("bionic")
   .filter((b) => (b.mutation_conflicts ?? []).includes(item.id))
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
 </script>
 
 <h1>

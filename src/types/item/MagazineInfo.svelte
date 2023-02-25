@@ -1,7 +1,7 @@
 <script lang="ts">
 import LimitedList from "../../LimitedList.svelte";
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../../data";
+import { byName, CddaData } from "../../data";
 import type { ItemBasicInfo } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
@@ -23,7 +23,7 @@ const compatibleItems = data
     );
   });
 
-compatibleItems.sort((a, b) => singularName(a).localeCompare(singularName(b)));
+compatibleItems.sort(byName);
 </script>
 
 {#if compatibleItems.length}

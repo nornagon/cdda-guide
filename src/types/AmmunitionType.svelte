@@ -2,7 +2,7 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../data";
+import { byName, CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { AmmunitionType, Item } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
@@ -19,7 +19,7 @@ const compatible = data.byType("item").flatMap((x) => {
   if (x.ammo_type === item.id) return [x];
   return [];
 });
-compatible.sort((a, b) => singularName(a).localeCompare(singularName(b)));
+compatible.sort(byName);
 
 const defaultPocketData = {
   pocket_type: "CONTAINER",
@@ -46,7 +46,7 @@ const usesAmmoType = (w: Item, t: AmmunitionType): boolean => {
 };
 
 const usedBy = data.byType("item").filter((w) => usesAmmoType(w, item));
-usedBy.sort((a, b) => singularName(a).localeCompare(singularName(b)));
+usedBy.sort(byName);
 </script>
 
 <h1>{t("Ammunition Type")}: {singularName(item)}</h1>

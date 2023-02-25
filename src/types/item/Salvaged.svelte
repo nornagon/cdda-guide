@@ -2,7 +2,7 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, parseMass, singularName } from "../../data";
+import { byName, CddaData, parseMass } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import type { Item, Material } from "../../types";
 import ThingLink from "../ThingLink.svelte";
@@ -32,7 +32,7 @@ const salvagedFromMaterials = data
   .flatMap((mat) => itemsWithOnlyMaterial(mat))
   .filter((it) => !(it.flags ?? []).includes("NO_SALVAGE"))
   .filter((it) => parseMass(it.weight) >= parseMass(item.weight))
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
 </script>
 
 {#if salvagedFromMaterials.length}

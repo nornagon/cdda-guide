@@ -2,7 +2,7 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../data";
+import { byName, CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { WeaponCategory } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
@@ -16,13 +16,13 @@ const itemsInCategory = data
   .byType("item")
   .filter((i) => i.id)
   .filter((i) => (i.weapon_category ?? []).some((c) => c === item.id));
-itemsInCategory.sort((a, b) => singularName(a).localeCompare(singularName(b)));
+itemsInCategory.sort(byName);
 
 const martialArts = data
   .byType("martial_art")
   .filter((ma) => ma.id)
   .filter((ma) => ma.weapon_category?.some((c) => c === item.id));
-martialArts.sort((a, b) => singularName(a).localeCompare(singularName(b)));
+martialArts.sort(byName);
 </script>
 
 <h1>{t("Weapon Category")}: {singularName(item)}</h1>

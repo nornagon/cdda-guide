@@ -2,7 +2,7 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../data";
+import { byName, CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { Item, VehiclePart, ToolQuality } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
@@ -96,9 +96,7 @@ for (const [level, set] of recipesUsingQualitySet)
         </dt>
         <dd>
           <LimitedList
-            items={toolsWithQualityByLevel
-              .get(level)
-              .sort((a, b) => singularName(a).localeCompare(singularName(b)))}
+            items={toolsWithQualityByLevel.get(level).sort(byName)}
             limit={20}
             let:item>
             <ItemSymbol {item} />
@@ -119,9 +117,7 @@ for (const [level, set] of recipesUsingQualitySet)
         </dt>
         <dd>
           <LimitedList
-            items={vpartsWithQualityByLevel
-              .get(level)
-              .sort((a, b) => singularName(a).localeCompare(singularName(b)))}
+            items={vpartsWithQualityByLevel.get(level).sort(byName)}
             limit={20}
             let:item>
             <ItemSymbol {item} />

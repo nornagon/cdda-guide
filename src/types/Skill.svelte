@@ -3,7 +3,7 @@ import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
 
-import { CddaData, singularName } from "../data";
+import { byName, CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { Skill, SupportedTypesWithMapped } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
@@ -32,7 +32,7 @@ const itemsUsingSkill = data
   .filter(
     (i) => i.id && i.type === "GUN" && i.skill === item.id
   ) as SupportedTypesWithMapped["GUN"][];
-itemsUsingSkill.sort((a, b) => singularName(a).localeCompare(singularName(b)));
+itemsUsingSkill.sort(byName);
 </script>
 
 <h1>{t("Skill")}: {singularName(item)}</h1>

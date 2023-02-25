@@ -2,7 +2,7 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../../data";
+import { byName, CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
@@ -19,7 +19,7 @@ const constructions = data
     );
     return byproducts.some((d) => d.id === item_id);
   })
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
 </script>
 
 {#if constructions.length}

@@ -2,7 +2,7 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../../data";
+import { byName, CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import type { Furniture, Terrain } from "../../types";
 import ThingLink from "../ThingLink.svelte";
@@ -27,7 +27,7 @@ let deconstructibleFrom = (data.byType("terrain") as (Terrain | Furniture)[])
 
     return deconstruct.some(({ id }) => id === item_id);
   })
-  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+  .sort(byName);
 </script>
 
 {#if deconstructibleFrom.length}

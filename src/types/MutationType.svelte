@@ -3,7 +3,7 @@ import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
 
-import { CddaData, singularName } from "../data";
+import { byName, CddaData, singularName } from "../data";
 import { topologicalSort } from "../toposort";
 import type { Mutation, MutationType } from "../types";
 import MutationColor from "./MutationColor.svelte";
@@ -19,7 +19,7 @@ const mutationsWithType = topologicalSort(
   data
     .byType("mutation")
     .filter((m) => (m.types ?? []).includes(item.id))
-    .sort((a, b) => singularName(a).localeCompare(singularName(b))),
+    .sort(byName),
   (m) => allPrereqs(m).map((x) => data.byId("mutation", x))
 );
 </script>

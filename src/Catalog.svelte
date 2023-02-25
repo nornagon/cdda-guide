@@ -1,7 +1,7 @@
 <script lang="ts">
 import { setContext } from "svelte";
 
-import { CddaData, singularName } from "./data";
+import { byName, CddaData, singularName } from "./data";
 import LimitedList from "./LimitedList.svelte";
 import type {
   Item,
@@ -20,8 +20,10 @@ export let data: CddaData;
 let typeWithCorrectType = type as keyof SupportedTypesWithMapped;
 setContext("data", data);
 
-const things = data.byType(type as any).filter((o) => o.id);
-things.sort((a, b) => singularName(a).localeCompare(singularName(b)));
+const things = data
+  .byType(type as any)
+  .filter((o) => o.id)
+  .sort(byName);
 
 // Ref https://github.com/CleverRaven/Cataclysm-DDA/blob/658bbe419fb652086fd4d46bf5bbf9e137228464/src/item_factory.cpp#L4774
 function getCategory(i: Item) {

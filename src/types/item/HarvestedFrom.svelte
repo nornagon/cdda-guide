@@ -1,6 +1,6 @@
 <script lang="ts">
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../../data";
+import { byName, CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import type { Furniture, Terrain } from "../../types";
@@ -29,7 +29,7 @@ const harvestedFrom = (data.byType("terrain") as (Terrain | Furniture)[])
     })
   );
 
-harvestedFrom.sort((a, b) => singularName(a).localeCompare(singularName(b)));
+harvestedFrom.sort(byName);
 </script>
 
 {#if harvestedFrom.length}
