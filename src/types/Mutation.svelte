@@ -28,9 +28,19 @@ const requiredBy = data
   )
   .sort((a, b) => singularName(a).localeCompare(singularName(b)));
 
-const cancelledBy = data
+const canceledByMutations = data
   .byType("mutation")
   .filter((m) => (m.cancels ?? []).includes(item.id))
+  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+
+const canceledByBionics = data
+  .byType("bionic")
+  .filter((b) => (b.canceled_mutations ?? []).includes(item.id))
+  .sort((a, b) => singularName(a).localeCompare(singularName(b)));
+
+const conflictsWithBionics = data
+  .byType("bionic")
+  .filter((b) => (b.mutation_conflicts ?? []).includes(item.id))
   .sort((a, b) => singularName(a).localeCompare(singularName(b)));
 </script>
 
@@ -135,12 +145,32 @@ const cancelledBy = data
         </ul>
       </dd>
     {/if}
-    {#if cancelledBy.length}
-      <dt>{t("Cancelled By", { _context })}</dt>
+    {#if canceledByMutations.length}
+      <dt>{t("Canceled By", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
-          {#each cancelledBy as { id }}
+          {#each canceledByMutations as { id }}
             <li><ThingLink {id} type="mutation" /></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if conflictsWithBionics.length}
+      <dt>{t("Incompatible With", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each conflictsWithBionics as { id }}
+            <li><ThingLink {id} type="bionic" /></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if canceledByBionics.length}
+      <dt>{t("Canceled By Bionics", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each canceledByBionics as { id }}
+            <li><ThingLink {id} type="bionic" /></li>
           {/each}
         </ul>
       </dd>
