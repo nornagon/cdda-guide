@@ -6,6 +6,7 @@ import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import { topologicalSort } from "../toposort";
 import type { Mutation, MutationType } from "../types";
+import MutationColor from "./MutationColor.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: MutationType;
@@ -30,7 +31,10 @@ const mutationsWithType = topologicalSort(
     <dd>
       <ul>
         {#each mutationsWithType as m}
-          <li><ThingLink id={m.id} type="mutation" /></li>
+          <li>
+            <ThingLink id={m.id} type="mutation" />
+            <MutationColor mutation={m} />
+          </li>
         {/each}
       </ul>
     </dd>
