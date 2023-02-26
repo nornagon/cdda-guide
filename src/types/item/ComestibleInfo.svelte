@@ -23,7 +23,7 @@ const _context = "Item Comestible Info";
     <dd>{item.spoils_in ?? "never"}</dd>
     <dt>{t("Health", { _context })}</dt>
     <dd>{item.healthy ?? 0}</dd>
-    {#if item.vitamins}
+    {#if item.vitamins?.length}
       <dt>{t("Vitamins (%RDA)", { _context })}</dt>
       <dd>
         {#each item.vitamins as [vitamin, rdapct], i}
