@@ -3,25 +3,17 @@ import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
 
-import { byName, CddaData, singularName } from "../data";
-import { topologicalSort } from "../toposort";
-import type { Mutation, MutationType } from "../types";
-import MutationColor from "./MutationColor.svelte";
-import ThingLink from "./ThingLink.svelte";
+import { CddaData, singularName } from "../data";
+import type { MutationType } from "../types";
+import MutationList from "./MutationList.svelte";
 
 export let item: MutationType;
 
 let data = getContext<CddaData>("data");
 
-const allPrereqs = (m: Mutation) =>
-  (m.prereqs ?? []).concat(m.prereqs2 ?? []).concat(m.threshreq ?? []);
-const mutationsWithType = topologicalSort(
-  data
-    .byType("mutation")
-    .filter((m) => (m.types ?? []).includes(item.id))
-    .sort(byName),
-  (m) => allPrereqs(m).map((x) => data.byId("mutation", x))
-);
+const mutationsWithType = data
+  .byType("mutation")
+  .filter((m) => (m.types ?? []).includes(item.id));
 </script>
 
 <h1>{t("Mutation Type")}: {singularName(item)}</h1>
@@ -29,14 +21,7 @@ const mutationsWithType = topologicalSort(
   <dl>
     <dt>{t("Mutations")}</dt>
     <dd>
-      <ul>
-        {#each mutationsWithType as m}
-          <li>
-            <ThingLink id={m.id} type="mutation" />
-            <MutationColor mutation={m} />
-          </li>
-        {/each}
-      </ul>
+      <MutationList mutations={mutationsWithType} />
     </dd>
   </dl>
 </section>

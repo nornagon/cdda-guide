@@ -3,10 +3,9 @@ import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
 
-import { CddaData, singularName } from "../data";
-import { topologicalSort } from "../toposort";
-import type { Mutation, MutationCategory } from "../types";
-import MutationColor from "./MutationColor.svelte";
+import { byName, CddaData, singularName } from "../data";
+import type { MutationCategory } from "../types";
+import MutationList from "./MutationList.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 let data = getContext<CddaData>("data");
@@ -17,21 +16,13 @@ export let inCatalog: boolean = false;
 
 const mutationsInCategory = data
   .byType("mutation")
-  .filter((m) => (m.category ?? []).includes(item.id));
-mutationsInCategory.sort((a, b) =>
-  singularName(a).localeCompare(singularName(b))
+  .filter((m) => (m.category ?? []).includes(item.id))
+  .sort(byName);
+const preThreshold = mutationsInCategory.filter(
+  (t) => !t.threshreq || t.threshreq.length === 0
 );
-const allPrereqs = (m: Mutation) =>
-  (m.prereqs ?? []).concat(m.prereqs2 ?? []).concat(m.threshreq ?? []);
-const preThreshold = topologicalSort(
-  mutationsInCategory.filter((t) => !t.threshreq || t.threshreq.length === 0),
-  (m) => allPrereqs(m).map((x) => data.byId("mutation", x))
-);
-const postThreshold = topologicalSort(
-  mutationsInCategory.filter(
-    (t) => !(!t.threshreq || t.threshreq.length === 0)
-  ),
-  (m) => allPrereqs(m).map((x) => data.byId("mutation", x))
+const postThreshold = mutationsInCategory.filter(
+  (t) => !(!t.threshreq || t.threshreq.length === 0)
 );
 </script>
 
@@ -51,27 +42,13 @@ const postThreshold = topologicalSort(
     {#if preThreshold.length}
       <dt>{t("Pre-Threshold Mutations", { _context })}</dt>
       <dd>
-        <ul>
-          {#each preThreshold as m}
-            <li>
-              <ThingLink id={m.id} type="mutation" />
-              <MutationColor mutation={m} />
-            </li>
-          {/each}
-        </ul>
+        <MutationList mutations={preThreshold} />
       </dd>
     {/if}
     {#if postThreshold.length}
       <dt>{t("Post-Threshold Mutations", { _context })}</dt>
       <dd>
-        <ul>
-          {#each postThreshold as m}
-            <li>
-              <ThingLink id={m.id} type="mutation" />
-              <MutationColor mutation={m} />
-            </li>
-          {/each}
-        </ul>
+        <MutationList mutations={postThreshold} />
       </dd>
     {/if}
   </dl>

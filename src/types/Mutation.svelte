@@ -7,6 +7,7 @@ import { byName, CddaData, singular, singularName } from "../data";
 
 import type { Mutation } from "../types";
 import MutationColor from "./MutationColor.svelte";
+import MutationList from "./MutationList.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: Mutation;
@@ -192,14 +193,7 @@ const conflictsWithBionics = data
 {#if item.threshold && postThresholdMutations.length}
   <section>
     <h1>{t("Post-Threshold Mutations", { _context })}</h1>
-    <ul>
-      {#each postThresholdMutations as m}
-        <li>
-          <ThingLink id={m.id} type="mutation" />
-          <MutationColor mutation={m} />
-        </li>
-      {/each}
-    </ul>
+    <MutationList mutations={postThresholdMutations} />
   </section>
 {/if}
 
