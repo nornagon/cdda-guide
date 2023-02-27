@@ -1383,6 +1383,8 @@ export type Mutation = {
   mixed_effect?: boolean;
   profession?: boolean;
   purifiable?: boolean; // default: true
+  visibility?: integer; // default: 0
+  ugliness?: integer; // default: 0
 
   prereqs?: string[];
   prereqs2?: string[];
