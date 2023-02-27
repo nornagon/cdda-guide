@@ -2,10 +2,15 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, singular, singularName } from "../data";
+import { CddaData, normalizeUseAction, singular, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 
-import type { SupportedTypes, Vitamin } from "../types";
+import type {
+  ConsumeDrugUseFunction,
+  Item,
+  SupportedTypes,
+  Vitamin,
+} from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: Vitamin;
@@ -24,11 +29,35 @@ const containingComestibles = data
   .map((c) => {
     const comestible = c as SupportedTypes["COMESTIBLE"];
     return {
-      comestible,
+      comestible: c as Item,
       pct: comestible.vitamins.find((v) => v[0] === item.id)[1],
     };
   });
-containingComestibles.sort((a, b) => b.pct - a.pct);
+const containingDrugs = data
+  .byType("item")
+  .filter((t) =>
+    normalizeUseAction(t.use_action).some(
+      (u) =>
+        u.type === "consume_drug" &&
+        (u.vitamins ?? []).some((v) => v[0] === item.id)
+    )
+  )
+  .map((c) => {
+    return {
+      comestible: c as Item,
+      pct: normalizeUseAction(c.use_action)
+        .filter((u) => u.type === "consume_drug")
+        .map((u) => (u as ConsumeDrugUseFunction).vitamins ?? [])
+        .flat()
+        .find((v) => v[0] === item.id)[1],
+    };
+  });
+const containing = containingComestibles.concat(containingDrugs);
+containing.sort((a, b) =>
+  b.pct - a.pct === 0
+    ? singularName(a.comestible).localeCompare(singularName(b.comestible))
+    : b.pct - a.pct
+);
 
 const excessNames = item.excess
   ? data.byId("effect_type", item.excess).name ?? []
@@ -69,7 +98,10 @@ const deficiencyNames = item.deficiency
 </section>
 <section>
   <h1>{t("Comestibles", { _context })}</h1>
-  <LimitedList items={containingComestibles} let:item>
-    <ThingLink id={item.comestible.id} type="item" /> ({item.pct}% RDA)
+  <LimitedList items={containing} let:item={other}>
+    <ThingLink id={other.comestible.id} type="item" /> ({other.pct}{item.vit_type ===
+    "counter"
+      ? " U"
+      : "% RDA"})
   </LimitedList>
 </section>

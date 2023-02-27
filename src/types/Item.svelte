@@ -50,6 +50,7 @@ import ToolInfo from "./item/ToolInfo.svelte";
 import TransformedFrom from "./item/TransformedFrom.svelte";
 import WheelInfo from "./item/WheelInfo.svelte";
 import ThingLink from "./ThingLink.svelte";
+import UsageDescription from "./UsageDescription.svelte";
 
 export let item: Item;
 let data: CddaData = getContext("data");
@@ -377,13 +378,7 @@ function normalizeStackVolume(item: Item) {
           <dd>
             <ul class="comma-separated">
               {#each usage as u}
-                <li>
-                  {u.menu_text ??
-                    singularName(
-                      data.byId("item_action", u.type)
-                    )}{#if u.type === "transform" || u.type === "delayed_transform"}{" "}(⟹
-                    <ThingLink type="item" id={u.target} />){/if}
-                </li>
+                <li><UsageDescription usage={u} /></li>
               {/each}
             </ul>
           </dd>

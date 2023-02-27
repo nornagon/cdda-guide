@@ -1213,12 +1213,13 @@ export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroup {
 }
 
 export function normalizeUseAction(action: Item["use_action"]): UseFunction[] {
-  if (typeof action === "string") return [{ type: action }];
+  if (typeof action === "string")
+    return [{ type: "__item_action__", id: action }];
   else if (Array.isArray(action)) {
     return action.map((s) => {
-      if (typeof s === "string") return { type: s };
+      if (typeof s === "string") return { type: "__item_action__", id: s };
       else if (Array.isArray(s)) {
-        return { type: s[0] };
+        return { type: "__item_action__", id: s[0] };
       } else {
         return s;
       }

@@ -389,11 +389,108 @@ export type WheelSlot = {
   width: integer;
 };
 
-export type UseFunction = {
-  type: string;
+export type UseFunction =
+  | ItemActionUseFunction
+  | TransformUseFunction
+  | DelayedTransformUseFunction
+  | ConsumeDrugUseFunction
+  | RepairItemUseFunction
+  | HolsterUseFunction
+  | AttachMolleUseFunction
+  | DetachMolleUseFunction
+  | {
+      // TODO
+      type:
+        | "ammobelt"
+        | "cast_spell"
+        | "change_scent"
+        | "deploy_furn"
+        | "deploy_tent"
+        | "effect_on_conditions"
+        | "explosion"
+        | "firestarter"
+        | "heal"
+        | "inscribe"
+        | "manualnoise"
+        | "musical_instrument"
+        | "place_monster"
+        | "place_trap"
+        | "reveal_map"
+        | "unpack"
+        | "weigh_self";
+    }
+  | {
+      // Technically, the type can be any of the custom iuse functions. In
+      // practice, STRONG_ANTIBIOTIC is the only instance of this. Instead of
+      // using the fully generic |string| type, keep this here so we get a schema
+      // warning when new use actions are added.
+      type: "STRONG_ANTIBIOTIC";
+    };
+
+type ItemActionUseFunction = {
+  type: "__item_action__";
+  id: string;
+};
+
+export type TransformUseFunction = {
+  type: "transform";
   target?: string;
   menu_text?: string;
+};
+
+export type DelayedTransformUseFunction = {
+  type: "delayed_transform";
   transform_age?: integer; // turns
+} & Omit<TransformUseFunction, "type">;
+
+export type ConsumeDrugUseFunction = {
+  type: "consume_drug";
+  activation_message?: Translation;
+  charges_needed?: Record<string, integer>;
+  tools_needed?: Record<string, integer>;
+  effects?: {
+    id: string;
+    duration?: duration;
+    bp?: string; // bp_id
+    permanent?: boolean;
+  }[];
+
+  damage_over_time?: any; // TODO
+
+  stat_adjustments?: Record<string, integer>;
+  fields_produced?: Record<string, integer>;
+  moves?: integer;
+
+  vitamins?: ([string, integer] | [string, integer, integer])[];
+
+  used_up_item?: string;
+};
+
+export type RepairItemUseFunction = {
+  type: "repair_item";
+  materials: string[];
+  skill: string;
+  cost_scaling: number;
+  tool_quality?: integer;
+  move_cost?: integer;
+  trains_skill_to?: integer;
+};
+
+export type HolsterUseFunction = {
+  type: "holster";
+  holster_prompt?: Translation;
+  holster_msg?: Translation;
+};
+
+export type AttachMolleUseFunction = {
+  type: "attach_molle";
+  size?: integer;
+  moves?: integer;
+};
+
+export type DetachMolleUseFunction = {
+  type: "detach_molle";
+  moves?: integer;
 };
 
 export type ItemBasicInfo = {
