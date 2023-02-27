@@ -16,7 +16,7 @@ const _context = "Item Bionic Info";
     <dt>{t("Difficulty", { _context })}</dt>
     <dd>{item.difficulty ?? 0}</dd>
     <dt>{t("Is upgrade", { _context })}</dt>
-    <dd>{item.is_upgrade ? "yes" : "no"}</dd>
+    <dd>{item.is_upgrade ? t("Yes") : t("No")}</dd>
     {#if item.installation_data}
       <dt>{t("Installation data", { _context })}</dt>
       <dd><ThingLink type="item" id={item.installation_data} /></dd>

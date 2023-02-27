@@ -72,7 +72,7 @@ const containingBionics = data
     {/if}
     {#if item.cant_remove_reason}
       <dt>{t("Removable", { _context })}</dt>
-      <dd>{t("no")}</dd>
+      <dd>{t("No")}</dd>
     {/if}
     {#if item.act_cost}
       <dt>{t("Activation Cost", { _context })}</dt>
@@ -114,7 +114,7 @@ const containingBionics = data
     {/if}
     {#if item.exothermic_power_gen}
       <dt>{t("Emits Heat", { _context })}</dt>
-      <dd>{t("yes")}</dd>
+      <dd>{t("Yes")}</dd>
     {/if}
     {#if item.power_trickle}
       <dt>{t("Power Trickle", { _context })}</dt>
@@ -163,7 +163,7 @@ const containingBionics = data
       </dd>
     {/if}
     <dt>{t("Duplicates Allowed", { _context })}</dt>
-    <dd>{item.dupes_allowed ? t("yes") : t("no")}</dd>
+    <dd>{item.dupes_allowed ? t("Yes") : t("No")}</dd>
     <dt>{t("Flags")}</dt>
     <dd>
       {#if item.flags?.length}
