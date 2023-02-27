@@ -64,6 +64,8 @@ const conflictsWithBionics = data
         </ul>
       </dd>
     {/if}
+    <dt>{t("Purifiable", { _context })}</dt>
+    <dd>{item.purifiable ?? true ? t("Yes") : t("No")}</dd>
     <dt title="You can't have two mutations that share a type.">
       {t("{n, plural, =1 {Type} other {Types}}", {
         n: item.types?.length ?? 0,

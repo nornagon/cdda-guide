@@ -1382,6 +1382,7 @@ export type Mutation = {
   points: integer;
   mixed_effect?: boolean;
   profession?: boolean;
+  purifiable?: boolean; // default: true
 
   prereqs?: string[];
   prereqs2?: string[];
