@@ -48,5 +48,5 @@ if (item?.type === "vehicle_part" && !item.name && item.item)
       : item}
   <a href="#/{type}/{id}"
     >{item ? (plural ? pluralName : singularName)(nameSource) : id}</a
-  >{#if item.type === "mutation"}&nbsp;<MutationColor mutation={item} />{/if}
+  >{#if item?.type === "mutation"}&nbsp;<MutationColor mutation={item} />{/if}
 {/if}
