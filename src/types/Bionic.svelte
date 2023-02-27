@@ -5,6 +5,7 @@ import { getContext } from "svelte";
 
 import { CddaData, singular, singularName } from "../data";
 import type { Bionic } from "../types";
+import MutationList from "./MutationList.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 export let item: Bionic;
@@ -188,25 +189,19 @@ const containingBionics = data
     {#if item.mutation_conflicts}
       <dt>{t("Conflicts With Mutations", { _context })}</dt>
       <dd>
-        <ul class="comma-separated">
-          {#each item.mutation_conflicts as mutation_id}
-            {#if data.byId("mutation", mutation_id)}
-              <li><ThingLink type="mutation" id={mutation_id} /></li>
-            {/if}
-          {/each}
-        </ul>
+        <MutationList
+          mutations={item.mutation_conflicts.map((id) =>
+            data.byId("mutation", id)
+          )} />
       </dd>
     {/if}
     {#if item.canceled_mutations}
       <dt>{t("Removes Mutations", { _context })}</dt>
       <dd>
-        <ul class="comma-separated">
-          {#each item.canceled_mutations as mutation_id}
-            {#if data.byId("mutation", mutation_id)}
-              <li><ThingLink type="mutation" id={mutation_id} /></li>
-            {/if}
-          {/each}
-        </ul>
+        <MutationList
+          mutations={item.canceled_mutations.map((id) =>
+            data.byId("mutation", id)
+          )} />
       </dd>
     {/if}
   </dl>

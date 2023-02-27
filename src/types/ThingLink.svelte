@@ -2,6 +2,7 @@
 import { getContext } from "svelte";
 import { CddaData, countsByCharges, pluralName, singularName } from "../data";
 import type { SupportedTypesWithMapped } from "../types";
+import MutationColor from "./MutationColor.svelte";
 
 export let type: keyof SupportedTypesWithMapped;
 export let id: string;
@@ -46,5 +47,6 @@ if (item?.type === "vehicle_part" && !item.name && item.item)
       ? item.variants.find((v) => v.id === variantId) ?? item
       : item}
   <a href="#/{type}/{id}"
-    >{item ? (plural ? pluralName : singularName)(nameSource) : id}</a>
+    >{item ? (plural ? pluralName : singularName)(nameSource) : id}</a
+  >{#if item.type === "mutation"}&nbsp;<MutationColor mutation={item} />{/if}
 {/if}

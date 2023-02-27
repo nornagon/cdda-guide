@@ -126,40 +126,30 @@ const conflictsWithBionics = data
         </ul>
       </dd>
     {/if}
-    {#if item.changes_to}
+    {#if item.changes_to?.length}
       <dt>{t("Changes To", { _context })}</dt>
       <dd>
-        <ul class="comma-separated">
-          {#each item.changes_to as id}
-            <li><ThingLink {id} type="mutation" /></li>
-          {/each}
-        </ul>
+        <MutationList
+          mutations={item.changes_to.map((id) => data.byId("mutation", id))} />
       </dd>
     {/if}
-    {#if item.cancels}
+    {#if item.cancels?.length}
       <dt>{t("Cancels", { _context })}</dt>
       <dd>
-        <ul class="comma-separated">
-          {#each item.cancels as id}
-            <li><ThingLink {id} type="mutation" /></li>
-          {/each}
-        </ul>
+        <MutationList
+          mutations={item.cancels.map((id) => data.byId("mutation", id))} />
       </dd>
     {/if}
     {#if canceledByMutations.length}
       <dt>{t("Canceled By", { _context })}</dt>
       <dd>
-        <ul class="comma-separated">
-          {#each canceledByMutations as { id }}
-            <li><ThingLink {id} type="mutation" /></li>
-          {/each}
-        </ul>
+        <MutationList mutations={canceledByMutations} />
       </dd>
     {/if}
     {#if conflictsWithBionics.length}
       <dt>{t("Incompatible With", { _context })}</dt>
       <dd>
-        <ul class="comma-separated">
+        <ul>
           {#each conflictsWithBionics as { id }}
             <li><ThingLink {id} type="bionic" /></li>
           {/each}
@@ -169,7 +159,7 @@ const conflictsWithBionics = data
     {#if canceledByBionics.length}
       <dt>{t("Canceled By Bionics", { _context })}</dt>
       <dd>
-        <ul class="comma-separated">
+        <ul>
           {#each canceledByBionics as { id }}
             <li><ThingLink {id} type="bionic" /></li>
           {/each}
@@ -202,10 +192,7 @@ const conflictsWithBionics = data
     <h1>{t("Required By", { _context })}</h1>
     <ul>
       {#each requiredBy as m}
-        <li>
-          <ThingLink id={m.id} type="mutation" />
-          <MutationColor mutation={m} />
-        </li>
+        <li><ThingLink id={m.id} type="mutation" /></li>
       {/each}
     </ul>
   </section>

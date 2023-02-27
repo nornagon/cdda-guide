@@ -4,7 +4,6 @@ import { getContext } from "svelte";
 import { topologicalSortComponentsByRank } from "../toposort";
 import type { Mutation } from "../types";
 import ThingLink from "./ThingLink.svelte";
-import MutationColor from "./MutationColor.svelte";
 
 let data = getContext<CddaData>("data");
 
@@ -23,8 +22,7 @@ let sortedMutations = topologicalSortComponentsByRank(mutations, (m) =>
         {#if i > 0}&nbsp;→{/if}
         {#each mg as m, i}
           {#if i > 0}, {/if}
-          <ThingLink id={m.id} type="mutation" />&nbsp;<MutationColor
-            mutation={m} />
+          <ThingLink id={m.id} type="mutation" />
         {/each}
       {/each}
     </li>
