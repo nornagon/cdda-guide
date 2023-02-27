@@ -105,6 +105,20 @@ const conflictsWithBionics = data
         </ul>
       </dd>
     {/if}
+    {#if item.craft_skill_bonus?.length}
+      <dt>{t("Crafting Skill Modifier", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.craft_skill_bonus as [skill, bonus]}
+            <li>
+              <ThingLink type="skill" id={skill} /> ({bonus > 0
+                ? "+" + bonus
+                : bonus})
+            </li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
     <dt title={t("You can't have two mutations that share a type.")}>
       {t("{n, plural, =1 {Type} other {Types}}", {
         n: item.types?.length ?? 0,

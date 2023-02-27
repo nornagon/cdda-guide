@@ -1403,6 +1403,8 @@ export type Mutation = {
   encumbrance_always?: [string /* bp_id */, integer][];
   encumbrance_covered?: [string /* bp_id */, integer][];
   restricts_gear?: string[];
+
+  craft_skill_bonus?: [string /* skill_id */, integer][];
 };
 
 export type MutationType = {
