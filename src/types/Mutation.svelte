@@ -70,7 +70,42 @@ const conflictsWithBionics = data
     <dd>{item.visibility ?? 0}</dd>
     <dt>{t("Ugliness", { _context })}</dt>
     <dd>{item.ugliness ?? 0}</dd>
-    <dt title="You can't have two mutations that share a type.">
+    {#if item.encumbrance_always?.length}
+      <dt>{t("Encumbrance", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.encumbrance_always as [part, encumbrance]}
+            <li><ThingLink type="body_part" id={part} /> ({encumbrance})</li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if item.encumbrance_covered?.length}
+      <dt>{t("Encumbrance (covered)", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.encumbrance_covered as [part, encumbrance]}
+            <li><ThingLink type="body_part" id={part} /> ({encumbrance})</li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if item.restricts_gear?.length}
+      <dt
+        title={t(
+          "Gear worn on this body part must be large enough to accommodate abnormally large mutated anatomy."
+        )}>
+        {t("Restricts Gear", { _context })}
+      </dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.restricts_gear as part}
+            <li><ThingLink type="body_part" id={part} /></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    <dt title={t("You can't have two mutations that share a type.")}>
       {t("{n, plural, =1 {Type} other {Types}}", {
         n: item.types?.length ?? 0,
         _context,

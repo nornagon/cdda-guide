@@ -1399,6 +1399,10 @@ export type Mutation = {
   threshold?: boolean;
 
   integrated_armor?: string[];
+
+  encumbrance_always?: [string /* bp_id */, integer][];
+  encumbrance_covered?: [string /* bp_id */, integer][];
+  restricts_gear?: string[];
 };
 
 export type MutationType = {
