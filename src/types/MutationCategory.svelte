@@ -35,8 +35,10 @@ const postThreshold = mutationsInCategory.filter(
     <h1>{singularName(item)}</h1>
   {/if}
   <dl>
-    <dt>{t("Vitamin", { _context })}</dt>
-    <dd><ThingLink id={item.vitamin} type="vitamin" /></dd>
+    {#if item.vitamin}
+      <dt>{t("Vitamin", { _context })}</dt>
+      <dd><ThingLink id={item.vitamin} type="vitamin" /></dd>
+    {/if}
     {#if preThreshold.length}
       <dt>{t("Pre-Threshold Mutations", { _context })}</dt>
       <dd>
