@@ -63,6 +63,17 @@ const conflictsWithBionics = data
           {/each}
         </ul>
       </dd>
+    {:else if item.threshold}
+      <dt>{t("Category", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each data
+            .byType("mutation_category")
+            .filter((mc) => mc.threshold_mut === item.id) as category}
+            <li><ThingLink type="mutation_category" id={category.id} /></li>
+          {/each}
+        </ul>
+      </dd>
     {/if}
     <dt>{t("Purifiable", { _context })}</dt>
     <dd>{item.purifiable ?? true ? t("Yes") : t("No")}</dd>

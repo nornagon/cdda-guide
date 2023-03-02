@@ -2,7 +2,13 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, normalizeUseAction, singular, singularName } from "../data";
+import {
+  CddaData,
+  normalizeUseAction,
+  parseDuration,
+  singular,
+  singularName,
+} from "../data";
 import LimitedList from "../LimitedList.svelte";
 
 import type {
@@ -72,19 +78,25 @@ const deficiencyNames = item.deficiency
   <dl>
     <dt>{t("Type", { _context })}</dt>
     <dd>{item.vit_type}</dd>
-    {#if item.excess}
+    {#if item.excess && item.disease_excess?.length}
       <dt>{t("Excess", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
-          {#each excessNames as n}<li>{singular(n)}</li>{/each}
+          {#each excessNames as n, i}
+            <!-- prettier-ignore -->
+            <li>{singular(n)} ({item.disease_excess[i][0]}→{item.disease_excess[i][1]})</li>
+          {/each}
         </ul>
       </dd>
     {/if}
-    {#if item.deficiency}
+    {#if item.deficiency && item.disease?.length}
       <dt>{t("Deficiency", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
-          {#each deficiencyNames as n}<li>{singular(n)}</li>{/each}
+          {#each deficiencyNames as n, i}
+            <!-- prettier-ignore -->
+            <li>{singular(n)} ({item.disease[i][0]}→{item.disease[i][1]})</li>
+          {/each}
         </ul>
       </dd>
     {/if}
@@ -92,16 +104,38 @@ const deficiencyNames = item.deficiency
     <dd>{item.min ?? 0}</dd>
     <dt>{t("Max", { _context })}</dt>
     <dd>{item.max ?? 0}</dd>
-    <dt>{t("Rate", { _context })}</dt>
-    <dd>{item.rate ?? "0 m"}</dd>
+    {#if parseDuration(item.rate ?? "0 m") > 0}
+      <dt>{t("Decay Rate", { _context })}</dt>
+      <dd>–1 / {item.rate ?? "0 m"}</dd>
+    {:else if parseDuration(item.rate ?? "0 m") < 0}
+      <dt>{t("Generation Rate", { _context })}</dt>
+      <dd>
+        1 / {typeof item.rate === "string"
+          ? item.rate.replace(/-/, "")
+          : -item.rate ?? "0 m"}
+      </dd>
+    {/if}
+    {#if item.decays_into?.length}
+      <dt>{t("Decays Into", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated and">
+          {#each item.decays_into as decay}
+            <!-- prettier-ignore -->
+            <li><ThingLink id={decay[0]} type="vitamin" />{#if decay[1] !== 1}&times;{decay[1]}{/if}</li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
   </dl>
 </section>
-<section>
-  <h1>{t("Comestibles", { _context })}</h1>
-  <LimitedList items={containing} let:item={other}>
-    <ThingLink id={other.comestible.id} type="item" /> ({other.pct}{item.vit_type ===
-    "counter"
-      ? " U"
-      : "% RDA"})
-  </LimitedList>
-</section>
+{#if containing.length}
+  <section>
+    <h1>{t("Comestibles", { _context })}</h1>
+    <LimitedList items={containing} let:item={other}>
+      <ThingLink id={other.comestible.id} type="item" /> ({other.pct}{item.vit_type ===
+      "counter"
+        ? " U"
+        : "% RDA"})
+    </LimitedList>
+  </section>
+{/if}

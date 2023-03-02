@@ -810,6 +810,7 @@ export type Vitamin = {
   vit_type: "vitamin" | "toxin" | "drug" | "counter";
   disease?: [number, number][];
   disease_excess?: [number, number][];
+  decays_into?: [string, number][];
   flags?: string[];
 };
 
@@ -1512,6 +1513,7 @@ export type MutationType = {
 export type MutationCategory = {
   id: string;
   type: "mutation_category";
+  vitamin: string;
   name: Translation;
   description?: Translation;
   threshold_mut?: string;

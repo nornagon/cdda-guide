@@ -140,7 +140,7 @@ export function parseMass(string: string | number): number {
   if (string.endsWith("g")) return parseInt(string);
 }
 
-export function parseDuration(duration: string | number) {
+export function parseDuration(duration: string | number): number {
   if (typeof duration === "number") return duration / 100;
   const turns = 1;
   const seconds = 1;
