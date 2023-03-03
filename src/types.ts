@@ -1189,8 +1189,8 @@ export type VehiclePart = {
   durability?: integer;
   damage_modifier?: integer; // percentage, default 100
   energy_consumption?: energy; // per second, default 0
-  power?: integer; // watts, default 0
-  epower?: integer; // watts, default 0
+  power?: integer | string; // watts, default 0
+  epower?: integer | string; // watts, default 0
   emissions?: string[]; // emit_id
   exhaust?: string[]; // emit_id
   fuel_type?: string; // item_id
