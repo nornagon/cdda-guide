@@ -59,7 +59,10 @@ const groupKeys = [...groups.keys()].sort();
 
 const groupFilter =
   {
-    mutation: (m: Mutation) => !/Fake\d$/.test(m.id),
+    mutation: (m: Mutation) =>
+      !/Fake\d$/.test(m.id) &&
+      !m.types?.includes("BACKGROUND_OTHER_SURVIVORS_STORY") &&
+      !m.types?.includes("BACKGROUND_SURVIVAL_STORY"),
   }[type] ?? (() => true);
 </script>
 
