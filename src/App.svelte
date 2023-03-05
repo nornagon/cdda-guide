@@ -128,7 +128,9 @@ function urlWithHash(newHash: string) {
 }
 
 // Throttle replaceState to avoid browser warnings.
-const replaceState = throttle(history.replaceState.bind(history), 100);
+const replaceState = throttle(history.replaceState.bind(history), 100, {
+  trailing: true,
+});
 
 const clearItem = () => {
   if (item) history.pushState(null, "", location.href.replace(/#.*$/, ""));
