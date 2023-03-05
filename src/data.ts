@@ -1014,10 +1014,8 @@ export class CddaData {
           if (!itemsByTool.has(tool.id)) itemsByTool.set(tool.id, new Set());
           itemsByTool.get(tool.id).add(recipe.result);
         }
-      const components = requirements.flatMap(([req, count]) =>
-        this.flattenRequirement(req.components ?? [], (x) => x.components).map(
-          (x) => x.map((x) => ({ ...x, count: x.count * count }))
-        )
+      const components = requirements.flatMap(([req]) =>
+        this.flattenRequirement(req.components ?? [], (x) => x.components)
       );
       for (const componentOptions of components)
         for (const component of componentOptions) {
