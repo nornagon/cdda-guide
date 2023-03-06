@@ -8,6 +8,7 @@ import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import { setContext } from "svelte";
 import { t } from "@transifex/native";
 import ThingLink from "./types/ThingLink.svelte";
+import throttle from "lodash.throttle";
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -116,7 +117,12 @@ $: matchingObjects =
   data &&
   filter(search);
 
-$: history.replaceState({ search }, "");
+// Throttle replaceState to avoid browser warnings.
+const replaceState = throttle(history.replaceState.bind(history), 100, {
+  trailing: true,
+});
+
+$: replaceState({ search }, "");
 </script>
 
 {#if matchingObjects}
