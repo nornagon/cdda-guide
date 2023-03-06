@@ -17,6 +17,7 @@ const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "tool_quality",
   "martial_art",
   "mutation",
+  "mutation_category",
   "vehicle",
   "terrain",
 ]);
