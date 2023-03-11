@@ -1015,7 +1015,7 @@ export class CddaData {
           itemsByTool.get(tool.id).add(recipe.result);
         }
       const components = requirements.flatMap(([req]) =>
-        this.flattenRequirement(req.components ?? [], (x) => x.components)
+        this.flattenRequirement(req.components ?? [], (x) => x.components ?? [])
       );
       for (const componentOptions of components)
         for (const component of componentOptions) {
@@ -1077,15 +1077,17 @@ function flattenChoices<T>(
           );
         }
         const otherRequirementTools = get(otherRequirement) ?? [];
-        const otherRequirementChoices = otherRequirementTools[0]; // only take the first
-        flatChoices.push(
-          ...flattenChoices(
-            data,
-            otherRequirementChoices,
-            get,
-            onlyRecoverable
-          ).map((x) => ({ ...x, count: x.count * count }))
-        );
+        if (otherRequirementTools.length) {
+          const otherRequirementChoices = otherRequirementTools[0]; // only take the first
+          flatChoices.push(
+            ...flattenChoices(
+              data,
+              otherRequirementChoices,
+              get,
+              onlyRecoverable
+            ).map((x) => ({ ...x, count: x.count * count }))
+          );
+        }
       } else {
         flatChoices.push({ id, count });
       }
