@@ -35,8 +35,8 @@ writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0));
 const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
   const proficiency = data.byId("proficiency", prof.proficiency);
   return {
-    fail_multiplier: proficiency.default_fail_multiplier,
-    time_multiplier: proficiency.default_time_multiplier,
+    fail_multiplier: proficiency.default_fail_multiplier ?? 2,
+    time_multiplier: proficiency.default_time_multiplier ?? 2,
     learning_time_multiplier: 1,
     ...prof,
   };
