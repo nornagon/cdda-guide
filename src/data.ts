@@ -814,7 +814,7 @@ export class CddaData {
   }
   flattenRequirement<T>(
     required: (T | T[])[],
-    get: (x: Requirement) => (T | T[])[],
+    get: (x: Requirement) => (T | T[])[] | undefined,
     opts?: { expandSubstitutes?: boolean; onlyRecoverable?: boolean }
   ): { id: string; count: number }[][] {
     const cache = this._flatRequirementCacheForOpts(opts);
@@ -1108,8 +1108,8 @@ function expandSubstitutes(
   return [r, ...replacements.map((o) => ({ id: o, count: r.count }))];
 }
 
-export function normalize<T>(xs: (T | T[])[]): T[][] {
-  return xs.map((x: T | T[]) => (Array.isArray(x) ? (x as T[]) : [x]));
+export function normalize<T>(xs: (T | T[])[] | undefined): T[][] {
+  return xs?.map((x: T | T[]) => (Array.isArray(x) ? (x as T[]) : [x])) ?? [];
 }
 
 export const countsByCharges = (item: any): boolean => {
