@@ -1295,7 +1295,7 @@ const fetchJsonWithIncorrectProgress = async (
   const chunks: Uint8Array[] = [];
   while (true) {
     const { done, value } = await reader.read();
-    if (done) break;
+    if (done || !value) break;
     chunks.push(value);
     receivedBytes += value.length;
     progress(receivedBytes, contentLength);
