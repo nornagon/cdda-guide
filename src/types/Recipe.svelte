@@ -1,5 +1,6 @@
 <script lang="ts">
 import { t } from "@transifex/native";
+import JsonView from "../JsonView.svelte";
 import { getContext } from "svelte";
 import { CddaData, i18n } from "../data";
 
@@ -223,6 +224,6 @@ function activityLevelName(level: number) {
   </dl>
   <details>
     <summary>{t("Recipe JSON")}</summary>
-    <pre>{JSON.stringify(recipe, null, 2)}</pre>
+    <JsonView obj={recipe} build_number={data.build_number} />
   </details>
 </section>

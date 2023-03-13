@@ -29,6 +29,7 @@ import ObsoletionWarning from "./ObsoletionWarning.svelte";
 import Bionic from "./types/Bionic.svelte";
 import * as Sentry from "@sentry/browser";
 import type { SupportedTypes } from "./types";
+import JsonView from "./JsonView.svelte";
 
 export let item: { id: string; type: string };
 
@@ -50,7 +51,7 @@ function onError(e: Error) {
 
 function defaultItem(id: string, type: string) {
   if (type === "json_flag") {
-    return { id, type, __filename: "(generated)" };
+    return { id, type, __filename: "" };
   } else {
     return undefined;
   }
@@ -135,6 +136,6 @@ const display = (obj && displays[obj.type]) ?? Unknown;
 
   <details>
     <summary>Raw JSON</summary>
-    <pre>{JSON.stringify(obj, null, 2)}</pre>
+    <JsonView {obj} build_number={data.build_number} />
   </details>
 {/if}
