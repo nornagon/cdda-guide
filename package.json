@@ -87,7 +87,8 @@
   "lint-staged": {
     "*.{js,ts,mjs,svelte,html}": [
       "prettier -w",
-      "npm run validate"
+      "svelte-check",
+      "tsc --noEmit -p ."
     ]
   }
 }
