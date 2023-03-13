@@ -202,7 +202,7 @@ items.sort((a, b) => b.prob - a.prob);
 
 const parts = normalizedParts
   .flatMap((np) => np.parts)
-  .filter((x) => data.byId("vehicle_part", x.partId));
+  .filter((x) => data.byIdMaybe("vehicle_part", x.partId)); // TODO: turrets?
 const partsGrouped = groupBy(parts, (p) => [p.partId]);
 const partsCounted = [...partsGrouped.entries()].map(([id, list]) => ({
   id,
