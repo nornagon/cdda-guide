@@ -1,5 +1,7 @@
 <script lang="ts">
-export let error: any = null;
+import type { Writable } from "svelte/store";
+
+export let error: Writable<Error>;
 export let onError: Function | null = null;
 let ENV = typeof process !== "undefined" && process.env && process.env.NODE_ENV;
 let DEV = ENV !== "production";
