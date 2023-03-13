@@ -861,9 +861,7 @@ export class CddaData {
         onlyRecoverable
           ? x.filter(
               (c) =>
-                !(this.byId("item", c.id)?.flags ?? []).includes(
-                  "UNRECOVERABLE"
-                )
+                !(this.byId("item", c.id).flags ?? []).includes("UNRECOVERABLE")
             )
           : x
       )
@@ -1197,7 +1195,8 @@ export const getVehiclePartIdAndVariant = (
   data: CddaData,
   compositePartId: string
 ): [string, string] => {
-  if (data.byId("vehicle_part", compositePartId)) return [compositePartId, ""];
+  if (data.byIdMaybe("vehicle_part", compositePartId))
+    return [compositePartId, ""];
   for (const variant of vpartVariants) {
     if (compositePartId.endsWith("_" + variant)) {
       return [

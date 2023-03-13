@@ -50,14 +50,14 @@ function onError(e: Error) {
 
 function defaultItem(id: string, type: string) {
   if (type === "json_flag") {
-    return { id, type };
+    return { id, type, __filename: "(generated)" };
   } else {
-    return null;
+    return undefined;
   }
 }
 
 let obj =
-  data.byId(item.type as keyof SupportedTypes, item.id) ??
+  data.byIdMaybe(item.type as keyof SupportedTypes, item.id) ??
   defaultItem(item.id, item.type);
 
 const displays: Record<string, typeof SvelteComponent> = {
@@ -101,7 +101,7 @@ const displays: Record<string, typeof SvelteComponent> = {
   bionic: Bionic,
 };
 
-const display = displays[obj.type] ?? Unknown;
+const display = (obj && displays[obj.type]) ?? Unknown;
 </script>
 
 {#if !obj}

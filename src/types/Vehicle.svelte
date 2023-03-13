@@ -101,10 +101,11 @@ const symbolForVehiclePartVariant = (
 ): string => {
   // TODO: https://github.com/CleverRaven/Cataclysm-DDA/pull/59563
   const vehiclePart =
-    data.byId("vehicle_part", partId) ??
+    data.byIdMaybe("vehicle_part", partId) ??
     (partId.startsWith("turret_")
-      ? data.byId("vehicle_part", "turret_generic")
+      ? data.byIdMaybe("vehicle_part", "turret_generic")
       : null);
+  if (!vehiclePart) return "?";
   const symbol = vehiclePart.symbol ?? "=";
   const symbols: Record<string, string> = {
     ...(vehiclePart.standard_symbols ? standardSymbols : {}),
@@ -116,10 +117,11 @@ const symbolForVehiclePartVariant = (
 const colorForVehiclePart = (partId: string) => {
   // TODO: https://github.com/CleverRaven/Cataclysm-DDA/pull/59563
   const vehiclePart =
-    data.byId("vehicle_part", partId) ??
+    data.byIdMaybe("vehicle_part", partId) ??
     (partId.startsWith("turret_")
-      ? data.byId("vehicle_part", "turret_generic")
+      ? data.byIdMaybe("vehicle_part", "turret_generic")
       : null);
+  if (!vehiclePart) return "white";
   const color = vehiclePart.color;
   return color;
 };

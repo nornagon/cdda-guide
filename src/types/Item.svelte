@@ -89,7 +89,7 @@ const primaryMaterial = materials.reduce(
   null as { type: string; portion: number } | null
 );
 let flags = (item.flags ?? []).map(
-  (id) => data.byId("json_flag", id) ?? { id }
+  (id) => data.byIdMaybe("json_flag", id) ?? { id }
 );
 let faults = (item.faults ?? []).map((f) => data.byId("fault", f));
 

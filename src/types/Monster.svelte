@@ -423,7 +423,7 @@ let upgrades =
     {#if item.death_function}
       <dt>{t("On Death", { _context })}</dt>
       <dd>
-        {#if item.death_function.effect?.id && data.byId("SPELL", item.death_function.effect.id)}
+        {#if item.death_function.effect?.id && data.byIdMaybe("SPELL", item.death_function.effect.id)}
           {singularName(data.byId("SPELL", item.death_function.effect.id))} ({singular(
             data.byId("SPELL", item.death_function.effect.id).description
           )})
@@ -466,7 +466,7 @@ let upgrades =
     <h1>{t("Butchering Results", { _context })}</h1>
     <ul>
       {#each harvest.entries as harvest_entry}
-        {#if (harvest_entry.type && data.byId("harvest_drop_type", harvest_entry.type)?.group) || harvest_entry.type === "bionic_group"}
+        {#if (harvest_entry.type && data.byIdMaybe("harvest_drop_type", harvest_entry.type)?.group) || harvest_entry.type === "bionic_group"}
           {#each data.flattenItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
             <li>
               <ItemSymbol item={data.byId("item", id)} />
