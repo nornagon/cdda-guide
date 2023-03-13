@@ -23,10 +23,10 @@ const computeToHit = ({
   surface = "any",
   balance = "neutral",
 }: {
-  grip?: string;
-  length?: string;
-  surface?: string;
-  balance?: string;
+  grip?: keyof typeof gripVal;
+  length?: keyof typeof lengthVal;
+  surface?: keyof typeof surfaceVal;
+  balance?: keyof typeof balanceVal;
 }) => {
   const g = gripVal[grip];
   const l = lengthVal[length];

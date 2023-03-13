@@ -46,8 +46,8 @@ function topologicalSortByRank<T>(
   outgoingEdges: (n: T) => T[]
 ): T[][] {
   const ranks = new Map<T, number>();
-  const rank = (x: T) => {
-    if (ranks.has(x)) return ranks.get(x);
+  const rank = (x: T): number => {
+    if (ranks.has(x)) return ranks.get(x)!;
     const r = Math.max(0, ...outgoingEdges(x).map(rank)) + 1;
     ranks.set(x, r);
     return r;

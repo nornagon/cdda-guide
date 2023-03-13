@@ -40,7 +40,7 @@ const types = [
 ];
 
 // This lets LimitedList always render expanded.
-globalThis.__isTesting__ = true;
+(globalThis as any).__isTesting__ = true;
 
 const all = data._raw
   .filter((x) => x.id && types.includes(mapType(x.type)))

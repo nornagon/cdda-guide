@@ -213,7 +213,7 @@ export class CddaData {
   _byType: Map<string, any[]> = new Map();
   _byTypeById: Map<string, Map<string, any>> = new Map();
   _abstractsByType: Map<string, Map<string, any>> = new Map();
-  _toolReplacements: Map<string, string[]>;
+  _toolReplacements: Map<string, string[]> | null = null;
   _craftingPseudoItems: Map<string, string> = new Map();
   _migrations: Map<string, string> = new Map();
   _flattenCache: Map<any, any> = new Map();
@@ -288,7 +288,7 @@ export class CddaData {
   byIdMaybe<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
     id: string
-  ): SupportedTypesWithMapped[TypeName] | undefined {
+  ): (SupportedTypesWithMapped[TypeName] & { __filename: string }) | undefined {
     if (typeof id !== "string") throw new Error("Requested non-string id");
     const byId = this._byTypeById.get(type);
     if (type === "item" && !byId?.has(id) && this._migrations.has(id))
@@ -300,7 +300,7 @@ export class CddaData {
   byId<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
     id: string
-  ): SupportedTypesWithMapped[TypeName] {
+  ): SupportedTypesWithMapped[TypeName] & { __filename: string } {
     const ret = this.byIdMaybe(type, id);
     if (!ret)
       throw new Error('unknown object "' + id + '" of type "' + type + '"');
@@ -381,7 +381,7 @@ export class CddaData {
     if (parentProps.vitamins && obj.vitamins) {
       ret.vitamins = [
         ...parentProps.vitamins.filter(
-          (x) => !obj.vitamins.some((y) => y[0] === x[0])
+          (x: any) => !obj.vitamins.some((y: any) => y[0] === x[0])
         ),
         ...obj.vitamins,
       ];
@@ -484,7 +484,7 @@ export class CddaData {
       if (Array.isArray(ret.delete[k])) {
         // Some 'delete' entries delete qualities, which are arrays. As a rough
         // heuristic, compare recursively.
-        const isEqual = (x: any, y: any) =>
+        const isEqual = (x: any, y: any): boolean =>
           x === y ||
           (Array.isArray(x) &&
             Array.isArray(y) &&
@@ -677,7 +677,7 @@ export class CddaData {
       args.forEach(addOne);
     }
 
-    if (group["container-item"])
+    if ("container-item" in group && group["container-item"])
       add({ id: group["container-item"], prob: 1, count: [1, 1] });
 
     const normalizedEntries: ItemGroupEntry[] = [];
@@ -735,8 +735,8 @@ export class CddaData {
         const { prob = 100 } = entry;
         const nProb = Math.min(prob, 100) / 100;
         const nCount = normalizeCount(entry);
-        if (entry["container-item"])
-          add({ id: entry["container-item"], prob: nProb, count: [1, 1] });
+        if (entry["container"])
+          add({ id: entry["container"], prob: nProb, count: [1, 1] });
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
           const item = this.byId("item", entry.item);
@@ -774,8 +774,8 @@ export class CddaData {
       for (const entry of normalizedEntries) {
         const nProb = (entry.prob ?? 100) / totalProb;
         const nCount = normalizeCount(entry);
-        if (entry["container-item"])
-          add({ id: entry["container-item"], prob: nProb, count: [1, 1] });
+        if (entry["container"])
+          add({ id: entry["container"], prob: nProb, count: [1, 1] });
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
         } else if ("group" in entry) {
@@ -1007,7 +1007,7 @@ export class CddaData {
   _itemComponentCache: {
     byTool: Map<string, Set<string>>;
     byComponent: Map<string, Set<string>>;
-  };
+  } | null = null;
   getItemComponents() {
     if (this._itemComponentCache) return this._itemComponentCache;
     const itemsByTool = new Map<string, Set<string>>();

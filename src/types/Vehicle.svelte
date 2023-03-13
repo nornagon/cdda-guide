@@ -13,7 +13,7 @@ import {
 import LimitedList from "../LimitedList.svelte";
 import * as Sentry from "@sentry/browser";
 
-import type { Vehicle } from "../types";
+import type { Vehicle, VehiclePart } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import { groupBy } from "./item/utils";
 import ThingLink from "./ThingLink.svelte";
@@ -47,7 +47,7 @@ const standardSymbols = {
   sw: "b",
 };
 
-const zOrder = {
+const zOrder: Record<NonNullable<VehiclePart["location"]>, number> = {
   on_roof: 9,
   on_cargo: 8,
   center: 7,
@@ -106,7 +106,7 @@ const symbolForVehiclePartVariant = (
       ? data.byId("vehicle_part", "turret_generic")
       : null);
   const symbol = vehiclePart.symbol ?? "=";
-  const symbols = {
+  const symbols: Record<string, string> = {
     ...(vehiclePart.standard_symbols ? standardSymbols : {}),
     ...vehiclePart.symbols,
   };

@@ -8,7 +8,7 @@ const blue = 0x04; // RGB{0; 0; 196}
 const magenta = 0x05; // RGB{196; 0; 180}
 const cyan = 0x06; // RGB{0; 170; 200}
 const white = 0x07; // RGB{196; 196; 196}
-const color_pairs = {};
+const color_pairs: Record<number, [number, number]> = {};
 
 const init_pair = (num: number, fg: number, bg: number) => {
   color_pairs[num] = [fg, bg];
@@ -120,7 +120,11 @@ function color_pair(i: number) {
   };
 }
 
-export function colorForName(name: string) {
+export function colorForName(name: string): {
+  fg: number;
+  bg: number;
+  inverse: string;
+} {
   if (!name) return colorForName("c_white");
   if (name[1] != "_") return colorForName("c_" + name);
   return all_colors[name];

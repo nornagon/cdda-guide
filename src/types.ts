@@ -18,13 +18,15 @@ export type ItemGroupEntry = (
   prob?: number;
   count?: number | [number, number];
   charges?: number | [number, number];
-  // TODO: damage, dirt, charges, ammo, container, contents, snippets?, sealed, custom-flags
+  container?: string;
+  // TODO: damage, dirt, charges, ammo, contents, snippets?, sealed, custom-flags
 };
 
 export type ItemGroupEntryOrShortcut = ItemGroupEntry | [string, number]; // item_id, prob (or item_group_id, prob if in 'groups' array)
 
 export type ItemGroup =
   | {
+      id?: string;
       subtype: "collection" | "distribution";
       entries?: ItemGroupEntryOrShortcut[];
       items?: (string /* item_id with prob=100 */ | ItemGroupEntryOrShortcut)[];
@@ -36,6 +38,7 @@ export type ItemGroup =
       // TODO: on_overflow
     }
   | {
+      id?: string;
       subtype?: "old"; // ~= "distribution"
       items?: ItemGroupEntryOrShortcut[];
     };
@@ -149,7 +152,14 @@ export type Recipe = {
         { skill_level?: number; recipe_name?: string; hidden?: boolean }
       >;
 
-  activity_level?: string;
+  activity_level?:
+    | "SLEEP_EXERCISE"
+    | "NO_EXERCISE"
+    | "LIGHT_EXERCISE"
+    | "MODERATE_EXERCISE"
+    | "BRISK_EXERCISE"
+    | "ACTIVE_EXERCISE"
+    | "EXTRA_EXERCISE";
 
   delete_flags?: string[]; // flag_id
   using?: string | ([string, number] | [string, number, "LIST"])[]; // requirement_id
@@ -519,7 +529,12 @@ export type ItemBasicInfo = {
   techniques?: string[];
   to_hit?:
     | number
-    | { grip?: string; length?: string; surface?: string; balance?: string };
+    | {
+        grip?: "bad" | "none" | "solid" | "weapon";
+        length?: "hand" | "short" | "long";
+        surface?: "point" | "line" | "any" | "every";
+        balance?: "clumsy" | "uneven" | "neutral" | "good";
+      };
   seed_data?: {
     grow?: string; // duration, default 1 day
     plant_name: Translation;
@@ -1185,7 +1200,19 @@ export type VehiclePart = {
   id: string;
   abstract?: string;
   item: string; // item_id
-  location?: string;
+  location?:
+    | "on_roof"
+    | "on_cargo"
+    | "center"
+    | "under"
+    | "structure"
+    | "engine_block"
+    | "on_battery_mount"
+    | "fuel_source"
+    | "armor"
+    | "roof"
+    | "";
+
   durability?: integer;
   damage_modifier?: integer; // percentage, default 100
   energy_consumption?: energy; // per second, default 0

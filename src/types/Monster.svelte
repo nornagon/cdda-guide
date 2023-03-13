@@ -92,7 +92,7 @@ function damage(mon: Monster) {
 
 // From mtype.h. See also http://cddawiki.chezzo.com/cdda_wiki/index.php?title=Template:Enemyflags&action=edit.
 // prettier-ignore
-const mon_flag_descriptions = {
+const mon_flag_descriptions: Record<string, string> = {
   SEES: "It can see you (and will run/follow)",
   HEARS: "It can hear you",
   GOODHEARING: "Pursues sounds more than most monsters",
@@ -207,7 +207,7 @@ const mon_flag_descriptions = {
 };
 
 // prettier-ignore
-const trigger_descriptions = {
+const trigger_descriptions: Record<string, string> = {
   FIRE: "Triggers if there's a fire within 3 tiles, the strength of the effect equals 5 * the field intensity of the fire.",
   FRIEND_ATTACKED: "Triggers if the monster sees another monster of the same type being attacked; strength = 15.",
   FRIEND_DIED: "Triggers if the monster sees another monster of the same type dying; strength = 15.",
@@ -314,7 +314,7 @@ let upgrades =
           <ul class="no-bullets">
             {#each item.special_attacks as special_attack}
               <li>
-                {#if special_attack[0] && data.byIdMaybe("monster_attack", special_attack[0])}
+                {#if Array.isArray(special_attack) && special_attack[0] && data.byIdMaybe("monster_attack", special_attack[0])}
                   <ThingLink type="monster_attack" id={special_attack[0]} />
                 {:else}
                   <SpecialAttack {special_attack} />

@@ -30,7 +30,7 @@ const mendingMethods = (item.mending_methods ?? []).map((mm) => {
   return { mending_method: mm, components, requirement };
 });
 
-const fault_flag_descriptions = {
+const fault_flag_descriptions: Record<string, string> = {
   NO_ALTERNATOR_CHARGE:
     "The alternator connected to this engine does not work.",
   BAD_COLD_START:

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { setContext } from "svelte";
+import { setContext, SvelteComponent } from "svelte";
 
 import type { CddaData } from "./data";
 import Monster from "./types/Monster.svelte";
@@ -28,6 +28,7 @@ import Achievement from "./types/Achievement.svelte";
 import ObsoletionWarning from "./ObsoletionWarning.svelte";
 import Bionic from "./types/Bionic.svelte";
 import * as Sentry from "@sentry/browser";
+import type { SupportedTypes } from "./types";
 
 export let item: { id: string; type: string };
 
@@ -56,9 +57,10 @@ function defaultItem(id: string, type: string) {
 }
 
 let obj =
-  data.byId(item.type as any, item.id) ?? defaultItem(item.id, item.type);
+  data.byId(item.type as keyof SupportedTypes, item.id) ??
+  defaultItem(item.id, item.type);
 
-const displays = {
+const displays: Record<string, typeof SvelteComponent> = {
   MONSTER: Monster,
   AMMO: Item,
   GUN: Item,
@@ -98,6 +100,8 @@ const displays = {
   conduct: Achievement,
   bionic: Bionic,
 };
+
+const display = displays[obj.type] ?? Unknown;
 </script>
 
 {#if !obj}
@@ -119,13 +123,13 @@ const displays = {
     </section>
   {:else if typeof globalThis !== "undefined" && globalThis.process}
     <!-- running in tests -->
-    <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
+    <svelte:component this={display} item={obj} />
   {:else}
     <ErrorBoundary {onError}>
       {#if /obsolet/.test(obj.__filename)}
         <ObsoletionWarning item={obj} />
       {/if}
-      <svelte:component this={displays[obj.type] ?? Unknown} item={obj} />
+      <svelte:component this={display} item={obj} />
     </ErrorBoundary>
   {/if}
 
