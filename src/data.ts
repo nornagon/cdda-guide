@@ -989,7 +989,7 @@ export class CddaData {
 
     const requirements = (using ?? [])
       .map(
-        ([id, count]: readonly [string, number] | [string, number, "LIST"]) =>
+        ([id, count]) =>
           [
             this.byId("requirement", id) as RequirementData,
             count as number,
@@ -1020,7 +1020,7 @@ export class CddaData {
 
       const requirements = (using ?? [])
         .map(
-          ([id, count]: readonly [string, number] | [string, number, "LIST"]) =>
+          ([id, count]) =>
             [
               this.byId("requirement", id) as RequirementData,
               count as number,
