@@ -20,7 +20,7 @@ export function groupBy<T>(things: T[], groupsFor: (x: T) => string[]) {
     const groups = groupsFor(thing);
     for (const group of groups) {
       if (!map.has(group)) map.set(group, []);
-      map.get(group).push(thing);
+      map.get(group)!.push(thing);
     }
   }
   return map;
@@ -28,7 +28,7 @@ export function groupBy<T>(things: T[], groupsFor: (x: T) => string[]) {
 
 export function uniq<T>(things: T[], id: (a: T) => any = (a) => a): T[] {
   const seen = new Set();
-  const result = [];
+  const result: T[] = [];
   for (const thing of things) {
     const thingId = id(thing);
     if (!seen.has(thingId)) result.push(thing);

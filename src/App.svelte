@@ -75,16 +75,19 @@ const tilesets = [
 ];
 
 const normalizeTemplate = (t: string) => (t === "null" || !t ? "" : t);
-function loadTileset() {
+function loadTileset(): string {
   try {
-    return normalizeTemplate(localStorage.getItem("cdda-guide:tileset"));
+    const templ = localStorage.getItem("cdda-guide:tileset");
+    if (!templ) return "";
+    return normalizeTemplate(templ);
   } catch (e) {
-    return null;
+    return "";
   }
 }
 function saveTileset(url: string) {
   try {
-    localStorage.setItem("cdda-guide:tileset", normalizeTemplate(url));
+    if (!url) localStorage.removeItem("cdda-guide:tileset");
+    else localStorage.setItem("cdda-guide:tileset", normalizeTemplate(url));
   } catch (e) {
     /* swallow security errors, which can happen when in incognito mode */
   }
@@ -92,7 +95,7 @@ function saveTileset(url: string) {
 let tilesetUrlTemplate = loadTileset();
 $: saveTileset(tilesetUrlTemplate);
 $: tilesetUrl = $data
-  ? tilesetUrlTemplate.replace("{version}", $data.build_number)
+  ? tilesetUrlTemplate?.replace("{version}", $data.build_number!) ?? null
   : null;
 $: tileData.setURL(tilesetUrl);
 
@@ -138,8 +141,8 @@ window.addEventListener("beforeinstallprompt", (e) => {
 });
 
 function maybeFocusSearch(e: KeyboardEvent) {
-  if (e.key === "/" && document.activeElement.id !== "search") {
-    document.getElementById("search").focus();
+  if (e.key === "/" && document.activeElement?.id !== "search") {
+    document.getElementById("search")?.focus();
     e.preventDefault();
   }
 }
@@ -266,7 +269,7 @@ newRandomPage();
         {/if}
       </span>
     {/if}
-  {:else if search}
+  {:else if search && $data}
     {#key search}
       <SearchResults data={$data} {search} />
     {/key}
@@ -406,11 +409,8 @@ Anyway?`,
         link_random_page: "{link_random_page}",
       })}
       slot0="link_random_page">
-      <a
-        slot="0"
-        href={randomPage}
-        disabled={!randomPage}
-        on:click={() => setTimeout(newRandomPage)}>{t("random page")}</a>
+      <a slot="0" href={randomPage} on:click={() => setTimeout(newRandomPage)}
+        >{t("random page")}</a>
     </InterpolatedTranslation>
   {/if}
 
@@ -425,7 +425,7 @@ Anyway?`,
           on:change={(e) => {
             const url = new URL(location.href);
             const buildNumber = e.currentTarget.value;
-            if (buildNumber === builds[0].build_number)
+            if (buildNumber === builds?.[0].build_number)
               url.searchParams.delete("v");
             else url.searchParams.set("v", buildNumber);
             location.href = url.toString();

@@ -10,7 +10,7 @@ for (const line of picture.picture) {
   let remaining = line;
   while (true) {
     const nextColorTag = remaining.match(/<\/?color([^>]*?)>/);
-    if (nextColorTag) {
+    if (nextColorTag && nextColorTag.index != null) {
       if (nextColorTag.index > 0)
         spans.push({
           string: remaining.substring(0, nextColorTag.index),

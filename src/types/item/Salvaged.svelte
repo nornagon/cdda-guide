@@ -31,7 +31,7 @@ const salvagedFromMaterials = data
   .filter((mat) => mat.salvaged_into === item_id)
   .flatMap((mat) => itemsWithOnlyMaterial(mat))
   .filter((it) => !(it.flags ?? []).includes("NO_SALVAGE"))
-  .filter((it) => parseMass(it.weight) >= parseMass(item.weight))
+  .filter((it) => parseMass(it.weight ?? 0) >= parseMass(item.weight ?? 0))
   .sort(byName);
 </script>
 

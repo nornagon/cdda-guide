@@ -32,7 +32,7 @@ for (let y = minY; y <= maxY; y++) {
     if (om) {
       const [, omt_id, dir] = /^(.+?)(?:_(north|south|east|west))?$/.exec(
         om.overmap
-      );
+      )!;
       const appearance = omtAppearance(omt_id, dir || "north");
       appearanceRow.push(appearance);
     } else {
@@ -89,11 +89,11 @@ function omtAppearance(
   sym: string;
   name: string;
 } {
-  const omt = data.byId("overmap_terrain", omt_id);
+  const omt = data.byIdMaybe("overmap_terrain", omt_id);
   return omt
     ? {
         color: omt.color,
-        sym: rotateSymbol(omt.sym, dir),
+        sym: rotateSymbol(omt.sym ?? "\u00a0" /* LINE_XOXO_C */, dir),
         name: singular(omt.name),
       }
     : { color: "black", sym: " ", name: "" };

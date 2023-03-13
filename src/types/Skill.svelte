@@ -24,8 +24,14 @@ const booksByLevel = new Map<number, SupportedTypesWithMapped["BOOK"][]>();
 for (const book of booksWithSkill) {
   if (!booksByLevel.has(book.max_level ?? 0))
     booksByLevel.set(book.max_level ?? 0, []);
-  booksByLevel.get(book.max_level ?? 0).push(book);
+  booksByLevel.get(book.max_level ?? 0)!.push(book);
 }
+const booksByLevelList = [...booksByLevel.entries()].sort(
+  (a, b) => a[0] - b[0]
+);
+booksByLevelList.forEach(([, books]) => {
+  books.sort((a, b) => (a.required_level ?? 0) - (b.required_level ?? 0));
+});
 
 const itemsUsingSkill = data
   .byType("item")
@@ -44,13 +50,11 @@ itemsUsingSkill.sort(byName);
   <section>
     <h1>{t("Books", { _context: "Skill" })}</h1>
     <dl>
-      {#each [...booksByLevel.keys()].sort((a, b) => a - b) as level}
+      {#each booksByLevelList as [level, books]}
         <dt style="font-variant: tabular-nums">Level {level}</dt>
         <dd>
           <ul>
-            {#each booksByLevel
-              .get(level)
-              .sort((a, b) => (a.required_level ?? 0) - (b.required_level ?? 0)) as book}
+            {#each books as book}
               <li><ThingLink id={book.id} type="item" /></li>
             {/each}
           </ul>

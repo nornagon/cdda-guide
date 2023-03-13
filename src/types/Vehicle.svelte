@@ -56,6 +56,7 @@ const zOrder = {
   engine_block: 4,
   on_battery_mount: 3,
   fuel_source: 2,
+  "": 0,
   roof: -1,
   armor: -2,
 };
@@ -130,18 +131,18 @@ type NormalizedPartList = {
   parts: NormalizedPart[];
 };
 const normalizedParts: NormalizedPartList[] = item.parts.map((part) => {
-  const parts = (
-    part.part
+  const parts =
+    (part.part
       ? [{ part: part.part, fuel: part.fuel }]
       : part.parts?.map((part) => (typeof part === "string" ? { part } : part))
-  ).map(({ part, fuel }) => {
-    const [partId, variant] = getVehiclePartIdAndVariant(data, part);
-    return {
-      partId,
-      variant,
-      fuel,
-    };
-  });
+    )?.map(({ part, fuel }) => {
+      const [partId, variant] = getVehiclePartIdAndVariant(data, part);
+      return {
+        partId,
+        variant,
+        fuel,
+      };
+    }) ?? [];
   return {
     x: part.x,
     y: part.y,
@@ -165,7 +166,7 @@ const zForPart = (partId: string): number => {
       });
     }
   }
-  const location = vehiclePart.location;
+  const location = vehiclePart.location ?? "";
   const z = zOrder[location] ?? 0;
   return z;
 };

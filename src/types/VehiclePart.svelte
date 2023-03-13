@@ -63,7 +63,9 @@ const vehiclesContainingPart = data.byType("vehicle").filter((v) =>
   v.parts.some((part) => {
     const parts = part.part
       ? [{ part: part.part, fuel: part.fuel }]
-      : part.parts?.map((part) => (typeof part === "string" ? { part } : part));
+      : part.parts?.map((part) =>
+          typeof part === "string" ? { part } : part
+        ) ?? [];
     return parts.some(
       (p) => getVehiclePartIdAndVariant(data, p.part)[0] === item.id
     );
@@ -76,7 +78,11 @@ vehiclesContainingPart.sort((a, b) =>
 
 <h1>
   <ItemSymbol {item} />
-  {item.name ? singularName(item) : singularName(data.byId("item", item.item))}
+  {item.name
+    ? singularName(item)
+    : item.item
+    ? singularName(data.byId("item", item.item))
+    : item.id}
 </h1>
 
 <section>
@@ -85,7 +91,7 @@ vehiclesContainingPart.sort((a, b) =>
     <dt>{t("Item")}</dt>
     <dd><ThingLink id={item.item} type="item" /></dd>
     <dt>{t("Weight")}</dt>
-    <dd>{asKilograms(data.byId("item", item.item).weight)}</dd>
+    <dd>{asKilograms(data.byId("item", item.item).weight ?? 0)}</dd>
     {#if item.fuel_options?.length}
       <dt>{t("Charge", { _context })}</dt>
       <dd>
@@ -211,7 +217,9 @@ vehiclesContainingPart.sort((a, b) =>
   </dl>
 
   <p style="color: var(--cata-color-gray)">
-    {singular(item.description ?? data.byId("item", item.item).description)}
+    {singular(
+      item.description ?? data.byId("item", item.item).description ?? ""
+    )}
   </p>
 </section>
 
@@ -222,7 +230,7 @@ vehiclesContainingPart.sort((a, b) =>
       <dt>{t("Skills Required")}</dt>
       <dd>
         {#each item.requirements?.install?.skills ?? [] as [skill, level], i}
-          <ThingLink type="skill" id={skill} /> ({level}){#if i === item.requirements.install.skills.length - 2}{" and "}{:else if i !== item.requirements.install.skills.length - 1}{", "}{/if}
+          <ThingLink type="skill" id={skill} /> ({level}){#if i + 2 === item.requirements?.install?.skills?.length}{" and "}{:else if i + 1 !== item.requirements?.install?.skills?.length}{", "}{/if}
         {:else}
           {t("none")}
         {/each}
@@ -247,7 +255,7 @@ vehiclesContainingPart.sort((a, b) =>
       <dt>{t("Skills Required")}</dt>
       <dd>
         {#each item.requirements?.removal?.skills ?? [] as [skill, level], i}
-          <ThingLink type="skill" id={skill} /> ({level}){#if i === item.requirements.removal.skills.length - 2}{" and "}{:else if i !== item.requirements.removal.skills.length - 1}{", "}{/if}
+          <ThingLink type="skill" id={skill} /> ({level}){#if i + 2 === item.requirements?.removal?.skills?.length}{" and "}{:else if i + 1 !== item.requirements?.removal?.skills?.length}{", "}{/if}
         {:else}
           none
         {/each}
@@ -277,9 +285,9 @@ vehiclesContainingPart.sort((a, b) =>
       <dt>{t("Skills Required")}</dt>
       <dd>
         {#each item.requirements.repair?.skills ?? [] as [skill, level], i}
-          <ThingLink type="skill" id={skill} /> ({level}){#if i === item.requirements.repair.skills.length - 2}{" and "}{:else if i !== item.requirements.repair.skills.length - 1}{", "}{/if}
+          <ThingLink type="skill" id={skill} /> ({level}){#if i + 2 === item.requirements?.repair?.skills?.length}{" and "}{:else if i + 1 !== item.requirements?.repair?.skills?.length}{", "}{/if}
         {:else}
-          none
+          {t("none")}
         {/each}
       </dd>
       <dt title="Time required goes down with better skills">

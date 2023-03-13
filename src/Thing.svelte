@@ -33,7 +33,7 @@ export let item: { id: string; type: string };
 
 export let data: CddaData;
 setContext("data", data);
-let error: Error = null;
+let error: Error | null = null;
 
 function onError(e: Error) {
   error = e;

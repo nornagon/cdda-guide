@@ -64,7 +64,7 @@ $: targets = [...(data?.all() ?? [])]
         type: mapType(x.type),
       },
     ].concat(
-      "variants" in x
+      "variants" in x && x.variants
         ? x.variants.map((v) => ({
             id: (x as any).id,
             variant_id: v.id,
@@ -96,7 +96,7 @@ function filter(
     const mappedType = item.type;
     if (!SEARCHABLE_TYPES.has(mappedType)) continue;
     if (!byType.has(mappedType)) byType.set(mappedType, []);
-    if (byType.get(mappedType).some((x) => x.item.id === item.id)) continue;
+    if (byType.get(mappedType)!.some((x) => x.item.id === item.id)) continue;
     const obj = data.byId(mappedType, item.id) as SearchableType;
     const variant = item.variant_id
       ? {
@@ -104,7 +104,7 @@ function filter(
           name: item.name,
         }
       : undefined;
-    byType.get(mappedType).push({ item: obj, variant });
+    byType.get(mappedType)!.push({ item: obj, variant });
   }
   return byType;
 }
@@ -116,6 +116,9 @@ $: matchingObjects =
   (search.length >= 2 || cjkRegex.test(search)) &&
   data &&
   filter(search);
+$: matchingObjectsList = matchingObjects
+  ? [...matchingObjects.entries()]
+  : null;
 
 // Throttle replaceState to avoid browser warnings.
 // |throttle| isn't defined when running tests for some reason.
@@ -128,11 +131,11 @@ const replaceState = throttle
 $: replaceState({ search }, "");
 </script>
 
-{#if matchingObjects}
-  {#each [...matchingObjects.keys()] as type}
+{#if matchingObjectsList}
+  {#each matchingObjectsList as [type, results]}
     <h1>{type.replace(/_/g, " ")}</h1>
     <ul>
-      {#each matchingObjects.get(type) as result}
+      {#each results as result}
         {@const item = data._flatten(result.item)}
         <li>
           <ItemSymbol {item} />
@@ -140,7 +143,7 @@ $: replaceState({ search }, "");
             type={mapType(result.item.type)}
             id={result.item.id}
             variantId={result.variant?.id} />
-          {#if /obsolet/.test(result.item.__filename)}
+          {#if /obsolet/.test(result.item.__filename ?? "")}
             <em style="color: var(--cata-color-gray)"
               >({t("obsolete", { _context: "Search Results" })})</em>
           {/if}

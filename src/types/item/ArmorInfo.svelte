@@ -26,7 +26,7 @@ function addRange(
   return [xlo + ylo, xhi + yhi];
 }
 
-function normalizeApdMaterial(m: ArmorPortionData["material"][0]) {
+function normalizeApdMaterial(m: NonNullable<ArmorPortionData["material"]>[0]) {
   return typeof m === "string" ? { type: m } : { ...m };
 }
 
@@ -43,7 +43,12 @@ const itemMaterials =
     : item.material.map((s) => ({ portion: 1, ...s }));
 const totalMaterialPortion = itemMaterials.reduce((m, o) => m + o.portion, 0);
 
-const normalizedPortionData: ArmorPortionData[] = [];
+const normalizedPortionData: (ArmorPortionData & {
+  covers: NonNullable<ArmorPortionData["covers"]>;
+  coverage: NonNullable<ArmorPortionData["coverage"]>;
+  cover_melee: NonNullable<ArmorPortionData["cover_melee"]>;
+  cover_ranged: NonNullable<ArmorPortionData["cover_ranged"]>;
+})[] = [];
 for (const apd of item.armor ?? []) {
   const mats =
     apd.material?.map(normalizeApdMaterial) ??
@@ -53,7 +58,7 @@ for (const apd of item.armor ?? []) {
       thickness:
         (mat.portion / totalMaterialPortion) * (item.material_thickness ?? 0),
     }));
-  for (const bp_id of uniq(apd.covers)) {
+  for (const bp_id of uniq(apd.covers ?? [])) {
     const bp = data.byId("body_part", bp_id);
     const existing = normalizedPortionData.find((apd2) =>
       apd2.covers.includes(bp_id)
@@ -146,9 +151,9 @@ for (const apd of item.armor ?? []) {
       newApd.material = JSON.parse(JSON.stringify(mats)) as PartMaterial[];
       for (const mat of newApd.material ?? []) {
         mat.covered_by_mat =
-          ((mat.covered_by_mat ?? 100) * newApd.coverage!) / 100;
+          ((mat.covered_by_mat ?? 100) * newApd.coverage) / 100;
       }
-      normalizedPortionData.push(newApd);
+      normalizedPortionData.push(newApd as any /* TODO */);
     }
   }
 }
@@ -161,7 +166,7 @@ for (const apd of normalizedPortionData) {
 
 function coverageLabel(covers: string[]): string[] {
   const covered = new Set();
-  const labels = [];
+  const labels: string[] = [];
   for (const bp_id of covers ?? []) {
     if (covered.has(bp_id)) continue;
     const bp = data.byId("body_part", bp_id);
@@ -178,12 +183,12 @@ function coverageLabel(covers: string[]): string[] {
 
 function subCoverageLabel(covers: string[]): string[] {
   const covered = new Set();
-  const labels = [];
+  const labels: string[] = [];
   for (const bp_id of covers ?? []) {
     if (covered.has(bp_id)) continue;
     const bp = data.byId("sub_body_part", bp_id);
     if (bp.opposite && covers.includes(bp.opposite)) {
-      labels.push(singular(bp.name_multiple));
+      labels.push(singular(bp.name_multiple ?? bp.name));
       covered.add(bp.opposite);
     } else {
       labels.push(singular(bp.name));
@@ -235,15 +240,16 @@ function maxCoverage(bp: BodyPart, apd: ArmorPortionData): number {
 
   let primaryMaxCoverage = 0;
   let secondaryMaxCoverage = 0;
-  const subCovers = (apd.specifically_covers ?? []).length
-    ? apd.specifically_covers.map((x) => data.byId("sub_body_part", x))
-    : data.byType("sub_body_part").filter((x) => x.parent === bp.id);
+  const subCovers =
+    apd.specifically_covers && apd.specifically_covers.length
+      ? apd.specifically_covers.map((x) => data.byId("sub_body_part", x))
+      : data.byType("sub_body_part").filter((x) => x.parent === bp.id);
   for (const sub of subCovers) {
     if (bp.id !== sub.parent) continue;
     if (sub.secondary) {
-      secondaryMaxCoverage += sub.max_coverage;
+      secondaryMaxCoverage += sub.max_coverage ?? 0;
     } else {
-      primaryMaxCoverage += sub.max_coverage;
+      primaryMaxCoverage += sub.max_coverage ?? 0;
     }
   }
   return Math.max(primaryMaxCoverage, secondaryMaxCoverage);
@@ -493,21 +499,24 @@ function fixApd(
                   <td>{t("Bash", { _context: "Damage Type" })}</td>
                   {#each apd.material as mat}
                     {@const m = data.byId("material", mat.type)}
-                    <td>{(m.bash_resist * mat.thickness).toFixed(2)}</td>
+                    <td>{(m.bash_resist * (mat.thickness ?? 0)).toFixed(2)}</td>
                   {/each}
                 </tr>
                 <tr>
                   <td>{t("Cut", { _context: "Damage Type" })}</td>
                   {#each apd.material as mat}
                     {@const m = data.byId("material", mat.type)}
-                    <td>{(m.cut_resist * mat.thickness).toFixed(2)}</td>
+                    <td>{(m.cut_resist * (mat.thickness ?? 0)).toFixed(2)}</td>
                   {/each}
                 </tr>
                 <tr>
                   <td>{t("Ballistic", { _context: "Damage Type" })}</td>
                   {#each apd.material as mat}
                     {@const m = data.byId("material", mat.type)}
-                    <td>{(m.bullet_resist * mat.thickness).toFixed(2)}</td>
+                    <td
+                      >{(m.bullet_resist * (mat.thickness ?? 0)).toFixed(
+                        2
+                      )}</td>
                   {/each}
                 </tr>
               </tbody>

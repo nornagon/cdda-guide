@@ -36,7 +36,7 @@ const containingComestibles = data
     const comestible = c as SupportedTypes["COMESTIBLE"];
     return {
       comestible: c as Item,
-      pct: comestible.vitamins.find((v) => v[0] === item.id)[1],
+      pct: comestible.vitamins!.find((v) => v[0] === item.id)![1],
     };
   });
 const containingDrugs = data
@@ -55,7 +55,7 @@ const containingDrugs = data
         .filter((u) => u.type === "consume_drug")
         .map((u) => (u as ConsumeDrugUseFunction).vitamins ?? [])
         .flat()
-        .find((v) => v[0] === item.id)[1],
+        .find((v) => v[0] === item.id)![1],
     };
   });
 const containing = containingComestibles.concat(containingDrugs);
@@ -112,7 +112,7 @@ const deficiencyNames = item.deficiency
       <dd>
         1 / {typeof item.rate === "string"
           ? item.rate.replace(/-/, "")
-          : -item.rate ?? "0 m"}
+          : -(item.rate ?? 0) ?? "0 m"}
       </dd>
     {/if}
     {#if item.decays_into?.length}

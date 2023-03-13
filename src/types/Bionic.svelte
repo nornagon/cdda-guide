@@ -88,7 +88,7 @@ const containingBionics = data
     {/if}
     {#if (item.vitamin_absorb_mod ?? 1) !== 1}
       <dt>{t("Vitamin Absorption Modifier", { _context })}</dt>
-      <dd>{(item.vitamin_absorb_mod * 100).toFixed(0)}%</dd>
+      <dd>{((item.vitamin_absorb_mod ?? 1) * 100).toFixed(0)}%</dd>
     {/if}
     {#if item.fuel_options?.length}
       <dt>{t("Fuel", { _context })}</dt>

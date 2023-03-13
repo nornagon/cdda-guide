@@ -17,7 +17,7 @@ const requiredBuffs =
 <dt>{t("Required Skills")}</dt>
 <dd>
   {#each item.skill_requirements ?? [] as { name, level }, i}
-    <ThingLink type="skill" id={name} /> ({level}){#if i === item.skill_requirements.length - 2}{" and "}{:else if i !== item.skill_requirements.length - 1}{", "}{/if}
+    <ThingLink type="skill" id={name} /> ({level}){#if i + 2 === item.skill_requirements?.length}{" and "}{:else if i + 1 !== item.skill_requirements?.length}{", "}{/if}
   {:else}
     <em>{t("none")}</em>
   {/each}

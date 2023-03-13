@@ -19,13 +19,15 @@ expect.extend({
     return {
       pass: valid,
       message: () => {
-        return errors
-          .map((e) => {
-            return `${e.instancePath} ${e.message}, but was ${util.inspect(
-              e.data
-            )}`;
-          })
-          .join("\n");
+        return (
+          errors
+            ?.map((e) => {
+              return `${e.instancePath} ${e.message}, but was ${util.inspect(
+                e.data
+              )}`;
+            })
+            .join("\n") ?? ""
+        );
       },
     };
   },
@@ -38,14 +40,14 @@ const typesSchema = TJS.generateSchema(program, "SupportedTypes", {
   required: true,
 });
 const schemasByType = new Map(
-  Object.entries(typesSchema.properties).map(([typeName, sch]) => {
+  Object.entries(typesSchema!.properties ?? {}).map(([typeName, sch]) => {
     const schemaForType = sch as TJS.Definition;
     return [
       typeName,
       ajv.compile({
         ...schemaForType,
-        definitions: typesSchema.definitions,
-        $schema: typesSchema.$schema,
+        definitions: typesSchema!.definitions,
+        $schema: typesSchema!.$schema,
       } as TJS.Definition),
     ];
   })
@@ -70,5 +72,5 @@ test.each(all)("schema matches %s %s", (type, id, obj) => {
     pending();
     return;
   }
-  expect(obj).toMatchSchema(schemasByType.get(type));
+  expect(obj).toMatchSchema(schemasByType.get(type)!);
 });

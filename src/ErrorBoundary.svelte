@@ -1,16 +1,16 @@
-<script>
-export let error = null;
-export let onError = null;
+<script lang="ts">
+export let error: Error | null = null;
+export let onError: Function | null = null;
 let ENV = typeof process !== "undefined" && process.env && process.env.NODE_ENV;
 let DEV = ENV !== "production";
-$: if ($error && onError) onError($error);
+$: if (error && onError) onError(error);
 </script>
 
-{#if $error}
+{#if error}
   <div class="error">
-    <b>{$error.message}</b>
+    <b>{error.message}</b>
     <pre class="trace">
-      {DEV ? $error.stack : ""}
+      {DEV ? error.stack : ""}
     </pre>
   </div>
 {:else}

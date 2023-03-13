@@ -1,14 +1,14 @@
 <script lang="ts">
 export let str: string;
 
-export let slot0: string = null;
-export let slot1: string = null;
-export let slot2: string = null;
-export let slot3: string = null;
-export let slot4: string = null;
-export let slot5: string = null;
-export let slot6: string = null;
-export let slot7: string = null;
+export let slot0: string | null = null;
+export let slot1: string | null = null;
+export let slot2: string | null = null;
+export let slot3: string | null = null;
+export let slot4: string | null = null;
+export let slot5: string | null = null;
+export let slot6: string | null = null;
+export let slot7: string | null = null;
 
 const slotNameToNumber = new Map();
 if (slot0) slotNameToNumber.set(slot0, 0);
@@ -30,7 +30,7 @@ if (slot7) slotNameToNumber.set(slot7, 7);
 // ]
 const parts: ({ text: string } | { slot: number })[] = [];
 const re = /\{([^}]+)\}/gms;
-let m: RegExpExecArray;
+let m: RegExpExecArray | null;
 let i = 0;
 while ((m = re.exec(str))) {
   const before = str.substring(i, m.index);

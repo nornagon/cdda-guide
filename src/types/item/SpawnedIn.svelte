@@ -20,7 +20,7 @@ const spawnLocationsPromise = lootByOMSAppearance(data).then(
     }[] = [];
     for (const { loot, ids } of lootByAppearance.values()) {
       if (loot.has(item_id)) {
-        const chance = loot.get(item_id);
+        const chance = loot.get(item_id)!;
         const oms = data.byId("overmap_special", ids[0]);
         spawnLocations.push({ overmap_special: oms, ids, chance });
       }
@@ -44,7 +44,7 @@ function omsName(oms: OvermapSpecial): string {
   for (const omt of ground_level_omts) {
     const [x, y] = omt.point;
     if (
-      !data.byId(
+      !data.byIdMaybe(
         "overmap_terrain",
         omt.overmap.replace(/_(north|south|east|west)$/, "")
       )

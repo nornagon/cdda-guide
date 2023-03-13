@@ -56,7 +56,7 @@ function topologicalSortByRank<T>(
   const byRank: T[][] = [];
   const topoSorted = topologicalSort(xs, outgoingEdges);
   for (const x of topoSorted) {
-    const r = ranks.get(x);
+    const r = ranks.get(x)!;
     if (!byRank[r]) byRank[r] = [];
     byRank[r].push(x);
   }
@@ -77,9 +77,9 @@ function undirectedEdges<T>(
   const edges = new Map<T, Set<T>>();
   const addEdge = (a: T, b: T) => {
     if (!edges.has(a)) edges.set(a, new Set());
-    edges.get(a).add(b);
+    edges.get(a)!.add(b);
     if (!edges.has(b)) edges.set(b, new Set());
-    edges.get(b).add(a);
+    edges.get(b)!.add(a);
   };
   for (const a of xs) {
     for (const b of outgoingEdges(a)) addEdge(a, b);
@@ -95,10 +95,10 @@ function connectedComponents<T>(xs: T[], outgoingEdgesFn: (n: T) => T[]) {
   while (ns.size) {
     const n = ns.values().next().value as T;
     ns.delete(n);
-    const cc = [];
+    const cc: T[] = [];
     const q = [n];
     while (q.length) {
-      const x = q.shift();
+      const x = q.shift()!;
       if (cc.includes(x)) continue;
       cc.push(x);
       ns.delete(x);

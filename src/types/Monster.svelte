@@ -25,7 +25,7 @@ export let item: Monster;
 let data = getContext<CddaData>("data");
 
 // prettier-ignore
-function difficulty(item: Monster): number {
+function difficulty(mon: Monster): number {
   const {
     melee_skill = 0,
     melee_dice = 0,
@@ -44,12 +44,12 @@ function difficulty(item: Monster): number {
     aggression: agro = 0,
     vision_day = 40,
     vision_night = 1
-  } = item
+  } = mon
   let difficulty = ( melee_skill + 1 ) * melee_dice * ( bonus_cut + melee_sides ) * 0.04 +
                ( sk_dodge + 1 ) * ( 3 + armor_bash + armor_cut ) * 0.04 +
                ( difficulty_base + special_attacks.length + 8 * emit_fields.length );
   difficulty = Math.floor(difficulty);
-  difficulty *= ( hp + speed - attack_cost + ( morale + agro ) * 0.1 ) * 0.01 +
+  difficulty *= ( (hp ?? 1) + speed - attack_cost + ( morale + agro ) * 0.1 ) * 0.01 +
                 ( vision_day + 2 * vision_night ) * 0.01;
   return Math.floor(difficulty);
 }
@@ -226,11 +226,11 @@ let materials = item.material ?? [];
 
 let deathDrops = data.flatDeathDrops(item.id);
 
-let harvest: Harvest = item.harvest
+let harvest: Harvest | undefined = item.harvest
   ? data.byId("harvest", item.harvest)
   : undefined;
 
-let dissect: Harvest = item.dissect
+let dissect: Harvest | undefined = item.dissect
   ? data.byId("harvest", item.dissect)
   : undefined;
 
@@ -242,8 +242,10 @@ function showProbability(prob: number) {
 
 function flattenGroup(mg: MonsterGroup): string[] {
   return [mg.default]
-    .concat(mg.monsters.map((m) => m.monster).filter((x) => x !== mg.default))
-    .filter((x) => x);
+    .concat(
+      mg.monsters?.map((m) => m.monster).filter((x) => x !== mg.default) ?? []
+    )
+    .filter((x): x is string => !!x);
 }
 
 let upgrades =
@@ -252,7 +254,9 @@ let upgrades =
         ...item.upgrades,
         monsters: item.upgrades.into
           ? [item.upgrades.into]
-          : flattenGroup(data.byId("monstergroup", item.upgrades.into_group)),
+          : item.upgrades.into_group
+          ? flattenGroup(data.byId("monstergroup", item.upgrades.into_group))
+          : [],
       }
     : null;
 </script>
@@ -269,9 +273,9 @@ let upgrades =
       <dd>{(item.species ?? []).join(", ")}</dd>
     {/if}
     <dt>{t("Volume")}</dt>
-    <dd>{asLiters(item.volume)}</dd>
+    <dd>{asLiters(item.volume ?? 0)}</dd>
     <dt>{t("Weight")}</dt>
-    <dd>{asKilograms(item.weight)}</dd>
+    <dd>{asKilograms(item.weight ?? 0)}</dd>
     {#if materials.length}
       <dt>{t("Material")}</dt>
       <dd>
@@ -290,7 +294,9 @@ let upgrades =
         fgOnly={true} />)
     </dd>
   </dl>
-  <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
+  {#if item.description}
+    <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
+  {/if}
 </section>
 <div class="side-by-side">
   <section>
@@ -308,7 +314,7 @@ let upgrades =
           <ul class="no-bullets">
             {#each item.special_attacks as special_attack}
               <li>
-                {#if special_attack[0] && data.byId("monster_attack", special_attack[0])}
+                {#if special_attack[0] && data.byIdMaybe("monster_attack", special_attack[0])}
                   <ThingLink type="monster_attack" id={special_attack[0]} />
                 {:else}
                   <SpecialAttack {special_attack} />
@@ -460,7 +466,7 @@ let upgrades =
     <h1>{t("Butchering Results", { _context })}</h1>
     <ul>
       {#each harvest.entries as harvest_entry}
-        {#if data.byId("harvest_drop_type", harvest_entry.type)?.group || harvest_entry.type === "bionic_group"}
+        {#if (harvest_entry.type && data.byId("harvest_drop_type", harvest_entry.type)?.group) || harvest_entry.type === "bionic_group"}
           {#each data.flattenItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
             <li>
               <ItemSymbol item={data.byId("item", id)} />
@@ -482,7 +488,7 @@ let upgrades =
     <h1>{t("Dissection Results", { _context })}</h1>
     <ul>
       {#each dissect.entries as harvest_entry}
-        {#if data.byId("harvest_drop_type", harvest_entry.type)?.group || harvest_entry.type === "bionic_group"}
+        {#if (harvest_entry.type && data.byId("harvest_drop_type", harvest_entry.type)?.group) || harvest_entry.type === "bionic_group"}
           {#each data.flattenItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
             <li>
               <ItemSymbol item={data.byId("item", id)} />

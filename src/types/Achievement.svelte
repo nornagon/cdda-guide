@@ -66,10 +66,11 @@ const unlocks = data
             {#if req.description}
               <strong>{req.description}</strong>
             {:else}
+              {@const stat = data.byId("event_statistic", req.event_statistic)}
               <strong
-                >{plural(
-                  data.byId("event_statistic", req.event_statistic).description
-                )}</strong>
+                >{stat.description
+                  ? plural(stat.description)
+                  : stat.id}</strong>
               is <strong>{req.is} {req.target ?? ""}</strong>
             {/if}
           </li>

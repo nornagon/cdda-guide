@@ -36,8 +36,9 @@ const type = i18n.__(
     : "Offensive"
 );
 
-const extractInfo = (s: string) => /<info>(.+?)<\/info>/.exec(s)?.[1];
-const targetRequirements = [];
+const extractInfo = (s: string): string =>
+  /<info>(.+?)<\/info>/.exec(s)?.[1] ?? s;
+const targetRequirements: string[] = [];
 if (item.human_target)
   targetRequirements.push(
     extractInfo(i18n.__("* Only works on a <info>humanoid</info> target"))

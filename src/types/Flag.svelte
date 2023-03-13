@@ -2,7 +2,7 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, singular, singularName } from "../data";
+import { byName, CddaData, singular } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { JsonFlag } from "../types";
 import ColorText from "./ColorText.svelte";
@@ -45,11 +45,7 @@ const bionicWithFlag = data
 {#if itemsWithFlag.length}
   <section>
     <h1>{t("Items", { _comment: "Section heading" })}</h1>
-    <LimitedList
-      items={itemsWithFlag.sort((a, b) =>
-        singularName(a).localeCompare(singularName(b))
-      )}
-      let:item>
+    <LimitedList items={itemsWithFlag.sort(byName)} let:item>
       <ItemSymbol {item} />
       <ThingLink type="item" id={item.id} />
     </LimitedList>
@@ -58,11 +54,7 @@ const bionicWithFlag = data
 {#if vpartsWithFlag.length}
   <section>
     <h1>{t("Vehicle Parts")}</h1>
-    <LimitedList
-      items={vpartsWithFlag.sort((a, b) =>
-        singularName(a).localeCompare(singularName(b))
-      )}
-      let:item>
+    <LimitedList items={vpartsWithFlag.sort(byName)} let:item>
       <ItemSymbol {item} />
       <ThingLink type="vehicle_part" id={item.id} />
     </LimitedList>
@@ -71,11 +63,7 @@ const bionicWithFlag = data
 {#if terrainWithFlag.length}
   <section>
     <h1>{t("Terrain")}</h1>
-    <LimitedList
-      items={terrainWithFlag.sort((a, b) =>
-        singularName(a).localeCompare(singularName(b))
-      )}
-      let:item>
+    <LimitedList items={terrainWithFlag.sort(byName)} let:item>
       <ItemSymbol {item} />
       <ThingLink type="terrain" id={item.id} />
     </LimitedList>
@@ -84,11 +72,7 @@ const bionicWithFlag = data
 {#if furnitureWithFlag.length}
   <section>
     <h1>{t("Furniture")}</h1>
-    <LimitedList
-      items={furnitureWithFlag.sort((a, b) =>
-        singularName(a).localeCompare(singularName(b))
-      )}
-      let:item>
+    <LimitedList items={furnitureWithFlag.sort(byName)} let:item>
       <ItemSymbol {item} />
       <ThingLink type="furniture" id={item.id} />
     </LimitedList>
@@ -97,11 +81,7 @@ const bionicWithFlag = data
 {#if bionicWithFlag.length}
   <section>
     <h1>{t("Bionics")}</h1>
-    <LimitedList
-      items={bionicWithFlag.sort((a, b) =>
-        singularName(a).localeCompare(singularName(b))
-      )}
-      let:item>
+    <LimitedList items={bionicWithFlag.sort(byName)} let:item>
       <ItemSymbol {item} />
       <ThingLink type="bionic" id={item.id} />
     </LimitedList>

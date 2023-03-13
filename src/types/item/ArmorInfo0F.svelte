@@ -1,6 +1,6 @@
 <script lang="ts">
 import { getContext } from "svelte";
-import type { CddaData } from "../../data";
+import { CddaData, singular } from "../../data";
 import type { ArmorPortionData, ArmorSlot, ItemBasicInfo } from "../../types";
 
 export let item: ItemBasicInfo & ArmorSlot;
@@ -23,7 +23,10 @@ let materials = normalizedMaterial.map((m) => ({
   material: data.byId("material", m.type),
   portion: m.portion,
 }));
-const totalMaterialPortion = materials.reduce((m, o) => m + o.portion, 0);
+const totalMaterialPortion = materials.reduce(
+  (m, o) => m + (o.portion ?? 1),
+  0
+);
 
 function covers(body_part_id: string): boolean {
   return (
@@ -38,15 +41,15 @@ const armor =
 
 function coverageLabel(apd: ArmorPortionData): string[] {
   const covered = new Set();
-  const labels = [];
+  const labels: string[] = [];
   for (const bp_id of apd.covers ?? []) {
     if (covered.has(bp_id)) continue;
     const bp = data.byId("body_part", bp_id);
-    if (bp.opposite_part && apd.covers.includes(bp.opposite_part)) {
-      labels.push(bp.heading_multiple);
+    if (bp.opposite_part && apd.covers!.includes(bp.opposite_part)) {
+      labels.push(singular(bp.heading_multiple));
       covered.add(bp.opposite_part);
     } else {
-      labels.push(bp.heading);
+      labels.push(singular(bp.heading));
     }
     covered.add(bp_id);
   }
@@ -144,7 +147,8 @@ function coverageLabel(apd: ArmorPortionData): string[] {
             <dd>
               {(
                 (materials.reduce(
-                  (m, o) => m + (o.material.bash_resist ?? 0) * o.portion,
+                  (m, o) =>
+                    m + (o.material.bash_resist ?? 0) * (o.portion ?? 1),
                   0
                 ) *
                   (item.material_thickness ?? 0)) /
@@ -155,7 +159,7 @@ function coverageLabel(apd: ArmorPortionData): string[] {
             <dd>
               {(
                 (materials.reduce(
-                  (m, o) => m + (o.material.cut_resist ?? 0) * o.portion,
+                  (m, o) => m + (o.material.cut_resist ?? 0) * (o.portion ?? 1),
                   0
                 ) *
                   (item.material_thickness ?? 0)) /
@@ -166,7 +170,8 @@ function coverageLabel(apd: ArmorPortionData): string[] {
             <dd>
               {(
                 (materials.reduce(
-                  (m, o) => m + (o.material.bullet_resist ?? 0) * o.portion,
+                  (m, o) =>
+                    m + (o.material.bullet_resist ?? 0) * (o.portion ?? 1),
                   0
                 ) *
                   (item.material_thickness ?? 0)) /
@@ -178,7 +183,8 @@ function coverageLabel(apd: ArmorPortionData): string[] {
               {(() => {
                 let resist =
                   materials.reduce(
-                    (m, o) => m + (o.material.acid_resist ?? 0) * o.portion,
+                    (m, o) =>
+                      m + (o.material.acid_resist ?? 0) * (o.portion ?? 1),
                     0
                   ) / totalMaterialPortion;
                 const env = item.environmental_protection ?? 0;
@@ -191,7 +197,8 @@ function coverageLabel(apd: ArmorPortionData): string[] {
               {(() => {
                 let resist =
                   materials.reduce(
-                    (m, o) => m + (o.material.fire_resist ?? 0) * o.portion,
+                    (m, o) =>
+                      m + (o.material.fire_resist ?? 0) * (o.portion ?? 1),
                     0
                   ) / totalMaterialPortion;
                 const env = item.environmental_protection ?? 0;

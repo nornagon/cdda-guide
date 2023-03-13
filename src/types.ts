@@ -434,7 +434,7 @@ type ItemActionUseFunction = {
 
 export type TransformUseFunction = {
   type: "transform";
-  target?: string;
+  target: string;
   menu_text?: string;
 };
 
@@ -748,13 +748,13 @@ export type BonusContainer = {
     stat: string;
     type?: string;
     "scaling-stat"?: string;
-    scale?: number;
+    scale: number;
   }[];
   mult_bonuses?: {
     stat: string;
     type?: string;
     "scaling-stat"?: string;
-    scale?: number;
+    scale: number;
   }[];
 };
 
@@ -1091,7 +1091,7 @@ export type Harvest = {
 export type Monster = {
   id: string;
   type: "MONSTER";
-  color?: string;
+  color?: string; // default "white"
   symbol?: string;
   material?: string | string[];
   description?: Translation;
@@ -1184,7 +1184,7 @@ export type VehiclePart = {
   name?: Translation;
   id: string;
   abstract?: string;
-  item?: string; // item_id
+  item: string; // item_id
   location?: string;
   durability?: integer;
   damage_modifier?: integer; // percentage, default 100
@@ -1625,7 +1625,7 @@ export type Bionic = {
   type: "bionic";
   id: string;
   name: Translation;
-  description?: Translation;
+  description: Translation;
   cant_remove_reason?: Translation;
 
   react_cost?: energy;

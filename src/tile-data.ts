@@ -37,7 +37,7 @@ const fetchJson = async (url: string) => {
 const { subscribe, set } = writable<any>(null);
 export const tileData = {
   subscribe,
-  setURL(url: string) {
+  setURL(url: string | null) {
     if (url) {
       fetchJson(url).then(
         (x) => {

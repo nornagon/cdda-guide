@@ -19,7 +19,7 @@ function add(recipe_id: string, level: number) {
   );
 }
 for (const recipe of data.byType("recipe")) {
-  if (Array.isArray(recipe.book_learn))
+  if (recipe.result && Array.isArray(recipe.book_learn))
     for (const [id, level = 0] of recipe.book_learn)
       if (id === item.id) add(recipe.result, level);
       else if (recipe.book_learn)

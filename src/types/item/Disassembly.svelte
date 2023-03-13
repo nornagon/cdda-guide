@@ -15,10 +15,10 @@ const uncraftableFromSet = new Set<string>();
 const allCraftableThings = (data.byType("recipe") as Recipe[])
   .concat(data.byType("uncraft"))
   .map((x) => x.result)
-  .filter((x) => x);
+  .filter((x): x is string => !!x);
 for (const id of allCraftableThings) {
   const recipe = data.uncraftRecipe(id);
-  if (recipe) {
+  if (recipe && recipe.result) {
     const { components } = data.normalizeRequirementsForDisassembly(recipe);
     const defaultComponents = components.map((c) => c[0]);
     if (defaultComponents.some(([id]) => id === item_id))

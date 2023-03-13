@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "validate": "svelte-check",
+    "validate": "svelte-check && tsc --noEmit",
     "test": "node fetch-fixtures.js && npm run lint && npm run validate && jest src",
     "test:latest": "node fetch-fixtures.js latest && npm run validate && jest src",
     "test:watch": "npm run test -- --watch",
@@ -18,8 +18,7 @@
     "lint": "prettier -c .",
     "lint:fix": "prettier -w .",
     "precommit": "lint-staged",
-    "prepare": "husky install",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@fontsource/unifont": "^4.5.5",

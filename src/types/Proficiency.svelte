@@ -22,6 +22,7 @@ const recipesUsingProficiency = [
         )
       )
       .map((recipe) => recipe.result)
+      .filter((x): x is string => !!x)
   ),
 ].sort((a, b) =>
   singularName(data.byId("item", a)).localeCompare(

@@ -54,7 +54,7 @@ if (construction.pre_flags)
     <dt>{t("Required Skills")}</dt>
     <dd>
       {#each construction.required_skills ?? [] as [id, level], i}
-        <ThingLink type="skill" {id} /> ({level}){#if i === construction.required_skills.length - 2}{" and "}{:else if i !== construction.required_skills.length - 1}{", "}{/if}
+        <ThingLink type="skill" {id} /> ({level}){#if i + 2 === construction.required_skills?.length}{" and "}{:else if i + 1 !== construction.required_skills?.length}{", "}{/if}
       {:else}
         {#if construction.skill}
           <ThingLink type="skill" id={construction.skill} /> ({construction.difficulty ??

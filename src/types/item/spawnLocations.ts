@@ -129,15 +129,15 @@ async function yieldable<T>(
 
 const lootByOmSpecialCache = new WeakMap<CddaData, Map<string, Loot>>();
 export async function lootByOmSpecial(data: CddaData) {
-  if (lootByOmSpecialCache.has(data)) return lootByOmSpecialCache.get(data);
+  if (lootByOmSpecialCache.has(data)) return lootByOmSpecialCache.get(data)!;
   const mapgensByOmt = new Map<string, raw.Mapgen[]>();
   const add = (id: string, mapgen: raw.Mapgen) => {
     if (!mapgensByOmt.has(id)) mapgensByOmt.set(id, []);
-    mapgensByOmt.get(id).push(mapgen);
+    mapgensByOmt.get(id)!.push(mapgen);
   };
   // If om_terrain is missing, this is nested_mapgen or update_mapgen
-  const mapgens = data.byType("mapgen").filter((m) => m.om_terrain != null);
-  for (const mapgen of mapgens) {
+  for (const mapgen of data.byType("mapgen")) {
+    if (!mapgen.om_terrain) continue;
     if (typeof mapgen.om_terrain === "string") {
       add(mapgen.om_terrain, mapgen);
     } else {
@@ -162,7 +162,7 @@ export async function lootByOmSpecial(data: CddaData) {
   await yieldable(async (relinquish) => {
     for (const om_special of overmap_specials) {
       if (om_special.subtype === "mutable") continue;
-      const loots = [];
+      const loots: Loot[] = [];
       for (const om of om_special.overmaps ?? []) {
         const overmap_id = om.overmap.replace(/_(north|east|west|south)$/, "");
         const mapgens = mapgensByOmt.get(overmap_id) ?? [];
@@ -195,7 +195,7 @@ function overmapAppearance(
   const overmapsByPoint = new Map<string, typeof overmaps[0]>();
   for (const om of overmaps) {
     const omt_id = om.overmap.replace(/_(north|south|east|west)$/, "");
-    if (!data.byId("overmap_terrain", omt_id)) continue;
+    if (!data.byIdMaybe("overmap_terrain", omt_id)) continue;
     const [x, y, z] = om.point;
     if (z !== 0) continue;
     if (x < minX) minX = x;
@@ -252,7 +252,7 @@ const lootByOmAppearanceCache = new WeakMap<
 export function lootByOMSAppearance(data: CddaData) {
   if (!lootByOmAppearanceCache.has(data))
     lootByOmAppearanceCache.set(data, computeLootByOMSAppearance(data));
-  return lootByOmAppearanceCache.get(data);
+  return lootByOmAppearanceCache.get(data)!;
 }
 async function computeLootByOMSAppearance(data: CddaData) {
   const lootByOMS = await lootByOmSpecial(data);
@@ -269,8 +269,11 @@ async function computeLootByOMSAppearance(data: CddaData) {
       );
       if (!appearance) continue;
       if (!lootByOMSAppearance.has(appearance))
-        lootByOMSAppearance.set(appearance, { loot: undefined, ids: [] });
-      const l = lootByOMSAppearance.get(appearance);
+        lootByOMSAppearance.set(appearance, {
+          loot: undefined as any,
+          ids: [],
+        });
+      const l = lootByOMSAppearance.get(appearance)!;
       if (l.loot)
         l.loot = mergeLoot([
           { loot: l.loot, weight: 1 },
@@ -358,7 +361,7 @@ function lootForChunks(
 
 const lootForMapgenCache = new WeakMap<raw.Mapgen, Loot>();
 export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
-  if (lootForMapgenCache.has(mapgen)) return lootForMapgenCache.get(mapgen);
+  if (lootForMapgenCache.has(mapgen)) return lootForMapgenCache.get(mapgen)!;
   const palette = parsePalette(data, mapgen.object);
   const place_items = (mapgen.object.place_items ?? []).map(
     ({ item, chance = 100, repeat }) => ({
@@ -376,11 +379,13 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
       // This assumes that .item and .group are mutually exclusive
       loot: item
         ? new Map([[item, 1]])
-        : parseItemGroup(data, group, repeat, chance / 100),
+        : group
+        ? parseItemGroup(data, group, repeat, chance / 100)
+        : new Map(),
     })
   );
   const place_nested = (mapgen.object.place_nested ?? []).map((nested) => {
-    const loot = lootForChunks(data, nested.chunks);
+    const loot = lootForChunks(data, nested.chunks ?? []);
     const multipliedLoot: Loot = new Map();
     for (const [id, chance] of loot.entries()) {
       multipliedLoot.set(id, repeatChance(nested.repeat, chance));
@@ -400,7 +405,7 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
         countByPalette.set(char, (countByPalette.get(char) ?? 0) + 1);
   const items: { loot: Loot }[] = [];
   for (const [sym, count] of countByPalette.entries()) {
-    const loot = palette.get(sym);
+    const loot = palette.get(sym)!;
     const multipliedLoot: Loot = new Map();
     for (const [id, chance] of loot.entries()) {
       multipliedLoot.set(id, 1 - Math.pow(1 - chance, count));
@@ -492,7 +497,7 @@ export function parsePalette(
   data: CddaData,
   palette: RawPalette
 ): Map<string, Loot> {
-  if (paletteCache.has(palette)) return paletteCache.get(palette);
+  if (paletteCache.has(palette)) return paletteCache.get(palette)!;
   const sealed_item = parsePlaceMapping(
     palette.sealed_item,
     function* ({ item, items, chance = 100 }) {
@@ -536,7 +541,7 @@ export function parsePalette(
   );
   const nested = parsePlaceMapping(palette.nested, function* ({ chunks }) {
     yield {
-      loot: lootForChunks(data, chunks),
+      loot: lootForChunks(data, chunks ?? []),
       chance: 1,
     };
   });

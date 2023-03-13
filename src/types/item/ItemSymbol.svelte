@@ -17,7 +17,7 @@ let data: CddaData = getContext("data");
 $: tile_info = $tileData?.tile_info[0];
 $: tile = typeHasTile(item)
   ? findTileOrLooksLike($tileData, item) ??
-    fallbackTile($tileData, item.symbol, item.color)
+    fallbackTile($tileData, item.symbol, item.color ?? "white")
   : null;
 $: baseUrl = $tileData?.baseUrl;
 
@@ -29,7 +29,7 @@ const color = item.color
     : item.color[0]
   : item.bgcolor
   ? colorFromBgcolor(item.bgcolor)
-  : null;
+  : "white";
 
 function typeHasTile(item: any): boolean {
   return ["item", "monster", "terrain", "furniture", "vehicle_part"].includes(
@@ -39,7 +39,7 @@ function typeHasTile(item: any): boolean {
 
 function colorFromBgcolor(
   color: string | [string] | [string, string, string, string]
-) {
+): string {
   return typeof color === "string" ? `i_${color}` : colorFromBgcolor(color[0]);
 }
 
@@ -47,7 +47,7 @@ function findTileOrLooksLike(
   tileData: any,
   item: any,
   jumps: number = 10
-): TileInfo {
+): TileInfo | undefined {
   function resolveId(id: string): string {
     return item.type === "vehicle_part" ? `vp_${id}` : id;
   }
@@ -59,7 +59,7 @@ function findTileOrLooksLike(
   if (looksLikeTile) return looksLikeTile;
   if (jumps > 0) {
     const parent =
-      data.byId(mapType(item.type), looksLikeId) ??
+      data.byIdMaybe(mapType(item.type), looksLikeId) ??
       data.abstractById(mapType(item.type), looksLikeId);
     if (parent) return findTileOrLooksLike(tileData, parent, jumps - 1);
   }
@@ -79,10 +79,10 @@ type TileInfo = {
   bg?: TilePosition;
 };
 
-function findTile(tileData: any, id: string): TileInfo {
+function findTile(tileData: any, id: string): TileInfo | undefined {
   if (!tileData || !id) return;
   let offset = 0;
-  const ranges = [];
+  const ranges: { from: number; to: number; chunk: any }[] = [];
   for (const chunk of tileData["tiles-new"]) {
     ranges.push({
       from: offset,
@@ -98,6 +98,7 @@ function findTile(tileData: any, id: string): TileInfo {
   function tileInfoForId(id: number | undefined): TilePosition | undefined {
     if (id == null) return;
     const range = findRange(id);
+    if (!range) return;
     const offsetInFile = id - range.from;
     const fgTx = offsetInFile % range.chunk.nx;
     const fgTy = (offsetInFile / range.chunk.nx) | 0;
@@ -139,9 +140,9 @@ function findTile(tileData: any, id: string): TileInfo {
 
 function fallbackTile(
   tileData: any,
-  symbolMaybeArr: string | string[],
+  symbolMaybeArr: string | string[] | undefined,
   color: string | string[]
-): TileInfo {
+): TileInfo | undefined {
   if (!tileData) return;
   const symbol = [symbolMaybeArr].flat()[0];
   const sym = !symbol ? " " : /^LINE_/.test(symbol) ? "|" : symbol;

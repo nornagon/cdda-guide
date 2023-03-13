@@ -15,7 +15,7 @@ export let special_attack: SpecialAttack;
     {special_attack.type}{#if special_attack.cooldown}{" "}(cooldown: {special_attack.cooldown}){/if}
   {/if}
 {:else if "id" in special_attack}
-  {special_attack.id}{#if "damage_max_instance" in special_attack}:
+  {special_attack.id}{#if "damage_max_instance" in special_attack && special_attack.damage_max_instance}:
     {normalizeDamageInstance(special_attack.damage_max_instance)
       .map((inst) => {
         return `(${inst.damage_type} for ${inst.amount} damage)`;

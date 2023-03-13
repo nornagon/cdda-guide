@@ -24,7 +24,7 @@ function countIsPlural(count: number | [number, number]): boolean {
 
 const data = getContext<CddaData>("data");
 
-let item = data.byId(type, id);
+let item = data.byIdMaybe(type, id);
 if (item?.type === "vehicle_part" && !item.name && item.item)
   item = data.byId("item", item.item);
 </script>
@@ -43,7 +43,7 @@ if (item?.type === "vehicle_part" && !item.name && item.item)
       )}){/if}</span>
 {:else}
   {@const nameSource =
-    item && variantId && "variants" in item
+    item && variantId && "variants" in item && item.variants
       ? item.variants.find((v) => v.id === variantId) ?? item
       : item}
   <a href="#/{type}/{id}"

@@ -55,7 +55,7 @@ const groupingFn =
   }[type] ?? (() => [""]);
 
 const groups = groupBy(things, groupingFn);
-const groupKeys = [...groups.keys()].sort();
+const groupsList = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
 
 const groupFilter =
   {
@@ -67,8 +67,8 @@ const groupFilter =
 </script>
 
 <h1>{type}</h1>
-{#each groupKeys as groupName}
-  {#if type === "mutation" && groupName && data.byId("mutation_category", groupName)}
+{#each groupsList as [groupName, group]}
+  {#if type === "mutation" && groupName && data.byIdMaybe("mutation_category", groupName)}
     <MutationCategory
       item={data.byId("mutation_category", groupName)}
       inCatalog={true} />
@@ -78,9 +78,9 @@ const groupFilter =
         <h1>{groupName}</h1>
       {/if}
       <LimitedList
-        items={groups.get(groupName).filter(groupFilter)}
+        items={group.filter(groupFilter)}
         let:item
-        limit={groupKeys.length === 1 ? Infinity : 10}>
+        limit={groupsList.length === 1 ? Infinity : 10}>
         {#if type === "item" || type === "terrain" || type === "furniture" || type === "monster" || type === "vehicle_part"}<ItemSymbol
             {item} />{/if}
         <ThingLink type={typeWithCorrectType} id={item.id} />

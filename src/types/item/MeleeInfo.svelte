@@ -53,8 +53,8 @@ const to_hit: number =
 function attackTime(item: Item) {
   return Math.floor(
     65 +
-      (Math.floor(parseVolume(item.volume) / 62.5) +
-        Math.floor(parseMass(item.weight) / 60))
+      (Math.floor(parseVolume(item.volume ?? "1 ml") / 62.5) +
+        Math.floor(parseMass(item.weight ?? 0) / 60))
   );
 }
 
@@ -83,7 +83,9 @@ const piercing =
             {#each techniques as technique}
               <li>
                 <strong><ThingLink type="technique" id={technique.id} /></strong
-                >: {singular(technique.description)}
+                >{#if technique.description}: {singular(
+                    technique.description
+                  )}{/if}
               </li>
             {/each}
           </ul>

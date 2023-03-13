@@ -10,7 +10,7 @@ function parseColorText(text: string): { string: string; color: string }[] {
     const nextColorTag = remaining.match(
       /<\/?(info|good|bad|color|color_[^>]+)>/
     );
-    if (nextColorTag) {
+    if (nextColorTag && nextColorTag.index != null) {
       if (nextColorTag.index > 0)
         spans.push({
           string: remaining.substring(0, nextColorTag.index),

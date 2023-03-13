@@ -51,6 +51,11 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
     harvestBySeason.set(season, id);
   }
 }
+const seasonOrder = ["winter", "spring", "summer", "autumn"];
+const harvestBySeasonList = [...harvestBySeason.entries()];
+harvestBySeasonList.sort(
+  (a, b) => seasonOrder.indexOf(a[0]) - seasonOrder.indexOf(b[0])
+);
 
 const constructions = data
   .byType("construction")
@@ -90,14 +95,14 @@ const constructions = data
         </dd>
       {/if}
     {/each}
-    {#if harvestBySeason.size}
+    {#if harvestBySeasonList.length}
       <dt>{t("Harvest", { _context })}</dt>
       <dd>
         <dl>
-          {#each ["winter", "spring", "summer", "autumn"].filter( (season) => harvestBySeason.has(season) ) as season}
+          {#each harvestBySeasonList as [season, harvestId]}
             <dt>{i18n.__(season.replace(/^(.)/, (x) => x.toUpperCase()))}</dt>
             <dd>
-              {#each [data.byId("harvest", harvestBySeason.get(season))] as harvest}
+              {#each [data.byId("harvest", harvestId)] as harvest}
                 <ul>
                   {#each harvest.entries as harvest_entry}
                     {#if harvest_entry.type === "bionic_group"}

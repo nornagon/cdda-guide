@@ -22,7 +22,7 @@ let description =
     type="item"
     id={usage.target} />){:else if usage.type === "consume_drug" && (usage.vitamins?.length || Object.keys(usage.tools_needed ?? {}).length)}
   {" "}({#if Object.keys(usage.tools_needed ?? {}).length}with
-    {#each Object.entries(usage.tools_needed) as [tool], i}{#if i !== 0},
+    {#each Object.entries(usage.tools_needed ?? {}) as [tool], i}{#if i !== 0},
       {/if}<ThingLink
         type="item"
         id={tool} />{/each}{#if usage.vitamins?.length}:

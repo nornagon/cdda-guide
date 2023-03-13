@@ -78,7 +78,7 @@ function activityLevelName(level: number) {
       })}{:else}{t("Craft", { _context, _comment: "Section heading" })}{/if}
   </h1>
   <dl>
-    {#if showResult}
+    {#if showResult && recipe.result}
       <dt>{t("Result", { _context })}</dt>
       <dd><ThingLink id={recipe.result} type="item" /></dd>
     {/if}

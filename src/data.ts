@@ -78,12 +78,12 @@ function getMsgId(t: Translation) {
   return typeof t === "string" ? t : "str_sp" in t ? t.str_sp : t.str;
 }
 
-function getMsgIdPlural(t: Translation) {
+function getMsgIdPlural(t: Translation): string {
   return typeof t === "string"
     ? t + "s"
     : "str_sp" in t
     ? t.str_sp
-    : "str_pl" in t
+    : "str_pl" in t && t.str_pl
     ? t.str_pl
     : t.str + "s";
 }
@@ -94,7 +94,7 @@ export function translate(
   n: number
 ): string {
   const sg = getMsgId(t);
-  const pl = needsPlural ? getMsgIdPlural(t) : undefined;
+  const pl = needsPlural ? getMsgIdPlural(t) : "";
   return i18n.ngettext(sg, pl, n) || (n === 1 ? sg : pl ?? sg);
 }
 
@@ -130,6 +130,7 @@ export function parseVolume(string: string | number): number {
   if (typeof string === "number") return string * 250;
   if (string.endsWith("ml")) return parseInt(string);
   else if (string.endsWith("L")) return parseInt(string) * 1000;
+  throw new Error("unknown volume unit: " + string);
 }
 
 export function parseMass(string: string | number): number {
@@ -138,6 +139,7 @@ export function parseMass(string: string | number): number {
   if (string.endsWith("mg")) return parseInt(string) / 1000;
   if (string.endsWith("kg")) return parseInt(string) * 1000;
   if (string.endsWith("g")) return parseInt(string);
+  throw new Error("unknown mass unit: " + string);
 }
 
 export function parseDuration(duration: string | number): number {
@@ -218,7 +220,7 @@ export class CddaData {
   _nestedMapgensById: Map<string, Mapgen[]> = new Map();
 
   release: any;
-  build_number: string;
+  build_number: string | undefined;
 
   constructor(raw: any[], build_number?: string, release?: any) {
     this.release = release;
@@ -236,15 +238,15 @@ export class CddaData {
       }
       const mappedType = mapType(obj.type);
       if (!this._byType.has(mappedType)) this._byType.set(mappedType, []);
-      this._byType.get(mappedType).push(obj);
+      this._byType.get(mappedType)!.push(obj);
       if (Object.hasOwnProperty.call(obj, "id")) {
         if (!this._byTypeById.has(mappedType))
           this._byTypeById.set(mappedType, new Map());
         if (typeof obj.id === "string")
-          this._byTypeById.get(mappedType).set(obj.id, obj);
+          this._byTypeById.get(mappedType)!.set(obj.id, obj);
         else if (Array.isArray(obj.id))
           for (const id of obj.id)
-            this._byTypeById.get(mappedType).set(id, obj);
+            this._byTypeById.get(mappedType)!.set(id, obj);
       }
       // recipes are id'd by their result
       if (
@@ -254,7 +256,7 @@ export class CddaData {
         if (!this._byTypeById.has(mappedType))
           this._byTypeById.set(mappedType, new Map());
         const id = obj.result + (obj.id_suffix ? "_" + obj.id_suffix : "");
-        this._byTypeById.get(mappedType).set(id, obj);
+        this._byTypeById.get(mappedType)!.set(id, obj);
       }
       if (
         mappedType === "monstergroup" &&
@@ -263,12 +265,12 @@ export class CddaData {
         if (!this._byTypeById.has(mappedType))
           this._byTypeById.set(mappedType, new Map());
         const id = obj.name;
-        this._byTypeById.get(mappedType).set(id, obj);
+        this._byTypeById.get(mappedType)!.set(id, obj);
       }
       if (Object.hasOwnProperty.call(obj, "abstract")) {
         if (!this._abstractsByType.has(mappedType))
           this._abstractsByType.set(mappedType, new Map());
-        this._abstractsByType.get(mappedType).set(obj.abstract, obj);
+        this._abstractsByType.get(mappedType)!.set(obj.abstract, obj);
       }
 
       if (Object.hasOwnProperty.call(obj, "crafting_pseudo_item")) {
@@ -278,21 +280,31 @@ export class CddaData {
       if (Object.hasOwnProperty.call(obj, "nested_mapgen_id")) {
         if (!this._nestedMapgensById.has(obj.nested_mapgen_id))
           this._nestedMapgensById.set(obj.nested_mapgen_id, []);
-        this._nestedMapgensById.get(obj.nested_mapgen_id).push(obj);
+        this._nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
       }
     }
+  }
+
+  byIdMaybe<TypeName extends keyof SupportedTypesWithMapped>(
+    type: TypeName,
+    id: string
+  ): SupportedTypesWithMapped[TypeName] | undefined {
+    if (typeof id !== "string") throw new Error("Requested non-string id");
+    const byId = this._byTypeById.get(type);
+    if (type === "item" && !byId?.has(id) && this._migrations.has(id))
+      return this.byIdMaybe(type, this._migrations.get(id)!);
+    const obj = byId?.get(id);
+    if (obj) return this._flatten(obj);
   }
 
   byId<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
     id: string
   ): SupportedTypesWithMapped[TypeName] {
-    if (typeof id !== "string") throw new Error("Requested non-string id");
-    const byId = this._byTypeById.get(type);
-    if (type === "item" && !byId?.has(id) && this._migrations.has(id))
-      return this.byId(type, this._migrations.get(id));
-    const obj = byId?.get(id);
-    if (obj) return this._flatten(obj);
+    const ret = this.byIdMaybe(type, id);
+    if (!ret)
+      throw new Error('unknown object "' + id + '" of type "' + type + '"');
+    return ret;
   }
 
   byType<TypeName extends keyof SupportedTypesWithMapped>(
@@ -304,7 +316,7 @@ export class CddaData {
   abstractById<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
     id: string
-  ): any /* abstracts don't have ids, for instance */ {
+  ): object | undefined /* abstracts don't have ids, for instance */ {
     if (typeof id !== "string") throw new Error("Requested non-string id");
     const obj = this._abstractsByType.get(type)?.get(id);
     if (obj) return this._flatten(obj);
@@ -314,10 +326,14 @@ export class CddaData {
     if (!this._toolReplacements) {
       this._toolReplacements = new Map();
       for (const obj of this.byType("item")) {
-        if (obj.type === "TOOL" && Object.hasOwnProperty.call(obj, "sub")) {
+        if (
+          obj.type === "TOOL" &&
+          Object.hasOwnProperty.call(obj, "sub") &&
+          obj.sub
+        ) {
           if (!this._toolReplacements.has(obj.sub))
             this._toolReplacements.set(obj.sub, []);
-          this._toolReplacements.get(obj.sub).push(obj.id);
+          this._toolReplacements.get(obj.sub)!.push(obj.id);
         }
       }
     }
@@ -492,7 +508,7 @@ export class CddaData {
     mon_id: string
   ): { id: string; prob: number; count: [number, number] }[] {
     if (this._cachedDeathDrops.has(mon_id))
-      return this._cachedDeathDrops.get(mon_id);
+      return this._cachedDeathDrops.get(mon_id)!;
     const mon = this.byId("monster", mon_id);
     const ret = mon.death_drops
       ? this.flattenItemGroup(
@@ -507,7 +523,7 @@ export class CddaData {
     return ret;
   }
 
-  _cachedUncraftRecipes: Map<string, Recipe> = null;
+  _cachedUncraftRecipes: Map<string, Recipe> | null = null;
   uncraftRecipe(item_id: string): Recipe | undefined {
     if (!this._cachedUncraftRecipes) {
       this._cachedUncraftRecipes = new Map();
@@ -524,11 +540,11 @@ export class CddaData {
   _cachedMapgenSpawnItems = new Map<Mapgen, string[]>();
   mapgenSpawnItems(mapgen: Mapgen): string[] {
     if (this._cachedMapgenSpawnItems.has(mapgen))
-      return this._cachedMapgenSpawnItems.get(mapgen);
+      return this._cachedMapgenSpawnItems.get(mapgen)!;
     const palette = new Map<string, Set<string>>();
     const add = (c: string, item_id: string) => {
       if (!palette.has(c)) palette.set(c, new Set());
-      palette.get(c).add(item_id);
+      palette.get(c)!.add(item_id);
     };
 
     const addGroup = (c: string, v: string | ItemGroup | ItemGroupEntry[]) => {
@@ -631,7 +647,7 @@ export class CddaData {
     group: ItemGroup
   ): { id: string; prob: number; count: [number, number] }[] {
     if (this._flattenItemGroupCache.has(group))
-      return this._flattenItemGroupCache.get(group);
+      return this._flattenItemGroupCache.get(group)!;
     const retMap = new Map<string, { prob: number; count: [number, number] }>();
 
     function addOne({
@@ -671,7 +687,9 @@ export class CddaData {
           normalizedEntries.push({ item: item[0], prob: item[1] });
         else normalizedEntries.push(item);
     } else {
-      for (const entry of group.entries ?? [])
+      for (const entry of "entries" in group && group.entries
+        ? group.entries
+        : [])
         if (Array.isArray(entry))
           normalizedEntries.push({ item: entry[0], prob: entry[1] });
         else normalizedEntries.push(entry);
@@ -681,7 +699,7 @@ export class CddaData {
         else if (typeof item === "string")
           normalizedEntries.push({ item, prob: 100 });
         else normalizedEntries.push(item);
-      for (const g of group.groups ?? [])
+      for (const g of "groups" in group && group.groups ? group.groups : [])
         if (Array.isArray(g))
           normalizedEntries.push({ group: g[0], prob: g[1] });
         else if (typeof g === "string")
@@ -818,7 +836,7 @@ export class CddaData {
     opts?: { expandSubstitutes?: boolean; onlyRecoverable?: boolean }
   ): { id: string; count: number }[][] {
     const cache = this._flatRequirementCacheForOpts(opts);
-    if (cache.has(required)) return cache.get(required);
+    if (cache.has(required)) return cache.get(required)!;
     const {
       expandSubstitutes: doExpandSubstitutes = false,
       onlyRecoverable = false,
@@ -831,7 +849,12 @@ export class CddaData {
     const ret = normalize(required)
       .map((x) =>
         maybeExpandSubstitutes(
-          flattenChoices(this, x, (q) => normalize(get(q)), onlyRecoverable)
+          flattenChoices(
+            this,
+            x,
+            (q) => normalize(get(q) ?? []),
+            onlyRecoverable
+          )
         )
       )
       .map((x) =>
@@ -991,7 +1014,8 @@ export class CddaData {
     const itemsByComponent = new Map<string, Set<string>>();
 
     this.byType("recipe").forEach((recipe) => {
-      if (!recipe.result || !this.byId("item", recipe.result)) return false;
+      if (!recipe.result || !this.byIdMaybe("item", recipe.result))
+        return false;
       const using =
         typeof recipe.using === "string"
           ? ([[recipe.using, 1]] as const)
@@ -1012,7 +1036,7 @@ export class CddaData {
       for (const toolOptions of tools)
         for (const tool of toolOptions) {
           if (!itemsByTool.has(tool.id)) itemsByTool.set(tool.id, new Set());
-          itemsByTool.get(tool.id).add(recipe.result);
+          itemsByTool.get(tool.id)!.add(recipe.result);
         }
       const components = requirements.flatMap(([req]) =>
         this.flattenRequirement(req.components ?? [], (x) => x.components ?? [])
@@ -1021,7 +1045,7 @@ export class CddaData {
         for (const component of componentOptions) {
           if (!itemsByComponent.has(component.id))
             itemsByComponent.set(component.id, new Set());
-          itemsByComponent.get(component.id).add(recipe.result);
+          itemsByComponent.get(component.id)!.add(recipe.result);
         }
     });
     this._itemComponentCache = {
@@ -1062,7 +1086,7 @@ function flattenChoices<T>(
   get: (x: Requirement) => T[][],
   onlyRecoverable: boolean = false
 ): { id: string; count: number }[] {
-  const flatChoices = [];
+  const flatChoices: { id: string; count: number }[] = [];
   for (const choice of choices) {
     if (Array.isArray(choice)) {
       const [id, count, ...rest] = choice;
@@ -1262,11 +1286,13 @@ const fetchJsonWithIncorrectProgress = async (
   const res = await fetch(url, { mode: "cors" });
   if (!res.ok)
     throw new Error(`Error ${res.status} (${res.statusText}) fetching ${url}`);
+  if (!res.body)
+    throw new Error(`No body in response from ${url} (status ${res.status})`);
   const reader = res.body.getReader();
-  const contentLength = +res.headers.get("Content-Length");
+  const contentLength = +(res.headers.get("Content-Length") ?? 0);
   let receivedBytes = 0;
   progress(receivedBytes, contentLength);
-  const chunks = [];
+  const chunks: Uint8Array[] = [];
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -1321,14 +1347,14 @@ async function retry<T>(promiseGenerator: () => Promise<T>) {
 const loadProgressStore = writable<[number, number] | null>(null);
 export const loadProgress = { subscribe: loadProgressStore.subscribe };
 let _hasSetVersion = false;
-const { subscribe, set } = writable<CddaData>(null);
+const { subscribe, set } = writable<CddaData | null>(null);
 export const data = {
   subscribe,
-  async setVersion(version: string, locale: string | undefined) {
+  async setVersion(version: string, locale: string | null) {
     if (_hasSetVersion) throw new Error("can only set version once");
     _hasSetVersion = true;
-    let totals: [number, number] = [null, null];
-    let receiveds: [number, number] = [null, null];
+    let totals: [number, number] = [0, 0];
+    let receiveds: [number, number] = [0, 0];
     const updateProgress = () => {
       const total = totals[0] + totals[1];
       const received = receiveds[0] + receiveds[1];
@@ -1351,7 +1377,7 @@ export const data = {
           })
         ),
     ]);
-    if (localeJson) {
+    if (locale && localeJson) {
       i18n.loadJSON(localeJson);
       i18n.setLocale(locale);
     }

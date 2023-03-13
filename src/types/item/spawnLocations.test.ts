@@ -318,7 +318,7 @@ describe("repeatChance()", () => {
     expect(repeatChance([2], 0.5)).toBe(0.75);
   });
   it.each([undefined, null])("handles %s repeat as 1", (nullish) => {
-    expect(repeatChance(nullish, 0.5)).toBe(0.5);
+    expect(repeatChance(nullish as any, 0.5)).toBe(0.5);
   });
 });
 
@@ -352,13 +352,13 @@ describe("foo", () => {
     //   = 4x 75%*33% = 24.75% chances to spawn
     //   so prob(spawn) = 1-(1-24.75%)^4
     //   ~= 68%
-    expect(loot.get("item_a").toFixed(2)).toEqual("0.68");
+    expect(loot.get("item_a")!.toFixed(2)).toEqual("0.68");
     // prob for item_b:
     //   4x 75% chances for a 2/3 chance to spawn.
     //   = 4x 75%*2/3 = 50% chances to spawn
     //   so prob(spawn) = 1-(1-50%)^4
     //   ~= 93%
-    expect(loot.get("item_b").toFixed(2)).toEqual("0.94");
+    expect(loot.get("item_b")!.toFixed(2)).toEqual("0.94");
   });
 });
 

@@ -59,7 +59,7 @@ const _context = "Item Basic Info";
 
 function length(item: ItemBasicInfo) {
   if (item.longest_side) return item.longest_side;
-  return `${Math.round(Math.cbrt(parseVolume(item.volume)))} cm`;
+  return `${Math.round(Math.cbrt(parseVolume(item.volume ?? "1 ml")))} cm`;
 }
 
 let qualities = (item.qualities ?? []).map(([id, level]) => ({
@@ -86,7 +86,7 @@ const materials =
 const totalMaterialPortion = materials.reduce((m, o) => m + o.portion, 0);
 const primaryMaterial = materials.reduce(
   (m, o) => (!m || o.portion > m.portion ? o : m),
-  null
+  null as { type: string; portion: number } | null
 );
 let flags = (item.flags ?? []).map(
   (id) => data.byId("json_flag", id) ?? { id }
@@ -169,9 +169,11 @@ const fuelForVPs = data
     (vp) =>
       vp.id && (vp.fuel_options?.includes(item.id) || vp.fuel_type === item.id)
   );
-const fuelForBionics = data
-  .byType("bionic")
-  .filter((b) => b.id && b.fuel_options?.includes(primaryMaterial?.type));
+const fuelForBionics = primaryMaterial?.type
+  ? data
+      .byType("bionic")
+      .filter((b) => b.id && b.fuel_options?.includes(primaryMaterial?.type))
+  : [];
 const fuelForItems = (fuelForVPs.sort(byName) as SupportedTypeMapped[]).concat(
   fuelForBionics.sort(byName)
 );
@@ -203,14 +205,14 @@ const grantedByMutation = data
   .byType("mutation")
   .filter((m) => m.id && m.integrated_armor?.some((x) => x === item.id));
 
-function normalizeStackVolume(item: Item) {
+function normalizeStackVolume(item: Item): (string | number) | undefined {
   if (item.type === "AMMO") {
     const { count } = item;
-    return `${parseVolume(item.volume) / (count ?? 1)} ml`;
+    return `${parseVolume(item.volume ?? "1 ml") / (count ?? 1)} ml`;
   }
   if (item.type === "COMESTIBLE") {
     const { charges } = item;
-    return `${parseVolume(item.volume) / (charges ?? 1)} ml`;
+    return `${parseVolume(item.volume ?? "1 ml") / (charges ?? 1)} ml`;
   }
   return item.volume;
 }
@@ -252,9 +254,9 @@ function normalizeStackVolume(item: Item) {
           </dd>
         {/if}
         <dt>{t("Volume")}</dt>
-        <dd>{asLiters(normalizeStackVolume(item))}</dd>
+        <dd>{asLiters(normalizeStackVolume(item) ?? "1 ml")}</dd>
         <dt>{t("Weight")}</dt>
-        <dd>{asKilograms(item.weight)}</dd>
+        <dd>{asKilograms(item.weight ?? 0)}</dd>
         <dt>{t("Length")}</dt>
         <dd>{length(item)}</dd>
 
@@ -355,7 +357,7 @@ function normalizeStackVolume(item: Item) {
           </dd>
         {/if}
 
-        {#if uncraft}
+        {#if uncraft && uncraftRecipe}
           <dt>{t("Disassembles Into", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
@@ -407,9 +409,11 @@ function normalizeStackVolume(item: Item) {
           </dd>
         {/if}
       </dl>
-      <p style="color: var(--cata-color-gray); margin-bottom: 0;">
-        {singular(item.description)}
-      </p>
+      {#if item.description}
+        <p style="color: var(--cata-color-gray); margin-bottom: 0;">
+          {singular(item.description)}
+        </p>
+      {/if}
     </div>
     <div>
       {#if ascii_picture}
@@ -528,7 +532,7 @@ function normalizeStackVolume(item: Item) {
           </dt>
           <dd>1</dd>
         {/if}
-        {#if (pocket.sealed_data?.spoil_multiplier ?? 1) !== 1.0}
+        {#if pocket.sealed_data && (pocket.sealed_data.spoil_multiplier ?? 1) !== 1.0}
           <dt>
             {t("Spoil Multiplier", {
               _context,
