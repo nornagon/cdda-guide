@@ -18,8 +18,14 @@ export type ItemGroupEntry = (
   prob?: number;
   count?: number | [number, number];
   charges?: number | [number, number];
-  container?: string;
-  // TODO: damage, dirt, charges, ammo, contents, snippets?, sealed, custom-flags
+
+  // NB! "container-item" isn't greppable in the correct place in the source,
+  // it's made up by load_sub_ref(..., "container"), which then looks for
+  // "container-item" and "container-group". rg '"-item"' to find it.
+  // The same is true for ammo{-item,-group} and contents{-item,-group}.
+  "container-item"?: string;
+  // TODO: "container-group"?: string;
+  // TODO: damage, dirt, charges, ammo, contents, snippets?, sealed, custom-flags, etc.
 };
 
 export type ItemGroupEntryOrShortcut = ItemGroupEntry | [string, number]; // item_id, prob (or item_group_id, prob if in 'groups' array)
