@@ -159,7 +159,8 @@ export type Recipe = {
     | "MODERATE_EXERCISE"
     | "BRISK_EXERCISE"
     | "ACTIVE_EXERCISE"
-    | "EXTRA_EXERCISE";
+    | "EXTRA_EXERCISE"
+    | "fake";
 
   delete_flags?: string[]; // flag_id
   using?: string | ([string, number] | [string, number, "LIST"])[]; // requirement_id
@@ -1211,7 +1212,7 @@ export type VehiclePart = {
     | "fuel_source"
     | "armor"
     | "roof"
-    | "";
+    | string;
 
   durability?: integer;
   damage_modifier?: integer; // percentage, default 100

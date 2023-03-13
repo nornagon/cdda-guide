@@ -40,7 +40,7 @@ const typesSchema = TJS.generateSchema(program, "SupportedTypes", {
   required: true,
 });
 const schemasByType = new Map(
-  Object.entries(typesSchema!.properties ?? {}).map(([typeName, sch]) => {
+  Object.entries(typesSchema!.properties!).map(([typeName, sch]) => {
     const schemaForType = sch as TJS.Definition;
     return [
       typeName,

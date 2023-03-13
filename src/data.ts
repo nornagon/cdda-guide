@@ -989,7 +989,7 @@ export class CddaData {
 
     const requirements = (using ?? [])
       .map(
-        ([id, count]) =>
+        ([id, count]: readonly [string, number] | [string, number, "LIST"]) =>
           [
             this.byId("requirement", id) as RequirementData,
             count as number,
@@ -1020,7 +1020,7 @@ export class CddaData {
 
       const requirements = (using ?? [])
         .map(
-          ([id, count]) =>
+          ([id, count]: readonly [string, number] | [string, number, "LIST"]) =>
             [
               this.byId("requirement", id) as RequirementData,
               count as number,
@@ -1068,11 +1068,11 @@ export class CddaData {
     return { subtype, entries: [] };
   }
 
-  itemForBionic(bionic: Bionic): Item {
+  itemForBionic(bionic: Bionic): Item | undefined {
     return (
       this.byType("item").find(
         (i) => "bionic_id" in i && i.id && i.bionic_id === bionic.id
-      ) ?? this.byId("item", bionic.id)
+      ) ?? this.byIdMaybe("item", bionic.id)
     );
   }
 }

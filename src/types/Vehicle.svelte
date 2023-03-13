@@ -56,7 +56,6 @@ const zOrder: Record<NonNullable<VehiclePart["location"]>, number> = {
   engine_block: 4,
   on_battery_mount: 3,
   fuel_source: 2,
-  "": 0,
   roof: -1,
   armor: -2,
 };
@@ -153,7 +152,7 @@ const normalizedParts: NormalizedPartList[] = item.parts.map((part) => {
 });
 
 const zForPart = (partId: string): number => {
-  const vehiclePart = data.byId("vehicle_part", partId);
+  const vehiclePart = data.byIdMaybe("vehicle_part", partId);
   if (!vehiclePart) {
     // TODO: https://github.com/CleverRaven/Cataclysm-DDA/pull/59563
     if (partId.startsWith("turret_")) return zForPart("turret_generic");
@@ -168,7 +167,7 @@ const zForPart = (partId: string): number => {
       });
     }
   }
-  const location = vehiclePart.location ?? "";
+  const location = vehiclePart?.location ?? "";
   const z = zOrder[location] ?? 0;
   return z;
 };
