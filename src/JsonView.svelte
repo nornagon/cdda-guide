@@ -1,6 +1,6 @@
 <script lang="ts">
 export let obj: any;
-export let build_number: string | undefined;
+export let buildNumber: string | undefined;
 </script>
 
 <pre>{JSON.stringify(
@@ -11,13 +11,13 @@ export let build_number: string | undefined;
 {#if obj.__filename}
   <a
     href={`https://github.com/CleverRaven/Cataclysm-DDA/blob/${
-      build_number ?? "master"
+      buildNumber ?? "master"
     }/${obj.__filename}`}
     target="_blank">View</a>
   /
   <a
     href={`https://github.dev/CleverRaven/Cataclysm-DDA/blob/${
-      build_number ?? "master"
+      buildNumber ?? "master"
     }/${obj.__filename}`}
     target="_blank">Edit on GitHub</a>
 {/if}

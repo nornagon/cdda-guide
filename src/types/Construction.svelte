@@ -1,5 +1,6 @@
 <script lang="ts">
 import { t } from "@transifex/native";
+import JsonView from "../JsonView.svelte";
 
 import { getContext } from "svelte";
 import { CddaData, i18n, singular } from "../data";
@@ -131,6 +132,6 @@ if (construction.pre_flags)
   {/if}
   <details>
     <summary>{t("Construction JSON", { _context })}</summary>
-    <pre>{JSON.stringify(construction, null, 2)}</pre>
+    <JsonView obj={construction} buildNumber={data.build_number} />
   </details>
 </section>

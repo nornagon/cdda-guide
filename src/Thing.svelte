@@ -136,6 +136,6 @@ const display = (obj && displays[obj.type]) ?? Unknown;
 
   <details>
     <summary>Raw JSON</summary>
-    <JsonView {obj} build_number={data.build_number} />
+    <JsonView {obj} buildNumber={data.build_number} />
   </details>
 {/if}

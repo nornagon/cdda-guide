@@ -228,6 +228,6 @@ function activityLevelName(level: number) {
   </dl>
   <details>
     <summary>{t("Recipe JSON")}</summary>
-    <JsonView obj={recipe} build_number={data.build_number} />
+    <JsonView obj={recipe} buildNumber={data.build_number} />
   </details>
 </section>
