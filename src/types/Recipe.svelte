@@ -112,30 +112,22 @@ function activityLevelName(level: number) {
       <dd>
         <ul>
           {#each proficiencies as prof}
+            {@const ctx = { _context, _comment: "proficiency multiplier" }}
             {@const multipliers = [
               prof.time_multiplier !== 1
-                ? `${prof.time_multiplier}× ${t("time", {
-                    _context,
-                    _comment: "proficiency multiplier",
-                  })}`
+                ? `${prof.time_multiplier}× ${t("time", ctx)}`
                 : null,
-              prof.fail_multiplier && prof.fail_multiplier !== 1
-                ? `${prof.fail_multiplier}× ${t("fail", {
-                    _context,
-                    _comment: "proficiency multiplier",
-                  })}`
+              prof.fail_multiplier != null && prof.fail_multiplier !== 1
+                ? `${prof.fail_multiplier}× ${t("fail", ctx)}`
                 : null,
-              prof.skill_penalty && prof.skill_penalty !== 0
-                ? `${prof.skill_penalty} ${t("skill bonus", {
-                    _context,
-                    _comment: "proficiency multiplier",
-                  })}`
+              prof.skill_penalty != null && prof.skill_penalty !== 0
+                ? `${prof.skill_penalty} ${t("skill bonus", ctx)}`
                 : null,
               prof.learning_time_multiplier !== 1
-                ? `${prof.learning_time_multiplier}× ${t("learning speed", {
-                    _context,
-                    _comment: "proficiency multiplier",
-                  })}`
+                ? `${prof.learning_time_multiplier}× ${t(
+                    "learning speed",
+                    ctx
+                  )}`
                 : null,
             ].filter((x) => x)}
             <li>
