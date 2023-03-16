@@ -699,6 +699,28 @@ export type MapDataCommon = {
   // curtain_transform
 };
 
+export type Terrain = MapDataCommon & {
+  type: "terrain";
+  id: string;
+  name: Translation;
+  description: Translation;
+  symbol: string;
+  color: string | [string, string, string, string];
+
+  move_cost?: integer;
+  coverage?: integer;
+  flags?: string[];
+  bash?: MapBashInfo;
+  deconstruct?: MapDeconstructInfo;
+
+  transforms_into?: string;
+
+  examine_action?:
+    | string
+    | { type: "cardreader" }
+    | { type: "effect_on_condition" };
+};
+
 export type Furniture = MapDataCommon & {
   type: "furniture";
   id: string;
@@ -1578,28 +1600,6 @@ export type Vehicle = {
     items?: string | string[];
     item_groups?: string | string[];
   }[];
-};
-
-export type Terrain = MapDataCommon & {
-  type: "terrain";
-  id: string;
-  name: Translation;
-  description: Translation;
-  symbol: string;
-  color: string | [string, string, string, string];
-
-  move_cost?: integer;
-  coverage?: integer;
-  flags?: string[];
-  bash?: MapBashInfo;
-  deconstruct?: MapDeconstructInfo;
-
-  transforms_into?: string;
-
-  examine_action?:
-    | string
-    | { type: "cardreader" }
-    | { type: "effect_on_condition" };
 };
 
 export type WeaponCategory = {
