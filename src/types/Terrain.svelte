@@ -13,6 +13,7 @@ import {
 import type { Terrain } from "../types";
 import Construction from "./Construction.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import TerFurnActivity from "./TerFurnActivity.svelte";
 import ThingLink from "./ThingLink.svelte";
 
 const data = getContext<CddaData>("data");
@@ -78,6 +79,30 @@ const constructions = data
       <dd>
         <ItemSymbol item={data.byId("terrain", item.transforms_into)} />
         <ThingLink id={item.transforms_into} type="terrain" />
+      </dd>
+    {/if}
+    {#if item.boltcut}
+      <dt>{t("Boltcut", { _context })}</dt>
+      <dd>
+        <TerFurnActivity act={item.boltcut} resultType="terrain" />
+      </dd>
+    {/if}
+    {#if item.hacksaw}
+      <dt>{t("Hacksaw", { _context })}</dt>
+      <dd>
+        <TerFurnActivity act={item.hacksaw} resultType="terrain" />
+      </dd>
+    {/if}
+    {#if item.oxytorch}
+      <dt>{t("Oxytorch", { _context })}</dt>
+      <dd>
+        <TerFurnActivity act={item.oxytorch} resultType="terrain" />
+      </dd>
+    {/if}
+    {#if item.prying}
+      <dt>{t("Prying", { _context })}</dt>
+      <dd>
+        <TerFurnActivity act={item.prying} resultType="terrain" />
       </dd>
     {/if}
     {#each bits as [title, arr]}

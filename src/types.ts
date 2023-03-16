@@ -686,6 +686,26 @@ export type MapDeconstructInfo = {
   items?: string | ItemGroupEntry[];
 };
 
+export type ActivityDataCommon = {
+  duration?: duration; // default: 1 sec
+  byproducts?: {
+    item: string; // item_id
+    count?: number | [number, number];
+  }[];
+  prying_data?: {
+    prying_nails?: boolean;
+    difficulty?: integer;
+    prying_level?: integer;
+    noisy?: boolean;
+    alarm?: boolean;
+    breakable?: boolean;
+    failure?: Translation;
+  };
+
+  message?: Translation;
+  sound?: Translation;
+};
+
 export type MapDataCommon = {
   color?: string | [string] | [string, string, string, string];
   bgcolor?: string | [string] | [string, string, string, string];
@@ -719,6 +739,11 @@ export type Terrain = MapDataCommon & {
     | string
     | { type: "cardreader" }
     | { type: "effect_on_condition" };
+
+  oxytorch?: ActivityDataCommon & { result: string };
+  boltcut?: ActivityDataCommon & { result: string };
+  hacksaw?: ActivityDataCommon & { result: string };
+  prying?: ActivityDataCommon & { result: string };
 };
 
 export type Furniture = MapDataCommon & {
@@ -747,6 +772,11 @@ export type Furniture = MapDataCommon & {
 
   bash?: MapBashInfo;
   deconstruct?: MapDeconstructInfo;
+
+  oxytorch?: ActivityDataCommon & { result?: string };
+  boltcut?: ActivityDataCommon & { result?: string };
+  hacksaw?: ActivityDataCommon & { result?: string };
+  prying?: ActivityDataCommon & { result?: string };
 
   // TODO:
   // open
