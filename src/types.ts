@@ -144,9 +144,12 @@ export type Recipe = {
     proficiency: string; // proficiency_id
     required?: boolean;
     time_multiplier?: number; // default to proficiency multiplier
-    fail_multiplier?: number; // default to proficiency multiplier
+    skill_penalty?: number; // default to proficiency penalty
     learning_time_multiplier?: number; // default 1.0
     max_experience?: duration;
+
+    // Removed shortly after 0.G
+    fail_multiplier?: number; // default to proficiency multiplier
   }[];
   autolearn?: boolean | [string, number][];
   never_learn?: boolean;
@@ -741,9 +744,12 @@ export type Proficiency = {
   time_to_learn?: string; // duration, default: 9999 h
 
   default_time_multiplier?: number; // default: 2
-  default_fail_multiplier?: number; // default: 2
+  default_skill_penalty?: number; // default: 1
 
   required_proficiencies?: string[]; // proficiency_id[]
+
+  // Removed shortly after 0.G
+  default_fail_multiplier?: number; // default: 2
 };
 
 export type Skill = {

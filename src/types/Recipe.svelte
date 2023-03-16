@@ -35,8 +35,13 @@ writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0));
 
 const proficiencies = (recipe.proficiencies ?? []).map((prof) => {
   const proficiency = data.byId("proficiency", prof.proficiency);
+  const skill_penalty =
+    prof.skill_penalty ?? proficiency.default_skill_penalty ?? 0;
+  const fail_multiplier =
+    prof.fail_multiplier ?? proficiency.default_fail_multiplier ?? 1;
   return {
-    fail_multiplier: proficiency.default_fail_multiplier ?? 2,
+    skill_penalty,
+    fail_multiplier,
     time_multiplier: proficiency.default_time_multiplier ?? 2,
     learning_time_multiplier: 1,
     ...prof,
@@ -107,29 +112,36 @@ function activityLevelName(level: number) {
       <dd>
         <ul>
           {#each proficiencies as prof}
+            {@const multipliers = [
+              prof.time_multiplier !== 1
+                ? `${prof.time_multiplier}× ${t("time", {
+                    _context,
+                    _comment: "proficiency multiplier",
+                  })}`
+                : null,
+              prof.fail_multiplier && prof.fail_multiplier !== 1
+                ? `${prof.fail_multiplier}× ${t("fail", {
+                    _context,
+                    _comment: "proficiency multiplier",
+                  })}`
+                : null,
+              prof.skill_penalty && prof.skill_penalty !== 0
+                ? `${prof.skill_penalty} ${t("skill bonus", {
+                    _context,
+                    _comment: "proficiency multiplier",
+                  })}`
+                : null,
+              prof.learning_time_multiplier !== 1
+                ? `${prof.learning_time_multiplier}× ${t("learning speed", {
+                    _context,
+                    _comment: "proficiency multiplier",
+                  })}`
+                : null,
+            ].filter((x) => x)}
             <li>
               <ThingLink type="proficiency" id={prof.proficiency} />
-              {#if prof.time_multiplier !== 1 || prof.fail_multiplier !== 1 || prof.learning_time_multiplier !== 1}
-                ({[
-                  [
-                    prof.time_multiplier,
-                    t("time", { _context, _comment: "proficiency multiplier" }),
-                  ],
-                  [
-                    prof.fail_multiplier,
-                    t("fail", { _context, _comment: "proficiency multiplier" }),
-                  ],
-                  [
-                    prof.learning_time_multiplier,
-                    t("learning speed", {
-                      _context,
-                      _comment: "proficiency multiplier",
-                    }),
-                  ],
-                ]
-                  .filter((x) => x[0] !== 1)
-                  .map(([num, name]) => `${num}× ${name}`)
-                  .join(", ")})
+              {#if multipliers.length}
+                ({multipliers.join(", ")})
               {/if}
             </li>
           {/each}
