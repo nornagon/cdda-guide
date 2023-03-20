@@ -131,7 +131,7 @@ const constructions = data
                 <ul>
                   {#each harvest.entries as harvest_entry}
                     {#if harvest_entry.type === "bionic_group"}
-                      {#each data.flattenItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
+                      {#each data.flattenTopLevelItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
                         <li>
                           <ItemSymbol item={data.byId("item", id)} />
                           <ThingLink type="item" {id} /> ({(prob * 100).toFixed(

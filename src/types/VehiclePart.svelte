@@ -15,7 +15,7 @@ import {
 } from "../data";
 import LimitedList from "../LimitedList.svelte";
 
-import type { ItemGroup, VehiclePart } from "../types";
+import type { ItemGroupData, VehiclePart } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import RequirementData from "./item/RequirementData.svelte";
 import ThingLink from "./ThingLink.svelte";
@@ -48,9 +48,9 @@ function bonusLabel(item: VehiclePart) {
 
 const data = getContext<CddaData>("data");
 
-const breaksIntoGroup: ItemGroup | null =
+const breaksIntoGroup: ItemGroupData | null =
   typeof item.breaks_into === "string"
-    ? data.byId("item_group", item.breaks_into)
+    ? data.convertTopLevelItemGroup(data.byId("item_group", item.breaks_into))
     : Array.isArray(item.breaks_into)
     ? { subtype: "collection", entries: item.breaks_into }
     : item.breaks_into

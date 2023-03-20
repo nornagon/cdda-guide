@@ -20,7 +20,7 @@ const harvestedFrom = (data.byType("terrain") as (Terrain | Furniture)[])
       return harvest.entries.some((e) => {
         if (e.type === "bionic_group") {
           return data
-            .flattenItemGroup(data.byId("item_group", e.drop))
+            .flattenTopLevelItemGroup(data.byId("item_group", e.drop))
             .some((x) => x.id === item_id);
         } else {
           return e.drop === item_id;

@@ -4,7 +4,12 @@ import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
-import type { Terrain, Furniture, ItemGroup, VehiclePart } from "../../types";
+import type {
+  Terrain,
+  Furniture,
+  ItemGroupData,
+  VehiclePart,
+} from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
@@ -37,9 +42,9 @@ let bashFromVP = data
   .byType("vehicle_part")
   .filter((vp) => {
     if (!vp.id) return;
-    const breaksIntoGroup: ItemGroup | null =
+    const breaksIntoGroup: ItemGroupData | null =
       typeof vp.breaks_into === "string"
-        ? data.byId("item_group", vp.breaks_into)
+        ? data.convertTopLevelItemGroup(data.byId("item_group", vp.breaks_into))
         : Array.isArray(vp.breaks_into)
         ? { subtype: "collection", entries: vp.breaks_into }
         : vp.breaks_into

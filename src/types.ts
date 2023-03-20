@@ -26,28 +26,37 @@ export type ItemGroupEntry = (
   "container-item"?: string;
   // TODO: "container-group"?: string;
   // TODO: damage, dirt, charges, ammo, contents, snippets?, sealed, custom-flags, etc.
+
+  event?: string;
 };
 
 export type ItemGroupEntryOrShortcut = ItemGroupEntry | [string, number]; // item_id, prob (or item_group_id, prob if in 'groups' array)
 
-export type ItemGroup =
-  | {
-      id?: string;
-      subtype: "collection" | "distribution";
-      entries?: ItemGroupEntryOrShortcut[];
-      items?: (string /* item_id with prob=100 */ | ItemGroupEntryOrShortcut)[];
-      groups?: (
-        | string /* item_group_id with prob=100 */
-        | ItemGroupEntryOrShortcut
-      )[];
-      "container-item"?: string;
-      // TODO: on_overflow
-    }
-  | {
-      id?: string;
-      subtype?: "old"; // ~= "distribution"
-      items?: ItemGroupEntryOrShortcut[];
-    };
+// The top-level item_group. Always has an id.
+export type ItemGroup = {
+  id: string;
+} & (
+  | ({ subtype: "collection" | "distribution" } & ItemGroupData)
+  | ({ subtype?: "old" } & OldItemGroupData)
+);
+
+export type ItemGroupData = {
+  subtype?: "collection" | "distribution";
+  entries?: ItemGroupEntryOrShortcut[];
+  items?: (string /* item_id with prob=100 */ | ItemGroupEntryOrShortcut)[];
+  groups?: (
+    | string /* item_group_id with prob=100 */
+    | ItemGroupEntryOrShortcut
+  )[];
+  "container-item"?: string;
+};
+
+export type OldItemGroupData = {
+  subtype?: "old";
+  items?: ItemGroupEntryOrShortcut[];
+};
+
+export type InlineItemGroup = string | ItemGroupData | ItemGroupEntry[];
 
 export type Construction = {
   type: "construction";
@@ -80,7 +89,7 @@ export type Construction = {
     | { flag: string; force_terrain: boolean }[];
   post_flags?: string[];
 
-  byproducts?: string | ItemGroup | ItemGroupEntry[]; // subtype collection
+  byproducts?: InlineItemGroup;
 
   pre_special?: string;
   post_special?: string;
@@ -1049,7 +1058,7 @@ export interface MapgenObject {
 
 type MapgenInt = number | [number] | [number, number];
 export interface MapgenItemGroup {
-  item: string | ItemGroup | ItemGroupEntry[] /* subtype collection */;
+  item: InlineItemGroup /* subtype collection */;
   chance?: number;
   repeat?: MapgenInt;
 }
@@ -1227,7 +1236,7 @@ export type Monster = {
         into?: string;
       };
   ascii_picture?: string;
-  death_drops?: string | ItemGroup | ItemGroupEntry[]; // distribution
+  death_drops?: InlineItemGroup; // distribution
 };
 
 export type MonsterGroup = {
@@ -1305,7 +1314,7 @@ export type VehiclePart = {
     repair?: VehiclePartRequirements;
     removal?: VehiclePartRequirements;
   };
-  breaks_into?: string | ItemGroup | ItemGroupEntry[]; // collection
+  breaks_into?: InlineItemGroup; // collection
   qualities?: [string, number][];
   pseudo_tools?: {
     id: string;

@@ -4,12 +4,11 @@
 import {
   collection,
   getLootForMapgen,
-  lootByOmSpecial,
   parsePalette,
   repeatChance,
 } from "./spawnLocations";
 import { CddaData } from "../../data";
-import type { ItemGroup, Mapgen, OvermapSpecial } from "../../types";
+import type { ItemGroupData, Mapgen } from "../../types";
 
 describe("collection()", () => {
   it("returns nothing given no items", () => {
@@ -344,7 +343,7 @@ describe("foo", () => {
           ["item_a", 50],
           ["item_b", 100],
         ],
-      } as ItemGroup,
+      } as ItemGroupData,
     ]);
     const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
     // prob for item_a:

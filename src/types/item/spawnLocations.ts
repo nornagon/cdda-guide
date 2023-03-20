@@ -431,13 +431,13 @@ function repeatThroughArr(
 
 function parseItemGroup(
   data: CddaData,
-  group: string | raw.ItemGroup | raw.ItemGroupEntry[],
+  group: raw.InlineItemGroup,
   repeat: undefined | number | [number] | [number, number],
   chance: chance
 ): Loot {
   const g =
     typeof group === "string"
-      ? data.byId("item_group", group)
+      ? data.convertTopLevelItemGroup(data.byId("item_group", group))
       : Array.isArray(group)
       ? { subtype: "collection" as "collection", entries: group }
       : group;

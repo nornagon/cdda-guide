@@ -6,7 +6,6 @@ import type {
   Requirement,
   ItemGroup,
   ItemGroupEntry,
-  ItemGroupEntryOrShortcut,
   Recipe,
   Mapgen,
   PaletteData,
@@ -22,6 +21,8 @@ import type {
   ItemComponent,
   QualityRequirement,
   ToolComponent,
+  InlineItemGroup,
+  ItemGroupData,
 } from "./types";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
@@ -547,10 +548,11 @@ export class CddaData {
       palette.get(c)!.add(item_id);
     };
 
-    const addGroup = (c: string, v: string | ItemGroup | ItemGroupEntry[]) => {
+    const addGroup = (c: string, v: InlineItemGroup) => {
+      // TODO dedupe?
       const group =
         typeof v === "string"
-          ? this.byId("item_group", v)
+          ? this.convertTopLevelItemGroup(this.byId("item_group", v))
           : Array.isArray(v)
           ? { subtype: "collection" as const, entries: v }
           : v;
@@ -608,7 +610,7 @@ export class CddaData {
     for (const v of mapgen.object.place_items ?? []) {
       const group =
         typeof v.item === "string"
-          ? this.byId("item_group", v.item)
+          ? this.convertTopLevelItemGroup(this.byId("item_group", v.item))
           : Array.isArray(v.item)
           ? { subtype: "collection" as const, entries: v.item }
           : v.item;
@@ -625,7 +627,7 @@ export class CddaData {
     for (const v of mapgen.object.place_loot ?? []) {
       if (v.item) ret.add(v.item);
       if (v.group)
-        for (const { id } of this.flattenItemGroup(
+        for (const { id } of this.flattenTopLevelItemGroup(
           this.byId("item_group", v.group)
         ))
           ret.add(id);
@@ -638,13 +640,45 @@ export class CddaData {
     return r;
   }
 
+  // Top-level item groups can have the "old" subtype (which is the default if
+  // no other subtype is specified).
+  _convertedTopLevelItemGroups = new Map<ItemGroup, ItemGroupData>();
+  convertTopLevelItemGroup(group: ItemGroup): ItemGroupData {
+    if (group.subtype === "distribution" || group.subtype === "collection") {
+      return group;
+    } else if (
+      !("subtype" in group) ||
+      !group.subtype ||
+      group.subtype === "old"
+    ) {
+      if (this._convertedTopLevelItemGroups.has(group))
+        return this._convertedTopLevelItemGroups.get(group)!;
+      // Convert old-style item groups to new-style
+      const normalizedEntries: ItemGroupEntry[] = [];
+      for (const item of group.items ?? [])
+        if (Array.isArray(item))
+          normalizedEntries.push({ item: item[0], prob: item[1] });
+        else normalizedEntries.push(item);
+      const ret: ItemGroupData = {
+        subtype: "distribution",
+        entries: normalizedEntries,
+      };
+      this._convertedTopLevelItemGroups.set(group, ret);
+      return ret;
+    } else throw new Error("unknown item group subtype: " + group.subtype);
+  }
+
+  flattenTopLevelItemGroup(group: ItemGroup) {
+    return this.flattenItemGroup(this.convertTopLevelItemGroup(group));
+  }
+
   // This is a WeakMap because flattenItemGroup is sometimes called with temporary objects
   _flattenItemGroupCache = new WeakMap<
-    ItemGroup,
+    ItemGroupData,
     { id: string; prob: number; count: [number, number] }[]
   >();
   flattenItemGroup(
-    group: ItemGroup
+    group: ItemGroupData
   ): { id: string; prob: number; count: [number, number] }[] {
     if (this._flattenItemGroupCache.has(group))
       return this._flattenItemGroupCache.get(group)!;
@@ -680,32 +714,27 @@ export class CddaData {
     if ("container-item" in group && group["container-item"])
       add({ id: group["container-item"], prob: 1, count: [1, 1] });
 
-    const normalizedEntries: ItemGroupEntry[] = [];
-    if (group.subtype === "old" || !group.subtype) {
-      for (const item of group.items as ItemGroupEntryOrShortcut[])
-        if (Array.isArray(item))
-          normalizedEntries.push({ item: item[0], prob: item[1] });
-        else normalizedEntries.push(item);
-    } else {
-      for (const entry of "entries" in group && group.entries
-        ? group.entries
-        : [])
-        if (Array.isArray(entry))
-          normalizedEntries.push({ item: entry[0], prob: entry[1] });
-        else normalizedEntries.push(entry);
-      for (const item of group.items ?? [])
-        if (Array.isArray(item))
-          normalizedEntries.push({ item: item[0], prob: item[1] });
-        else if (typeof item === "string")
-          normalizedEntries.push({ item, prob: 100 });
-        else normalizedEntries.push(item);
-      for (const g of "groups" in group && group.groups ? group.groups : [])
-        if (Array.isArray(g))
-          normalizedEntries.push({ group: g[0], prob: g[1] });
-        else if (typeof g === "string")
-          normalizedEntries.push({ group: g, prob: 100 });
-        else normalizedEntries.push(g);
-    }
+    let normalizedEntries: ItemGroupEntry[] = [];
+    for (const entry of "entries" in group && group.entries
+      ? group.entries
+      : [])
+      if (Array.isArray(entry))
+        normalizedEntries.push({ item: entry[0], prob: entry[1] });
+      else normalizedEntries.push(entry);
+    for (const item of group.items ?? [])
+      if (Array.isArray(item))
+        normalizedEntries.push({ item: item[0], prob: item[1] });
+      else if (typeof item === "string")
+        normalizedEntries.push({ item, prob: 100 });
+      else normalizedEntries.push(item);
+    for (const g of "groups" in group && group.groups ? group.groups : [])
+      if (Array.isArray(g)) normalizedEntries.push({ group: g[0], prob: g[1] });
+      else if (typeof g === "string")
+        normalizedEntries.push({ group: g, prob: 100 });
+      else normalizedEntries.push(g);
+    normalizedEntries = normalizedEntries.filter(
+      (e) => !("event" in e) || !e.event
+    );
 
     function prod(
       p: { id: string; prob: number; count: [number, number] },
@@ -744,9 +773,9 @@ export class CddaData {
             add({ id: item.container, prob: nProb, count: nCount });
         } else if ("group" in entry) {
           add(
-            ...this.flattenItemGroup(this.byId("item_group", entry.group)).map(
-              (p) => prod(p, nProb, nCount)
-            )
+            ...this.flattenTopLevelItemGroup(
+              this.byId("item_group", entry.group)
+            ).map((p) => prod(p, nProb, nCount))
           );
         } else if ("collection" in entry) {
           add(
@@ -779,9 +808,9 @@ export class CddaData {
           add({ id: entry.item, prob: nProb, count: nCount });
         } else if ("group" in entry) {
           add(
-            ...this.flattenItemGroup(this.byId("item_group", entry.group)).map(
-              (p) => prod(p, nProb, nCount)
-            )
+            ...this.flattenTopLevelItemGroup(
+              this.byId("item_group", entry.group)
+            ).map((p) => prod(p, nProb, nCount))
           );
         } else if ("collection" in entry) {
           add(
@@ -1053,12 +1082,12 @@ export class CddaData {
   }
 
   normalizeItemGroup(
-    g: undefined | string | ItemGroup | ItemGroupEntry[],
+    g: undefined | string | ItemGroupData | ItemGroupEntry[],
     subtype: "collection" | "distribution"
-  ): ItemGroup {
+  ): ItemGroupData {
     if (g) {
       if (typeof g === "string") {
-        return this.byId("item_group", g);
+        return this.convertTopLevelItemGroup(this.byId("item_group", g));
       } else if (Array.isArray(g)) {
         return { subtype, entries: g };
       } else {
@@ -1207,7 +1236,7 @@ export const getVehiclePartIdAndVariant = (
   return [compositePartId, ""];
 };
 
-export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroup {
+export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroupData {
   return {
     subtype: "collection",
     entries: (vehicle.items ?? []).map((it) => {
