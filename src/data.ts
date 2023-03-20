@@ -898,9 +898,19 @@ export class CddaData {
     return ret;
   }
 
+  _normalizeRequirementsCache = new Map<
+    RequirementData & { using?: Recipe["using"] },
+    ReturnType<typeof this.normalizeRequirementsForDisassembly>
+  >();
   normalizeRequirementsForDisassembly(
     requirement: RequirementData & { using?: Recipe["using"] }
-  ) {
+  ): {
+    tools: [string, number][][];
+    qualities: QualityRequirement[][];
+    components: [string, number][][];
+  } {
+    if (this._normalizeRequirementsCache.has(requirement))
+      return this._normalizeRequirementsCache.get(requirement)!;
     const { tools, qualities, components } = this.normalizeRequirements(
       requirement,
       { onlyRecoverable: true }
@@ -974,11 +984,15 @@ export class CddaData {
       )
       .filter((c) => c.length);
 
-    return {
+    const ret = {
       tools: filteredTools,
       qualities: finalQualities,
       components: filteredComponents,
     };
+
+    this._normalizeRequirementsCache.set(requirement, ret);
+
+    return ret;
   }
 
   normalizeRequirementUsing(
@@ -1236,8 +1250,11 @@ export const getVehiclePartIdAndVariant = (
   return [compositePartId, ""];
 };
 
+const _itemGroupFromVehicleCache = new Map<Vehicle, ItemGroupData>();
 export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroupData {
-  return {
+  if (_itemGroupFromVehicleCache.has(vehicle))
+    return _itemGroupFromVehicleCache.get(vehicle)!;
+  const ret: ItemGroupData = {
     subtype: "collection",
     entries: (vehicle.items ?? []).map((it) => {
       if (it.items) {
@@ -1261,6 +1278,9 @@ export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroupData {
       }
     }),
   };
+
+  _itemGroupFromVehicleCache.set(vehicle, ret);
+  return ret;
 }
 
 export function normalizeUseAction(action: Item["use_action"]): UseFunction[] {
