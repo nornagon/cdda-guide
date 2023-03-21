@@ -21,32 +21,33 @@ const compatible = data.byType("item").flatMap((x) => {
 });
 compatible.sort(byName);
 
-const defaultPocketData = {
-  pocket_type: "CONTAINER",
-  min_item_volume: "0 ml",
-  moves: 100,
-  fire_protection: false,
-  watertight: false,
-  airtight: false,
-  open_container: false,
-  rigid: false,
-  holster: false,
-};
-
 const usesAmmoType = (w: Item, t: AmmunitionType): boolean => {
-  let pockets = (w.pocket_data ?? []).map((pocket) => {
-    return { ...defaultPocketData, ...pocket };
-  });
-  let ammo = pockets.flatMap((pocket) =>
-    pocket.pocket_type === "MAGAZINE"
-      ? Object.keys(pocket.ammo_restriction ?? {})
-      : []
+  // TODO: it might be good to split out things that have this as "ammo" vs.
+  // MAGAZINEs that accept this ammo type.
+  if ("ammo" in w && w.ammo?.includes(t.id)) return true;
+  return !!w.pocket_data?.some(
+    (pocket) =>
+      pocket.pocket_type === "MAGAZINE" &&
+      pocket.ammo_restriction &&
+      Object.prototype.hasOwnProperty.call(pocket.ammo_restriction, t.id)
   );
-  return ammo.some((a) => a === t.id);
 };
 
 const usedBy = data.byType("item").filter((w) => usesAmmoType(w, item));
-usedBy.sort(byName);
+function composeSort<T>(
+  fa: (a: T, b: T) => number,
+  fb: (a: T, b: T) => number
+) {
+  return (a: T, b: T) => {
+    const r = fa(a, b);
+    if (r !== 0) return r;
+    return fb(a, b);
+  };
+}
+function byType(a: Item, b: Item) {
+  return a.type.localeCompare(b.type);
+}
+usedBy.sort(composeSort(byType, byName));
 </script>
 
 <h1>{t("Ammunition Type")}: {singularName(item)}</h1>
