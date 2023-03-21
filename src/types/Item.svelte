@@ -453,9 +453,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
 {#if item.type === "WHEEL"}
   <WheelInfo {item} />
 {/if}
-{#if item.type === "MAGAZINE"}
-  <MagazineInfo {item} />
-{/if}
+<MagazineInfo {item} />
 {#if item.seed_data}
   <section>
     <h1>{t("Grows Into", { _context: "Seed Data" })}</h1>
@@ -488,6 +486,14 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
     <h1>{t("Pockets", { _context })}</h1>
     {#each pockets.filter((p) => p.pocket_type === "CONTAINER") as pocket}
       <dl>
+        {#if pocket.name}
+          <dt>{t("Name", { _context })}</dt>
+          <dd>{pocket.name}</dd>
+        {/if}
+        {#if pocket.description}
+          <dt>{t("Description", { _context })}</dt>
+          <dd>{pocket.description}</dd>
+        {/if}
         {#if pocket.max_contains_volume != null}
           <dt>{t("Volume Capacity", { _context })}</dt>
           <dd>{pocket.max_contains_volume}</dd>

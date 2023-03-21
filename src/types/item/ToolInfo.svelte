@@ -13,6 +13,16 @@ export let item: ToolSlot;
   <section>
     <h1>{t("Tool", { _context, _comment: "Section heading" })}</h1>
     <dl>
+      {#if item.ammo?.length}
+        <dt>{t("Ammo", { _context })}</dt>
+        <dd>
+          <ul class="comma-separated">
+            {#each item.ammo as ammo}
+              <li><ThingLink type="ammunition_type" id={ammo} /></li>
+            {/each}
+          </ul>
+        </dd>
+      {/if}
       {#if item.charges_per_use}
         <dt>{t("Charges Per Use", { _context })}</dt>
         <dd>{item.charges_per_use}</dd>

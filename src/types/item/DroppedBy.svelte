@@ -44,7 +44,7 @@ const dissectableFrom = data
   <section>
     <h1>{t("Dropped By", { _context: "Obtaining" })}</h1>
     <LimitedList items={mons} let:item>
-      <ItemSymbol item={data.byId("monster", item.id)} />
+      <ItemSymbol {item} />
       <ThingLink type="monster" id={item.id} /> ({showProbability(item.prob)})
     </LimitedList>
   </section>

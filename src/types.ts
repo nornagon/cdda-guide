@@ -604,9 +604,20 @@ export type Item =
   | SupportedTypes["WHEEL"];
 
 export type PocketData = {
-  pocket_type?: string;
+  pocket_type?:
+    | "CONTAINER"
+    | "MAGAZINE"
+    | "MAGAZINE_WELL"
+    | "MOD"
+    | "CORPSE"
+    | "SOFTWARE"
+    | "EBOOK"
+    | "MIGRATION";
+  description?: Translation;
+  name?: Translation;
   ammo_restriction?: Record<string, number>;
   item_restriction?: Array<string>;
+  flag_restriction?: Array<string>;
   allowed_speedloaders?: Array<string>;
   min_item_volume?: string;
   max_item_volume?: string;
@@ -622,7 +633,6 @@ export type PocketData = {
   watertight?: boolean;
   airtight?: boolean;
   open_container?: boolean;
-  flag_restriction?: Array<string>;
   rigid?: boolean;
   holster?: boolean;
   sealed_data?: { spoil_multiplier?: number };
