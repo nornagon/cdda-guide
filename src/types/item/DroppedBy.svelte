@@ -22,7 +22,7 @@ mons.sort((a, b) => b.prob - a.prob);
 
 const itemsFromHarvest = (h: Harvest): string[] =>
   h.entries?.flatMap((e) =>
-    e.type && data.byId("harvest_drop_type", e.type)?.group
+    e.type && data.byIdMaybe("harvest_drop_type", e.type)?.group
       ? data
           .flattenTopLevelItemGroup(data.byId("item_group", e.drop))
           .map((x) => x.id)
