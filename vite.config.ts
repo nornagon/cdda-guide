@@ -9,6 +9,9 @@ export default defineConfig({
   build: {
     sourcemap: true,
   },
+  server: {
+    port: 3000,
+  },
   plugins: [
     EnvironmentPlugin({
       GITHUB_SHA: null,
