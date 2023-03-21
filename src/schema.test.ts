@@ -1,4 +1,4 @@
-import * as TJS from "typescript-json-schema";
+import * as TJS from "ts-json-schema-generator";
 import * as fs from "fs";
 import * as util from "util";
 import Ajv, { ValidateFunction } from "ajv";
@@ -33,14 +33,18 @@ expect.extend({
   },
 });
 
-const program = TJS.programFromConfig(__dirname + "/../tsconfig.json");
+const program = TJS.createGenerator({
+  tsconfig: __dirname + "/../tsconfig.json",
+  additionalProperties: true, // Someday I'd like to turn this off.
+});
 
 const ajv = new Ajv({ allowUnionTypes: true, verbose: true });
-const typesSchema = TJS.generateSchema(program, "SupportedTypes", {
-  required: true,
-});
+const typesSchema = program.createSchema("SupportedTypes");
+fs.writeFileSync("schema.json", JSON.stringify(typesSchema, null, 2));
 const schemasByType = new Map(
-  Object.entries(typesSchema!.properties!).map(([typeName, sch]) => {
+  Object.entries(
+    (typesSchema!.definitions!["SupportedTypes"] as any).properties
+  ).map(([typeName, sch]) => {
     const schemaForType = sch as TJS.Definition;
     return [
       typeName,

@@ -1016,12 +1016,7 @@ export interface MapgenObject {
   //monster?: MonsterClass;
   //monsters?: Monsters;
   // TODO: handle param/distribution/switch
-  palettes?: (
-    | string
-    | { param: any }
-    | { distribution: any }
-    | { switch: any }
-  )[];
+  palettes?: MapgenValue[];
   //place_vehicles?: PlaceVehicle[];
   //vehicles?: ObjectVehicles;
   place_nested?: PlaceList<MapgenNested>;
@@ -1056,7 +1051,14 @@ export interface MapgenObject {
   //place_zones?: PlaceZone[];
 }
 
-type MapgenInt = number | [number] | [number, number];
+export type MapgenInt = number | [number] | [number, number];
+export type WeightedList<T> = (T | [T, number])[];
+export type MapgenValue =
+  | string
+  | { param: string; fallback?: string }
+  | { distribution: WeightedList<string> }
+  | { switch: MapgenValue; cases: Record<string, string> };
+
 export interface MapgenItemGroup {
   item: InlineItemGroup /* subtype collection */;
   chance?: number;
@@ -1064,7 +1066,7 @@ export interface MapgenItemGroup {
 }
 
 export interface MapgenSpawnItem {
-  item: string;
+  item: MapgenValue;
   amount?: MapgenInt;
   chance?: number;
   repeat?: MapgenInt;

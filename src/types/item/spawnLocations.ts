@@ -476,12 +476,7 @@ type RawPalette = {
   items?: raw.PlaceMapping<raw.MapgenItemGroup>;
   sealed_item?: raw.PlaceMapping<raw.MapgenSealedItem>;
   nested?: raw.PlaceMapping<raw.MapgenNested>;
-  palettes?: (
-    | string
-    | { param: any }
-    | { distribution: [string, number][] }
-    | { switch: any }
-  )[];
+  palettes?: raw.MapgenValue[];
 };
 
 function parsePlaceMapping<T>(
@@ -517,7 +512,7 @@ export function parsePalette(
           ),
           chance: 1,
         };
-      if (item)
+      if (item && typeof item.item === "string")
         yield {
           loot: new Map([[item.item, 1]]),
           chance: repeatChance(
@@ -530,10 +525,11 @@ export function parsePalette(
   const item = parsePlaceMapping(
     palette.item,
     function* ({ item, chance = 100, repeat }) {
-      yield {
-        loot: new Map([[item, 1]]),
-        chance: repeatChance(repeat, chance / 100),
-      };
+      if (typeof item === "string")
+        yield {
+          loot: new Map([[item, 1]]),
+          chance: repeatChance(repeat, chance / 100),
+        };
     }
   );
   const items = parsePlaceMapping(
@@ -551,16 +547,22 @@ export function parsePalette(
       chance: 1,
     };
   });
-  const palettes = (palette.palettes ?? []).flatMap((id) => {
-    if (typeof id === "string") {
-      return [parsePalette(data, data.byId("palette", id))];
-    } else if ("distribution" in id) {
-      const opts = id.distribution;
-      const totalProb = opts.reduce((m, [, prob]) => m + prob, 0);
-      return opts.map(([subId, prob]) =>
+  const palettes = (palette.palettes ?? []).flatMap((val) => {
+    if (typeof val === "string") {
+      return [parsePalette(data, data.byId("palette", val))];
+    } else if ("distribution" in val) {
+      const opts = val.distribution;
+      function prob<T>(it: T | [T, number]) {
+        return Array.isArray(it) ? it[1] : 1;
+      }
+      function id<T>(it: T | [T, number]) {
+        return Array.isArray(it) ? it[0] : it;
+      }
+      const totalProb = opts.reduce((m, it) => m + prob(it), 0);
+      return opts.map((it) =>
         attenuatePalette(
-          parsePalette(data, data.byId("palette", subId)),
-          prob / totalProb
+          parsePalette(data, data.byId("palette", id(it))),
+          prob(it) / totalProb
         )
       );
     } else return [];

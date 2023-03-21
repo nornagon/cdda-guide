@@ -23,6 +23,7 @@ import type {
   ToolComponent,
   InlineItemGroup,
   ItemGroupData,
+  MapgenValue,
 } from "./types";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
@@ -543,9 +544,13 @@ export class CddaData {
     if (this._cachedMapgenSpawnItems.has(mapgen))
       return this._cachedMapgenSpawnItems.get(mapgen)!;
     const palette = new Map<string, Set<string>>();
-    const add = (c: string, item_id: string) => {
-      if (!palette.has(c)) palette.set(c, new Set());
-      palette.get(c)!.add(item_id);
+    const add = (c: string, item_id: MapgenValue) => {
+      if (typeof item_id === "string") {
+        if (!palette.has(c)) palette.set(c, new Set());
+        palette.get(c)!.add(item_id);
+      } else {
+        // TODO: handle distribution, param, switch/cases
+      }
     };
 
     const addGroup = (c: string, v: InlineItemGroup) => {
@@ -605,7 +610,8 @@ export class CddaData {
       for (const x of v) ret.add(x);
     }
 
-    for (const v of mapgen.object.place_item ?? []) ret.add(v.item);
+    for (const v of mapgen.object.place_item ?? [])
+      if (typeof v.item === "string") ret.add(v.item);
 
     for (const v of mapgen.object.place_items ?? []) {
       const group =
@@ -633,7 +639,8 @@ export class CddaData {
           ret.add(id);
     }
 
-    for (const v of mapgen.object.add ?? []) ret.add(v.item);
+    for (const v of mapgen.object.add ?? [])
+      if (typeof v.item === "string") ret.add(v.item);
 
     const r = [...ret];
     this._cachedMapgenSpawnItems.set(mapgen, r);
