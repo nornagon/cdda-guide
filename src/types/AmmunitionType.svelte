@@ -33,7 +33,7 @@ const usesAmmoType = (w: Item, t: AmmunitionType): boolean => {
   );
 };
 
-const usedBy = data.byType("item").filter((w) => usesAmmoType(w, item));
+const usedBy = data.byType("item").filter((w) => w.id && usesAmmoType(w, item));
 function composeSort<T>(
   fa: (a: T, b: T) => number,
   fb: (a: T, b: T) => number
