@@ -190,9 +190,10 @@ const containingBionics = data
       <dt>{t("Conflicts With Mutations", { _context })}</dt>
       <dd>
         <MutationList
-          mutations={item.mutation_conflicts
-            .map((id) => data.byId("mutation", id))
-            .filter((x) => x)} />
+          mutations={item.mutation_conflicts.flatMap((x) => {
+            const m = data.byIdMaybe("mutation", x);
+            return m ? [m] : [];
+          })} />
       </dd>
     {/if}
     {#if item.canceled_mutations}
