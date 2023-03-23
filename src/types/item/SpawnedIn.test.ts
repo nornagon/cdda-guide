@@ -2,14 +2,12 @@
  * @jest-environment jsdom
  */
 import { render } from "@testing-library/svelte";
-import matchers from "@testing-library/jest-dom/matchers";
 
 import SpawnedIn from "./SpawnedIn.svelte";
 import WithData from "../../WithData.svelte";
 import { CddaData } from "../../data";
 import { lootByOMSAppearance } from "./spawnLocations";
 import { describe, it, expect } from "vitest";
-expect.extend(matchers);
 
 describe("the loot section", () => {
   it("displays the name of the spawn location and chance", async () => {
@@ -51,8 +49,8 @@ describe("the loot section", () => {
     });
     await new Promise((r) => setTimeout(r));
 
-    expect(getByText(/fake place/)).toBeInTheDocument();
-    expect(getByText(/50.00%/)).toBeInTheDocument();
+    expect(getByText(/fake place/)).toBeTruthy();
+    expect(getByText(/50.00%/)).toBeTruthy();
   });
   it("displays a composite chance", async () => {
     const data = new CddaData([
@@ -93,6 +91,6 @@ describe("the loot section", () => {
     });
     await new Promise((r) => setTimeout(r));
 
-    expect(getByText(/75.00%/)).toBeInTheDocument();
+    expect(getByText(/75.00%/)).toBeTruthy();
   });
 });
