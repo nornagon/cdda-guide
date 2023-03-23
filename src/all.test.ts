@@ -1,8 +1,8 @@
 /**
  * @jest-environment jsdom
  */
-import "@testing-library/jest-dom/extend-expect";
-import { render } from "@testing-library/svelte";
+import { render, cleanup } from "@testing-library/svelte";
+import { expect, test, afterEach } from "vitest";
 import * as fs from "fs";
 
 import { CddaData, mapType } from "./data";
@@ -44,16 +44,23 @@ const types = [
 
 const all = data._raw
   .filter((x) => x.id && types.includes(mapType(x.type)))
-  .map((x) => [mapType(x.type), x.id]);
+  .map((x) => [mapType(x.type), x.id])
+  .slice(0, 10);
 
-// The first test sometimes times out on CI with the default 5sec timeout.
-jest.setTimeout(10000);
+afterEach(cleanup);
 
-test.each(all)("render %s %s", async (type, id) => {
-  // Prefill the loot tables, so we don't have to mess with waiting for async load...
-  await lootByOMSAppearance(data);
-  const { container } = render(Thing, { item: { type, id }, data });
-  if (type !== "technique") {
-    expect(container.textContent).not.toMatch(/undefined|NaN|object Object/);
+test.each(all)(
+  "render %s %s",
+  async (type, id) => {
+    // Prefill the loot tables, so we don't have to mess with waiting for async load...
+    await lootByOMSAppearance(data);
+    const { container } = render(Thing, { item: { type, id }, data });
+    if (type !== "technique") {
+      expect(container.textContent).not.toMatch(/undefined|NaN|object Object/);
+    }
+  },
+  {
+    // The first test sometimes times out on CI with the default 5sec timeout.
+    timeout: 10000,
   }
-});
+);

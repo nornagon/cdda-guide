@@ -1,12 +1,15 @@
 /**
  * @jest-environment jsdom
  */
-import "@testing-library/jest-dom";
 import { render } from "@testing-library/svelte";
+import matchers from "@testing-library/jest-dom/matchers";
+
 import SpawnedIn from "./SpawnedIn.svelte";
 import WithData from "../../WithData.svelte";
 import { CddaData } from "../../data";
 import { lootByOMSAppearance } from "./spawnLocations";
+import { describe, it, expect } from "vitest";
+expect.extend(matchers);
 
 describe("the loot section", () => {
   it("displays the name of the spawn location and chance", async () => {

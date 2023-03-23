@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import "@testing-library/jest-dom/extend-expect";
+import { test, expect } from "vitest";
 import { render } from "@testing-library/svelte";
 
 import { CddaData } from "./data";

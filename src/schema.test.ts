@@ -3,11 +3,12 @@ import * as fs from "fs";
 import * as util from "util";
 import Ajv, { ValidateFunction } from "ajv";
 import { CddaData } from "./data";
+import { test, expect } from "vitest";
 
 declare global {
   namespace jest {
     interface Matchers<R> {
-      toMatchSchema(validate: ValidateFunction): CustomMatcherResult;
+      toMatchSchema(validate: ValidateFunction): R;
     }
   }
 }
@@ -73,7 +74,7 @@ const skipped = new Set<string>([]);
 
 test.each(all)("schema matches %s %s", (type, id, obj) => {
   if (skipped.has(id)) {
-    pending();
+    //pending();
     return;
   }
   expect(obj).toMatchSchema(schemasByType.get(type)!);

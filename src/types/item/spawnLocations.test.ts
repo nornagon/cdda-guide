@@ -9,6 +9,7 @@ import {
 } from "./spawnLocations";
 import { CddaData } from "../../data";
 import type { ItemGroupData, Mapgen } from "../../types";
+import { describe, it, expect } from "vitest";
 
 describe("collection()", () => {
   it("returns nothing given no items", () => {

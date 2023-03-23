@@ -1,3 +1,4 @@
+import { expect, test } from "vitest";
 import { CddaData } from "./data";
 
 test("flattened item group includes container item for distribution", () => {
