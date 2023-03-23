@@ -30,7 +30,7 @@ if (location.hash) {
   history.replaceState(
     null,
     "",
-    import.meta.env.BASE_URL + location.hash.slice(2)
+    import.meta.env.BASE_URL + location.hash.slice(2) + location.search
   );
 }
 
