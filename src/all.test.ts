@@ -44,8 +44,7 @@ const types = [
 
 const all = data._raw
   .filter((x) => x.id && types.includes(mapType(x.type)))
-  .map((x) => [mapType(x.type), x.id])
-  .slice(0, 10);
+  .map((x) => [mapType(x.type), x.id]);
 
 afterEach(cleanup);
 
