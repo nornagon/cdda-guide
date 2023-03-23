@@ -50,7 +50,9 @@ let { tools, qualities } =
             {#if i !== 0}{i18n.__(" OR ")}{/if}
             {#if count <= 0}
               {#if data.craftingPseudoItem(toolId)}
-                <a href="#/furniture/{data.craftingPseudoItem(toolId)}"
+                <a
+                  href="{import.meta.env
+                    .BASE_URL}furniture/{data.craftingPseudoItem(toolId)}"
                   >{singularName(data.byId("item", toolId))}</a>
               {:else}
                 <ThingLink type="item" id={toolId} />
@@ -71,7 +73,9 @@ let { tools, qualities } =
                 slot0="item">
                 <svelte:fragment slot="0">
                   {#if data.craftingPseudoItem(toolId)}
-                    <a href="#/furniture/{data.craftingPseudoItem(toolId)}"
+                    <a
+                      href="{import.meta.env
+                        .BASE_URL}furniture/{data.craftingPseudoItem(toolId)}"
                       >{singularName(data.byId("item", toolId))}</a>
                   {:else}
                     <ThingLink type="item" id={toolId} />

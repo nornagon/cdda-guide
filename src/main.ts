@@ -26,6 +26,14 @@ if (location.hostname !== "localhost")
 
 registerSW({});
 
+if (location.hash) {
+  history.replaceState(
+    null,
+    "",
+    import.meta.env.BASE_URL + location.hash.slice(2)
+  );
+}
+
 const url = new URL(location.href);
 const locale = url.searchParams.get("lang");
 if (locale) {

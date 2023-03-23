@@ -46,7 +46,7 @@ if (item?.type === "vehicle_part" && !item.name && item.item)
     item && variantId && "variants" in item && item.variants
       ? item.variants.find((v) => v.id === variantId) ?? item
       : item}
-  <a href="#/{type}/{id}"
+  <a href="{import.meta.env.BASE_URL}{type}/{id}"
     >{item ? (plural ? pluralName : singularName)(nameSource) : id}</a
   >{#if item?.type === "mutation"}&nbsp;<MutationColor mutation={item} />{/if}
 {/if}

@@ -5,7 +5,7 @@ import EnvironmentPlugin from "vite-plugin-environment";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "./",
+  base: "/cdda-guide/",
   build: {
     sourcemap: true,
   },
@@ -21,7 +21,7 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
-      includeAssets: ["favicon.png", "global.css"],
+      includeAssets: ["favicon.png"],
       manifest: {
         short_name: "Cataclysm Guide",
         name: "The Hitchhiker's Guide to the Cataclysm",
@@ -43,6 +43,8 @@ export default defineConfig({
         display: "standalone",
       },
       workbox: {
+        globPatterns: ["**/*.{js,css,html,png}"],
+        navigateFallback: "index.html",
         runtimeCaching: [
           {
             // latest/all.json updates regularly, so try the network first.

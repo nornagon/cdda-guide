@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Hitchhiker's Guide to the Cataclysm</title>
+    <script type="text/javascript">
+      // Redirect from /cdda-guide/foo/bar?lang=zh_CN&v=0.F to /cdda-guide/#/foo/bar?lang=zh_CN&v=0.F
+      const u = new URL(location.href);
+      const { pathname } = u;
+      const root = "/cdda-guide";
+      u.pathname = root + "/";
+      u.hash =
+        (pathname.startsWith(root) ? pathname.slice(root.length) : pathname) +
+        u.search;
+      u.search = "";
+      location.href = u.toString();
+    </script>
+  </head>
+  <body>
+    <!-- we gotta be longer than 512 bytes i think? maybe? idk, can't hurt anyway. -->
+  </body>
+</html>

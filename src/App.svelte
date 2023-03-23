@@ -1,7 +1,6 @@
 <script lang="ts">
-import { onMount } from "svelte";
 import Thing from "./Thing.svelte";
-import { CddaData, data, loadProgress, mapType } from "./data";
+import { CddaData, data, loadProgress, mapType, singularName } from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
@@ -9,6 +8,7 @@ import dontPanic from "./assets/dont_panic.png";
 import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
 import { t } from "@transifex/native";
 import type { SupportedTypeMapped } from "./types";
+import throttle from "lodash/throttle";
 
 let item: { type: string; id: string } | null = null;
 
@@ -99,10 +99,8 @@ $: tilesetUrl = $data
   : null;
 $: tileData.setURL(tilesetUrl);
 
-function hashchange() {
-  // the poor man's router!
-  const path = window.location.hash.slice(1);
-
+function load() {
+  const path = location.pathname.slice(import.meta.env.BASE_URL.length - 1);
   let m: RegExpExecArray | null;
   if ((m = /^\/([^\/]+)(?:\/(.+))?$/.exec(path))) {
     const [, type, id] = m;
@@ -120,20 +118,71 @@ function hashchange() {
   }
 }
 
-onMount(hashchange);
-let search: string = "";
-
-function urlWithHash(newHash: string) {
-  const url = new URL(location.href);
-  url.hash = newHash;
-  return url.toString();
+$: if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
+  const it = $data.byId(item.type as any, item.id);
+  document.title = `${singularName(
+    it
+  )} - The Hitchhiker's Guide to the Cataclysm`;
+} else if (item && !item.id && item.type) {
+  document.title = `${item.type} - The Hitchhiker's Guide to the Cataclysm`;
+} else {
+  document.title = "The Hitchhiker's Guide to the Cataclysm";
 }
 
+let search: string = "";
+
+load();
+
+// Throttle replaceState to avoid browser warnings.
+// |throttle| isn't defined when running tests for some reason.
+const replaceState = throttle
+  ? throttle(history.replaceState.bind(history), 100, {
+      trailing: true,
+    })
+  : history.replaceState.bind(history);
+
 const clearItem = () => {
-  if (item) history.pushState(null, "", location.href.replace(/#.*$/, ""));
-  else history.replaceState(null, "", urlWithHash("/search/" + search));
+  if (item)
+    history.pushState(
+      null,
+      "",
+      import.meta.env.BASE_URL +
+        (search ? "search/" + search : "") +
+        location.search
+    );
+  else
+    replaceState(
+      null,
+      "",
+      import.meta.env.BASE_URL +
+        (search ? "search/" + search : "") +
+        location.search
+    );
   item = null;
 };
+
+function maybeNavigate(event: MouseEvent) {
+  if (
+    event.target &&
+    "tagName" in event.target &&
+    event.target.tagName === "A"
+  ) {
+    const { href } = event.target as HTMLAnchorElement;
+    const { origin, pathname } = new URL(href);
+    if (
+      origin === location.origin &&
+      pathname.startsWith(import.meta.env.BASE_URL)
+    ) {
+      event.preventDefault();
+      history.pushState(null, "", pathname + location.search);
+      load();
+    }
+  }
+}
+
+window.addEventListener("popstate", () => {
+  load();
+});
 
 let deferredPrompt: any;
 window.addEventListener("beforeinstallprompt", (e) => {
@@ -218,20 +267,20 @@ async function getRandomPage() {
 let randomPage: string | null = null;
 function newRandomPage() {
   getRandomPage().then((r) => {
-    randomPage = `#/${mapType(r.type)}/${r.id}`;
+    randomPage = `${import.meta.env.BASE_URL}${mapType(r.type)}/${r.id}`;
   });
 }
 newRandomPage();
 </script>
 
-<svelte:window on:hashchange={hashchange} on:keydown={maybeFocusSearch} />
+<svelte:window on:click={maybeNavigate} on:keydown={maybeFocusSearch} />
 
 <header>
   <nav>
     <div class="title">
       <!-- svelte-ignore a11y-invalid-attribute -->
       <strong>
-        <a href="#" on:click={() => (search = "")}
+        <a href={import.meta.env.BASE_URL} on:click={() => (search = "")}
           >Hitchhiker's Guide to the Cataclysm</a>
       </strong>
     </div>
@@ -269,10 +318,23 @@ newRandomPage();
         {/if}
       </span>
     {/if}
-  {:else if search && $data}
-    {#key search}
-      <SearchResults data={$data} {search} />
-    {/key}
+  {:else if search}
+    {#if $data}
+      {#key search}
+        <SearchResults data={$data} {search} />
+      {/key}
+    {:else}
+      <span style="color: var(--cata-color-gray)">
+        <em>{t("Loading...")}</em>
+        {#if $loadProgress}
+          ({($loadProgress[0] / 1024 / 1024).toFixed(1)}/{(
+            $loadProgress[1] /
+            1024 /
+            1024
+          ).toFixed(1)} MB)
+        {/if}
+      </span>
+    {/if}
   {:else}
     <img
       src={dontPanic}
@@ -304,11 +366,11 @@ files in the game itself.`,
         <strong slot="0">Hitchhiker's Guide to the Cataclysm</strong>
         <a slot="1" href="https://cataclysmdda.org/"
           >Cataclysm: Dark Days Ahead</a>
-        <a slot="2" href="#/item/flashlight"
+        <a slot="2" href="{import.meta.env.BASE_URL}item/flashlight"
           >{t("flashlight", { _comment: "Item name" })}</a>
-        <a slot="3" href="#/furniture/f_table"
+        <a slot="3" href="{import.meta.env.BASE_URL}furniture/f_table"
           >{t("table", { _comment: "Furniture" })}</a>
-        <a slot="4" href="#/monster/mon_zombie"
+        <a slot="4" href="{import.meta.env.BASE_URL}monster/mon_zombie"
           >{t("zombie", { _comment: "Monster name" })}</a>
       </InterpolatedTranslation>
     </p>
@@ -389,18 +451,18 @@ Anyway?`,
 
     <h2>{t("Catalogs")}</h2>
     <ul>
-      <li><a href="#/item">{t("Items")}</a></li>
-      <li><a href="#/monster">{t("Monsters")}</a></li>
-      <li><a href="#/furniture">{t("Furniture")}</a></li>
-      <li><a href="#/terrain">{t("Terrain")}</a></li>
-      <li><a href="#/vehicle_part">{t("Vehicle Parts")}</a></li>
-      <li><a href="#/tool_quality">{t("Qualities")}</a></li>
-      <li><a href="#/mutation">{t("Mutations")}</a></li>
-      <li><a href="#/martial_art">{t("Martial Arts")}</a></li>
-      <li><a href="#/json_flag">{t("Flags")}</a></li>
+      <li><a href="./item">{t("Items")}</a></li>
+      <li><a href="./monster">{t("Monsters")}</a></li>
+      <li><a href="./furniture">{t("Furniture")}</a></li>
+      <li><a href="./terrain">{t("Terrain")}</a></li>
+      <li><a href="./vehicle_part">{t("Vehicle Parts")}</a></li>
+      <li><a href="./tool_quality">{t("Qualities")}</a></li>
+      <li><a href="./mutation">{t("Mutations")}</a></li>
+      <li><a href="./martial_art">{t("Martial Arts")}</a></li>
+      <li><a href="./json_flag">{t("Flags")}</a></li>
       <li>
-        <a href="#/achievement">{t("Achievements")}</a> /
-        <a href="#/conduct">{t("Conducts")}</a>
+        <a href="./achievement">{t("Achievements")}</a> /
+        <a href="./conduct">{t("Conducts")}</a>
       </li>
     </ul>
 
