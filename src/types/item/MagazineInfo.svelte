@@ -10,18 +10,7 @@ import { t } from "@transifex/native";
 export let item: ItemBasicInfo;
 const data = getContext<CddaData>("data");
 
-const compatibleItems = data
-  .byType("item")
-  .filter((x) => x.id)
-  .filter((i) => {
-    return i.pocket_data?.some(
-      (p) =>
-        (p.pocket_type === "MAGAZINE_WELL" || p.pocket_type === "MAGAZINE") &&
-        (p.item_restriction?.includes(item.id) ||
-          p.allowed_speedloaders?.includes(item.id) ||
-          p.flag_restriction?.some((f) => item.flags?.includes(f)))
-    );
-  });
+const compatibleItems = data.compatibleItems(item);
 
 compatibleItems.sort(byName);
 </script>

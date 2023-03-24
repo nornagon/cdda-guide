@@ -11,13 +11,7 @@ export let item_id: string;
 
 let data = getContext<CddaData>("data");
 
-const sources = data.byType("item").filter((item) => {
-  if (!item.id || !item.seed_data) return false;
-  return (
-    item.seed_data.fruit === item_id ||
-    item.seed_data.byproducts?.includes(item_id)
-  );
-});
+const sources = data.grownFrom(item_id);
 </script>
 
 {#if sources.length}

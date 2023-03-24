@@ -24,6 +24,7 @@ import type {
   InlineItemGroup,
   ItemGroupData,
   MapgenValue,
+  ItemBasicInfo,
 } from "./types";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
@@ -1124,6 +1125,135 @@ export class CddaData {
         (i) => "bionic_id" in i && i.id && i.bionic_id === bionic.id
       ) ?? this.byIdMaybe("item", bionic.id)
     );
+  }
+
+  _compatibleItemsIdIndex = new ReverseIndex(this, "item", (item) => {
+    const ret: string[] = [];
+    for (const pd of item.pocket_data ?? []) {
+      if (pd.pocket_type === "MAGAZINE" || pd.pocket_type === "MAGAZINE_WELL") {
+        ret.push(...(pd.item_restriction ?? []));
+        ret.push(...(pd.allowed_speedloaders ?? []));
+      }
+    }
+    return ret;
+  });
+  _compatibleItemsFlagIndex = new ReverseIndex(this, "item", (item) => {
+    const ret: string[] = [];
+    for (const pd of item.pocket_data ?? []) {
+      if (pd.pocket_type === "MAGAZINE" || pd.pocket_type === "MAGAZINE_WELL") {
+        ret.push(...(pd.flag_restriction ?? []));
+      }
+    }
+    return ret;
+  });
+  compatibleItems(item: ItemBasicInfo): Item[] {
+    const byId = this._compatibleItemsIdIndex.lookup(item.id);
+    const byFlag = item.flags
+      ? item.flags.flatMap((f) => this._compatibleItemsFlagIndex.lookup(f))
+      : [];
+
+    return [...new Set([...byId, ...byFlag])];
+  }
+
+  _grownFromIndex = new ReverseIndex(this, "item", (item) => {
+    if (!item.id || !item.seed_data) return [];
+    const result: string[] = [];
+    if (item.seed_data.fruit) result.push(item.seed_data.fruit);
+    if (item.seed_data.byproducts) result.push(...item.seed_data.byproducts);
+    return result;
+  });
+  grownFrom(item_id: string) {
+    return this._grownFromIndex.lookup(item_id);
+  }
+
+  _brewedFromIndex = new ReverseIndex(this, "item", (x) =>
+    x.id ? x.brewable?.results ?? [] : []
+  );
+  brewedFrom(item_id: string) {
+    return this._brewedFromIndex.lookup(item_id);
+  }
+
+  _transformedFromIndex = new ReverseIndex(this, "item", (x) =>
+    normalizeUseAction(x.use_action).flatMap((a) =>
+      "target" in a ? [a.target] : []
+    )
+  );
+  transformedFrom(item_id: string) {
+    return this._transformedFromIndex.lookup(item_id);
+  }
+
+  _bashFromFurnitureIndex = new ReverseIndex(this, "furniture", (f) => {
+    return f.bash?.items
+      ? this.flattenItemGroup({
+          subtype: "collection",
+          entries:
+            typeof f.bash.items === "string"
+              ? [{ group: f.bash.items }]
+              : f.bash.items,
+        }).map((x) => x.id)
+      : [];
+  });
+  bashFromFurniture(item_id: string) {
+    return this._bashFromFurnitureIndex.lookup(item_id).sort(byName);
+  }
+
+  _bashFromTerrainIndex = new ReverseIndex(this, "terrain", (f) => {
+    return f.bash?.items
+      ? this.flattenItemGroup({
+          subtype: "collection",
+          entries:
+            typeof f.bash.items === "string"
+              ? [{ group: f.bash.items }]
+              : f.bash.items,
+        }).map((x) => x.id)
+      : [];
+  });
+  bashFromTerrain(item_id: string) {
+    return this._bashFromTerrainIndex.lookup(item_id).sort(byName);
+  }
+
+  _bashFromVehiclePartIndex = new ReverseIndex(this, "vehicle_part", (vp) => {
+    if (!vp.id) return [];
+    const breaksIntoGroup: ItemGroupData | null =
+      typeof vp.breaks_into === "string"
+        ? this.convertTopLevelItemGroup(this.byId("item_group", vp.breaks_into))
+        : Array.isArray(vp.breaks_into)
+        ? { subtype: "collection", entries: vp.breaks_into }
+        : vp.breaks_into
+        ? vp.breaks_into
+        : null;
+    const breaksIntoGroupFlattened =
+      breaksIntoGroup && this.flattenItemGroup(breaksIntoGroup);
+    return breaksIntoGroupFlattened?.map((x) => x.id) ?? [];
+  });
+  bashFromVehiclePart(item_id: string) {
+    return this._bashFromVehiclePartIndex.lookup(item_id);
+  }
+}
+
+class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
+  #index: Map<string, SupportedTypesWithMapped[T][]> | null = null;
+  constructor(
+    private data: CddaData,
+    private objType: T,
+    private fn: (x: SupportedTypesWithMapped[T]) => string[]
+  ) {}
+
+  #ensureIndex() {
+    if (!this.#index) {
+      this.#index = new Map();
+      for (const item of this.data.byType(this.objType)) {
+        for (const id of this.fn(item)) {
+          if (!this.#index.has(id)) this.#index.set(id, []);
+          this.#index.get(id)!.push(item);
+        }
+      }
+    }
+  }
+
+  lookup(id: string) {
+    this.#ensureIndex();
+    return this.#index!.get(id) ?? [];
   }
 }
 

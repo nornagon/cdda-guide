@@ -19,13 +19,7 @@ import ItemSymbol from "./ItemSymbol.svelte";
 export let item_id: string;
 
 const data = getContext<CddaData>("data");
-const transformedFrom = data
-  .byType("item")
-  .filter((i) =>
-    normalizeUseAction(i.use_action).some(
-      (a) => "target" in a && a.target === item_id
-    )
-  );
+const transformedFrom = data.transformedFrom(item_id);
 const getTransformAction = (item: Item) =>
   normalizeUseAction(item.use_action).find(
     (a) => "target" in a && a.target === item_id

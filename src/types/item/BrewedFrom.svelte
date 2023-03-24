@@ -11,10 +11,7 @@ export let item_id: string;
 
 let data = getContext<CddaData>("data");
 
-const sources = data.byType("item").filter((item) => {
-  if (!item.id || !item.brewable) return false;
-  return item.brewable.results.includes(item_id);
-});
+const sources = data.brewedFrom(item_id);
 </script>
 
 {#if sources.length}
