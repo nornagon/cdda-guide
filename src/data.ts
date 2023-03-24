@@ -1127,7 +1127,7 @@ export class CddaData {
     );
   }
 
-  _compatibleItemsIdIndex = new ReverseIndex(this, "item", (item) => {
+  #compatibleItemsIdIndex = new ReverseIndex(this, "item", (item) => {
     const ret: string[] = [];
     for (const pd of item.pocket_data ?? []) {
       if (pd.pocket_type === "MAGAZINE" || pd.pocket_type === "MAGAZINE_WELL") {
@@ -1137,7 +1137,7 @@ export class CddaData {
     }
     return ret;
   });
-  _compatibleItemsFlagIndex = new ReverseIndex(this, "item", (item) => {
+  #compatibleItemsFlagIndex = new ReverseIndex(this, "item", (item) => {
     const ret: string[] = [];
     for (const pd of item.pocket_data ?? []) {
       if (pd.pocket_type === "MAGAZINE" || pd.pocket_type === "MAGAZINE_WELL") {
@@ -1147,15 +1147,15 @@ export class CddaData {
     return ret;
   });
   compatibleItems(item: ItemBasicInfo): Item[] {
-    const byId = this._compatibleItemsIdIndex.lookup(item.id);
+    const byId = this.#compatibleItemsIdIndex.lookup(item.id);
     const byFlag = item.flags
-      ? item.flags.flatMap((f) => this._compatibleItemsFlagIndex.lookup(f))
+      ? item.flags.flatMap((f) => this.#compatibleItemsFlagIndex.lookup(f))
       : [];
 
     return [...new Set([...byId, ...byFlag])];
   }
 
-  _grownFromIndex = new ReverseIndex(this, "item", (item) => {
+  #grownFromIndex = new ReverseIndex(this, "item", (item) => {
     if (!item.id || !item.seed_data) return [];
     const result: string[] = [];
     if (item.seed_data.fruit) result.push(item.seed_data.fruit);
@@ -1163,26 +1163,26 @@ export class CddaData {
     return result;
   });
   grownFrom(item_id: string) {
-    return this._grownFromIndex.lookup(item_id);
+    return this.#grownFromIndex.lookup(item_id);
   }
 
-  _brewedFromIndex = new ReverseIndex(this, "item", (x) =>
+  #brewedFromIndex = new ReverseIndex(this, "item", (x) =>
     x.id ? x.brewable?.results ?? [] : []
   );
   brewedFrom(item_id: string) {
-    return this._brewedFromIndex.lookup(item_id);
+    return this.#brewedFromIndex.lookup(item_id);
   }
 
-  _transformedFromIndex = new ReverseIndex(this, "item", (x) =>
+  #transformedFromIndex = new ReverseIndex(this, "item", (x) =>
     normalizeUseAction(x.use_action).flatMap((a) =>
       "target" in a ? [a.target] : []
     )
   );
   transformedFrom(item_id: string) {
-    return this._transformedFromIndex.lookup(item_id);
+    return this.#transformedFromIndex.lookup(item_id);
   }
 
-  _bashFromFurnitureIndex = new ReverseIndex(this, "furniture", (f) => {
+  #bashFromFurnitureIndex = new ReverseIndex(this, "furniture", (f) => {
     return f.bash?.items
       ? this.flattenItemGroup({
           subtype: "collection",
@@ -1194,10 +1194,10 @@ export class CddaData {
       : [];
   });
   bashFromFurniture(item_id: string) {
-    return this._bashFromFurnitureIndex.lookup(item_id).sort(byName);
+    return this.#bashFromFurnitureIndex.lookup(item_id).sort(byName);
   }
 
-  _bashFromTerrainIndex = new ReverseIndex(this, "terrain", (f) => {
+  #bashFromTerrainIndex = new ReverseIndex(this, "terrain", (f) => {
     return f.bash?.items
       ? this.flattenItemGroup({
           subtype: "collection",
@@ -1209,10 +1209,10 @@ export class CddaData {
       : [];
   });
   bashFromTerrain(item_id: string) {
-    return this._bashFromTerrainIndex.lookup(item_id).sort(byName);
+    return this.#bashFromTerrainIndex.lookup(item_id).sort(byName);
   }
 
-  _bashFromVehiclePartIndex = new ReverseIndex(this, "vehicle_part", (vp) => {
+  #bashFromVehiclePartIndex = new ReverseIndex(this, "vehicle_part", (vp) => {
     if (!vp.id) return [];
     const breaksIntoGroup: ItemGroupData | null =
       typeof vp.breaks_into === "string"
@@ -1227,7 +1227,40 @@ export class CddaData {
     return breaksIntoGroupFlattened?.map((x) => x.id) ?? [];
   });
   bashFromVehiclePart(item_id: string) {
-    return this._bashFromVehiclePartIndex.lookup(item_id);
+    return this.#bashFromVehiclePartIndex.lookup(item_id);
+  }
+
+  #deconstructFromFurnitureIndex = new ReverseIndex(this, "furniture", (f) => {
+    const deconstruct = f.deconstruct?.items
+      ? this.flattenItemGroup({
+          subtype: "collection",
+          entries:
+            typeof f.deconstruct.items === "string"
+              ? [{ group: f.deconstruct.items }]
+              : f.deconstruct.items,
+        })
+      : [];
+
+    return deconstruct.map((x) => x.id);
+  });
+  #deconstructFromTerrainIndex = new ReverseIndex(this, "terrain", (f) => {
+    const deconstruct = f.deconstruct?.items
+      ? this.flattenItemGroup({
+          subtype: "collection",
+          entries:
+            typeof f.deconstruct.items === "string"
+              ? [{ group: f.deconstruct.items }]
+              : f.deconstruct.items,
+        })
+      : [];
+
+    return deconstruct.map((x) => x.id);
+  });
+  deconstructFrom(item_id: string) {
+    return [
+      ...this.#deconstructFromFurnitureIndex.lookup(item_id).sort(byName),
+      ...this.#deconstructFromTerrainIndex.lookup(item_id).sort(byName),
+    ];
   }
 }
 
