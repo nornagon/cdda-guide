@@ -1474,6 +1474,7 @@ const fetchJsonWithProgress = (
   url: string,
   progress: (receivedBytes: number, totalBytes: number) => void
 ): Promise<any> => {
+  console.log(navigator.userAgent);
   if (/bot/i.test(navigator.userAgent)) return fetchJsonInChunks(url);
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
