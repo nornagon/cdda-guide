@@ -1474,7 +1474,6 @@ const fetchJsonWithProgress = (
   url: string,
   progress: (receivedBytes: number, totalBytes: number) => void
 ): Promise<any> => {
-  console.log(navigator.userAgent);
   if (/bot/i.test(navigator.userAgent)) return fetchJsonInChunks(url);
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -1503,7 +1502,7 @@ async function fetchJsonInChunks(url: string): Promise<any> {
   // This forces the response to be uncompressed, so we can't use this for
   // non-GoogleBot users.
 
-  const MAX_CHUNK_SIZE = 15 * 1024 * 1024;
+  const MAX_CHUNK_SIZE = 14 * 1024 * 1024;
 
   const chunks: ArrayBuffer[] = [];
   let receivedBytes = 0;
