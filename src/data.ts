@@ -1265,16 +1265,16 @@ export class CddaData {
 }
 
 class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
-  #index: Map<string, SupportedTypesWithMapped[T][]> | null = null;
   constructor(
     private data: CddaData,
     private objType: T,
     private fn: (x: SupportedTypesWithMapped[T]) => string[]
   ) {}
 
-  #ensureIndex() {
-    if (!this.#index) {
-      this.#index = new Map();
+  #_index: Map<string, SupportedTypesWithMapped[T][]> | null = null;
+  get #index() {
+    if (!this.#_index) {
+      this.#_index = new Map();
       for (const item of this.data.byType(this.objType)) {
         for (const id of this.fn(item)) {
           if (!this.#index.has(id)) this.#index.set(id, []);
@@ -1282,11 +1282,11 @@ class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
         }
       }
     }
+    return this.#_index;
   }
 
   lookup(id: string) {
-    this.#ensureIndex();
-    return this.#index!.get(id) ?? [];
+    return this.#index.get(id) ?? [];
   }
 }
 
