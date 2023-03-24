@@ -1474,6 +1474,7 @@ const fetchJsonWithProgress = (
   url: string,
   progress: (receivedBytes: number, totalBytes: number) => void
 ): Promise<any> => {
+  if (/bot/i.test(navigator.userAgent)) return fetchJsonInChunks(url);
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.onload = (e) => {
@@ -1494,6 +1495,56 @@ const fetchJsonWithProgress = (
     xhr.send();
   });
 };
+
+async function fetchJsonInChunks(url: string): Promise<any> {
+  // Use range requests to request the JSON in chunks of at most 15 MB each.
+  // This is because GoogleBot has a 15 MB limit on the size of a response.
+  // This forces the response to be uncompressed, so we can't use this for
+  // non-GoogleBot users.
+
+  const MAX_CHUNK_SIZE = 15 * 1024 * 1024;
+
+  const chunks: ArrayBuffer[] = [];
+  let receivedBytes = 0;
+  let chunkStart = 0;
+  while (true) {
+    const chunkEnd = chunkStart + MAX_CHUNK_SIZE - 1;
+    const res = await fetch(url, {
+      headers: {
+        Range: `bytes=${chunkStart}-${chunkEnd}`,
+      },
+    });
+    if (!res.ok)
+      throw new Error(
+        `Error ${res.status} (${res.statusText}) fetching ${url}`
+      );
+    if (!res.body)
+      throw new Error(`No body in response from ${url} (status ${res.status})`);
+    const chunk = await res.arrayBuffer();
+    chunks.push(chunk);
+    receivedBytes += chunk.byteLength;
+    chunkStart = chunkEnd + 1;
+    if (!res.headers.has("Content-Length"))
+      throw new Error("No Content-Length header");
+    const length = +res.headers.get("Content-Length")!;
+    if (length < chunkEnd) break;
+  }
+
+  // Concatenate the chunks into a single ArrayBuffer
+  const buffer = new ArrayBuffer(receivedBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    new Uint8Array(buffer, offset, chunk.byteLength).set(new Uint8Array(chunk));
+    offset += chunk.byteLength;
+  }
+
+  // Decode the ArrayBuffer as UTF-8
+  const decoder = new TextDecoder("utf-8");
+  const text = decoder.decode(buffer);
+
+  // Parse the JSON
+  return JSON.parse(text);
+}
 
 // Sigh, the fetch spec has a bug: https://github.com/whatwg/fetch/issues/1358
 const fetchJsonWithIncorrectProgress = async (
