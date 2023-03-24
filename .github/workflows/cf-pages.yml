@@ -26,7 +26,7 @@ jobs:
 
       - name: Build
         env:
-          BASE_URL: '/'
+          BASE_URL: "/"
         run: yarn build
 
       # cloudflare assumes if you don't have a 404.html that you are a SPA
