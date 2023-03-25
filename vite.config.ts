@@ -5,7 +5,7 @@ import EnvironmentPlugin from "vite-plugin-environment";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: process.env.BASE_URL ?? "/cdda-guide/",
+  base: "/",
   build: {
     sourcemap: true,
   },

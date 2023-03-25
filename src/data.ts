@@ -1474,7 +1474,10 @@ const fetchJsonWithProgress = (
   url: string,
   progress: (receivedBytes: number, totalBytes: number) => void
 ): Promise<any> => {
-  if (/bot/i.test(navigator.userAgent)) return fetchGzippedJson(url);
+  // GoogleBot has a 15MB limit on the size of the response, so we need to
+  // serve it double-gzipped JSON.
+  if (/latest/.test(url) && /googlebot/i.test(navigator.userAgent))
+    return fetchGzippedJsonForGoogleBot(url);
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.onload = (e) => {
@@ -1496,7 +1499,7 @@ const fetchJsonWithProgress = (
   });
 };
 
-async function fetchGzippedJson(url: string): Promise<any> {
+async function fetchGzippedJsonForGoogleBot(url: string): Promise<any> {
   const gzUrl = url.replace(/latest/, "latest.gz");
   const res = await fetch(gzUrl, { mode: "cors" });
   if (!res.ok)
