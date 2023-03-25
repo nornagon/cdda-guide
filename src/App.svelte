@@ -271,9 +271,33 @@ function newRandomPage() {
   });
 }
 newRandomPage();
+
+// This is one character behind the actual search value, because
+// of the throttle, but eh, it's good enough.
+let currentHref = location.href;
+$: item, search, (currentHref = location.href);
+
+function langHref(lang: string, href: string) {
+  const u = new URL(href);
+  u.searchParams.set("lang", lang);
+  return u.toString();
+}
 </script>
 
 <svelte:window on:click={maybeNavigate} on:keydown={maybeFocusSearch} />
+
+<svelte:head>
+  {#if builds}
+    {@const build_number =
+      version === "latest" ? builds[0].build_number : version}
+    {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b) ) as lang}
+      <link
+        rel="alternate"
+        hreflang={lang}
+        href={langHref(lang, currentHref)} />
+    {/each}
+  {/if}
+</svelte:head>
 
 <header>
   <nav>
