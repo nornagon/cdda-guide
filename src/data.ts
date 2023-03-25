@@ -1474,7 +1474,7 @@ const fetchJsonWithProgress = (
   url: string,
   progress: (receivedBytes: number, totalBytes: number) => void
 ): Promise<any> => {
-  if (/bot/i.test(navigator.userAgent)) return fetchJsonInChunks(url);
+  if (/bot/i.test(navigator.userAgent)) return fetchGzippedJson(url);
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.onload = (e) => {
@@ -1496,53 +1496,22 @@ const fetchJsonWithProgress = (
   });
 };
 
-async function fetchJsonInChunks(url: string): Promise<any> {
-  // Use range requests to request the JSON in chunks of at most 15 MB each.
-  // This is because GoogleBot has a 15 MB limit on the size of a response.
-  // This forces the response to be uncompressed, so we can't use this for
-  // non-GoogleBot users.
+async function fetchGzippedJson(url: string): Promise<any> {
+  const gzUrl = url.replace(/latest/, "latest.gz");
+  const res = await fetch(gzUrl, { mode: "cors" });
+  if (!res.ok)
+    throw new Error(`Error ${res.status} (${res.statusText}) fetching ${url}`);
+  if (!res.body)
+    throw new Error(`No body in response from ${url} (status ${res.status})`);
 
-  const MAX_CHUNK_SIZE = 14 * 1024 * 1024;
+  // Use DecompressionStream to decompress the gzipped response
+  const decompressionStream = new (globalThis as any).DecompressionStream(
+    "gzip"
+  );
+  const decompressedStream: ReadableStream<ArrayBuffer> =
+    res.body.pipeThrough(decompressionStream);
 
-  const chunks: ArrayBuffer[] = [];
-  let receivedBytes = 0;
-  let chunkStart = 0;
-  while (true) {
-    const chunkEnd = chunkStart + MAX_CHUNK_SIZE - 1;
-    const res = await fetch(url, {
-      headers: {
-        Range: `bytes=${chunkStart}-${chunkEnd}`,
-      },
-    });
-    if (!res.ok)
-      throw new Error(
-        `Error ${res.status} (${res.statusText}) fetching ${url}`
-      );
-    if (!res.body)
-      throw new Error(`No body in response from ${url} (status ${res.status})`);
-    const chunk = await res.arrayBuffer();
-    chunks.push(chunk);
-    receivedBytes += chunk.byteLength;
-    chunkStart = chunkEnd + 1;
-    if (!res.headers.has("Content-Length"))
-      throw new Error("No Content-Length header");
-    const length = +res.headers.get("Content-Length")!;
-    if (length < chunkEnd) break;
-  }
-
-  // Concatenate the chunks into a single ArrayBuffer
-  const buffer = new ArrayBuffer(receivedBytes);
-  let offset = 0;
-  for (const chunk of chunks) {
-    new Uint8Array(buffer, offset, chunk.byteLength).set(new Uint8Array(chunk));
-    offset += chunk.byteLength;
-  }
-
-  // Decode the ArrayBuffer as UTF-8
-  const decoder = new TextDecoder("utf-8");
-  const text = decoder.decode(buffer);
-
-  // Parse the JSON
+  const text = await new Response(decompressedStream).text();
   return JSON.parse(text);
 }
 
