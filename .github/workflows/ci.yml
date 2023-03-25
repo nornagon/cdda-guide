@@ -51,4 +51,3 @@ jobs:
           projectName: cdda-guide
           directory: dist
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
