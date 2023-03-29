@@ -476,18 +476,18 @@ Anyway?`,
 
     <h2>{t("Catalogs")}</h2>
     <ul>
-      <li><a href="./item">{t("Items")}</a></li>
-      <li><a href="./monster">{t("Monsters")}</a></li>
-      <li><a href="./furniture">{t("Furniture")}</a></li>
-      <li><a href="./terrain">{t("Terrain")}</a></li>
-      <li><a href="./vehicle_part">{t("Vehicle Parts")}</a></li>
-      <li><a href="./tool_quality">{t("Qualities")}</a></li>
-      <li><a href="./mutation">{t("Mutations")}</a></li>
-      <li><a href="./martial_art">{t("Martial Arts")}</a></li>
-      <li><a href="./json_flag">{t("Flags")}</a></li>
+      <li><a href="/item">{t("Items")}</a></li>
+      <li><a href="/monster">{t("Monsters")}</a></li>
+      <li><a href="/furniture">{t("Furniture")}</a></li>
+      <li><a href="/terrain">{t("Terrain")}</a></li>
+      <li><a href="/vehicle_part">{t("Vehicle Parts")}</a></li>
+      <li><a href="/tool_quality">{t("Qualities")}</a></li>
+      <li><a href="/mutation">{t("Mutations")}</a></li>
+      <li><a href="/martial_art">{t("Martial Arts")}</a></li>
+      <li><a href="/json_flag">{t("Flags")}</a></li>
       <li>
-        <a href="./achievement">{t("Achievements")}</a> /
-        <a href="./conduct">{t("Conducts")}</a>
+        <a href="/achievement">{t("Achievements")}</a> /
+        <a href="/conduct">{t("Conducts")}</a>
       </li>
     </ul>
 
