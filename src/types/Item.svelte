@@ -11,6 +11,7 @@ import {
   parseVolume,
   singular,
   singularName,
+  i18n,
 } from "../data";
 import type {
   ItemBasicInfo,
@@ -51,6 +52,7 @@ import TransformedFrom from "./item/TransformedFrom.svelte";
 import WheelInfo from "./item/WheelInfo.svelte";
 import ThingLink from "./ThingLink.svelte";
 import UsageDescription from "./UsageDescription.svelte";
+import InterpolatedTranslation from "../InterpolatedTranslation.svelte";
 
 export let item: Item;
 let data: CddaData = getContext("data");
@@ -329,9 +331,19 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
             <ul class="no-bullets">
               {#each qualities as { quality, level }}
                 <li>
-                  Has level <strong
-                    >{level}
-                    <ThingLink type="tool_quality" id={quality.id} /></strong> quality.
+                  <InterpolatedTranslation
+                    str={i18n
+                      .gettext(
+                        "Has level <color_cyan>%1$d %2$s</color> quality",
+                        "{level}",
+                        "{quality}"
+                      )
+                      .replace(/\$[ds]|<\/?color[^>]*>/g, "")}
+                    slot0="level"
+                    slot1="quality">
+                    <strong slot="0">{level}</strong>
+                    <ThingLink slot="1" type="tool_quality" id={quality.id} />
+                  </InterpolatedTranslation>
                 </li>
               {/each}
               {#each chargedQualities as { quality, level }}
