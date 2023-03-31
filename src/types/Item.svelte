@@ -52,6 +52,7 @@ import TransformedFrom from "./item/TransformedFrom.svelte";
 import WheelInfo from "./item/WheelInfo.svelte";
 import ThingLink from "./ThingLink.svelte";
 import UsageDescription from "./UsageDescription.svelte";
+import ColorText from "./ColorText.svelte";
 import InterpolatedTranslation from "../InterpolatedTranslation.svelte";
 
 export let item: Item;
@@ -306,13 +307,26 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
           </dd>
         {/if}
 
-        <dt>{t("Flags")}</dt>
-        <dd>
-          <ul class="comma-separated">
-            <!-- prettier-ignore -->
-            {#each flags as f}<li><ThingLink type="json_flag" id={f.id} /></li>{:else}<li><em>{t('none')}</em></li>{/each}
-          </ul>
-        </dd>
+        {#if flags.length}
+          <dt>{t("Flags")}</dt>
+          <dd>
+            <ul>
+              {#each flags as f}
+                <li>
+                  {#if "info" in f && f.info}
+                    <ThingLink type="json_flag" id={f.id} />
+                    <span style="color: var(--cata-color-gray)"
+                      >(<ColorText
+                        text={singular(f.info)}
+                        fgOnly={true} />)</span>
+                  {:else}
+                    <ThingLink type="json_flag" id={f.id} />
+                  {/if}
+                </li>
+              {/each}
+            </ul>
+          </dd>
+        {/if}
 
         {#if faults.length}
           <dt>{t("Possible Faults", { _context })}</dt>
