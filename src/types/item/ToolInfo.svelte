@@ -17,7 +17,7 @@ export let item: ToolSlot;
         <dt>{t("Ammo", { _context })}</dt>
         <dd>
           <ul class="comma-separated">
-            {#each item.ammo as ammo}
+            {#each [item.ammo].flat() as ammo}
               <li><ThingLink type="ammunition_type" id={ammo} /></li>
             {/each}
           </ul>
