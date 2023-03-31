@@ -162,13 +162,10 @@ const clearItem = () => {
 };
 
 function maybeNavigate(event: MouseEvent) {
-  if (
-    event.target &&
-    "tagName" in event.target &&
-    event.target.tagName === "A"
-  ) {
-    const { href } = event.target as HTMLAnchorElement;
-    const { origin, pathname } = new URL(href);
+  const target = event.target as HTMLElement | null;
+  const anchor = target?.closest("a") as HTMLAnchorElement | null;
+  if (anchor && anchor.href) {
+    const { origin, pathname } = new URL(anchor.href);
     if (
       origin === location.origin &&
       pathname.startsWith(import.meta.env.BASE_URL)
@@ -305,7 +302,9 @@ function langHref(lang: string, href: string) {
       <!-- svelte-ignore a11y-invalid-attribute -->
       <strong>
         <a href={import.meta.env.BASE_URL} on:click={() => (search = "")}
-          >Hitchhiker's Guide to the Cataclysm</a>
+          ><span class="wide">Hitchhiker's Guide to the Cataclysm</span><span
+            class="narrow">HHG</span
+          ></a>
       </strong>
     </div>
     <div class="search">
@@ -608,13 +607,26 @@ nav {
 }
 
 nav > .search {
-  flex: 0.8;
+  flex: 1;
+  max-width: calc(0.5 * 980px);
+}
+
+nav > .title .narrow {
+  display: none;
+}
+
+nav > .title {
+  margin-right: 1em;
 }
 
 @media (max-width: 600px) {
-  nav > .title {
+  nav > .title .wide {
     display: none;
   }
+  nav > .title .narrow {
+    display: inline;
+  }
+
   nav > .search {
     flex: 1;
   }
