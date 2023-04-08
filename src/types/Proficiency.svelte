@@ -38,8 +38,13 @@ const recipesUsingProficiency = [
     <dd>{item.can_learn ? item.time_to_learn : "not learnable"}</dd>
     <dt>{t("Default Time Multiplier", { _context })}</dt>
     <dd>{item.default_time_multiplier ?? 2}&times;</dd>
-    <dt>{t("Default Fail Multiplier", { _context })}</dt>
-    <dd>{item.default_fail_multiplier ?? 2}&times;</dd>
+    {#if item.default_fail_multiplier}
+      <dt>{t("Default Fail Multiplier", { _context })}</dt>
+      <dd>{item.default_fail_multiplier}&times;</dd>
+    {:else}
+      <dt>{t("Default Skill Bonus", { _context })}</dt>
+      <dd>{item.default_skill_penalty ?? 1}</dd>
+    {/if}
     {#if item.required_proficiencies}
       <dt>{t("Required Proficiencies", { _context })}</dt>
       <dd>
