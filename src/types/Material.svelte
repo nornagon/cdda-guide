@@ -54,25 +54,32 @@ let itemsWithMaterial = data
     <dd>
       <dl>
         <dt>{t("Bash", { _context: "Damage Type" })}</dt>
-        <dd>{item.bash_resist ?? 0}</dd>
+        <dd>{item.bash_resist ?? item.resist?.bash ?? 0}</dd>
         <dt>{t("Cut", { _context: "Damage Type" })}</dt>
-        <dd>{item.cut_resist ?? 0}</dd>
+        <dd>{item.cut_resist ?? item.resist?.cut ?? 0}</dd>
         <dt>{t("Ballistic", { _context: "Damage Type" })}</dt>
-        <dd>{item.bullet_resist ?? 0}</dd>
+        <dd>{item.bullet_resist ?? item.resist?.bullet ?? 0}</dd>
         <dt>{t("Acid", { _context: "Damage Type" })}</dt>
-        <dd>{item.acid_resist ?? 0}</dd>
-        <dt title="Resistance to physical damage of the item itself">
-          {t("Chip", { _context })}
-        </dt>
-        <dd>{item.chip_resist ?? 0}</dd>
+        <dd>{item.acid_resist ?? item.resist?.acid ?? 0}</dd>
+        <dt>{t("Heat", { _context: "Damage Type" })}</dt>
+        <dd>{item.fire_resist ?? item.resist?.heat ?? 0}</dd>
+
         <dt>{t("Conductive", { _context })}</dt>
         <dd>
-          {item.elec_resist === 0 || item.elec_resist === 1 || item.conductive
+          {item.elec_resist === 0 ||
+          item.elec_resist === 1 ||
+          item.resist?.electric != null ||
+          item.conductive
             ? t("Yes")
             : t("No")}
         </dd>
       </dl>
     </dd>
+    <dt title="Resistance to physical damage of the item itself">
+      {t("Durability", { _context })}
+    </dt>
+    <dd>{item.chip_resist ?? 0}</dd>
+
     {#if item.repaired_with}
       <dt>{t("Repaired With", { _context })}</dt>
       <dd><ThingLink type="item" id={item.repaired_with} /></dd>

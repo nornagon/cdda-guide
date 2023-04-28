@@ -8,6 +8,7 @@ import type {
   BodyPart,
   ItemBasicInfo,
   PartMaterial,
+  Material,
 } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import { groupBy, uniq } from "./utils";
@@ -261,38 +262,6 @@ function armorMadeOf(bp_id: string): PartMaterial[] {
   return [];
 }
 
-/*
-function resist(
-  bp_id: string,
-  roll: number,
-  resistFn: (m: Material) => number
-) {
-  {
-    const mats = armorMadeOf(bp_id);
-    if (mats?.length) {
-      let resist = 0;
-      for (const mat of mats) {
-        const effThic = Math.max(0.1, mat.thickness);
-        const internalRoll = roll < 0 ? (Math.random() * 100) | 0 : roll;
-        if (internalRoll < mat.covered_by_mat ?? 0)
-          resist += resistFn(data.byId("material", mat.type)) * effThic;
-      }
-      return resist;
-    }
-  }
-
-  let resist = 0;
-  const avgThickness = getThickness(bp_id);
-  const { mats, total } = computeMats();
-  if (mats.length) {
-    for (const m of mats)
-      resist += resistFn(data.byId("material", m.type)) * m.portion;
-    resist /= total;
-  }
-  return resist * avgThickness;
-}
-*/
-
 function getEnvResist() {
   if (normalizedPortionData.length === 0) return 0;
   const avgEnvResist =
@@ -304,14 +273,14 @@ function getEnvResist() {
   return avgEnvResist;
 }
 
-function acidResist(bp_id: string) {
+function envResist(bp_id: string, resistFn: (m: Material) => number) {
   {
     const mats = armorMadeOf(bp_id);
     if (mats?.length) {
       let resist = 0;
       for (const mat of mats)
         resist +=
-          data.byId("material", mat.type).acid_resist *
+          resistFn(data.byId("material", mat.type)) *
           (mat.covered_by_mat ?? 0) *
           0.01;
       const env = getEnvResist();
@@ -323,7 +292,7 @@ function acidResist(bp_id: string) {
   let resist = 0;
   const { mats, total } = computeMats();
   if (mats.length) {
-    for (const m of mats) resist += data.byId("material", m.type).acid_resist;
+    for (const m of mats) resist += resistFn(data.byId("material", m.type));
     resist /= total;
   }
   const env = getEnvResist();
@@ -331,31 +300,12 @@ function acidResist(bp_id: string) {
   return resist;
 }
 
-function fireResist(bp_id: string) {
-  {
-    const mats = armorMadeOf(bp_id);
-    if (mats?.length) {
-      let resist = 0;
-      for (const mat of mats)
-        resist +=
-          data.byId("material", mat.type).fire_resist *
-          (mat.covered_by_mat ?? 0) *
-          0.01;
-      const env = getEnvResist();
-      if (env < 10) resist *= env / 10;
-      return resist;
-    }
-  }
+function acidResist(bp_id: string) {
+  return envResist(bp_id, (m) => m.acid_resist ?? m.resist?.acid ?? 0);
+}
 
-  let resist = 0;
-  const { mats, total } = computeMats();
-  if (mats.length) {
-    for (const m of mats) resist += data.byId("material", m.type).fire_resist;
-    resist /= total;
-  }
-  const env = getEnvResist();
-  if (env < 10) resist *= env / 10;
-  return resist;
+function heatResist(bp_id: string) {
+  return envResist(bp_id, (m) => m.fire_resist ?? m.resist?.heat ?? 0);
 }
 
 /*
@@ -467,8 +417,8 @@ function fixApd(
               <dl class="protection-env">
                 <dt>{t("Acid", { _context: "Damage Type" })}</dt>
                 <dd>{acidResist(cp.bp_ids[0]).toFixed(2)}</dd>
-                <dt>{t("Fire", { _context: "Damage Type" })}</dt>
-                <dd>{fireResist(cp.bp_ids[0]).toFixed(2)}</dd>
+                <dt>{t("Heat", { _context: "Damage Type" })}</dt>
+                <dd>{heatResist(cp.bp_ids[0]).toFixed(2)}</dd>
                 <dt>{t("Environ.", { _context })}</dt>
                 <dd>{getEnvResist()}</dd>
               </dl>
@@ -499,14 +449,22 @@ function fixApd(
                   <td>{t("Bash", { _context: "Damage Type" })}</td>
                   {#each apd.material as mat}
                     {@const m = data.byId("material", mat.type)}
-                    <td>{(m.bash_resist * (mat.thickness ?? 0)).toFixed(2)}</td>
+                    <td
+                      >{(
+                        (m.bash_resist ?? m.resist?.bash ?? 0) *
+                        (mat.thickness ?? 0)
+                      ).toFixed(2)}</td>
                   {/each}
                 </tr>
                 <tr>
                   <td>{t("Cut", { _context: "Damage Type" })}</td>
                   {#each apd.material as mat}
                     {@const m = data.byId("material", mat.type)}
-                    <td>{(m.cut_resist * (mat.thickness ?? 0)).toFixed(2)}</td>
+                    <td
+                      >{(
+                        (m.cut_resist ?? m.resist?.cut ?? 0) *
+                        (mat.thickness ?? 0)
+                      ).toFixed(2)}</td>
                   {/each}
                 </tr>
                 <tr>
@@ -514,9 +472,10 @@ function fixApd(
                   {#each apd.material as mat}
                     {@const m = data.byId("material", mat.type)}
                     <td
-                      >{(m.bullet_resist * (mat.thickness ?? 0)).toFixed(
-                        2
-                      )}</td>
+                      >{(
+                        (m.bullet_resist ?? m.resist?.bullet ?? 0) *
+                        (mat.thickness ?? 0)
+                      ).toFixed(2)}</td>
                   {/each}
                 </tr>
               </tbody>

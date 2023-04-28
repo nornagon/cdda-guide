@@ -1189,6 +1189,8 @@ export type Harvest = {
   butchery_requirements?: string; // butchery_requirement id, default "default"
 };
 
+export type Resistances = Record<string /* damage_type_id */, number>;
+
 export type Monster = {
   id: string;
   type: "MONSTER";
@@ -1216,14 +1218,7 @@ export type Monster = {
   hp?: integer;
   regenerates?: integer;
   dodge?: number;
-  armor?: {
-    bash?: number;
-    stab?: number;
-    cut?: number;
-    bullet?: number;
-    acid?: number;
-    heat?: number;
-  };
+  armor?: Resistances;
   vision_day?: number;
   vision_night?: number;
   default_faction?: string;
@@ -1492,12 +1487,17 @@ export type Material = {
 
   density: number; // default 1
 
-  bash_resist: number;
-  cut_resist: number;
-  bullet_resist: number;
-  acid_resist: number;
+  // 0.H
+  resist?: Resistances;
+
+  // 0.G
+  bash_resist?: number;
+  cut_resist?: number;
+  bullet_resist?: number;
+  acid_resist?: number;
   elec_resist?: number;
-  fire_resist: number;
+  fire_resist?: number;
+
   chip_resist: integer;
 
   wind_resist?: integer;
