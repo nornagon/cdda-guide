@@ -90,6 +90,8 @@ vehiclesContainingPart.sort((a, b) =>
   <dl>
     <dt>{t("Item")}</dt>
     <dd><ThingLink id={item.item} type="item" /></dd>
+    <dt>{t("Location")}</dt>
+    <dd>{item.location}</dd>
     <dt>{t("Weight")}</dt>
     <dd>{asKilograms(data.byId("item", item.item).weight ?? 0)}</dd>
     {#if item.fuel_options?.length}
