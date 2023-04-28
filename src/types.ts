@@ -1216,12 +1216,14 @@ export type Monster = {
   hp?: integer;
   regenerates?: integer;
   dodge?: number;
-  armor_bash?: number;
-  armor_stab?: number;
-  armor_cut?: number;
-  armor_bullet?: number;
-  armor_acid?: number;
-  armor_fire?: number;
+  armor?: {
+    bash?: number;
+    stab?: number;
+    cut?: number;
+    bullet?: number;
+    acid?: number;
+    heat?: number;
+  };
   vision_day?: number;
   vision_night?: number;
   default_faction?: string;
@@ -1249,6 +1251,14 @@ export type Monster = {
       };
   ascii_picture?: string;
   death_drops?: InlineItemGroup; // distribution
+
+  // 0.G
+  armor_bash?: number;
+  armor_stab?: number;
+  armor_cut?: number;
+  armor_bullet?: number;
+  armor_acid?: number;
+  armor_fire?: number;
 };
 
 export type MonsterGroup = {

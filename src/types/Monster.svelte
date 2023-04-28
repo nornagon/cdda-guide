@@ -32,8 +32,6 @@ function difficulty(mon: Monster): number {
     melee_cut: bonus_cut = 0,
     melee_dice_sides: melee_sides = 0,
     dodge: sk_dodge = 0,
-    armor_bash = -1,
-    armor_cut = -1,
     diff: difficulty_base = 0,
     special_attacks = [],
     emit_fields = [],
@@ -45,6 +43,8 @@ function difficulty(mon: Monster): number {
     vision_day = 40,
     vision_night = 1
   } = mon
+  const armor_bash = mon.armor_bash ?? mon.armor?.bash ?? -1;
+  const armor_cut = mon.armor_cut ?? mon.armor?.cut ?? -1;
   let difficulty = ( melee_skill + 1 ) * melee_dice * ( bonus_cut + melee_sides ) * 0.04 +
                ( sk_dodge + 1 ) * ( 3 + armor_bash + armor_cut ) * 0.04 +
                ( difficulty_base + special_attacks.length + 8 * emit_fields.length );
@@ -341,17 +341,25 @@ let upgrades =
       <dd>
         <dl>
           <dt>{t("Bash", { _context: "Damage Type" })}</dt>
-          <dd>{item.armor_bash ?? 0}</dd>
+          <dd>{item.armor_bash ?? item.armor?.bash ?? 0}</dd>
           <dt>{t("Cut", { _context: "Damage Type" })}</dt>
-          <dd>{item.armor_cut ?? 0}</dd>
+          <dd>{item.armor_cut ?? item.armor?.cut ?? 0}</dd>
           <dt>{t("Stab", { _context: "Damage Type" })}</dt>
-          <dd>{item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}</dd>
+          <dd>
+            {item.armor_stab ??
+              item.armor?.stab ??
+              Math.floor((item.armor_cut ?? item.armor?.cut ?? 0) * 0.8)}
+          </dd>
           <dt>{t("Ballistic", { _context: "Damage Type" })}</dt>
-          <dd>{item.armor_bullet ?? 0}</dd>
+          <dd>{item.armor_bullet ?? item.armor?.bullet ?? 0}</dd>
           <dt>{t("Acid", { _context: "Damage Type" })}</dt>
-          <dd>{item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}</dd>
-          <dt>{t("Fire", { _context: "Damage Type" })}</dt>
-          <dd>{item.armor_fire ?? 0}</dd>
+          <dd>
+            {item.armor_acid ??
+              item.armor?.acid ??
+              Math.floor((item.armor_cut ?? item.armor?.cut ?? 0) * 0.5)}
+          </dd>
+          <dt>{t("Heat", { _context: "Damage Type" })}</dt>
+          <dd>{item.armor_fire ?? item.armor?.heat ?? 0}</dd>
         </dl>
       </dd>
       {#if item.special_when_hit}
