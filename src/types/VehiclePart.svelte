@@ -188,7 +188,7 @@ vehiclesContainingPart.sort((a, b) =>
       <dd>
         <ul class="comma-separated">
           {#each item.pseudo_tools as { id }}
-            <ThingLink type="item" {id} />
+            <li><ThingLink type="item" {id} /></li>
           {/each}
         </ul>
       </dd>
