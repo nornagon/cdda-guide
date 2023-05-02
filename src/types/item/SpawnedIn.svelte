@@ -40,7 +40,7 @@ function omsName(oms: OvermapSpecial): string {
     minY = Infinity;
   let maxX = -Infinity,
     maxY = -Infinity;
-  const grid = new Map<string, typeof ground_level_omts[0]>();
+  const grid = new Map<string, (typeof ground_level_omts)[0]>();
   for (const omt of ground_level_omts) {
     const [x, y] = omt.point;
     if (

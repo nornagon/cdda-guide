@@ -225,7 +225,7 @@ const coveredPartGroups = [...grouped.values()].map((bp_ids) => {
 const cpGroupHeading = (cpGroup: string[]) => {
   return coverageLabel(cpGroup).join(", ");
 };
-const encumbrance = (cp: typeof coveredPartGroups[0]) => {
+const encumbrance = (cp: (typeof coveredPartGroups)[0]) => {
   const [encumbMin, encumbMax] =
     typeof cp.apd.encumbrance === "number"
       ? [cp.apd.encumbrance, cp.apd.encumbrance]

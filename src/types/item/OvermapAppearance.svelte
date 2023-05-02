@@ -14,7 +14,7 @@ let minX = Infinity,
   minY = Infinity;
 let maxX = -Infinity,
   maxY = -Infinity;
-const overmapsByPoint = new Map<string, typeof overmaps[0]>();
+const overmapsByPoint = new Map<string, (typeof overmaps)[0]>();
 for (const om of overmaps) {
   const [x, y, z] = om.point;
   if (z !== 0) continue;
