@@ -54,8 +54,5 @@
     "vite-plugin-pwa": "^0.14.4",
     "vitest": "^0.29.7",
     "workbox-window": "^6.5.4"
-  },
-  "peerDependencies": {
-    "workbox-window": "^6.5.4"
   }
 }
