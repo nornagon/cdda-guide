@@ -192,7 +192,7 @@ function overmapAppearance(
     minY = Infinity;
   let maxX = -Infinity,
     maxY = -Infinity;
-  const overmapsByPoint = new Map<string, typeof overmaps[0]>();
+  const overmapsByPoint = new Map<string, (typeof overmaps)[0]>();
   for (const om of overmaps) {
     const omt_id = om.overmap.replace(/_(north|south|east|west)$/, "");
     if (!data.byIdMaybe("overmap_terrain", omt_id)) continue;
