@@ -44,7 +44,8 @@ function getCategory(i: Item) {
 }
 
 function getCategoryName(category: string) {
-  return singularName(data.byId("ITEM_CATEGORY", category));
+  const cat = data.byIdMaybe("ITEM_CATEGORY", category);
+  return cat ? singularName(cat) : category;
 }
 
 const groupingFn =
