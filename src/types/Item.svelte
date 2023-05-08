@@ -497,7 +497,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
     </dl>
   </section>
 {/if}
-{#if item.bashing || item.cutting || item.type === "GUN" || (item.type === "AMMO" && (item.show_stats || item.damage))}
+{#if item.bashing || item.cutting || item.melee_damage || item.type === "GUN" || (item.type === "AMMO" && (item.show_stats || item.damage))}
   <div class="side-by-side">
     <MeleeInfo {item} />
     {#if item.type === "GUN"}

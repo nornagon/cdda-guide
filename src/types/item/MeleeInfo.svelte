@@ -2,7 +2,13 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, parseMass, parseVolume, singular } from "../../data";
+import {
+  CddaData,
+  parseMass,
+  parseVolume,
+  singular,
+  singularName,
+} from "../../data";
 import type { Item } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
@@ -63,6 +69,7 @@ const piercing =
 </script>
 
 {#if item.bashing || item.cutting}
+  <!-- O.G -->
   <section>
     <h1>{t("Melee", { _context, _comment: "Section heading" })}</h1>
     <dl>
@@ -72,6 +79,37 @@ const piercing =
         {t(piercing ? "Pierce" : "Cut", { _context: "Damage Type" })}
       </dt>
       <dd>{item.cutting ?? 0}</dd>
+      <dt>{t("To Hit", { _context })}</dt>
+      <dd>{to_hit}</dd>
+      <dt>{t("Moves Per Attack", { _context })}</dt>
+      <dd>{attackTime(item)}</dd>
+      {#if techniques.length}
+        <dt>{t("Techniques", { _context })}</dt>
+        <dd>
+          <ul class="no-bullets">
+            {#each techniques as technique}
+              <li>
+                <strong><ThingLink type="technique" id={technique.id} /></strong
+                >{#if technique.description}: {singular(
+                    technique.description
+                  )}{/if}
+              </li>
+            {/each}
+          </ul>
+        </dd>
+      {/if}
+    </dl>
+  </section>
+{/if}
+
+{#if item.melee_damage}
+  <section>
+    <h1>{t("Melee", { _context, _comment: "Section heading" })}</h1>
+    <dl>
+      {#each Object.entries(item.melee_damage) as [damageType, damage]}
+        <dt>{singularName(data.byId("damage_type", damageType))}</dt>
+        <dd>{damage}</dd>
+      {/each}
       <dt>{t("To Hit", { _context })}</dt>
       <dd>{to_hit}</dd>
       <dt>{t("Moves Per Attack", { _context })}</dt>

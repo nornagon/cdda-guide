@@ -193,6 +193,31 @@ export type Recipe = {
   construction_blueprint?: any;
 } & RequirementData;
 
+export type DamageType = {
+  id: string;
+  type: "damage_type";
+  name: Translation;
+  skill: string; // skill_id
+  physical?: boolean;
+  melee_only?: boolean;
+  edged?: boolean;
+  environmental?: boolean;
+  material_required?: boolean;
+  mon_difficulty?: boolean;
+  no_resist?: boolean;
+
+  immune_flags?: {
+    monster?: string[];
+    character?: string[];
+  };
+
+  magic_color?: string;
+
+  derived_from?: [string /* damage_type_id */, number /* float */];
+
+  // TODO: onhit_eocs
+};
+
 export type BookProficiencyBonus = {
   proficiency: string; // proficiency_id
   fail_factor?: number; // default: 0.5
@@ -226,7 +251,7 @@ export type ToolSlot = {
   rand_charges?: integer[];
 };
 
-export type DamageType =
+export type DamageTypeId =
   | "pure"
   | "biological"
   | "bash"
@@ -236,10 +261,10 @@ export type DamageType =
   | "bullet"
   | "heat"
   | "cold"
-  | "electric";
+  | "electric"; // TODO maybe no longer static?
 
 export type DamageUnit = {
-  damage_type: DamageType;
+  damage_type: DamageTypeId;
   amount?: number; // float, default 0
   armor_penetration?: number; // float, default 0
   armor_multiplier?: number; // float, default 1
@@ -542,8 +567,13 @@ export type ItemBasicInfo = {
     | string
     | null
     | any /* this is to appease json-schema, which doesn't generate a correct schema for just string | null */;
+
+  /* O.G */
   bashing?: number;
   cutting?: number;
+
+  melee_damage?: Record<string /* damage_type_id */, number>;
+
   min_strength?: number;
   techniques?: string[];
   to_hit?:
@@ -1841,6 +1871,7 @@ export type SupportedTypes = {
   conduct: Achievement;
   construction: Construction;
   construction_group: ConstructionGroup;
+  damage_type: DamageType;
   effect_type: EffectType;
   event_statistic: EventStatistic;
   fault: Fault;
