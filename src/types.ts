@@ -197,7 +197,7 @@ export type DamageType = {
   id: string;
   type: "damage_type";
   name: Translation;
-  skill: string; // skill_id
+  skill?: string; // skill_id
   physical?: boolean;
   melee_only?: boolean;
   edged?: boolean;
