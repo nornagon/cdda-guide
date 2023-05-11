@@ -59,17 +59,19 @@ const breaksIntoGroup: ItemGroupData | null =
 const breaksIntoGroupFlattened =
   breaksIntoGroup && data.flattenItemGroup(breaksIntoGroup);
 
-const vehiclesContainingPart = data.byType("vehicle").filter((v) =>
-  v.parts.some((part) => {
-    const parts = part.part
-      ? [{ part: part.part, fuel: part.fuel }]
-      : part.parts?.map((part) =>
-          typeof part === "string" ? { part } : part
-        ) ?? [];
-    return parts.some(
-      (p) => getVehiclePartIdAndVariant(data, p.part)[0] === item.id
-    );
-  })
+const vehiclesContainingPart = data.byType("vehicle").filter(
+  (v) =>
+    v.id &&
+    v.parts.some((part) => {
+      const parts = part.part
+        ? [{ part: part.part, fuel: part.fuel }]
+        : part.parts?.map((part) =>
+            typeof part === "string" ? { part } : part
+          ) ?? [];
+      return parts.some(
+        (p) => getVehiclePartIdAndVariant(data, p.part)[0] === item.id
+      );
+    })
 );
 vehiclesContainingPart.sort((a, b) =>
   singularName(a).localeCompare(singularName(b))
