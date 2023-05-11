@@ -10,13 +10,16 @@ export let item_id: string;
 
 const data = getContext<CddaData>("data");
 
-const vehiclesAndProbabilities = data.byType("vehicle").flatMap((vehicle) => {
-  const group = itemGroupFromVehicle(vehicle);
-  const flatGroup = data.flattenItemGroup(group);
-  const self = flatGroup.find((e) => e.id === item_id);
-  if (self) return [{ vehicle, prob: self.prob, count: self.count }];
-  else return [];
-});
+const vehiclesAndProbabilities = data
+  .byType("vehicle")
+  .filter((i) => i.id)
+  .flatMap((vehicle) => {
+    const group = itemGroupFromVehicle(vehicle);
+    const flatGroup = data.flattenItemGroup(group);
+    const self = flatGroup.find((e) => e.id === item_id);
+    if (self) return [{ vehicle, prob: self.prob, count: self.count }];
+    else return [];
+  });
 vehiclesAndProbabilities.sort((a, b) => b.prob - a.prob);
 </script>
 
