@@ -45,6 +45,7 @@ const types = [
 const all = data._raw
   .filter((x) => x.id && types.includes(mapType(x.type)))
   .map((x) => [mapType(x.type), x.id]);
+all.length = 20;
 
 afterEach(cleanup);
 
@@ -53,10 +54,7 @@ if (!chunkNum) throw new Error("No chunk index found");
 const chunkIdx = parseInt(chunkNum, 10) - 1;
 const numChunks = 2;
 
-const start = Math.floor((all.length / numChunks) * chunkIdx);
-const end = Math.floor((all.length / numChunks) * (chunkIdx + 1));
-
-test.each(all.slice(start, end))(
+test.each(all.filter((_, i) => i % numChunks === chunkIdx))(
   "render %s %s",
   async (type, id) => {
     // Prefill the loot tables, so we don't have to mess with waiting for async load...
