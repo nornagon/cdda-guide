@@ -39,6 +39,7 @@ import Foraged from "./item/Foraged.svelte";
 import GrownFrom from "./item/GrownFrom.svelte";
 import GunInfo from "./item/GunInfo.svelte";
 import HarvestedFrom from "./item/HarvestedFrom.svelte";
+import MilledFrom from "./item/MilledFrom.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import MagazineInfo from "./item/MagazineInfo.svelte";
 import MeleeInfo from "./item/MeleeInfo.svelte";
@@ -424,6 +425,14 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
           </dd>
         {/if}
 
+        {#if item.milling?.into}
+          <dt>{t("Mills Into", { _context })}</dt>
+          <dd>
+            <ThingLink type="item" id={item.milling.into} />
+            (×{item.milling.conversion_rate ?? 0})
+          </dd>
+        {/if}
+
         {#if grantedByMutation.length}
           <dt>{t("From Mutation", { _context })}</dt>
           <dd>
@@ -627,6 +636,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
   <GrownFrom item_id={item.id} />
   <BrewedFrom item_id={item.id} />
   <HarvestedFrom item_id={item.id} />
+  <MilledFrom item_id={item.id} />
   <TransformedFrom item_id={item.id} />
   <Disassembly item_id={item.id} />
   <Salvaged item_id={item.id} />

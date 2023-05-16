@@ -613,6 +613,10 @@ export type ItemBasicInfo = {
     results: string[]; // item_id
     time?: duration;
   };
+  milling?: {
+    into?: string; // item_id
+    conversion_rate?: number; // float, default 0
+  };
 };
 
 export type Item =
