@@ -844,6 +844,7 @@ export type Proficiency = {
   type: "proficiency";
   id: string;
   description: string;
+  category: string; // proficiency_category_id
   name: Translation;
   can_learn: boolean;
   time_to_learn?: string; // duration, default: 9999 h
@@ -1842,6 +1843,13 @@ export type ItemCategory = {
   // TODO: zones
 };
 
+export type ProficiencyCategory = {
+  id: string;
+  type: "proficiency_category";
+  name: Translation;
+  description?: Translation;
+};
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -1896,6 +1904,7 @@ export type SupportedTypes = {
   overmap_terrain: OvermapTerrain;
   palette: Palette;
   proficiency: Proficiency;
+  proficiency_category: ProficiencyCategory;
   recipe: { type: "recipe" } & Recipe;
   requirement: Requirement;
   rotatable_symbol: RotatableSymbol;

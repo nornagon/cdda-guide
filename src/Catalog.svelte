@@ -7,6 +7,7 @@ import type {
   Item,
   Monster,
   Mutation,
+  Proficiency,
   SupportedTypeMapped,
   SupportedTypesWithMapped,
   VehiclePart,
@@ -15,6 +16,7 @@ import MutationCategory from "./types/MutationCategory.svelte";
 import ThingLink from "./types/ThingLink.svelte";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
 import { groupBy } from "./types/item/utils";
+import ProficiencyList from "./types/ProficiencyList.svelte";
 
 export let type: string;
 export let data: CddaData;
@@ -48,10 +50,18 @@ function getCategoryName(category: string) {
   return cat ? singularName(cat) : category;
 }
 
+function getProficiencyCategoryName(category_id: string) {
+  const cat = data.byIdMaybe("proficiency_category", category_id);
+  return cat ? singularName(cat) : category_id;
+}
+
 const groupingFn =
   {
     monster: (m: Monster) => [m.default_faction ?? ""],
     item: (i: Item) => [`${i.type} (${getCategoryName(getCategory(i))})`],
+    proficiency: (p: Proficiency) => [
+      p.category ? getProficiencyCategoryName(p.category) : "",
+    ],
     vehicle_part: (vp: VehiclePart) => vp.categories ?? [""],
     mutation: (m: Mutation) => m.category ?? [""],
   }[type] ?? (() => [""]);
@@ -68,6 +78,10 @@ const groupFilter = ({
     !m.types?.includes("BACKGROUND_OTHER_SURVIVORS_STORY") &&
     !m.types?.includes("BACKGROUND_SURVIVAL_STORY"),
 }[type] ?? (() => true)) as (t: SupportedTypeMapped) => boolean;
+
+function isProficiency(t: SupportedTypeMapped): t is Proficiency {
+  return t.type === "proficiency";
+}
 </script>
 
 <h1>{type}</h1>
@@ -81,14 +95,18 @@ const groupFilter = ({
       {#if groupName}
         <h1>{groupName}</h1>
       {/if}
-      <LimitedList
-        items={group.filter(groupFilter)}
-        let:item
-        limit={groupsList.length === 1 ? Infinity : 10}>
-        {#if type === "item" || type === "terrain" || type === "furniture" || type === "monster" || type === "vehicle_part"}<ItemSymbol
-            {item} />{/if}
-        <ThingLink type={typeWithCorrectType} id={item.id} />
-      </LimitedList>
+      {#if type === "proficiency"}
+        <ProficiencyList proficiencies={group.filter(isProficiency)} />
+      {:else}
+        <LimitedList
+          items={group.filter(groupFilter)}
+          let:item
+          limit={groupsList.length === 1 ? Infinity : 10}>
+          {#if type === "item" || type === "terrain" || type === "furniture" || type === "monster" || type === "vehicle_part"}<ItemSymbol
+              {item} />{/if}
+          <ThingLink type={typeWithCorrectType} id={item.id} />
+        </LimitedList>
+      {/if}
     </section>
   {/if}
 {/each}

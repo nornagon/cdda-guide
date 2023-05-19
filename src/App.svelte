@@ -243,6 +243,7 @@ const randomableItemTypes = new Set([
   "json_flag",
   "achivement",
   "conduct",
+  "proficiency",
 ]);
 async function getRandomPage() {
   const d = await new Promise<CddaData>((resolve) => {
@@ -488,6 +489,7 @@ Anyway?`,
         <a href="/achievement">{t("Achievements")}</a> /
         <a href="/conduct">{t("Conducts")}</a>
       </li>
+      <li><a href="/proficiency">{t("Proficiencies")}</a></li>
     </ul>
 
     <InterpolatedTranslation
