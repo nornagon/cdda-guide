@@ -29,6 +29,14 @@ const recipesUsingProficiency = [
     singularName(data.byId("item", b))
   )
 );
+
+const proficienciesRequiring = data
+  .byType("proficiency")
+  .filter(
+    (prof) =>
+      prof.id &&
+      (prof.required_proficiencies ?? []).some((prof) => prof === item.id)
+  );
 </script>
 
 <h1>{t("Proficiency")}: {singularName(item)}</h1>
@@ -58,6 +66,15 @@ const recipesUsingProficiency = [
   </dl>
   <p style="color: var(--cata-color-gray)">{item.description}</p>
 </section>
+
+{#if proficienciesRequiring.length}
+  <section>
+    <h1>{t("Required By", { _context })}</h1>
+    <LimitedList items={proficienciesRequiring} let:item>
+      <ThingLink type="proficiency" id={item.id} />
+    </LimitedList>
+  </section>
+{/if}
 
 {#if recipesUsingProficiency.length}
   <section>
