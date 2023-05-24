@@ -560,7 +560,7 @@ export type ItemBasicInfo = {
   weight?: mass;
   longest_side?: string;
   material?: string | string[] | { type: string; portion?: integer }[]; // material_id
-  flags?: string[];
+  flags?: string | string[];
   faults?: string[];
   pocket_data?: PocketData[];
   container?:

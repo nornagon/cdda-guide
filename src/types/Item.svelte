@@ -92,9 +92,9 @@ const primaryMaterial = materials.reduce(
   (m, o) => (!m || o.portion > m.portion ? o : m),
   null as { type: string; portion: number } | null
 );
-let flags = (item.flags ?? []).map(
-  (id) => data.byIdMaybe("json_flag", id) ?? { id }
-);
+let flags = [item.flags ?? []]
+  .flat()
+  .map((id) => data.byIdMaybe("json_flag", id) ?? { id });
 let faults = (item.faults ?? []).map((f) => data.byId("fault", f));
 
 const defaultPocketData = {

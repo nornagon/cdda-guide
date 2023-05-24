@@ -1147,7 +1147,9 @@ export class CddaData {
   compatibleItems(item: ItemBasicInfo): Item[] {
     const byId = this.#compatibleItemsIdIndex.lookup(item.id);
     const byFlag = item.flags
-      ? item.flags.flatMap((f) => this.#compatibleItemsFlagIndex.lookup(f))
+      ? [item.flags]
+          .flat()
+          .flatMap((f) => this.#compatibleItemsFlagIndex.lookup(f))
       : [];
 
     return [...new Set([...byId, ...byFlag])];
