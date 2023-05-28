@@ -617,6 +617,7 @@ export type ItemBasicInfo = {
     into?: string; // item_id
     conversion_rate?: number; // float, default 0
   };
+  nanofab_template_group?: string; // item_group_id
 };
 
 export type Item =
