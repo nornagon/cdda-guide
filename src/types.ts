@@ -471,7 +471,8 @@ export type UseFunction =
         | "place_trap"
         | "reveal_map"
         | "unpack"
-        | "weigh_self";
+        | "weigh_self"
+        | "link_up";
     }
   | {
       // Technically, the type can be any of the custom iuse functions. In
