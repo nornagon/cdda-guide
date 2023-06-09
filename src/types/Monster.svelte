@@ -449,9 +449,7 @@ let upgrades =
         <dd>
           <ul class="comma-separated or">
             <!-- prettier-ignore -->
-            {#each upgrades.monsters as mon}
-            <li><ThingLink type="monster" id={mon} /></li>
-          {/each}
+            {#each upgrades.monsters as mon}<li><ThingLink type="monster" id={mon} /></li>{/each}
           </ul>
           {#if upgrades.age_grow}
             in {upgrades.age_grow} day{#if upgrades.age_grow !== 1}s{/if}
