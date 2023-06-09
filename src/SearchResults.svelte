@@ -8,6 +8,7 @@ import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import { setContext } from "svelte";
 import { t } from "@transifex/native";
 import ThingLink from "./types/ThingLink.svelte";
+import LimitedList from "./LimitedList.svelte";
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -83,7 +84,6 @@ function filter(
   { item: SearchableType; variant?: { name: string; id: string } }[]
 > {
   const results = fuzzysort.go(text, targets, {
-    limit: 100,
     keys: ["id", "name", "variant_id"],
     threshold: -10000,
   });
@@ -123,22 +123,18 @@ $: matchingObjectsList = matchingObjects
 {#if matchingObjectsList}
   {#each matchingObjectsList as [type, results]}
     <h1>{type.replace(/_/g, " ")}</h1>
-    <ul>
-      {#each results as result}
-        {@const item = data._flatten(result.item)}
-        <li>
-          <ItemSymbol {item} />
-          <ThingLink
-            type={mapType(result.item.type)}
-            id={result.item.id}
-            variantId={result.variant?.id} />
-          {#if /obsolet/.test(result.item.__filename ?? "")}
-            <em style="color: var(--cata-color-gray)"
-              >({t("obsolete", { _context: "Search Results" })})</em>
-          {/if}
-        </li>
-      {/each}
-    </ul>
+    <LimitedList items={results} let:item={result} limit={50}>
+      {@const item = data._flatten(result.item)}
+      <ItemSymbol {item} />
+      <ThingLink
+        type={mapType(result.item.type)}
+        id={result.item.id}
+        variantId={result.variant?.id} />
+      {#if /obsolet/.test(result.item.__filename ?? "")}
+        <em style="color: var(--cata-color-gray)"
+          >({t("obsolete", { _context: "Search Results" })})</em>
+      {/if}
+    </LimitedList>
   {:else}
     <em>{t("No results.", { _context: "Search Results" })}</em>
   {/each}
