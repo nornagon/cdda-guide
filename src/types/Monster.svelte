@@ -12,7 +12,7 @@ import {
   singularName,
 } from "../data";
 import ThingLink from "./ThingLink.svelte";
-import type { Harvest, Monster, MonsterGroup } from "../types";
+import type { Harvest, Monster, MonsterGroup, Resistances } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import SpecialAttack from "./monster/SpecialAttack.svelte";
 import LimitedList from "../LimitedList.svelte";
@@ -25,12 +25,28 @@ export let item: Monster;
 
 let data = getContext<CddaData>("data");
 
+function monsterArmor(armor: Resistances): Record<string, number> {
+  if (armor) {
+    const ret: Record<string, number> = {};
+    for (const damageType of data.allDamageTypes()) {
+      let value = armor[damageType.id];
+      if (!value && damageType.derived_from) {
+        const [derived_from, multiplier] = damageType.derived_from;
+        value = armor[derived_from] * multiplier;
+      }
+      if (value) ret[damageType.id] = value;
+    }
+    return ret;
+  }
+  return {};
+}
+
 // prettier-ignore
 function difficulty(mon: Monster): number {
   const {
     melee_skill = 0,
     melee_dice = 0,
-    melee_cut: bonus_cut = 0,
+    melee_damage = [],
     melee_dice_sides: melee_sides = 0,
     dodge: sk_dodge = 0,
     diff: difficulty_base = 0,
@@ -44,10 +60,16 @@ function difficulty(mon: Monster): number {
     vision_day = 40,
     vision_night = 1
   } = mon
-  const armor_bash = mon.armor_bash ?? mon.armor?.bash ?? -1;
-  const armor_cut = mon.armor_cut ?? mon.armor?.cut ?? -1;
-  let difficulty = ( melee_skill + 1 ) * melee_dice * ( bonus_cut + melee_sides ) * 0.04 +
-               ( sk_dodge + 1 ) * ( 3 + armor_bash + armor_cut ) * 0.04 +
+  const normalizedMeleeDamage = normalizeDamageInstance(melee_damage)
+  const melee_dmg_total = normalizedMeleeDamage.reduce((acc, { amount = 0, damage_multiplier = 1, constant_damage_multiplier = 1 }) => acc + amount * damage_multiplier * constant_damage_multiplier, 0)
+  let armor_diff = 3
+  for (const [damageTypeId, amount] of Object.entries(monsterArmor(mon.armor ?? {}))) {
+    const damageType = data.byId("damage_type", damageTypeId)
+    if (damageType.mon_difficulty)
+      armor_diff += amount
+  }
+  let difficulty = ( melee_skill + 1 ) * melee_dice * ( melee_dmg_total + melee_sides ) * 0.04 +
+               ( sk_dodge + 1 ) * armor_diff * 0.04 +
                ( difficulty_base + special_attacks.length + 8 * emit_fields.length );
   difficulty = Math.floor(difficulty);
   difficulty *= ( (hp ?? 1) + speed - attack_cost + ( morale + agro ) * 0.1 ) * 0.01 +
@@ -340,30 +362,40 @@ let upgrades =
         <dt>{t("Dodge", { _context })}</dt>
         <dd>{item.dodge ?? 0}</dd>
         <dt>{t("Armor", { _context })}</dt>
-        <dd>
-          <dl>
-            <dt>{t("Bash", { _context: "Damage Type" })}</dt>
-            <dd>{item.armor_bash ?? item.armor?.bash ?? 0}</dd>
-            <dt>{t("Cut", { _context: "Damage Type" })}</dt>
-            <dd>{item.armor_cut ?? item.armor?.cut ?? 0}</dd>
-            <dt>{t("Stab", { _context: "Damage Type" })}</dt>
-            <dd>
-              {item.armor_stab ??
-                item.armor?.stab ??
-                Math.floor((item.armor_cut ?? item.armor?.cut ?? 0) * 0.8)}
-            </dd>
-            <dt>{t("Ballistic", { _context: "Damage Type" })}</dt>
-            <dd>{item.armor_bullet ?? item.armor?.bullet ?? 0}</dd>
-            <dt>{t("Acid", { _context: "Damage Type" })}</dt>
-            <dd>
-              {item.armor_acid ??
-                item.armor?.acid ??
-                Math.floor((item.armor_cut ?? item.armor?.cut ?? 0) * 0.5)}
-            </dd>
-            <dt>{t("Heat", { _context: "Damage Type" })}</dt>
-            <dd>{item.armor_fire ?? item.armor?.heat ?? 0}</dd>
-          </dl>
-        </dd>
+        {#if item.armor}
+          <dd>
+            <dl>
+              {#each Object.entries(monsterArmor(item.armor)) as [damageTypeId, value]}
+                {@const damageType = data.byId("damage_type", damageTypeId)}
+                {#if value}
+                  <dt>{singularName(damageType)}</dt>
+                  <dd>{value.toFixed(1)}</dd>
+                {/if}
+              {/each}
+            </dl>
+          </dd>
+        {:else}
+          <dd>
+            <dl>
+              <dt>{t("Bash", { _context: "Damage Type" })}</dt>
+              <dd>{item.armor_bash ?? 0}</dd>
+              <dt>{t("Cut", { _context: "Damage Type" })}</dt>
+              <dd>{item.armor_cut ?? 0}</dd>
+              <dt>{t("Stab", { _context: "Damage Type" })}</dt>
+              <dd>
+                {item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}
+              </dd>
+              <dt>{t("Ballistic", { _context: "Damage Type" })}</dt>
+              <dd>{item.armor_bullet ?? 0}</dd>
+              <dt>{t("Acid", { _context: "Damage Type" })}</dt>
+              <dd>
+                {item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}
+              </dd>
+              <dt>{t("Heat", { _context: "Damage Type" })}</dt>
+              <dd>{item.armor_fire ?? 0}</dd>
+            </dl>
+          </dd>
+        {/if}
         {#if item.special_when_hit}
           <dt>{t("When Hit", { _context })}</dt>
           <dd>{item.special_when_hit[0]} ({item.special_when_hit[1]}%)</dd>

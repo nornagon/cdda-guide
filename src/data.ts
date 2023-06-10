@@ -1262,8 +1262,20 @@ export class CddaData {
       ...this.#deconstructFromTerrainIndex.lookup(item_id).sort(byName),
     ];
   }
-}
 
+  allDamageTypes(
+    sort_key:
+      | "protection_info"
+      | "bionic_info"
+      | "pet_prot_info"
+      | "melee_combat_info"
+      | "ablative_info" = "protection_info"
+  ) {
+    return this.byType("damage_info_order")
+      .sort((a, b) => (a[sort_key]?.order ?? -1) - (b[sort_key]?.order ?? -1))
+      .map((x) => this.byId("damage_type", x.id));
+  }
+}
 class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
   constructor(
     private data: CddaData,

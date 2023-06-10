@@ -218,6 +218,25 @@ export type DamageType = {
   // TODO: onhit_eocs
 };
 
+export type DamageInfoOrderEntry = {
+  show_type?: boolean; // default: true
+  order: integer;
+};
+
+export type DamageInfoOrder = {
+  id: string;
+  type: "damage_info_order";
+  info_display?: "detailed" | "basic" | "none";
+
+  bionic_info?: DamageInfoOrderEntry;
+  protection_info?: DamageInfoOrderEntry;
+  pet_prot_info?: DamageInfoOrderEntry;
+  melee_combat_info?: DamageInfoOrderEntry;
+  ablative_info?: DamageInfoOrderEntry;
+
+  verb?: Translation;
+};
+
 export type BookProficiencyBonus = {
   proficiency: string; // proficiency_id
   fail_factor?: number; // default: 0.5
@@ -1885,6 +1904,7 @@ export type SupportedTypes = {
   conduct: Achievement;
   construction: Construction;
   construction_group: ConstructionGroup;
+  damage_info_order: DamageInfoOrder;
   damage_type: DamageType;
   effect_type: EffectType;
   event_statistic: EventStatistic;
