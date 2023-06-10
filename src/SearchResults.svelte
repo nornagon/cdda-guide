@@ -64,7 +64,7 @@ $: targets = [...(data?.all() ?? [])]
         type: mapType(x.type),
       },
     ].concat(
-      "variants" in x && x.variants
+      mapType(x.type) === "item" && "variants" in x && x.variants
         ? x.variants.map((v) => ({
             id: (x as any).id,
             variant_id: v.id,
