@@ -387,6 +387,9 @@ export class CddaData {
         ...obj.vitamins,
       ];
     }
+    if (obj.type === "vehicle" && parentProps.parts && obj.parts) {
+      ret.parts = [...parentProps.parts, ...obj.parts];
+    }
     for (const k of Object.keys(ret.relative ?? {})) {
       if (typeof ret.relative[k] === "number") {
         if (k === "melee_damage") {
