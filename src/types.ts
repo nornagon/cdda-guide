@@ -1426,7 +1426,7 @@ export type VehiclePart = {
   // transform_terrain
 
   variants?: {
-    id: string;
+    id?: string;
     label?: string;
     symbols: string;
     symbols_broken: string;
