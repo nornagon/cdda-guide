@@ -3,7 +3,6 @@ import { getContext } from "svelte";
 import { byName, CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
-import type { Furniture, Terrain } from "../../types";
 import ItemSymbol from "./ItemSymbol.svelte";
 import { t } from "@transifex/native";
 

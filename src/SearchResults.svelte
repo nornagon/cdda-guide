@@ -1,10 +1,13 @@
 <script lang="ts">
-import { mapType, singular, singularName } from "./data";
+import { mapType, singular, singularName, loadProgress } from "./data";
 import type { CddaData } from "./data";
-import { loadProgress } from "./data";
 import * as fuzzysort from "fuzzysort";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
-import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
+import type {
+  Item,
+  SupportedTypeMapped,
+  SupportedTypesWithMapped,
+} from "./types";
 import { setContext } from "svelte";
 import { t } from "@transifex/native";
 import ThingLink from "./types/ThingLink.svelte";
@@ -43,6 +46,16 @@ function searchableName(data: CddaData, item: any) {
     item = data.byId("item", item.item);
   return singularName(item);
 }
+
+function isItem(item: SupportedTypeMapped): item is Item {
+  return mapType(item.type) === "item";
+}
+
+function itemVariants(item: SupportedTypeMapped) {
+  if (isItem(item) && "variants" in item && item.variants) return item.variants;
+  else return [];
+}
+
 $: targets = [...(data?.all() ?? [])]
   .filter(
     (x) =>
@@ -64,14 +77,12 @@ $: targets = [...(data?.all() ?? [])]
         type: mapType(x.type),
       },
     ].concat(
-      mapType(x.type) === "item" && "variants" in x && x.variants
-        ? x.variants.map((v) => ({
-            id: (x as any).id,
-            variant_id: v.id,
-            name: singular(v.name),
-            type: mapType(x.type),
-          }))
-        : []
+      itemVariants(x).map((v) => ({
+        id: (x as any).id,
+        variant_id: v.id,
+        name: singular(v.name),
+        type: mapType(x.type),
+      }))
     )
   );
 

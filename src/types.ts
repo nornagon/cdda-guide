@@ -1424,7 +1424,15 @@ export type VehiclePart = {
 
   // TODO:
   // transform_terrain
-  // symbol, color, etc
+
+  variants?: {
+    id: string;
+    label?: string;
+    symbols: string;
+    symbols_broken: string;
+  }[];
+
+  // 0.G
   standard_symbols?: boolean;
   symbols?: Record<string, string>;
   symbol?: string;

@@ -1421,6 +1421,10 @@ export const getVehiclePartIdAndVariant = (
 ): [string, string] => {
   if (data.byIdMaybe("vehicle_part", compositePartId))
     return [compositePartId, ""];
+  const m = /^(.+)#(.+?)$/.exec(compositePartId);
+  if (m) return [m[1], m[2]];
+
+  // TODO: only check this for releases older than https://github.com/CleverRaven/Cataclysm-DDA/pull/65871
   for (const variant of vpartVariants) {
     if (compositePartId.endsWith("_" + variant)) {
       return [

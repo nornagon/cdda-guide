@@ -105,12 +105,20 @@ const symbolForVehiclePartVariant = (
       ? data.byIdMaybe("vehicle_part", "turret_generic")
       : null);
   if (!vehiclePart) return "?";
-  const symbol = vehiclePart.symbol ?? "=";
-  const symbols: Record<string, string> = {
-    ...(vehiclePart.standard_symbols ? standardSymbols : {}),
-    ...vehiclePart.symbols,
-  };
-  return specialSymbol(symbols[variant] ?? symbol);
+  const variantInfo = vehiclePart.variants;
+  if (variantInfo) {
+    const variantData =
+      variantInfo.find((v) => v.id === variant) || variantInfo[0];
+    if (!variantData) return "?";
+    return variantData.symbols[0];
+  } else {
+    const symbol = vehiclePart.symbol ?? "=";
+    const symbols: Record<string, string> = {
+      ...(vehiclePart.standard_symbols ? standardSymbols : {}),
+      ...vehiclePart.symbols,
+    };
+    return specialSymbol(symbols[variant] ?? symbol);
+  }
 };
 
 const colorForVehiclePart = (partId: string) => {
@@ -222,7 +230,7 @@ partsCounted.sort((a, b) => {
 <section>
   <pre
     style="font-family: Unifont, monospace; line-height: 1">{#each grid as row}{#each row as part}{#if part}<span
-            title={`${part.partId}_${part.variant}`}
+            title={`${part.partId}${part.variant ? "#" + part.variant : ""}`}
             class={`c_${colorForVehiclePart(part.partId)}`}
             >{symbolForVehiclePartVariant(part.partId, part.variant)}</span
           >{:else}{" "}{/if}{/each}{"\n"}{/each}</pre>
