@@ -1,17 +1,19 @@
 <script lang="ts">
-import { i18n, singular, singularName } from "../data";
+import { asHumanReadableDuration, i18n, singular, singularName } from "../data";
 import type { CddaData } from "../data";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import type { Fault, RequirementData } from "../types";
 import { t } from "@transifex/native";
 import RequirementDataTools from "./item/RequirementDataTools.svelte";
+import JsonView from "../JsonView.svelte";
 
 const data = getContext<CddaData>("data");
 const _context = "Fault";
 
 export let item: Fault;
 
+// 0.G
 const mendingMethods = (item.mending_methods ?? []).map((mm) => {
   const requirements: [RequirementData, number][] =
     typeof mm.requirements === "string"
@@ -29,6 +31,24 @@ const mendingMethods = (item.mending_methods ?? []).map((mm) => {
   );
   return { mending_method: mm, components, requirement };
 });
+
+const faultFixes = data
+  .byType("fault_fix")
+  .filter((f) => f.faults_removed?.includes(item.id))
+  .map((ff) => {
+    const requirements: [RequirementData, number][] =
+      ff.requirements?.map((req) =>
+        Array.isArray(req)
+          ? [data.byId("requirement", req[0]), req[1]]
+          : [req, 1]
+      ) ?? [];
+    const requirement = data.normalizeRequirementUsing(requirements);
+    const components = data.flattenRequirement(
+      requirement.components,
+      (r) => r.components
+    );
+    return { fault_fix: ff, components, requirement };
+  });
 
 const fault_flag_descriptions: Record<string, string> = {
   NO_ALTERNATOR_CHARGE:
@@ -76,42 +96,102 @@ const fault_flag_descriptions: Record<string, string> = {
 
 {#if mendingMethods.length}
   <h2>{t("Mending Methods", { _context })}</h2>
-{/if}
-
-{#each mendingMethods as { components, requirement, mending_method }}
-  <section>
-    <h1>{singularName(mending_method)}</h1>
-    <dl>
-      <dt>{t("Skills Used", { _context })}</dt>
-      <dd>
-        {#each mending_method.skills as { id, level }, i}
-          <ThingLink type="skill" {id} /> ({level}){#if i === mending_method.skills.length - 2}{" and "}{:else if i !== mending_method.skills.length - 1}{", "}{/if}
-        {:else}
-          {t("none")}
-        {/each}
-      </dd>
-      <dt>{t("Time to Complete")}</dt>
-      <dd>{mending_method.time}</dd>
-      <RequirementDataTools {requirement} />
-      {#if components.length}
-        <dt>{t("Components", { _context: "Requirement" })}</dt>
+  {#each mendingMethods as { components, requirement, mending_method }}
+    <section>
+      <h1>{singularName(mending_method)}</h1>
+      <dl>
+        <dt>{t("Skills Used", { _context })}</dt>
         <dd>
-          <ul>
-            {#each components as componentChoices}
-              <li>
-                {#each componentChoices.map( (c) => ({ ...c, item: data.byId("item", c.id) }) ) as { id, count }, i}
-                  {#if i !== 0}{i18n.__(" OR ")}{/if}
-                  <ThingLink {id} {count} type="item" />
-                {/each}
-              </li>
-            {/each}
-          </ul>
+          {#each mending_method.skills as { id, level }, i}
+            <ThingLink type="skill" {id} /> ({level}){#if i === mending_method.skills.length - 2}{" and "}{:else if i !== mending_method.skills.length - 1}{", "}{/if}
+          {:else}
+            {t("none")}
+          {/each}
         </dd>
-      {/if}
-      {#if mending_method.turns_into}
-        <dt>{t("Turns Into", { _context })}</dt>
-        <dd><ThingLink type="fault" id={mending_method.turns_into} /></dd>
-      {/if}
-    </dl>
-  </section>
-{/each}
+        <dt>{t("Time to Complete")}</dt>
+        <dd>{mending_method.time}</dd>
+        <RequirementDataTools {requirement} />
+        {#if components.length}
+          <dt>{t("Components", { _context: "Requirement" })}</dt>
+          <dd>
+            <ul>
+              {#each components as componentChoices}
+                <li>
+                  {#each componentChoices.map( (c) => ({ ...c, item: data.byId("item", c.id) }) ) as { id, count }, i}
+                    {#if i !== 0}{i18n.__(" OR ")}{/if}
+                    <ThingLink {id} {count} type="item" />
+                  {/each}
+                </li>
+              {/each}
+            </ul>
+          </dd>
+        {/if}
+        {#if mending_method.turns_into}
+          <dt>{t("Turns Into", { _context })}</dt>
+          <dd><ThingLink type="fault" id={mending_method.turns_into} /></dd>
+        {/if}
+      </dl>
+    </section>
+  {/each}
+{:else if faultFixes.length}
+  <h2>{t("Fixes", { _context })}</h2>
+  {#each faultFixes as { components, requirement, fault_fix }}
+    {@const skills = Object.entries(fault_fix.skills ?? {})}
+    <section>
+      <h1>{singularName(fault_fix)}</h1>
+      <dl>
+        <dt>{t("Skills Used", { _context })}</dt>
+        <dd>
+          {#each skills as [id, level], i}
+            <ThingLink type="skill" {id} /> ({level}){#if i === skills.length - 2}{" and "}{:else if i !== skills.length - 1}{", "}{/if}
+          {:else}
+            {t("none")}
+          {/each}
+        </dd>
+        <dt>{t("Time to Complete")}</dt>
+        <dd>{asHumanReadableDuration(fault_fix.time)}</dd>
+        <RequirementDataTools {requirement} />
+        {#if components.length}
+          <dt>{t("Components", { _context: "Requirement" })}</dt>
+          <dd>
+            <ul>
+              {#each components as componentChoices}
+                <li>
+                  {#each componentChoices.map( (c) => ({ ...c, item: data.byId("item", c.id) }) ) as { id, count }, i}
+                    {#if i !== 0}{i18n.__(" OR ")}{/if}
+                    <ThingLink {id} {count} type="item" />
+                  {/each}
+                </li>
+              {/each}
+            </ul>
+          </dd>
+        {/if}
+        {#if fault_fix.faults_added?.length}
+          <dt>{t("Adds Fault", { _context })}</dt>
+          <dd>
+            <ul class="comma-separated and">
+              {#each fault_fix.faults_added as fault}
+                <li><ThingLink type="fault" id={fault} /></li>
+              {/each}
+            </ul>
+          </dd>
+        {/if}
+        {#if fault_fix.faults_removed?.length && fault_fix.faults_removed.some((f) => f !== item.id)}
+          <dt>{t("Also Fixes", { _context })}</dt>
+          <dd>
+            <ul class="comma-separated and">
+              {#each fault_fix.faults_removed.filter((f) => f !== item.id) as fault}
+                <li><ThingLink type="fault" id={fault} /></li>
+              {/each}
+            </ul>
+          </dd>
+        {/if}
+      </dl>
+
+      <details>
+        <summary>Fault JSON</summary>
+        <JsonView obj={fault_fix} buildNumber={data.build_number} />
+      </details>
+    </section>
+  {/each}
+{/if}

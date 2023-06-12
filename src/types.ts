@@ -693,6 +693,7 @@ export type PocketData = {
   sealed_data?: { spoil_multiplier?: number };
 };
 
+// 0.G
 export type MendingMethod = {
   id: string;
   name?: Translation;
@@ -711,9 +712,24 @@ export type Fault = {
   name: Translation;
   description: Translation;
 
-  mending_methods?: MendingMethod[];
-
   flags?: string[];
+
+  // 0.G
+  mending_methods?: MendingMethod[];
+};
+
+export type FaultFix = {
+  type: "fault_fix";
+  id: string;
+  name: Translation;
+  time: string; // duration
+  set_variables?: Record<string, string>;
+  skills?: Record<string, number>;
+  faults_removed: string[]; // fault_id
+  faults_added: string[]; // fault_id
+  mod_damage: number; // int
+  mod_degredation: number; // int
+  requirements?: [string, number][] | RequirementData[];
 };
 
 export type JsonFlag = {
@@ -1917,6 +1933,7 @@ export type SupportedTypes = {
   effect_type: EffectType;
   event_statistic: EventStatistic;
   fault: Fault;
+  fault_fix: FaultFix;
   furniture: Furniture;
   harvest: Harvest;
   harvest_drop_type: HarvestDropType;
