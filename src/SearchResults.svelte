@@ -24,6 +24,7 @@ const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "mutation_category",
   "vehicle",
   "terrain",
+  "skill",
 ]);
 
 type SearchableType = SupportedTypeMapped & {
