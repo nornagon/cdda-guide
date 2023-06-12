@@ -2,11 +2,12 @@
 import { t } from "@transifex/native";
 import JsonView from "../JsonView.svelte";
 import { getContext } from "svelte";
-import { CddaData, i18n } from "../data";
+import { CddaData, i18n, singular, singularName } from "../data";
 
 import type { Recipe } from "../types";
 import RequirementData from "./item/RequirementData.svelte";
 import ThingLink from "./ThingLink.svelte";
+import InterpolatedTranslation from "../InterpolatedTranslation.svelte";
 
 export let recipe: Recipe;
 export let showResult: boolean = false;
@@ -78,7 +79,9 @@ function activityLevelName(level: number) {
 
 <section class="recipe">
   <h1>
-    {#if showResult}{t("Byproduct", {
+    {#if recipe.name}
+      {singularName(recipe)}
+    {:else if showResult}{t("Byproduct", {
         _context,
         _comment: "Section heading",
       })}{:else}{t("Craft", { _context, _comment: "Section heading" })}{/if}
@@ -105,6 +108,24 @@ function activityLevelName(level: number) {
         {:else}
           {t("none")}
         {/each}
+      </dd>
+    {/if}
+    {#if recipe.practice_data}
+      <dt>{t("Difficulty Range", { _context })}</dt>
+      <dd>
+        {recipe.practice_data.min_difficulty ?? 0}–{recipe.practice_data
+          .max_difficulty ?? 0}
+        {#if recipe.practice_data.skill_limit != null}
+          <InterpolatedTranslation
+            str={t(`(max {skill_limit})`, {
+              skill_limit: "{skill_limit}",
+              _context,
+              _comment: "practice recipe skill limit",
+            })}
+            slot0="skill_limit">
+            <span slot="0">{recipe.practice_data.skill_limit ?? 0}</span>
+          </InterpolatedTranslation>
+        {/if}
       </dd>
     {/if}
     {#if proficiencies.length}
@@ -226,6 +247,9 @@ function activityLevelName(level: number) {
       </dd>
     {/if}
   </dl>
+  {#if recipe.description}
+    <p style="color: var(--cata-color-gray)">{singular(recipe.description)}</p>
+  {/if}
   <details>
     <summary>{t("Recipe JSON")}</summary>
     <JsonView obj={recipe} buildNumber={data.build_number} />

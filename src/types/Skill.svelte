@@ -8,6 +8,7 @@ import LimitedList from "../LimitedList.svelte";
 import type { Skill, SupportedTypesWithMapped } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
+import Recipe from "./Recipe.svelte";
 
 export let item: Skill;
 
@@ -39,6 +40,15 @@ const itemsUsingSkill = data
     (i) => i.id && i.type === "GUN" && i.skill === item.id
   ) as SupportedTypesWithMapped["GUN"][];
 itemsUsingSkill.sort(byName);
+
+const practiceRecipes = data
+  .byType("practice")
+  .filter((r) => r.skill_used === item.id);
+practiceRecipes.sort(
+  (a, b) =>
+    (a.practice_data?.min_difficulty ?? 0) -
+    (b.practice_data?.min_difficulty ?? 0)
+);
 </script>
 
 <h1>{t("Skill")}: {singularName(item)}</h1>
@@ -72,4 +82,11 @@ itemsUsingSkill.sort(byName);
       <ThingLink type="item" id={item.id} />
     </LimitedList>
   </section>
+{/if}
+
+{#if practiceRecipes.length}
+  <h1>{t("Practice", { _context: "Skill" })}</h1>
+  {#each practiceRecipes as recipe}
+    <Recipe {recipe} showResult={false} />
+  {/each}
 {/if}

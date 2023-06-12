@@ -127,7 +127,7 @@ export type RequirementData = {
 export type Recipe = {
   result?: string;
   abstract?: string; // mutex with result
-  type: "recipe" | "uncraft";
+  type: "recipe" | "uncraft" | "practice";
 
   id_suffix?: string; // only for type 'recipe'. not allowed for abstracts
   obsolete?: boolean;
@@ -186,11 +186,19 @@ export type Recipe = {
   // for type: 'recipe' only
   category?: string;
   subcategory?: string;
-  description?: string;
+  description?: Translation;
+  name?: Translation;
   reversible?: boolean | { time: duration };
   byproducts?: ([string] | [string, number])[];
   // TODO: construction_blueprint
   construction_blueprint?: any;
+
+  // for type: 'practice' only
+  practice_data?: {
+    min_difficulty: integer;
+    max_difficulty: integer;
+    skill_limit?: integer;
+  };
 } & RequirementData;
 
 export type DamageType = {
@@ -1950,6 +1958,7 @@ export type SupportedTypes = {
   overmap_special: { type: "overmap_special" } & OvermapSpecial;
   overmap_terrain: OvermapTerrain;
   palette: Palette;
+  practice: { type: "practice" } & Recipe;
   proficiency: Proficiency;
   proficiency_category: ProficiencyCategory;
   recipe: { type: "recipe" } & Recipe;
