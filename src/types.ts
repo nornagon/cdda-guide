@@ -726,9 +726,9 @@ export type FaultFix = {
   set_variables?: Record<string, string>;
   skills?: Record<string, number>;
   faults_removed: string[]; // fault_id
-  faults_added: string[]; // fault_id
-  mod_damage: number; // int
-  mod_degredation: number; // int
+  faults_added?: string[]; // fault_id
+  mod_damage?: number; // int
+  mod_degredation?: number; // int
   requirements?: [string, number][] | RequirementData[];
 };
 
