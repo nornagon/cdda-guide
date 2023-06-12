@@ -24,6 +24,13 @@ for (const it of data.byType("item")) {
     if (!toolsWithQualityByLevel.has(level))
       toolsWithQualityByLevel.set(level, []);
     toolsWithQualityByLevel.get(level)!.push(it);
+  } else {
+    if (it.type === "GUN" && !it.flags?.includes("PRIMITIVE_RANGED_WEAPON")) {
+      if (it.skill.toUpperCase() === item.id) {
+        if (!toolsWithQualityByLevel.has(1)) toolsWithQualityByLevel.set(1, []);
+        toolsWithQualityByLevel.get(1)!.push(it);
+      }
+    }
   }
 }
 const toolsWithQualityByLevelList = [...toolsWithQualityByLevel.entries()].sort(
