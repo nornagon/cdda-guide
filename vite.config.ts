@@ -15,6 +15,7 @@ export default defineConfig({
   plugins: [
     EnvironmentPlugin({
       GITHUB_SHA: null,
+      SENTRY_DSN: null,
     }),
     svelte(),
     VitePWA({
