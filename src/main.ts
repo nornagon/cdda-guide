@@ -1,6 +1,5 @@
 import App from "./App.svelte";
 import * as Sentry from "@sentry/browser";
-import { Integrations } from "@sentry/tracing";
 import "@fontsource/unifont";
 import { registerSW } from "virtual:pwa-register";
 import { tx } from "@transifex/native";
@@ -12,7 +11,7 @@ tx.init({
 if (location.hostname !== "localhost")
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
-    integrations: [new Integrations.BrowserTracing()],
+    integrations: [new Sentry.BrowserTracing()],
     tracesSampleRate: 0.2,
     ...(process.env.GITHUB_SHA && {
       release: `cdda-guide@${process.env.GITHUB_SHA.slice(0, 8)}`,
