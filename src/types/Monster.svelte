@@ -264,11 +264,15 @@ function showProbability(prob: number) {
 }
 
 function flattenGroup(mg: MonsterGroup): string[] {
-  return [mg.default]
-    .concat(
-      mg.monsters?.map((m) => m.monster).filter((x) => x !== mg.default) ?? []
-    )
-    .filter((x): x is string => !!x);
+  const results = new Set<string>();
+  if (mg.default) results.add(mg.default);
+  for (const m of mg.monsters ?? []) {
+    if (m.monster) results.add(m.monster);
+    if (m.group)
+      for (const n of flattenGroup(data.byId("monstergroup", m.group)))
+        results.add(n);
+  }
+  return [...results];
 }
 
 let upgrades =

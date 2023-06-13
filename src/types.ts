@@ -1323,6 +1323,8 @@ export type Monster = {
         age_grow?: integer;
         into_group?: string;
         into?: string;
+        multiple_spawns?: boolean;
+        spawn_range?: integer;
       };
   ascii_picture?: string;
   death_drops?: InlineItemGroup; // distribution
@@ -1342,7 +1344,8 @@ export type MonsterGroup = {
   default?: string;
   is_animal?: boolean;
   monsters?: {
-    monster: string;
+    monster?: string;
+    group?: string;
     freq: integer;
     cost_multiplier: integer;
     pack_size?: [integer, integer];
