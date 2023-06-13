@@ -35,6 +35,8 @@ jobs:
           fi
 
       - name: Build
+        env:
+          SENTRY_DSN: ${{ vars.SENTRY_DSN }}
         run: yarn build
 
       - name: Upload Translation Strings
