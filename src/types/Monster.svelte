@@ -488,9 +488,15 @@ let upgrades =
             {#each upgrades.monsters as mon}<li><ThingLink type="monster" id={mon} /></li>{/each}
           </ul>
           {#if upgrades.age_grow}
-            in {upgrades.age_grow} day{#if upgrades.age_grow !== 1}s{/if}
+            {t("in {days} {days, plural, =1 {day} other {days}}", {
+              _context,
+              days: upgrades.age_grow,
+            })}
           {:else if upgrades.half_life}
-            with a half-life of {upgrades.half_life} day{#if upgrades.half_life !== 1}s{/if}
+            {t(
+              "with a half-life of {half_life} {half_life, plural, =1 {day} other {days}}",
+              { _context, half_life: upgrades.half_life }
+            )}
           {/if}
         </dd>
       {/if}
