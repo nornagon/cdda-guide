@@ -108,8 +108,19 @@ function damage(mon: Monster) {
   }
   //melee_damage = melee_damage ?? [ { damage_type: "bash", amount: `${melee_dice}d${melee_dice_sides}` } ]
   return (
-    `${melee_dice}d${melee_dice_sides} bash` +
-    du.map((u) => ` + ${u.amount} ${u.damage_type}`).join("")
+    `${melee_dice}d${melee_dice_sides} ${singularName(
+      data.byIdMaybe("damage_type", "bash") ?? { id: "bash" }
+    )}` +
+    du
+      .map(
+        (u) =>
+          ` + ${u.amount} ${singularName(
+            data.byIdMaybe("damage_type", u.damage_type) ?? {
+              id: u.damage_type,
+            }
+          )}`
+      )
+      .join("")
   );
 }
 
