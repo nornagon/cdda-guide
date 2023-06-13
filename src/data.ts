@@ -1043,10 +1043,11 @@ export class CddaData {
       .map(
         ([id, count]) =>
           [
-            this.byId("requirement", id) as RequirementData,
+            this.byIdMaybe("requirement", id) as RequirementData,
             count as number,
           ] as const
       )
+      .filter((x) => x[0])
       .concat([[requirement, 1] as const])
       .filter((x) => x[0]); // NB. to cope with some data errors in obsolete parts
 
