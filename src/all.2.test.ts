@@ -46,7 +46,6 @@ const types = [
 const all = data._raw
   .filter((x) => x.id && types.includes(mapType(x.type)))
   .map((x) => [mapType(x.type), x.id]);
-all.length = 20;
 
 afterEach(cleanup);
 
