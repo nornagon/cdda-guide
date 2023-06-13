@@ -108,7 +108,7 @@ export const plural = (name: Translation, n: number = 2): string =>
 export const singularName = (obj: any): string => pluralName(obj, 1);
 
 export const pluralName = (obj: any, n: number = 2): string => {
-  const name: Translation = obj?.name;
+  const name: Translation = obj?.name?.male ?? obj?.name;
   if (name == null) return obj?.id ?? obj?.abstract;
   const txed = Array.isArray(name)
     ? translate(name[0], needsPlural.includes(obj.type), n)
