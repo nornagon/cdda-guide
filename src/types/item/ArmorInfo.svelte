@@ -1,7 +1,7 @@
 <script lang="ts">
 import { t } from "@transifex/native";
 import { getContext } from "svelte";
-import { CddaData, i18n, parseMass, singular } from "../../data";
+import { CddaData, i18n, parseMass, parseVolume, singular } from "../../data";
 import type {
   ArmorPortionData,
   ArmorSlot,
@@ -263,6 +263,26 @@ function calcEncumbrance(apd: ArmorPortionData, weight: number, bpId: string) {
     Math.round((encumbrance * multiplier) / 100) + additionalEncumbrance;
   return Math.max(encumbrance, 1);
 }
+const computeMaxEncumber = (apd: ArmorPortionData, enc: number): number => {
+  return (
+    enc +
+    Math.floor(
+      ((item.pocket_data?.reduce(
+        (m, o) =>
+          m +
+          Math.floor(
+            !o.rigid
+              ? parseVolume(o.max_contains_volume ?? 0) *
+                  (o.volume_encumber_modifier ?? 1)
+              : 0
+          ),
+        0
+      ) ?? 0) *
+        (apd.volume_encumber_modifier ?? 1)) /
+        250
+    )
+  );
+};
 const encumbrance = (cp: (typeof coveredPartGroups)[0]): [number, number] => {
   if (cp.apd.encumbrance_modifiers?.length) {
     let encumber = calcEncumbrance(
@@ -275,7 +295,7 @@ const encumbrance = (cp: (typeof coveredPartGroups)[0]): [number, number] => {
     return [encumber, encumber];
   }
   return typeof cp.apd.encumbrance === "number"
-    ? [cp.apd.encumbrance, cp.apd.encumbrance]
+    ? [cp.apd.encumbrance, computeMaxEncumber(cp.apd, cp.apd.encumbrance)]
     : cp.apd.encumbrance ?? [0, 0];
 };
 const fitsEncumbrance = (enc: number) =>

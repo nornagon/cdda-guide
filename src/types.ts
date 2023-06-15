@@ -690,6 +690,8 @@ export type PocketData = {
   spoil_multiplier?: number; // float
   weight_multiplier?: number; // float
   volume_multiplier?: number; // float
+  volume_encumber_modifier?: number; // float
+  extra_encumbrance?: integer;
   magazine_well?: string; // volume
   moves?: number;
   fire_protection?: boolean;
