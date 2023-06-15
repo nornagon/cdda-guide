@@ -20,6 +20,7 @@ import type {
   UseFunction,
   SupportedTypeMapped,
   RequirementData,
+  PocketData,
 } from "../types";
 import AsciiPicture from "./AsciiPicture.svelte";
 import AmmoInfo from "./item/AmmoInfo.svelte";
@@ -98,7 +99,7 @@ let flags = [item.flags ?? []]
 let faults = (item.faults ?? []).map((f) => data.byId("fault", f));
 
 const defaultPocketData = {
-  pocket_type: "CONTAINER",
+  pocket_type: "CONTAINER" as const,
   min_item_volume: "0 ml",
   moves: 100,
   fire_protection: false,
@@ -139,6 +140,37 @@ let ammo = pockets.flatMap((pocket) =>
     ? Object.keys(pocket.ammo_restriction ?? {})
     : []
 );
+
+function deepEquals(a: any, b: any) {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== "object") return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++)
+      if (!deepEquals(a[i], b[i])) return false;
+    return true;
+  }
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) if (!deepEquals(a[key], b[key])) return false;
+  return true;
+}
+
+function coalescePockets(pockets: PocketData[]) {
+  const coalesced: { pocket: PocketData; count: number }[] = [];
+  for (const pocket of pockets) {
+    const last = coalesced[coalesced.length - 1];
+    if (deepEquals(last?.pocket, pocket)) {
+      last.count++;
+    } else {
+      coalesced.push({ pocket, count: 1 });
+    }
+  }
+  return coalesced;
+}
 
 const uncraftRecipe = data.uncraftRecipe(item.id);
 const uncraft = uncraftRecipe
@@ -539,8 +571,12 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
 {#if pockets.filter((p) => p.pocket_type === "CONTAINER").length}
   <section>
     <h1>{t("Pockets", { _context })}</h1>
-    {#each pockets.filter((p) => p.pocket_type === "CONTAINER") as pocket}
+    {#each coalescePockets(pockets.filter((p) => p.pocket_type === "CONTAINER")) as { pocket, count }}
       <dl>
+        {#if count != 1}
+          <dt>{t("Count", { _context })}</dt>
+          <dd>{count}&times;</dd>
+        {/if}
         {#if pocket.name}
           <dt>{t("Name", { _context })}</dt>
           <dd>{pocket.name}</dd>
