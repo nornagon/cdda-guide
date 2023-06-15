@@ -1,7 +1,7 @@
 <script lang="ts">
 import { t } from "@transifex/native";
 import { getContext } from "svelte";
-import { CddaData, singular } from "../../data";
+import { CddaData, parseMass, singular } from "../../data";
 import type {
   ArmorPortionData,
   ArmorSlot,
@@ -225,7 +225,54 @@ const coveredPartGroups = [...grouped.values()].map((bp_ids) => {
 const cpGroupHeading = (cpGroup: string[]) => {
   return coverageLabel(cpGroup).join(", ");
 };
+const encumbranceModifier = {
+  IMBALANCED: { type: "flat", value: 10 },
+  RESTRICTS_NECK: { type: "flat", value: 10 },
+  WELL_SUPPORTED: { type: "mult", value: -20 },
+  NONE: { type: "flat", value: 0 },
+};
+function calcEncumbrance(apd: ArmorPortionData, weight: number, bpId: string) {
+  const massToEncumbrance = data.byId("body_part", bpId).encumbrance_per_weight;
+  if (!massToEncumbrance) return 0;
+  const parsedMassToEncumbrance = massToEncumbrance.map(
+    ({ weight, encumbrance }) => ({ weight: parseMass(weight), encumbrance })
+  );
+  parsedMassToEncumbrance.sort((a, b) => a.weight - b.weight);
+  const postIndex = parsedMassToEncumbrance.findIndex(
+    ({ weight: w }) => w > weight
+  );
+  const preIndex = postIndex - 1;
+  const pre = parsedMassToEncumbrance[preIndex];
+  const post = parsedMassToEncumbrance[postIndex];
+  const t = (weight - pre.weight) / (post.weight - pre.weight);
+  let encumbrance = pre.encumbrance + (post.encumbrance - pre.encumbrance) * t;
+  let multiplier = 100;
+  let additionalEncumbrance = 0;
+  if (apd.encumbrance_modifiers?.length) {
+    for (const modId of apd.encumbrance_modifiers) {
+      const mod = encumbranceModifier[modId];
+      if (mod.type === "flat") {
+        additionalEncumbrance += mod.value;
+      } else if (mod.type === "mult") {
+        multiplier += mod.value;
+      }
+    }
+  }
+  encumbrance =
+    Math.round((encumbrance * multiplier) / 100) + additionalEncumbrance;
+  return Math.max(encumbrance, 1);
+}
 const encumbrance = (cp: (typeof coveredPartGroups)[0]) => {
+  if (cp.apd.encumbrance_modifiers?.length) {
+    let encumber = calcEncumbrance(
+      cp.apd,
+      parseMass(item.weight ?? 1),
+      cp.bp_ids[0]
+    );
+    if (item.flags?.includes("VARSIZE"))
+      encumber = Math.min(encumber * 2, encumber + 10);
+    return `${encumber}`;
+  }
   const [encumbMin, encumbMax] =
     typeof cp.apd.encumbrance === "number"
       ? [cp.apd.encumbrance, cp.apd.encumbrance]

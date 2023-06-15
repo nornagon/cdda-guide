@@ -1530,6 +1530,12 @@ export type BodyPart = {
   side: "left" | "right" | "both";
 
   sub_parts?: string[]; // sub_body_part_id
+
+  encumbrance_per_weight?: {
+    weight: string;
+    encumbrance: integer;
+  }[];
+
   // ...
 };
 
