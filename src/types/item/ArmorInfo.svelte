@@ -1,7 +1,7 @@
 <script lang="ts">
 import { t } from "@transifex/native";
 import { getContext } from "svelte";
-import { CddaData, parseMass, singular } from "../../data";
+import { CddaData, i18n, parseMass, singular } from "../../data";
 import type {
   ArmorPortionData,
   ArmorSlot,
@@ -12,6 +12,7 @@ import type {
 } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import { groupBy, uniq } from "./utils";
+import ColorText from "../ColorText.svelte";
 
 export let item: ItemBasicInfo & ArmorSlot;
 let data = getContext<CddaData>("data");
@@ -262,7 +263,7 @@ function calcEncumbrance(apd: ArmorPortionData, weight: number, bpId: string) {
     Math.round((encumbrance * multiplier) / 100) + additionalEncumbrance;
   return Math.max(encumbrance, 1);
 }
-const encumbrance = (cp: (typeof coveredPartGroups)[0]) => {
+const encumbrance = (cp: (typeof coveredPartGroups)[0]): [number, number] => {
   if (cp.apd.encumbrance_modifiers?.length) {
     let encumber = calcEncumbrance(
       cp.apd,
@@ -271,18 +272,14 @@ const encumbrance = (cp: (typeof coveredPartGroups)[0]) => {
     );
     if (item.flags?.includes("VARSIZE"))
       encumber = Math.min(encumber * 2, encumber + 10);
-    return `${encumber}`;
+    return [encumber, encumber];
   }
-  const [encumbMin, encumbMax] =
-    typeof cp.apd.encumbrance === "number"
-      ? [cp.apd.encumbrance, cp.apd.encumbrance]
-      : cp.apd.encumbrance ?? [0, 0];
-  if (encumbMin === encumbMax) {
-    return `${encumbMin}`;
-  } else {
-    return `${encumbMin} (${encumbMax} when full)`;
-  }
+  return typeof cp.apd.encumbrance === "number"
+    ? [cp.apd.encumbrance, cp.apd.encumbrance]
+    : cp.apd.encumbrance ?? [0, 0];
 };
+const fitsEncumbrance = (enc: number) =>
+  Math.max(Math.floor(enc / 2), enc - 10);
 function maxCoverage(bp: BodyPart, apd: ArmorPortionData): number {
   if (!bp.sub_parts?.length) return 100;
 
@@ -425,6 +422,7 @@ function fixApd(
   <div class="body-parts">
     {#each coveredPartGroups as cp}
       {@const apd = fixApd(cp.apd)}
+      {@const [encMin, encMax] = encumbrance(cp)}
       <div class="body-part">
         <h2>
           {cpGroupHeading(cp.bp_ids)}
@@ -434,7 +432,42 @@ function fixApd(
         </h2>
         <dl>
           <dt>{t("Encumbrance", { _context })}</dt>
-          <dd>{encumbrance(cp)}</dd>
+          <dd>
+            {#if item.flags?.includes("VARSIZE")}
+              {@const fitsEncMin = fitsEncumbrance(encMin)}
+              {@const fitsEncMax = fitsEncumbrance(encMax)}
+              <dl>
+                <dt>
+                  <ColorText
+                    text={i18n.__(" <info>(fits)</info>")}
+                    fgOnly={true} />
+                </dt>
+                <dd>
+                  {#if fitsEncMin === fitsEncMax}
+                    {fitsEncMin}
+                  {:else}
+                    {fitsEncMin}–{fitsEncMax}
+                  {/if}
+                </dd>
+                <dt>
+                  <ColorText
+                    text={i18n.__(" <bad>(poor fit)</bad>")}
+                    fgOnly={true} />
+                </dt>
+                <dd>
+                  {#if encMin === encMax}
+                    {encMin}
+                  {:else}
+                    {encMin}–{encMax}
+                  {/if}
+                </dd>
+              </dl>
+            {:else if encMin === encMax}
+              {encMin}
+            {:else}
+              {encMin}–{encMax}
+            {/if}
+          </dd>
           <dt>{t("Coverage", { _context })}</dt>
           <dd>
             {#if cp.apd.coverage === cp.apd.cover_melee && cp.apd.coverage === cp.apd.cover_ranged && cp.apd.cover_vitals === 0}
