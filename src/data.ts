@@ -92,11 +92,14 @@ function getMsgIdPlural(t: Translation): string {
 export function translate(
   t: Translation,
   needsPlural: boolean,
-  n: number
+  n: number,
+  domain?: string
 ): string {
   const sg = getMsgId(t);
   const pl = needsPlural ? getMsgIdPlural(t) : "";
-  return i18n.ngettext(sg, pl, n) || (n === 1 ? sg : pl ?? sg);
+  return (
+    i18n.dcnpgettext(domain, undefined, sg, pl, n) || (n === 1 ? sg : pl ?? sg)
+  );
 }
 
 export const singular = (name: Translation): string =>
@@ -105,14 +108,19 @@ export const singular = (name: Translation): string =>
 export const plural = (name: Translation, n: number = 2): string =>
   translate(name, true, n);
 
-export const singularName = (obj: any): string => pluralName(obj, 1);
+export const singularName = (obj: any, domain?: string): string =>
+  pluralName(obj, 1, domain);
 
-export const pluralName = (obj: any, n: number = 2): string => {
+export const pluralName = (
+  obj: any,
+  n: number = 2,
+  domain?: string
+): string => {
   const name: Translation = obj?.name?.male ?? obj?.name;
   if (name == null) return obj?.id ?? obj?.abstract;
   const txed = Array.isArray(name)
-    ? translate(name[0], needsPlural.includes(obj.type), n)
-    : translate(name, needsPlural.includes(obj.type), n);
+    ? translate(name[0], needsPlural.includes(obj.type), n, domain)
+    : translate(name, needsPlural.includes(obj.type), n, domain);
   if (txed.length === 0) return obj?.id ?? obj?.abstract;
   return txed;
 };
@@ -1613,14 +1621,14 @@ export const data = {
   async setVersion(version: string, locale: string | null) {
     if (_hasSetVersion) throw new Error("can only set version once");
     _hasSetVersion = true;
-    let totals: [number, number] = [0, 0];
-    let receiveds: [number, number] = [0, 0];
+    let totals = [0, 0, 0];
+    let receiveds = [0, 0, 0];
     const updateProgress = () => {
-      const total = totals[0] + totals[1];
-      const received = receiveds[0] + receiveds[1];
+      const total = totals.reduce((a, b) => a + b, 0);
+      const received = receiveds.reduce((a, b) => a + b, 0);
       loadProgressStore.set([received, total]);
     };
-    const [dataJson, localeJson] = await Promise.all([
+    const [dataJson, localeJson, pinyinNameJson] = await Promise.all([
       retry(() =>
         fetchJson(version, (receivedBytes, totalBytes) => {
           totals[0] = totalBytes;
@@ -1636,10 +1644,26 @@ export const data = {
             updateProgress();
           })
         ),
+      locale?.startsWith("zh_") &&
+        retry(() =>
+          fetchLocaleJson(
+            version,
+            locale + "_pinyin",
+            (receivedBytes, totalBytes) => {
+              totals[2] = totalBytes;
+              receiveds[2] = receivedBytes;
+              updateProgress();
+            }
+          )
+        ),
     ]);
     if (locale && localeJson) {
+      if (pinyinNameJson) pinyinNameJson[""] = localeJson[""];
       i18n.loadJSON(localeJson);
       i18n.setLocale(locale);
+      if (pinyinNameJson) {
+        i18n.loadJSON(pinyinNameJson, "pinyin");
+      }
     }
     const cddaData = new CddaData(
       dataJson.data,

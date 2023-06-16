@@ -1,5 +1,5 @@
 <script lang="ts">
-import { mapType, singular, singularName, loadProgress } from "./data";
+import { mapType, singular, singularName, loadProgress, i18n } from "./data";
 import type { CddaData } from "./data";
 import * as fuzzysort from "fuzzysort";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
@@ -45,6 +45,7 @@ let targets: SearchTarget[];
 function searchableName(data: CddaData, item: any) {
   if (item?.type === "vehicle_part" && !item.name && item.item)
     item = data.byId("item", item.item);
+  if (i18n.getLocale().startsWith("zh-")) return singularName(item, "pinyin");
   return singularName(item);
 }
 
