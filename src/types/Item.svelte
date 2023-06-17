@@ -609,6 +609,8 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
           <dt>{t("Weight Capacity", { _context })}</dt>
           <dd>{pocket.max_contains_weight}</dd>
         {/if}
+        <dt>{t("Rigid", { _context })}</dt>
+        <dd>{pocket.rigid ? t("Yes") : t("No")}</dd>
         {#if pocket.ammo_restriction}
           <dt>
             {t("Ammo Restriction", { _context, _comment: "For a pocket" })}
