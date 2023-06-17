@@ -372,7 +372,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
           </dd>
         {/if}
 
-        {#if qualities.length || chargedQualities.length}
+        {#if qualities.length}
           <dt>{t("Qualities", { _context })}</dt>
           <dd>
             <ul class="no-bullets">
@@ -381,24 +381,40 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
                   <InterpolatedTranslation
                     str={i18n
                       .gettext(
-                        "Has level <color_cyan>%1$d %2$s</color> quality",
+                        "Level <info>%1$d %2$s</info> quality",
                         "{level}",
                         "{quality}"
                       )
-                      .replace(/\$[ds]|<\/?color[^>]*>/g, "")}
+                      .replace(/\$[ds]|<\/?info[^>]*>/g, "")}
                     slot0="level"
                     slot1="quality">
-                    <strong slot="0">{level}</strong>
+                    <span slot="0">{level}</span>
                     <ThingLink slot="1" type="tool_quality" id={quality.id} />
                   </InterpolatedTranslation>
                 </li>
               {/each}
+            </ul>
+          </dd>
+        {/if}
+        {#if chargedQualities.length}
+          <dt>{t("Qualities (Charged)", { _context })}</dt>
+          <dd>
+            <ul class="no-bullets">
               {#each chargedQualities as { quality, level }}
                 <li>
-                  Has level <strong
-                    >{level}
-                    <ThingLink type="tool_quality" id={quality.id} /></strong> quality
-                  (when charged).
+                  <InterpolatedTranslation
+                    str={i18n
+                      .gettext(
+                        "Level <info>%1$d %2$s</info> quality",
+                        "{level}",
+                        "{quality}"
+                      )
+                      .replace(/\$[ds]|<\/?info[^>]*>/g, "")}
+                    slot0="level"
+                    slot1="quality">
+                    <span slot="0">{level}</span>
+                    <ThingLink slot="1" type="tool_quality" id={quality.id} />
+                  </InterpolatedTranslation>
                 </li>
               {/each}
             </ul>
