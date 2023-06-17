@@ -6,6 +6,7 @@ import { getContext } from "svelte";
 import LimitedList from "../LimitedList.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import { t } from "@transifex/native";
+import Recipe from "./Recipe.svelte";
 
 export let item: Proficiency;
 
@@ -29,6 +30,17 @@ const recipesUsingProficiency = [
     singularName(data.byId("item", b))
   )
 );
+
+const practiceRecipesUsingProficiency = data
+  .byType("practice")
+  .filter((recipe) =>
+    (recipe.proficiencies ?? []).some((prof) => prof.proficiency === item.id)
+  )
+  .sort(
+    (a, b) =>
+      (a.practice_data?.min_difficulty ?? 0) -
+      (b.practice_data?.min_difficulty ?? 0)
+  );
 
 const proficienciesRequiring = data
   .byType("proficiency")
@@ -83,5 +95,14 @@ const proficienciesRequiring = data
       <ItemSymbol item={data.byId("item", item)} />
       <ThingLink type="item" id={item} />
     </LimitedList>
+  </section>
+{/if}
+
+{#if practiceRecipesUsingProficiency.length}
+  <h1>{t("Practice Recipes", { _context })}</h1>
+  <section>
+    {#each practiceRecipesUsingProficiency as recipe}
+      <Recipe {recipe} showResult={false} />
+    {/each}
   </section>
 {/if}
