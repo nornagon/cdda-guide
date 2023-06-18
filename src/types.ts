@@ -499,7 +499,8 @@ export type UseFunction =
         | "reveal_map"
         | "unpack"
         | "weigh_self"
-        | "link_up";
+        | "link_up"
+        | "message";
     }
   | {
       // Technically, the type can be any of the custom iuse functions. In
