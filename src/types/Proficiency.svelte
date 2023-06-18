@@ -99,10 +99,8 @@ const proficienciesRequiring = data
 {/if}
 
 {#if practiceRecipesUsingProficiency.length}
-  <h1>{t("Practice Recipes", { _context })}</h1>
-  <section>
-    {#each practiceRecipesUsingProficiency as recipe}
-      <Recipe {recipe} showResult={false} />
-    {/each}
-  </section>
+  <h1>{t("Practice Recipes", { _context: "Skill" })}</h1>
+  {#each practiceRecipesUsingProficiency as recipe}
+    <Recipe {recipe} showResult={false} />
+  {/each}
 {/if}

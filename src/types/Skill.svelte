@@ -85,7 +85,7 @@ practiceRecipes.sort(
 {/if}
 
 {#if practiceRecipes.length}
-  <h1>{t("Practice", { _context: "Skill" })}</h1>
+  <h1>{t("Practice Recipes", { _context: "Skill" })}</h1>
   {#each practiceRecipes as recipe}
     <Recipe {recipe} showResult={false} />
   {/each}
