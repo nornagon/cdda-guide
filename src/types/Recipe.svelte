@@ -152,6 +152,9 @@ function activityLevelName(level: number) {
                 : null,
             ].filter((x) => x)}
             <li>
+              {#if prof.required}
+                <strong>{t("Required:", { _context })}</strong>{" "}
+              {/if}
               <ThingLink type="proficiency" id={prof.proficiency} />
               {#if multipliers.length}
                 ({multipliers.join(", ")})
