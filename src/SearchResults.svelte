@@ -45,7 +45,8 @@ let targets: SearchTarget[];
 function searchableName(data: CddaData, item: any) {
   if (item?.type === "vehicle_part" && !item.name && item.item)
     item = data.byId("item", item.item);
-  if (i18n.getLocale().startsWith("zh-")) return singularName(item, "pinyin");
+  if (i18n.getLocale().startsWith("zh-"))
+    return singularName(item) + " " + singularName(item, "pinyin");
   return singularName(item);
 }
 
