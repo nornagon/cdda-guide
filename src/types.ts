@@ -1506,7 +1506,7 @@ export type BodyPart = {
 
   is_limb?: boolean;
   is_vital?: boolean;
-  limb_type:
+  limb_type?:
     | "head"
     | "torso"
     | "sensor"
