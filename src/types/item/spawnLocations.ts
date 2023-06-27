@@ -332,20 +332,33 @@ function addLoot(loots: Loot[]): Loot {
   return ret;
 }
 
+function getMapgenValue(val: raw.MapgenValue): string | undefined {
+  if (typeof val === "string") return val;
+  if (
+    "switch" in val &&
+    typeof val.switch === "object" &&
+    "fallback" in val.switch &&
+    val.switch.fallback
+  )
+    return val.cases[val.switch["fallback"]];
+  // TODO: support distribution, param/fallback?
+}
+
 let onStack = 0;
 function lootForChunks(
   data: CddaData,
-  chunks: (string | [string, number])[]
+  chunks: (raw.MapgenValue | [raw.MapgenValue, number])[]
 ): Loot {
   onStack += 1;
   // TODO: See https://github.com/nornagon/cdda-guide/issues/73
   if (onStack > 4) return new Map();
   const normalizedChunks = (chunks ?? []).map((c) =>
-    typeof c === "string" ? ([c, 100] as [string, number]) : c
+    Array.isArray(c) ? c : ([c, 100] as [raw.MapgenValue, number])
   );
   const loot = mergeLoot(
-    normalizedChunks.map(([chunkId, weight]) => {
-      const chunkMapgens = data.nestedMapgensById(chunkId) ?? [];
+    normalizedChunks.map(([chunkIdValue, weight]) => {
+      const chunkId = getMapgenValue(chunkIdValue);
+      const chunkMapgens = chunkId ? data.nestedMapgensById(chunkId) ?? [] : [];
       const loot = mergeLoot(
         chunkMapgens.map((mg) => {
           const loot = getLootForMapgen(data, mg);

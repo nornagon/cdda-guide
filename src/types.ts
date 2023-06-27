@@ -1184,7 +1184,7 @@ export interface MapgenLoot {
 
 export interface MapgenNested {
   neighbors?: any; // TODO:
-  chunks?: Array<[string, number] | string>;
+  chunks?: Array<[MapgenValue, number] | MapgenValue>;
   else_chunks?: Array<[string, number] | string>;
 }
 
