@@ -23,7 +23,7 @@ function computeLoudness(item: AmmoSlot): number {
   if ((item.loudness ?? -1) >= 0) return item.loudness ?? 0;
   return (
     (item.range ?? 0) * 2 +
-    (damage.amount ?? 0) * (damage.armor_penetration ?? 0)
+    ((damage.amount ?? 0) + (damage.armor_penetration ?? 0)) * 2
   );
 }
 </script>
