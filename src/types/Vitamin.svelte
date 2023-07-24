@@ -24,6 +24,10 @@ export let item: Vitamin;
 const data = getContext<CddaData>("data");
 const _context = "Vitamin";
 
+const mutationCategory = data
+  .byType("mutation_category")
+  .find((c) => c.vitamin === item.id);
+
 const containingComestibles = data
   .byType("item")
   .filter(
@@ -78,6 +82,10 @@ const deficiencyNames = item.deficiency
   <dl>
     <dt>{t("Type", { _context })}</dt>
     <dd>{item.vit_type}</dd>
+    {#if mutationCategory}
+      <dt>{t("Mutation Category", { _context })}</dt>
+      <dd><ThingLink id={mutationCategory.id} type="mutation_category" /></dd>
+    {/if}
     {#if item.excess && item.disease_excess?.length}
       <dt>{t("Excess", { _context })}</dt>
       <dd>
