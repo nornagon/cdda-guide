@@ -1820,7 +1820,7 @@ export type RotatableSymbol = {
 export type ItemAction = {
   type: "item_action";
   id: string;
-  name: Translation;
+  name?: Translation;
 };
 
 export type Bionic = {
