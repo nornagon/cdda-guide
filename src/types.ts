@@ -496,6 +496,7 @@ export type UseFunction =
         | "musical_instrument"
         | "place_monster"
         | "place_trap"
+        | "play_instrument"
         | "reveal_map"
         | "unpack"
         | "weigh_self"
