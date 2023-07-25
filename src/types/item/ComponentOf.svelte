@@ -11,7 +11,7 @@ const _context = "Item Basic Info";
 
 const data = getContext<CddaData>("data");
 
-const { byTool, byComponent } = data.getItemComponents();
+const { byTool, byComponent, byConstruction } = data.getItemComponents();
 
 const recipes: Set<string> = byComponent.get(item_id) ?? new Set();
 const toolRecipes: Set<string> = byTool.get(item_id) ?? new Set();
@@ -32,6 +32,14 @@ const toolResults = [...toolRecipes].sort((a, b) =>
     singularName(data.byId("item", b))
   )
 );
+
+const constructions = [...(byConstruction.get(item_id) ?? new Set())]
+  .map((id) => data.byId("construction", id))
+  .sort((a, b) =>
+    singularName(data.byId("construction_group", a.group)).localeCompare(
+      singularName(data.byId("construction_group", b.group))
+    )
+  );
 </script>
 
 {#if providedByVparts.length}
@@ -84,3 +92,24 @@ const toolResults = [...toolRecipes].sort((a, b) =>
     </section>
   {/if}
 </div>
+
+{#if constructions.length}
+  <section>
+    <h1>
+      {t("Used In Construction", { _context, _comment: "Section heading" })}
+    </h1>
+    <LimitedList items={constructions} let:item={f}>
+      <ThingLink id={f.group} type="construction_group" />
+      {#if f.pre_terrain}
+        on <ItemSymbol
+          item={data.byId(
+            f.pre_terrain.startsWith("f_") ? "furniture" : "terrain",
+            f.pre_terrain
+          )} />
+        <ThingLink
+          type={f.pre_terrain.startsWith("f_") ? "furniture" : "terrain"}
+          id={f.pre_terrain} />
+      {/if}
+    </LimitedList>
+  </section>
+{/if}
