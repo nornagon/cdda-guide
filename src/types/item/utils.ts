@@ -5,7 +5,7 @@ export function showProbability(prob: number) {
 }
 
 export function multimap<K, V>(entries: [K, V][]): Map<K, V[]> {
-  let ret = new Map();
+  let ret = new Map<K, V[]>();
   for (const [k, v] of entries) {
     const list = ret.get(k) ?? [];
     list.push(v);

@@ -4,7 +4,7 @@ import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import { byName, CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
-import type { Item, VehiclePart, ToolQuality } from "../types";
+import type { Item, VehiclePart, ToolQuality, Construction } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -91,6 +91,30 @@ for (const [level, set] of recipesUsingQualitySet)
 const recipesUsingQualityList = [...recipesUsingQuality.entries()].sort(
   (a, b) => a[0] - b[0]
 );
+
+const constructionsUsingQualityByLevel = new Map<number, Construction[]>();
+for (const construction of data.byType("construction")) {
+  const { qualities } = data.normalizeRequirements(construction);
+  for (const qs of qualities) {
+    for (const { id, level = 1 } of qs) {
+      if (id === item.id) {
+        if (!constructionsUsingQualityByLevel.has(level))
+          constructionsUsingQualityByLevel.set(level, []);
+        constructionsUsingQualityByLevel.get(level)!.push(construction);
+      }
+    }
+  }
+}
+const constructionsUsingQualityByLevelList = [
+  ...constructionsUsingQualityByLevel.entries(),
+].sort((a, b) => a[0] - b[0]);
+constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
+  constructions.sort((a, b) =>
+    singularName(data.byId("construction_group", a.group)).localeCompare(
+      singularName(data.byId("construction_group", b.group))
+    )
+  );
+});
 </script>
 
 <h1>{t("Quality", { _comment: "Tool Quality" })}: {singularName(item)}</h1>
@@ -161,6 +185,33 @@ const recipesUsingQualityList = [...recipesUsingQuality.entries()].sort(
           <LimitedList items={recipes} let:item limit={20}>
             <ItemSymbol item={data.byId("item", item)} />
             <ThingLink type="item" id={item} />
+          </LimitedList>
+        </dd>
+      {/each}
+    </dl>
+  </section>
+{/if}
+{#if constructionsUsingQualityByLevelList.length}
+  <section>
+    <h1>{t("Constructions")}</h1>
+    <dl>
+      {#each constructionsUsingQualityByLevelList as [level, constructions]}
+        <dt style="font-variant: tabular-nums">
+          {t("Level {level}", { level, _context })}
+        </dt>
+        <dd>
+          <LimitedList items={constructions} let:item={f}>
+            <ThingLink id={f.group} type="construction_group" />
+            {#if f.pre_terrain}
+              on <ItemSymbol
+                item={data.byId(
+                  f.pre_terrain.startsWith("f_") ? "furniture" : "terrain",
+                  f.pre_terrain
+                )} />
+              <ThingLink
+                type={f.pre_terrain.startsWith("f_") ? "furniture" : "terrain"}
+                id={f.pre_terrain} />
+            {/if}
           </LimitedList>
         </dd>
       {/each}
