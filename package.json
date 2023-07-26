@@ -34,7 +34,7 @@
     "@types/requestidlecallback": "^0.3.4",
     "ajv": "^8",
     "fuzzysort": "^2.0.1",
-    "gettext.js": "nornagon/gettext.js#bdf27db",
+    "gettext.js": "^2.0.0",
     "husky": "^7.0.4",
     "jest-environment-jsdom": "^28.1.1",
     "lint-staged": "^12.3.2",
