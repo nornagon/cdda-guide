@@ -124,6 +124,23 @@ if (construction.pre_flags)
         </ul>
       </dd>
     {/if}
+    {#if !includeTitle && construction.post_terrain}
+      <dt>{t("Creates", { _context })}</dt>
+      <dd>
+        <ItemSymbol
+          item={data.byId(
+            construction.post_terrain.startsWith("f_")
+              ? "furniture"
+              : "terrain",
+            construction.post_terrain
+          )} />
+        <ThingLink
+          type={construction.post_terrain.startsWith("f_")
+            ? "furniture"
+            : "terrain"}
+          id={construction.post_terrain} />
+      </dd>
+    {/if}
   </dl>
   {#if construction.pre_note}
     <p style="color: var(--cata-color-gray)">
