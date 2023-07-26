@@ -45,6 +45,10 @@ if (construction.pre_flags)
       preFlags.push({ flag });
     } else preFlags.push(flag);
   }
+
+function terrainOrFurniture(id: string) {
+  return data.byId(id.startsWith("f_") ? "furniture" : "terrain", id);
+}
 </script>
 
 <section>
@@ -74,11 +78,7 @@ if (construction.pre_flags)
     {#if construction.pre_terrain}
       <dt>{t("Requires", { _context })}</dt>
       <dd>
-        <ItemSymbol
-          item={data.byId(
-            construction.pre_terrain.startsWith("f_") ? "furniture" : "terrain",
-            construction.pre_terrain
-          )} />
+        <ItemSymbol item={terrainOrFurniture(construction.pre_terrain)} />
         <ThingLink
           type={construction.pre_terrain.startsWith("f_")
             ? "furniture"
@@ -127,18 +127,21 @@ if (construction.pre_flags)
     {#if !includeTitle && construction.post_terrain}
       <dt>{t("Creates", { _context })}</dt>
       <dd>
-        <ItemSymbol
-          item={data.byId(
-            construction.post_terrain.startsWith("f_")
+        {#if construction.post_terrain === "f_null"}
+          <em
+            >{t("nothing", {
+              _context,
+              _comment:
+                'The furniture/terrain "created" by a deconstruction is...',
+            })}</em>
+        {:else}
+          <ItemSymbol item={terrainOrFurniture(construction.post_terrain)} />
+          <ThingLink
+            type={construction.post_terrain.startsWith("f_")
               ? "furniture"
-              : "terrain",
-            construction.post_terrain
-          )} />
-        <ThingLink
-          type={construction.post_terrain.startsWith("f_")
-            ? "furniture"
-            : "terrain"}
-          id={construction.post_terrain} />
+              : "terrain"}
+            id={construction.post_terrain} />
+        {/if}
       </dd>
     {/if}
   </dl>

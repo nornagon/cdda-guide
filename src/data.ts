@@ -1065,7 +1065,6 @@ export class CddaData {
   _itemComponentCache: {
     byTool: Map<string, Set<string>>;
     byComponent: Map<string, Set<string>>;
-    byConstruction: Map<string, Set<string>>;
   } | null = null;
   getItemComponents() {
     if (this._itemComponentCache) return this._itemComponentCache;
@@ -1107,22 +1106,42 @@ export class CddaData {
           itemsByComponent.get(component.id)!.add(recipe.result);
         }
     });
-    const itemsByConstruction = new Map<string, Set<string>>();
-    for (const c of this.byType("construction")) {
-      const { components } = this.normalizeRequirements(c);
-      for (const componentOptions of components)
-        for (const [component] of componentOptions) {
-          if (!itemsByConstruction.has(component))
-            itemsByConstruction.set(component, new Set());
-          itemsByConstruction.get(component)!.add(c.id);
-        }
-    }
     this._itemComponentCache = {
       byTool: itemsByTool,
       byComponent: itemsByComponent,
-      byConstruction: itemsByConstruction,
     };
     return this._itemComponentCache;
+  }
+
+  _constructionComponentCache: {
+    byTool: Map<string, Set<string>>;
+    byComponent: Map<string, Set<string>>;
+  } | null = null;
+  getConstructionComponents() {
+    if (this._constructionComponentCache)
+      return this._constructionComponentCache;
+    const constructionsByComponent = new Map<string, Set<string>>();
+    const constructionsByTool = new Map<string, Set<string>>();
+    for (const c of this.byType("construction")) {
+      const { components, tools } = this.normalizeRequirements(c);
+      for (const componentOptions of components)
+        for (const [component] of componentOptions) {
+          if (!constructionsByComponent.has(component))
+            constructionsByComponent.set(component, new Set());
+          constructionsByComponent.get(component)!.add(c.id);
+        }
+      for (const toolOptions of tools)
+        for (const [tool] of toolOptions) {
+          if (!constructionsByTool.has(tool))
+            constructionsByTool.set(tool, new Set());
+          constructionsByTool.get(tool)!.add(c.id);
+        }
+    }
+    this._constructionComponentCache = {
+      byTool: constructionsByTool,
+      byComponent: constructionsByComponent,
+    };
+    return this._constructionComponentCache;
   }
 
   normalizeItemGroup(
