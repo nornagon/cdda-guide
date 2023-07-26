@@ -1190,8 +1190,8 @@ export interface MapgenNested {
 }
 
 export interface MapgenSet {
-  point?: "bash" | "furniture" | "terrain" | "trap";
-  line?: "bash" | "furniture" | "terrain" | "trap";
+  point?: "bash" | "furniture" | "terrain" | "trap" | "variable";
+  line?: "bash" | "furniture" | "terrain" | "trap" | "variable";
   square?: "radiation" | "terrain";
   id?: string; // ter/furn/trap id
   x: [number, number] | number;
