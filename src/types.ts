@@ -505,10 +505,10 @@ export type UseFunction =
     }
   | {
       // Technically, the type can be any of the custom iuse functions. In
-      // practice, STRONG_ANTIBIOTIC is the only instance of this. Instead of
-      // using the fully generic |string| type, keep this here so we get a schema
-      // warning when new use actions are added.
-      type: "STRONG_ANTIBIOTIC";
+      // practice, STRONG_ANTIBIOTIC and CROWBAR are the only instances of
+      // this. Instead of using the fully generic |string| type, keep this here
+      // so we get a schema warning when new use actions are added.
+      type: "STRONG_ANTIBIOTIC" | "CROWBAR";
     };
 
 type ItemActionUseFunction = {
@@ -1851,7 +1851,7 @@ export type Bionic = {
   fake_weapon?: string;
   installable_weapon_flags?: string[];
 
-  spell_on_activation?: string;
+  // spell_on_activation?: string; // TODO
   weight_capacity_modifier?: number; // default 1
   exothermic_power_gen?: boolean;
   power_gen_emission?: string;
