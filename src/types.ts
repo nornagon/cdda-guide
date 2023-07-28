@@ -24,8 +24,12 @@ export type ItemGroupEntry = (
   // "container-item" and "container-group". rg '"-item"' to find it.
   // The same is true for ammo{-item,-group} and contents{-item,-group}.
   "container-item"?: string;
-  // TODO: "container-group"?: string;
-  // TODO: damage, dirt, charges, ammo, contents, snippets?, sealed, custom-flags, etc.
+  "container-group"?: string;
+  "contents-item"?: string | string[];
+  "contents-group"?: string | string[];
+  "ammo-item"?: string;
+  "ammo-group"?: string;
+  // TODO: damage, dirt, charges, snippets?, sealed, custom-flags, etc.
 
   event?: string;
 };
@@ -48,6 +52,9 @@ export type ItemGroupData = {
     | string /* item_group_id with prob=100 */
     | ItemGroupEntryOrShortcut
   )[];
+
+  // TODO: In theory I think the other -item and -group fields should be
+  // allowed here too, but they're not used anywhere at the time of writing.
   "container-item"?: string;
 };
 

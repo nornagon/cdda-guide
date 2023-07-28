@@ -292,6 +292,9 @@ export class CddaData {
         this._nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
       }
     }
+    this._byTypeById
+      .get("item_group")
+      ?.set("EMPTY_GROUP", { id: "EMPTY_GROUP", entries: [] });
   }
 
   byIdMaybe<TypeName extends keyof SupportedTypesWithMapped>(
@@ -781,8 +784,30 @@ export class CddaData {
         const { prob = 100 } = entry;
         const nProb = Math.min(prob, 100) / 100;
         const nCount = normalizeCount(entry);
-        if (entry["container-item"])
-          add({ id: entry["container-item"], prob: nProb, count: [1, 1] });
+        for (const subrefItem of [
+          "container-item",
+          "ammo-item",
+          "contents-item",
+        ] as const) {
+          const ids = entry[subrefItem];
+          if (ids)
+            for (const id of [ids].flat())
+              add({ id, prob: nProb, count: [1, 1] });
+        }
+        for (const subrefGroup of [
+          "container-group",
+          "ammo-group",
+          "contents-group",
+        ] as const) {
+          const ids = entry[subrefGroup];
+          if (ids)
+            for (const id of [ids].flat())
+              add(
+                ...this.flattenTopLevelItemGroup(
+                  this.byId("item_group", id)
+                ).map((p) => prod(p, nProb, nCount))
+              );
+        }
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
           const item = this.byIdMaybe("item", entry.item);
@@ -819,8 +844,30 @@ export class CddaData {
       for (const entry of normalizedEntries) {
         const nProb = (entry.prob ?? 100) / totalProb;
         const nCount = normalizeCount(entry);
-        if (entry["container-item"])
-          add({ id: entry["container-item"], prob: nProb, count: [1, 1] });
+        for (const subrefItem of [
+          "container-item",
+          "ammo-item",
+          "contents-item",
+        ] as const) {
+          const ids = entry[subrefItem];
+          if (ids)
+            for (const id of [ids].flat())
+              add({ id, prob: nProb, count: [1, 1] });
+        }
+        for (const subrefGroup of [
+          "container-group",
+          "ammo-group",
+          "contents-group",
+        ] as const) {
+          const ids = entry[subrefGroup];
+          if (ids)
+            for (const id of [ids].flat())
+              add(
+                ...this.flattenTopLevelItemGroup(
+                  this.byId("item_group", id)
+                ).map((p) => prod(p, nProb, nCount))
+              );
+        }
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
         } else if ("group" in entry) {
