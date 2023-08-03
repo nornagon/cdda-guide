@@ -209,17 +209,11 @@ function activityLevelName(level: number) {
       {#if recipe.autolearn}
         <ul class="comma-separated">
           {#if Array.isArray(recipe.autolearn)}
-            {#each recipe.autolearn as [skill, level]}
-              <li><ThingLink type="skill" id={skill} /> ({level})</li>
-            {/each}
+            {#each recipe.autolearn as [skill, level]}<li><ThingLink type="skill" id={skill} /> ({level})</li>{/each}
           {:else}
             {#if recipe.skill_used}
-              <li>
-                <ThingLink type="skill" id={recipe.skill_used} /> ({recipe.difficulty ??
-                  0})
-              </li>
-            {/if}
-            {#if skillsRequired.length}
+              <!-- prettier-ignore-->
+              <li><ThingLink type="skill" id={recipe.skill_used} /> ({recipe.difficulty ?? 0})</li>{/if}{#if skillsRequired.length}
               {#each skillsRequired as [skill, level]}
                 <li><ThingLink type="skill" id={skill} /> ({level})</li>
               {/each}
