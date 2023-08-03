@@ -23,6 +23,10 @@ const _context = "Item Comestible Info";
     <dd>{item.spoils_in ?? "never"}</dd>
     <dt>{t("Health", { _context })}</dt>
     <dd>{item.healthy ?? 0}</dd>
+    {#if item.smoking_result}
+      <dt>{t("Smoking Result", { _context })}</dt>
+      <dd><ThingLink type="item" id={item.smoking_result} /></dd>
+    {/if}
     {#if item.parasites ?? 0 !== 0}
       <dt>{t("Parasites", { _context })}</dt>
       <dd>{(100 / (item.parasites ?? 0)).toPrecision(2)}%</dd>

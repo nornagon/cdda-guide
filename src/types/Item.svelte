@@ -56,6 +56,7 @@ import ThingLink from "./ThingLink.svelte";
 import UsageDescription from "./UsageDescription.svelte";
 import ColorText from "./ColorText.svelte";
 import InterpolatedTranslation from "../InterpolatedTranslation.svelte";
+import SmokedFrom from "./item/SmokedFrom.svelte";
 
 export let item: Item;
 let data: CddaData = getContext("data");
@@ -702,19 +703,20 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
 
 <div class="hide-header-if-no-sections">
   <h2>{t("Obtaining", { _context })}</h2>
-  <Recipes item_id={item.id} />
-  <DroppedBy item_id={item.id} />
   <Foraged item_id={item.id} />
   <GrownFrom item_id={item.id} />
   <BrewedFrom item_id={item.id} />
   <HarvestedFrom item_id={item.id} />
   <MilledFrom item_id={item.id} />
+  <SmokedFrom item_id={item.id} />
   <TransformedFrom item_id={item.id} />
   <Disassembly item_id={item.id} />
   <Salvaged item_id={item.id} />
+  <Recipes item_id={item.id} />
   <ConstructionByproduct item_id={item.id} />
   <Deconstruct item_id={item.id} />
   <Bash item_id={item.id} />
+  <DroppedBy item_id={item.id} />
   <SpawnedIn item_id={item.id} />
   <SpawnedInVehicle item_id={item.id} />
 </div>
