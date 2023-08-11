@@ -1256,9 +1256,16 @@ export class CddaData {
     return this.#grownFromIndex.lookup(item_id);
   }
 
-  #brewedFromIndex = new ReverseIndex(this, "item", (x) =>
-    x.id ? x.brewable?.results ?? [] : []
-  );
+  #brewedFromIndex = new ReverseIndex(this, "item", (x) => {
+    function normalize(
+      results: undefined | string[] | Record<string, number>
+    ): string[] {
+      if (!results) return [];
+      if (Array.isArray(results)) return results;
+      return Object.keys(results);
+    }
+    return x.id ? normalize(x.brewable?.results) : [];
+  });
   brewedFrom(item_id: string) {
     return this.#brewedFromIndex.lookup(item_id);
   }
