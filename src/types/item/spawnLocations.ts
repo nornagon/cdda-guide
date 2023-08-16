@@ -450,7 +450,9 @@ function parseItemGroup(
 ): Loot {
   const g =
     typeof group === "string"
-      ? data.convertTopLevelItemGroup(data.byId("item_group", group))
+      ? data.convertTopLevelItemGroup(
+          data.byIdMaybe("item_group", group) ?? { id: group, items: [] }
+        )
       : Array.isArray(group)
       ? { subtype: "collection" as "collection", entries: group }
       : group;
