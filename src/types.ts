@@ -1715,15 +1715,17 @@ export type Mutation = {
   visibility?: integer; // default: 0
   ugliness?: integer; // default: 0
 
-  prereqs?: string[];
-  prereqs2?: string[];
-  threshreq?: string[];
-  category?: string[];
-  leads_to?: string[];
-  changes_to?: string[];
-  cancels?: string[];
+  prereqs?: string | string[];
+  prereqs2?: string | string[];
+  threshreq?: string | string[];
+  category?: string | string[];
+  leads_to?: string | string[];
+  changes_to?: string | string[];
+  cancels?: string | string[];
 
-  types?: string[];
+  types?: string | string[];
+
+  // TODO: flags, active_flags, inactive_flags, moncams, social_modifiers, etc.
 
   threshold?: boolean;
 

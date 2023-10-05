@@ -6,10 +6,14 @@ import type { Mutation } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
 let data = getContext<CddaData>("data");
+const normalizeStringList = (list: string | string[] | undefined) =>
+  list ? (Array.isArray(list) ? list : [list]) : [];
 
 export let mutations: Mutation[];
 const allPrereqs = (m: Mutation) =>
-  (m.prereqs ?? []).concat(m.prereqs2 ?? []).concat(m.threshreq ?? []);
+  normalizeStringList(m.prereqs)
+    .concat(normalizeStringList(m.prereqs2))
+    .concat(normalizeStringList(m.threshreq));
 let sortedMutations = topologicalSortComponentsByRank(mutations, (m) =>
   allPrereqs(m).map((x) => data.byId("mutation", x))
 ).sort((a, b) => singularName(a[0][0]).localeCompare(singularName(b[0][0])));

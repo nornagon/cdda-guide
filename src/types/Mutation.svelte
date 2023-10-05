@@ -15,33 +15,35 @@ export let item: Mutation;
 let data = getContext<CddaData>("data");
 const _context = "Mutation";
 
+const normalizeStringList = (list: string | string[] | undefined) =>
+  list ? (Array.isArray(list) ? list : [list]) : [];
+
+const has = (list: string | string[] | undefined, id: string) =>
+  list ? (Array.isArray(list) ? list.includes(id) : list === id) : false;
+
 const postThresholdMutations = data
   .byType("mutation")
-  .filter((m) => (m.threshreq ?? []).includes(item.id))
+  .filter((m) => has(m.threshreq, item.id))
   .sort(byName);
 
 const requiredBy = data
   .byType("mutation")
-  .filter(
-    (m) =>
-      (m.prereqs ?? []).includes(item.id) ||
-      (m.prereqs2 ?? []).includes(item.id)
-  )
+  .filter((m) => has(m.prereqs, item.id) || has(m.prereqs2, item.id))
   .sort(byName);
 
 const canceledByMutations = data
   .byType("mutation")
-  .filter((m) => (m.cancels ?? []).includes(item.id))
+  .filter((m) => has(m.cancels, item.id))
   .sort(byName);
 
 const canceledByBionics = data
   .byType("bionic")
-  .filter((b) => (b.canceled_mutations ?? []).includes(item.id))
+  .filter((b) => has(b.canceled_mutations, item.id))
   .sort(byName);
 
 const conflictsWithBionics = data
   .byType("bionic")
-  .filter((b) => (b.mutation_conflicts ?? []).includes(item.id))
+  .filter((b) => has(b.mutation_conflicts, item.id))
   .sort(byName);
 </script>
 
@@ -58,7 +60,7 @@ const conflictsWithBionics = data
       <dt>{t("Category", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
-          {#each item.category as category_id}
+          {#each normalizeStringList(item.category) as category_id}
             <li><ThingLink type="mutation_category" id={category_id} /></li>
           {/each}
         </ul>
@@ -132,14 +134,14 @@ const conflictsWithBionics = data
     {/if}
     <dt title={t("You can't have two mutations that share a type.")}>
       {t("{n, plural, =1 {Type} other {Types}}", {
-        n: item.types?.length ?? 0,
+        n: normalizeStringList(item.types).length ?? 0,
         _context,
       })}
     </dt>
     <dd>
       {#if item.types}
         <ul class="comma-separated">
-          {#each item.types as type_id}
+          {#each normalizeStringList(item.types) as type_id}
             <li><ThingLink type="mutation_type" id={type_id} /></li>
           {/each}
         </ul>
@@ -153,7 +155,7 @@ const conflictsWithBionics = data
         <ul>
           <li>
             <ul class="comma-separated or">
-              {#each item.prereqs as prereq_id}
+              {#each normalizeStringList(item.prereqs) as prereq_id}
                 <li><ThingLink type="mutation" id={prereq_id} /></li>
               {/each}
             </ul>
@@ -161,7 +163,7 @@ const conflictsWithBionics = data
           {#if item.prereqs2}
             <li>
               <ul class="comma-separated or">
-                {#each item.prereqs2 as prereq_id}
+                {#each normalizeStringList(item.prereqs2) as prereq_id}
                   <li><ThingLink type="mutation" id={prereq_id} /></li>
                 {/each}
               </ul>
@@ -176,7 +178,7 @@ const conflictsWithBionics = data
       <dt>{t("Threshold Requirement", { _context })}</dt>
       <dd>
         <ul class="comma-separated or">
-          {#each item.threshreq as prereq_id}
+          {#each normalizeStringList(item.threshreq) as prereq_id}
             <li><ThingLink type="mutation" id={prereq_id} /></li>
           {/each}
         </ul>
@@ -186,7 +188,7 @@ const conflictsWithBionics = data
       <dt>{t("Leads To", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
-          {#each item.leads_to as id}
+          {#each normalizeStringList(item.leads_to) as id}
             <li><ThingLink {id} type="mutation" /></li>
           {/each}
         </ul>
@@ -196,14 +198,18 @@ const conflictsWithBionics = data
       <dt>{t("Changes To", { _context })}</dt>
       <dd>
         <MutationList
-          mutations={item.changes_to.map((id) => data.byId("mutation", id))} />
+          mutations={normalizeStringList(item.changes_to).map((id) =>
+            data.byId("mutation", id)
+          )} />
       </dd>
     {/if}
     {#if item.cancels?.length}
       <dt>{t("Cancels", { _context })}</dt>
       <dd>
         <MutationList
-          mutations={item.cancels.map((id) => data.byId("mutation", id))} />
+          mutations={normalizeStringList(item.cancels).map((id) =>
+            data.byId("mutation", id)
+          )} />
       </dd>
     {/if}
     {#if canceledByMutations.length}
