@@ -494,6 +494,7 @@ export type UseFunction =
         | "change_scent"
         | "deploy_furn"
         | "deploy_tent"
+        | "deploy_appliance"
         | "effect_on_conditions"
         | "explosion"
         | "firestarter"
