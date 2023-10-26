@@ -86,6 +86,20 @@ function activityLevelName(level: number) {
         _comment: "Section heading",
       })}{:else}{t("Craft", { _context, _comment: "Section heading" })}{/if}
   </h1>
+  <p>
+    {#if recipe.never_learn}
+      <section class="warning">
+        ⚠️ {t(
+          "This recipe is not learnable. It may be used by NPCs or for debugging purposes.",
+          {
+            _context,
+            _comment:
+              "This is a basecamp recipe or other utility recipe that isn't directly usable by the player.",
+          }
+        )}
+      </section>
+    {/if}
+  </p>
   <dl>
     {#if showResult && recipe.result}
       <dt>{t("Result", { _context })}</dt>
@@ -224,7 +238,7 @@ function activityLevelName(level: number) {
           {/if}
         </ul>
       {:else}
-        no
+        {t("No")}
       {/if}
     </dd>
     {#if writtenIn.length}
@@ -252,3 +266,9 @@ function activityLevelName(level: number) {
     <JsonView obj={recipe} buildNumber={data.build_number} />
   </details>
 </section>
+
+<style>
+.warning {
+  background-color: #69553f;
+}
+</style>
