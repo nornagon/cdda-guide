@@ -6,12 +6,18 @@ import type { CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
+import type { Furniture, Terrain, VehiclePart } from "src/types";
 
 export let item_id: string;
 
 const data = getContext<CddaData>("data");
 
-let deconstructibleFrom = data.deconstructFrom(item_id);
+let vparts = data
+  .byType("vehicle_part")
+  .filter((vp) => vp.id && vp.item === item_id);
+let deconstructibleFrom = (
+  data.deconstructFrom(item_id) as (Furniture | Terrain | VehiclePart)[]
+).concat(vparts);
 </script>
 
 {#if deconstructibleFrom.length}
