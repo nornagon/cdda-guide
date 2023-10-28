@@ -10,6 +10,7 @@ export let item: {
   bgcolor?: string | [string] | [string, string, string, string];
   symbol?: string | string[];
   type: string;
+  variants?: any;
 };
 
 let data: CddaData = getContext("data");
@@ -17,11 +18,20 @@ let data: CddaData = getContext("data");
 $: tile_info = $tileData?.tile_info[0];
 $: tile = typeHasTile(item)
   ? findTileOrLooksLike($tileData, item) ??
-    fallbackTile($tileData, item.symbol, item.color ?? "white")
+    fallbackTile(
+      $tileData,
+      item.type === "vehicle_part" && item.variants
+        ? item.variants[0].symbols[0]
+        : item.symbol,
+      item.color ?? "white"
+    )
   : null;
 $: baseUrl = $tileData?.baseUrl;
 
-const sym = [item.symbol].flat()[0] ?? " ";
+const sym =
+  item.type === "vehicle_part" && item.variants
+    ? item.variants[0].symbols[0]
+    : [item.symbol].flat()[0] ?? " ";
 const symbol = /^LINE_/.test(sym) ? "|" : sym;
 const color = item.color
   ? typeof item.color === "string"
@@ -49,7 +59,11 @@ function findTileOrLooksLike(
   jumps: number = 10
 ): TileInfo | undefined {
   function resolveId(id: string): string {
-    return item.type === "vehicle_part" ? `vp_${id}` : id;
+    return item.type === "vehicle_part"
+      ? item.variants?.[0].id
+        ? `vp_${id}_${item.variants[0].id}`
+        : `vp_${id}`
+      : id;
   }
   const idTile = findTile(tileData, resolveId(item.id ?? item.abstract));
   if (idTile) return idTile;
