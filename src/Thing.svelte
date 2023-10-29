@@ -27,6 +27,7 @@ import ConstructionGroup from "./types/ConstructionGroup.svelte";
 import Achievement from "./types/Achievement.svelte";
 import ObsoletionWarning from "./ObsoletionWarning.svelte";
 import Bionic from "./types/Bionic.svelte";
+import AddictionType from "./types/AddictionType.svelte";
 import * as Sentry from "@sentry/browser";
 import type { SupportedTypes } from "./types";
 import JsonView from "./JsonView.svelte";
@@ -80,6 +81,7 @@ const displays: Record<string, typeof SvelteComponent> = {
   GENERIC: Item,
   BIONIC_ITEM: Item,
   material: Material,
+  addiction_type: AddictionType,
   ammunition_type: AmmunitionType,
   tool_quality: ToolQuality,
   furniture: Furniture,

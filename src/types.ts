@@ -392,6 +392,17 @@ export type ComestibleSlot = {
   rot_spawn_chance?: number; // int, default 10
 };
 
+export type AddictionType = {
+  type: "addiction_type";
+  id: string;
+  name: Translation;
+  type_name: Translation;
+  description: Translation;
+  craving_morale?: string; // morale_type_id
+  effect_on_condition?: string; // effect_on_condition_id
+  builtin?: string;
+};
+
 export type ArmorPortionData = {
   encumbrance?: integer | [integer, integer];
   encumbrance_modifiers?: (
@@ -1951,6 +1962,7 @@ export type SupportedTypes = {
   MONSTER: Monster;
   SPELL: Spell;
   achievement: Achievement;
+  addiction_type: AddictionType;
   ammunition_type: AmmunitionType;
   ascii_art: AsciiArt;
   bionic: Bionic;

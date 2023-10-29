@@ -23,6 +23,13 @@ const _context = "Item Comestible Info";
     <dd>{item.spoils_in ?? "never"}</dd>
     <dt>{t("Health", { _context })}</dt>
     <dd>{item.healthy ?? 0}</dd>
+    {#if item.addiction_type}
+      <dt>{t("Addiction", { _context })}</dt>
+      <dd>
+        <ThingLink type="addiction_type" id={item.addiction_type} /> ({item.addiction_potential ??
+          0})
+      </dd>
+    {/if}
     {#if item.smoking_result}
       <dt>{t("Smoking Result", { _context })}</dt>
       <dd><ThingLink type="item" id={item.smoking_result} /></dd>

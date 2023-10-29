@@ -1,5 +1,5 @@
 <script lang="ts">
-import { CddaData, singularName } from "../data";
+import { CddaData, singular, singularName } from "../data";
 import ThingLink from "./ThingLink.svelte";
 import type { Proficiency } from "../types";
 import { getContext } from "svelte";
@@ -76,7 +76,7 @@ const proficienciesRequiring = data
       </dd>
     {/if}
   </dl>
-  <p style="color: var(--cata-color-gray)">{item.description}</p>
+  <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
 </section>
 
 {#if proficienciesRequiring.length}

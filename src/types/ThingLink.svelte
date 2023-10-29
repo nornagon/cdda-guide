@@ -6,6 +6,7 @@ import {
   pluralName,
   singularName,
   mapType,
+  singular,
 } from "../data";
 import type {
   Item,
@@ -61,6 +62,10 @@ function isItem(item: SupportedTypeMapped): item is Item {
       ? item.variants.find((v) => v.id === variantId) ?? item
       : item}
   <a href="{import.meta.env.BASE_URL}{type}/{id}"
-    >{item ? (plural ? pluralName : singularName)(nameSource) : id}</a
+    >{item
+      ? item.type === "addiction_type"
+        ? singular(item.type_name)
+        : (plural ? pluralName : singularName)(nameSource)
+      : id}</a
   >{#if item?.type === "mutation"}&nbsp;<MutationColor mutation={item} />{/if}
 {/if}
