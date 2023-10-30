@@ -1,5 +1,5 @@
 <script lang="ts">
-import { CddaData, byName, singular, singularName } from "../data";
+import { CddaData, byName, singular } from "../data";
 import ThingLink from "./ThingLink.svelte";
 import type { AddictionType } from "../types";
 import { getContext } from "svelte";
