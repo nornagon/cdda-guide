@@ -15,6 +15,7 @@ import Construction from "./Construction.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import TerFurnActivity from "./TerFurnActivity.svelte";
 import ThingLink from "./ThingLink.svelte";
+import TerrainSpawnedIn from "./item/TerrainSpawnedIn.svelte";
 
 const data = getContext<CddaData>("data");
 const _context = "Terrain / Furniture";
@@ -176,3 +177,5 @@ const constructions = data
     <Construction {construction} includeTitle />
   {/each}
 {/if}
+
+<TerrainSpawnedIn item_id={item.id} />

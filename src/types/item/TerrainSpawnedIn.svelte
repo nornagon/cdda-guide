@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
-import { furnitureByOMSAppearance } from "./spawnLocations";
+import { terrainByOMSAppearance } from "./spawnLocations";
 import { showProbability } from "./utils";
 import type { OvermapSpecial } from "../../types";
 import OvermapAppearance from "./OvermapAppearance.svelte";
@@ -11,7 +11,7 @@ export let item_id: string;
 
 const data = getContext<CddaData>("data");
 
-const spawnLocationsPromise = furnitureByOMSAppearance(data).then(
+const spawnLocationsPromise = terrainByOMSAppearance(data).then(
   (lootByAppearance) => {
     const spawnLocations: {
       overmap_special: OvermapSpecial;
