@@ -7,6 +7,8 @@ import Construction from "./Construction.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import { t } from "@transifex/native";
 import TerFurnActivity from "./TerFurnActivity.svelte";
+import FurnitureSpawnedIn from "./item/FurnitureSpawnedIn.svelte";
+import LimitedList from "../LimitedList.svelte";
 
 const data = getContext<CddaData>("data");
 const _context = "Terrain / Furniture";
@@ -42,6 +44,10 @@ function showProbability(prob: number) {
 const constructions = data
   .byType("construction")
   .filter((c) => c.post_terrain === item.id);
+
+const bashedFrom = data
+  .byType("furniture")
+  .filter((f) => f.id && f.bash?.furn_set === item.id);
 
 const harvestBySeason: Map<string, string> = new Map();
 for (const { seasons, id } of item.harvest_by_season ?? []) {
@@ -208,3 +214,15 @@ harvestBySeasonList.sort(
     <Construction {construction} includeTitle />
   {/each}
 {/if}
+
+{#if bashedFrom.length}
+  <section>
+    <h1>{t("Bashed From", { _context })}</h1>
+    <LimitedList items={bashedFrom} let:item>
+      <ItemSymbol {item} />
+      <ThingLink type="furniture" id={item.id} />
+    </LimitedList>
+  </section>
+{/if}
+
+<FurnitureSpawnedIn item_id={item.id} />

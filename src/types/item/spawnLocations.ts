@@ -127,40 +127,50 @@ async function yieldable<T>(
   });
 }
 
-const lootByOmSpecialCache = new WeakMap<CddaData, Map<string, Loot>>();
-export async function lootByOmSpecial(data: CddaData) {
-  if (lootByOmSpecialCache.has(data)) return lootByOmSpecialCache.get(data)!;
+function getMapgensByOmt(data: CddaData) {
   const mapgensByOmt = new Map<string, raw.Mapgen[]>();
   const add = (id: string, mapgen: raw.Mapgen) => {
     if (!mapgensByOmt.has(id)) mapgensByOmt.set(id, []);
     mapgensByOmt.get(id)!.push(mapgen);
   };
-  // If om_terrain is missing, this is nested_mapgen or update_mapgen
   for (const mapgen of data.byType("mapgen")) {
+    // If om_terrain is missing, this is nested_mapgen or update_mapgen
     if (!mapgen.om_terrain) continue;
+
+    // otherwise, om_terrain can be one of three things:
+    // 1. a string. if so, this mapgen can be instantiated for that om_terrain.
     if (typeof mapgen.om_terrain === "string") {
       add(mapgen.om_terrain, mapgen);
     } else {
       if (typeof mapgen.om_terrain[0] === "string") {
+        // 2. an array of strings. if so, this mapgen can be instantiated for
+        // any of the given om_terrains.
         for (const id of mapgen.om_terrain as string[]) add(id, mapgen);
       } else {
+        // 3. an array of arrays of strings. if so, this is actually several
+        // mapgens in a trench coat, and the ids are a grid.
         for (let y = 0; y < mapgen.om_terrain.length; y++)
           for (let x = 0; x < mapgen.om_terrain[y].length; x++)
             add(mapgen.om_terrain[y][x], offsetMapgen(mapgen, x, y));
       }
     }
   }
+  return mapgensByOmt;
+}
 
-  // om_terrain can be one of three things:
-  // 1. a string. if so, this mapgen can be instantiated for that om_terrain.
-  // 2. an array of strings. if so, this mapgen can be instantiated for any of the given om_terrains.
-  // 3. an array of arrays of strings. if so, this is actually several mapgens in a trench coat, and the ids are a grid.
+const lootByOmSpecialCache = new WeakMap<CddaData, Map<string, Loot>>();
+export async function lootByOmSpecial(
+  data: CddaData,
+  lootFn: (mapgen: raw.Mapgen) => Loot
+) {
+  if (lootByOmSpecialCache.has(data)) return lootByOmSpecialCache.get(data)!;
 
-  const overmap_specials = data.byType("overmap_special");
+  const mapgensByOmt = getMapgensByOmt(data);
+  const overmapSpecials = data.byType("overmap_special");
 
   const lootByOmSpecial = new Map<string, Loot>();
   await yieldable(async (relinquish) => {
-    for (const om_special of overmap_specials) {
+    for (const om_special of overmapSpecials) {
       if (om_special.subtype === "mutable") continue;
       const loots: Loot[] = [];
       for (const om of om_special.overmaps ?? []) {
@@ -169,7 +179,7 @@ export async function lootByOmSpecial(data: CddaData) {
         const loot = mergeLoot(
           mapgens.map((mg) => ({
             weight: mg.weight ?? 1000,
-            loot: getLootForMapgen(data, mg),
+            loot: lootFn(mg),
           }))
         );
         loots.push(loot);
@@ -252,11 +262,31 @@ const lootByOmAppearanceCache = new WeakMap<
 >();
 export function lootByOMSAppearance(data: CddaData) {
   if (!lootByOmAppearanceCache.has(data))
-    lootByOmAppearanceCache.set(data, computeLootByOMSAppearance(data));
+    lootByOmAppearanceCache.set(
+      data,
+      computeLootByOMSAppearance(data, (mg) => getLootForMapgen(data, mg))
+    );
   return lootByOmAppearanceCache.get(data)!;
 }
-async function computeLootByOMSAppearance(data: CddaData) {
-  const lootByOMS = await lootByOmSpecial(data);
+
+const furnitureByOmAppearanceCache = new WeakMap<
+  CddaData,
+  Promise<Map<string, { loot: Map<string, number>; ids: string[] }>>
+>();
+export function furnitureByOMSAppearance(data: CddaData) {
+  if (!furnitureByOmAppearanceCache.has(data))
+    furnitureByOmAppearanceCache.set(
+      data,
+      computeLootByOMSAppearance(data, (mg) => getFurnitureForMapgen(data, mg))
+    );
+  return furnitureByOmAppearanceCache.get(data)!;
+}
+
+async function computeLootByOMSAppearance(
+  data: CddaData,
+  lootFn: (mapgen: raw.Mapgen) => Loot
+) {
+  const lootByOMS = await lootByOmSpecial(data, lootFn);
   const lootByOMSAppearance = new Map<
     string,
     { loot: Map<string, number>; ids: string[] }
@@ -432,6 +462,40 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   return loot;
 }
 
+const furnitureForMapgenCache = new WeakMap<raw.Mapgen, Loot>();
+export function getFurnitureForMapgen(
+  data: CddaData,
+  mapgen: raw.Mapgen
+): Loot {
+  if (furnitureForMapgenCache.has(mapgen))
+    return furnitureForMapgenCache.get(mapgen)!;
+  const palette = parseFurnPalette(data, mapgen.object);
+  const place_furniture = (mapgen.object.place_furniture ?? []).map(
+    ({ furn }) => ({
+      loot: new Map([[furn, 1]]),
+    })
+  );
+  const additional_items = collection([...place_furniture]);
+  const countByPalette = new Map<string, number>();
+  for (const row of mapgen.object.rows ?? [])
+    for (const char of row)
+      if (palette.has(char))
+        countByPalette.set(char, (countByPalette.get(char) ?? 0) + 1);
+  const items: { loot: Loot }[] = [];
+  for (const [sym, count] of countByPalette.entries()) {
+    const loot = palette.get(sym)!;
+    const multipliedLoot: Loot = new Map();
+    for (const [id, chance] of loot.entries()) {
+      multipliedLoot.set(id, 1 - Math.pow(1 - chance, count));
+    }
+    items.push({ loot: multipliedLoot });
+  }
+  items.push({ loot: additional_items });
+  const loot = collection(items);
+  lootForMapgenCache.set(mapgen, loot);
+  return loot;
+}
+
 function repeatThroughArr(
   loot: [string, chance][],
   repeat: undefined | number | [number] | [number, number],
@@ -491,6 +555,9 @@ type RawPalette = {
   items?: raw.PlaceMapping<raw.MapgenItemGroup>;
   sealed_item?: raw.PlaceMapping<raw.MapgenSealedItem>;
   nested?: raw.PlaceMapping<raw.MapgenNested>;
+
+  furniture?: raw.PlaceMappingAlternative<raw.MapgenValue>;
+
   palettes?: raw.MapgenValue[];
 };
 
@@ -505,6 +572,31 @@ function parsePlaceMapping<T>(
         (Array.isArray(val) ? val : [val]).flatMap((x: T) => [...extract(x)])
       ),
     ])
+  );
+}
+
+function parsePlaceMappingAlternative<T>(
+  mapping: undefined | raw.PlaceMappingAlternative<T>,
+  extract: (t: T) => Iterable<{ chance: chance; loot: Loot }>
+): Map<string, Loot> {
+  return new Map(
+    Object.entries(mapping ?? {}).map(([sym, val]) => {
+      const vals = (Array.isArray(val) ? val : [val]).map(
+        (x: T | [T, number]) => (Array.isArray(x) ? x : ([x, 1] as [T, number]))
+      );
+      const total = vals.reduce((m, x) => m + x[1], 0);
+      return [
+        sym,
+        collection(
+          vals.flatMap((x: [T, number]) =>
+            [...extract(x[0])].map((v) => ({
+              ...v,
+              chance: (v.chance * x[1]) / total,
+            }))
+          )
+        ),
+      ];
+    })
   );
 }
 
@@ -584,5 +676,47 @@ export function parsePalette(
   });
   const ret = mergePalettes([item, items, sealed_item, nested, ...palettes]);
   paletteCache.set(palette, ret);
+  return ret;
+}
+
+const furnPaletteCache = new WeakMap<RawPalette, Map<string, Loot>>();
+export function parseFurnPalette(
+  data: CddaData,
+  palette: RawPalette
+): Map<string, Loot> {
+  if (furnPaletteCache.has(palette)) return furnPaletteCache.get(palette)!;
+  const furniture = parsePlaceMappingAlternative(
+    palette.furniture,
+    function* (furn) {
+      const value = getMapgenValue(furn);
+      if (value)
+        yield {
+          loot: new Map([[value, 1]]),
+          chance: 1,
+        };
+    }
+  );
+  const palettes = (palette.palettes ?? []).flatMap((val) => {
+    if (typeof val === "string") {
+      return [parseFurnPalette(data, data.byId("palette", val))];
+    } else if ("distribution" in val) {
+      const opts = val.distribution;
+      function prob<T>(it: T | [T, number]) {
+        return Array.isArray(it) ? it[1] : 1;
+      }
+      function id<T>(it: T | [T, number]) {
+        return Array.isArray(it) ? it[0] : it;
+      }
+      const totalProb = opts.reduce((m, it) => m + prob(it), 0);
+      return opts.map((it) =>
+        attenuatePalette(
+          parseFurnPalette(data, data.byId("palette", id(it))),
+          prob(it) / totalProb
+        )
+      );
+    } else return [];
+  });
+  const ret = mergePalettes([furniture, ...palettes]);
+  furnPaletteCache.set(palette, ret);
   return ret;
 }

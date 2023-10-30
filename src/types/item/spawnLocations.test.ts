@@ -3,6 +3,7 @@
  */
 import {
   collection,
+  getFurnitureForMapgen,
   getLootForMapgen,
   parsePalette,
   repeatChance,
@@ -322,7 +323,7 @@ describe("repeatChance()", () => {
   });
 });
 
-describe("foo", () => {
+describe("loot", () => {
   it("place_loot", async () => {
     const data = new CddaData([
       {
@@ -506,5 +507,43 @@ describe("nested mapgen", () => {
     // NB, lootByOmSpecial is what handles mapgen offsets, so we have to call through that.
     const loot = await getLootForMapgen(data, data.byType("mapgen")[0]);
     expect([...loot.entries()]).toEqual([["test_item", 1]]);
+  });
+});
+
+describe("furniture", () => {
+  it("furniture", async () => {
+    const data = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        om_terrain: "test_ter",
+        object: {
+          fill_ter: "t_floor",
+          rows: ["."],
+          furniture: {
+            ".": "f_test_furn",
+          },
+        },
+      } as Mapgen,
+    ]);
+    const loot = getFurnitureForMapgen(data, data.byType("mapgen")[0]);
+    expect(loot.get("f_test_furn")).toEqual(1);
+  });
+
+  it("place_furniture", async () => {
+    const data = new CddaData([
+      {
+        type: "mapgen",
+        method: "json",
+        om_terrain: "test_ter",
+        object: {
+          fill_ter: "t_floor",
+          rows: ["."],
+          place_furniture: [{ x: 0, y: 0, furn: "f_test_furn" }],
+        },
+      } as Mapgen,
+    ]);
+    const loot = getFurnitureForMapgen(data, data.byType("mapgen")[0]);
+    expect(loot.get("f_test_furn")).toEqual(1);
   });
 });

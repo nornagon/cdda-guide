@@ -1101,6 +1101,10 @@ export interface Mapgen {
 }
 
 export type PlaceMapping<T> = Record<string, T | T[]>;
+export type PlaceMappingAlternative<T> = Record<
+  string,
+  T | (T | [T, number])[]
+>;
 type PlaceList<T> = (MapgenPlace & T)[];
 
 interface MapgenPlace {
@@ -1109,12 +1113,21 @@ interface MapgenPlace {
   repeat?: MapgenInt;
 }
 
+export type MapgenPlaceTerrain = {
+  ter: string;
+};
+
+export type MapgenPlaceFurniture = {
+  furn: string;
+};
+
 export interface MapgenObject {
   fill_ter?: string;
   rows?: string[];
-  //terrain?: any; // TODO:
-  //place_terrain?: PlaceTerrain[];
-  //furniture?: any; // TODO:
+  terrain?: PlaceMappingAlternative<MapgenValue>;
+  place_terrain?: PlaceList<MapgenPlaceTerrain>;
+  furniture?: PlaceMappingAlternative<MapgenValue>;
+  place_furniture?: PlaceList<MapgenPlaceFurniture>;
 
   items?: PlaceMapping<MapgenItemGroup>;
   place_items?: PlaceList<MapgenItemGroup>;
