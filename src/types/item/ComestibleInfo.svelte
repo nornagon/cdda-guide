@@ -42,7 +42,7 @@ const _context = "Item Comestible Info";
       <dt>{t("Vitamins (%RDA)", { _context })}</dt>
       <dd>
         {#each item.vitamins as [vitamin, rdapct], i}
-          <ThingLink id={vitamin} type="vitamin" /> ({rdapct}%){#if i < item.vitamins.length - 2}{", "}{:else if i === item.vitamins.length - 2}{" and "}{/if}
+          <ThingLink id={vitamin} type="vitamin" /> ({#if typeof rdapct === "number"}{rdapct}%{:else}{rdapct}{/if}){#if i < item.vitamins.length - 2}{", "}{:else if i === item.vitamins.length - 2}{" and "}{/if}
         {/each}
       </dd>
     {/if}

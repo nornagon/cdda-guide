@@ -365,31 +365,31 @@ export type AmmoSlot = {
 export type ComestibleSlot = {
   comestible_type?: string; // DRINK, FOOD or MED
   tool?: string; // item_id, needed to consume
-  charges?: integer; // int, default 1
+  charges?: integer; // default 1
   stack_size?: integer; // defaults to charges
-  quench?: integer; // int, default 0
-  fun?: integer; // int, default 0
-  stim?: integer; // int, default 0
-  fatigue_mod?: integer; // int, default 0
-  healthy?: integer; // int, default 0
-  parasites?: integer; // int, default 0
-  radiation?: integer; // int, default 0
+  quench?: integer; // default 0
+  fun?: integer; // default 0
+  stim?: integer; // default 0
+  fatigue_mod?: integer; // default 0
+  healthy?: integer; // default 0
+  parasites?: integer; // default 0
+  radiation?: integer; // default 0
   freezing_point?: number; // float, default 32
   spoils_in?: string | number; // duration, default 0 (never spoils)
   cooks_like?: string; // item_id
   smoking_result?: string; // item_id
   contamination?: {
     disease: string /* diseasetype_id */;
-    probability: number /* int */;
+    probability: integer;
   }[];
   primary_material?: string; // material_id
   monotony_penalty?: number; // default 2 unless material is junk, in which case 0
   addiction_type?: string;
-  addiction_potential?: number; // int, default 0
-  calories?: number; // int
-  vitamins?: [string, number /* int */][];
+  addiction_potential?: integer; // default 0
+  calories?: integer;
+  vitamins?: [string, integer | mass][];
   rot_spawn?: string; // mongroup_id
-  rot_spawn_chance?: number; // int, default 10
+  rot_spawn_chance?: integer; // default 10
 };
 
 export type AddictionType = {
@@ -1014,6 +1014,7 @@ export type Vitamin = {
   disease_excess?: [number, number][];
   decays_into?: [string, number][];
   flags?: string[];
+  weight_per_unit?: mass;
 };
 
 export type LeapAttack = {

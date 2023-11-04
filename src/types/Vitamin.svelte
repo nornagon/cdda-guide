@@ -6,6 +6,7 @@ import {
   CddaData,
   normalizeUseAction,
   parseDuration,
+  parseMass,
   singular,
   singularName,
 } from "../data";
@@ -38,9 +39,16 @@ const containingComestibles = data
   )
   .map((c) => {
     const comestible = c as SupportedTypes["COMESTIBLE"];
+    const pctOrMass = comestible.vitamins!.find((v) => v[0] === item.id)![1];
+    const pct: number =
+      typeof pctOrMass !== "number"
+        ? item.weight_per_unit
+          ? parseMass(pctOrMass) / parseMass(item.weight_per_unit)
+          : 0
+        : pctOrMass;
     return {
       comestible: c as Item,
-      pct: comestible.vitamins!.find((v) => v[0] === item.id)![1],
+      pct: pct,
     };
   });
 const containingDrugs = data
