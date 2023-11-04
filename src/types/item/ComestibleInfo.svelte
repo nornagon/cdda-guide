@@ -39,7 +39,7 @@ const _context = "Item Comestible Info";
       <dd>{(100 / (item.parasites ?? 0)).toPrecision(2)}%</dd>
     {/if}
     {#if item.vitamins?.length}
-      <dt>{t("Vitamins (%RDA)", { _context })}</dt>
+      <dt>{t("Vitamins", { _context })}</dt>
       <dd>
         {#each item.vitamins as [vitamin, rdapct], i}
           <ThingLink id={vitamin} type="vitamin" /> ({#if typeof rdapct === "number"}{rdapct}%{:else}{rdapct}{/if}){#if i < item.vitamins.length - 2}{", "}{:else if i === item.vitamins.length - 2}{" and "}{/if}

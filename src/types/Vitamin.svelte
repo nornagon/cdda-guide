@@ -43,7 +43,7 @@ const containingComestibles = data
     const pct: number =
       typeof pctOrMass !== "number"
         ? item.weight_per_unit
-          ? parseMass(pctOrMass) / parseMass(item.weight_per_unit)
+          ? parseMass(pctOrMass ?? "0 g") / parseMass(item.weight_per_unit)
           : 0
         : pctOrMass;
     return {
