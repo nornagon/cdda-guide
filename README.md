@@ -17,6 +17,7 @@ The Hitchhiker's Guide to the Cataclysm is maintained by [**@nornagon**](https:/
 - [**@hexagonrecursion**](https://github.com/hexagonrecursion)
 - [**@CalKerethi**](https://github.com/CalKerethi)
 - [**@hfox**](https://github.com/hfox)
+- [**@pizzasgood**](https://github.com/pizzasgood)
 
 Further, thanks to everyone who files bugs and feature requests in the issue tracker. You all help make the Guide what it is!
 
