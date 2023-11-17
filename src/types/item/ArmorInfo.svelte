@@ -73,9 +73,10 @@ for (const apd of item.armor ?? []) {
       const scale = maxCoverage(bp, apd) / 100;
       const existingScale = maxCoverage(bp, existing) / 100;
 
-      existing.coverage += ((apd.coverage ?? 0) * scale) | 0;
-      existing.cover_melee += ((apd.cover_melee ?? 0) * scale) | 0;
-      existing.cover_ranged += ((apd.cover_ranged ?? 0) * scale) | 0;
+      const baseCoverage = apd.coverage ?? 0;
+      existing.coverage += (baseCoverage * scale) | 0;
+      existing.cover_melee += ((apd.cover_melee ?? baseCoverage) * scale) | 0;
+      existing.cover_ranged += ((apd.cover_ranged ?? baseCoverage) * scale) | 0;
       existing.cover_vitals =
         (existing.cover_vitals ?? 0) + (apd.cover_vitals ?? 0);
 
