@@ -384,7 +384,9 @@ export type ComestibleSlot = {
   }[];
   primary_material?: string; // material_id
   monotony_penalty?: number; // default 2 unless material is junk, in which case 0
-  addiction_type?: string;
+  addiction_type?:
+    | string
+    | (string | { addiction: string; potential: integer })[];
   addiction_potential?: integer; // default 0
   calories?: integer;
   vitamins?: [string, integer | mass][];

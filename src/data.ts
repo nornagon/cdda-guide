@@ -23,6 +23,7 @@ import type {
   ItemGroupData,
   MapgenValue,
   ItemBasicInfo,
+  ComestibleSlot,
 } from "./types";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
@@ -1470,6 +1471,28 @@ export function normalizeDamageInstance(
   if (Array.isArray(damageInstance)) return damageInstance;
   else if ("values" in damageInstance) return damageInstance.values;
   else return [damageInstance];
+}
+
+export function normalizeAddictionTypes(
+  comestible: ComestibleSlot
+): { addiction: string; potential: number }[] {
+  const addictionType = comestible.addiction_type;
+  if (typeof addictionType === "string") {
+    return [
+      {
+        addiction: addictionType,
+        potential: comestible.addiction_potential ?? 0,
+      },
+    ];
+  } else if (Array.isArray(addictionType)) {
+    return addictionType.map((a) =>
+      typeof a === "string"
+        ? { addiction: a, potential: comestible.addiction_potential ?? 0 }
+        : a
+    );
+  } else {
+    return [];
+  }
 }
 
 const vpartVariants = [

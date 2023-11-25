@@ -2,6 +2,7 @@
 import { t } from "@transifex/native";
 import type { ComestibleSlot } from "../../types";
 import ThingLink from "../ThingLink.svelte";
+import { normalizeAddictionTypes } from "../../data";
 
 export let item: ComestibleSlot;
 
@@ -26,8 +27,13 @@ const _context = "Item Comestible Info";
     {#if item.addiction_type}
       <dt>{t("Addiction", { _context })}</dt>
       <dd>
-        <ThingLink type="addiction_type" id={item.addiction_type} /> ({item.addiction_potential ??
-          0})
+        <ul class="comma-separated">
+          {#each normalizeAddictionTypes(item) as { addiction, potential }, i}
+            <li>
+              <ThingLink type="addiction_type" id={addiction} /> ({potential})
+            </li>
+          {/each}
+        </ul>
       </dd>
     {/if}
     {#if item.smoking_result}

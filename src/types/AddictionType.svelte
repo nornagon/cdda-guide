@@ -1,7 +1,7 @@
 <script lang="ts">
-import { CddaData, byName, singular } from "../data";
+import { CddaData, byName, normalizeAddictionTypes, singular } from "../data";
 import ThingLink from "./ThingLink.svelte";
-import type { AddictionType } from "../types";
+import type { AddictionType, ComestibleSlot } from "../types";
 import { getContext } from "svelte";
 import LimitedList from "../LimitedList.svelte";
 import { t } from "@transifex/native";
@@ -14,7 +14,12 @@ const _context = "Addiction Type";
 
 const itemsWithAddictionType = data
   .byType("item")
-  .filter((i) => i.id && "addiction_type" in i && i.addiction_type === item.id)
+  .filter(
+    (i) =>
+      i.id &&
+      "addiction_type" in i &&
+      normalizeAddictionTypes(i).some((a) => a.addiction === item.id)
+  )
   .sort(byName);
 </script>
 
