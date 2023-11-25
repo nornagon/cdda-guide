@@ -515,8 +515,9 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
         {/if}
       </dl>
       {#if item.description}
-        <p style="color: var(--cata-color-gray); margin-bottom: 0;">
-          {singular(item.description)}
+        <p
+          style="color: var(--cata-color-gray); margin-bottom: 0; white-space: pre-wrap;">
+          <ColorText text={singular(item.description)} fgOnly={true} />
         </p>
       {/if}
     </div>
