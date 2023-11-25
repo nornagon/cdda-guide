@@ -259,6 +259,7 @@ const hiddenLocations = new Set([
   "valhalla_cult",
   "nuclear power plant",
   "tutorial",
+  "debug_item_group_test",
 ]);
 const lootByOmAppearanceCache = new WeakMap<
   CddaData,
