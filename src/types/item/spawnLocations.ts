@@ -239,8 +239,10 @@ function overmapAppearance(
   }
 }
 
+const url = new URL(location.href);
+const showAll = url.searchParams.has('hideNothing');
 // Showing these is a bit spoilery, and also they are visually large, so hide them.
-const hiddenLocations = new Set([
+const hiddenLocations = showAll ? new Set() : new Set([
   "Necropolis",
   "Isherwood Farms",
   "lab_mutagen_6_level",
