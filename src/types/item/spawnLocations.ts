@@ -240,29 +240,31 @@ function overmapAppearance(
 }
 
 const url = new URL(location.href);
-const showAll = url.searchParams.has('hideNothing');
+const showAll = url.searchParams.has("hideNothing");
 // Showing these is a bit spoilery, and also they are visually large, so hide them.
-const hiddenLocations = showAll ? new Set() : new Set([
-  "Necropolis",
-  "Isherwood Farms",
-  "lab_mutagen_6_level",
-  "Lab_SECURITY_1x1x6",
-  "Lab_CARGO_Surface",
-  "hub_01",
-  "aircraft_carrier",
-  "airliner_crashed",
-  "farm_abandoned",
-  "ranch_camp",
-  "exodii_base",
-  "Central Lab",
-  "4x4_microlab_vent_shaft",
-  "lab_subway_vent_shaft",
-  "mil_base",
-  "valhalla_cult",
-  "nuclear power plant",
-  "tutorial",
-  "debug_item_group_test",
-]);
+const hiddenLocations = showAll
+  ? new Set()
+  : new Set([
+      "Necropolis",
+      "Isherwood Farms",
+      "lab_mutagen_6_level",
+      "Lab_SECURITY_1x1x6",
+      "Lab_CARGO_Surface",
+      "hub_01",
+      "aircraft_carrier",
+      "airliner_crashed",
+      "farm_abandoned",
+      "ranch_camp",
+      "exodii_base",
+      "Central Lab",
+      "4x4_microlab_vent_shaft",
+      "lab_subway_vent_shaft",
+      "mil_base",
+      "valhalla_cult",
+      "nuclear power plant",
+      "tutorial",
+      "debug_item_group_test",
+    ]);
 const lootByOmAppearanceCache = new WeakMap<
   CddaData,
   Promise<Map<string, { loot: Map<string, number>; ids: string[] }>>
