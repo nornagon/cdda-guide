@@ -1,8 +1,31 @@
-type integer = number;
-type volume = number | string;
-type mass = number | string;
-type duration = number | string;
-type energy = number | string;
+export type integer = number;
+export type volume = number | string;
+export type mass = number | string;
+export type duration = number | string;
+export type energy = number | string;
+
+export type var_part = {
+  default_str?: string;
+  default?: duration | number;
+  default_time?: duration;
+  var_name?: string;
+  type?: string;
+  context?: string;
+} & (
+  | { u_val: string }
+  | { npc_val: string }
+  | { global_val: string }
+  | { var_val: string }
+  | { context_val: string }
+  | { faction_val: string }
+  | { party_val: string }
+);
+export type dbl_or_var_part =
+  | number
+  | { arithmetic: any }
+  | { math: any }
+  | var_part;
+export type dbl_or_var = [dbl_or_var_part, dbl_or_var_part] | dbl_or_var_part;
 
 export type Translation =
   | string
@@ -1097,7 +1120,7 @@ export interface Mapgen {
   type: "mapgen";
   method: "json";
   om_terrain?: string | string[] | string[][];
-  weight?: integer;
+  weight?: dbl_or_var;
   object: MapgenObject;
   nested_mapgen_id?: string;
   update_mapgen_id?: string;

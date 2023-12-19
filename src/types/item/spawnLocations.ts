@@ -158,6 +158,15 @@ function getMapgensByOmt(data: CddaData) {
   return mapgensByOmt;
 }
 
+function normalizeMapgenVar(
+  dbl_or_var: raw.dbl_or_var | undefined
+): number | undefined {
+  if (dbl_or_var) {
+    if (typeof dbl_or_var === "number") return dbl_or_var;
+    else if ("default" in dbl_or_var) return Number(dbl_or_var.default);
+  }
+}
+
 const lootByOmSpecialCache = new WeakMap<CddaData, Map<string, Loot>>();
 export async function lootByOmSpecial(
   data: CddaData,
@@ -178,7 +187,7 @@ export async function lootByOmSpecial(
         const mapgens = mapgensByOmt.get(overmap_id) ?? [];
         const loot = mergeLoot(
           mapgens.map((mg) => ({
-            weight: mg.weight ?? 1000,
+            weight: normalizeMapgenVar(mg.weight) ?? 1000,
             loot: lootFn(mg),
           }))
         );
@@ -416,7 +425,7 @@ function lootForChunks(
       const loot = mergeLoot(
         chunkMapgens.map((mg) => {
           const loot = getLootForMapgen(data, mg);
-          const weight = mg.weight ?? 1000;
+          const weight = normalizeMapgenVar(mg.weight) ?? 1000;
           return { loot, weight };
         })
       );
