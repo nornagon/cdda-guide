@@ -20,40 +20,26 @@ describe("collection()", () => {
   });
   it("given one item, returns it", () => {
     const loot = new Map([["fake_item", 1.0]]);
-    const given = [{ chance: 1.0, loot }];
+    const given = [loot];
 
     const got = collection(given);
 
     expect(got).toStrictEqual(loot);
   });
-  it("knowns about item chance", () => {
-    const given = [{ chance: 0.5, loot: new Map([["fake_item", 1.0]]) }];
-
-    const got = collection(given);
-
-    expect(got).toStrictEqual(new Map([["fake_item", 0.5]]));
-  });
   it("knowns about loot chance", () => {
-    const given = [{ chance: 1.0, loot: new Map([["fake_item", 0.5]]) }];
+    const given = [new Map([["fake_item", 0.5]])];
 
     const got = collection(given);
 
     expect(got).toStrictEqual(new Map([["fake_item", 0.5]]));
   });
   it("can add up probabilities", () => {
-    const item = { chance: 1.0, loot: new Map([["fake_item", 0.5]]) };
+    const item = new Map([["fake_item", 0.5]]);
     const given = [item, item];
 
     const got = collection(given);
 
     expect(got).toStrictEqual(new Map([["fake_item", 0.75]]));
-  });
-  it("defaunts chance to 1", () => {
-    const given = [{ loot: new Map([["fake_item", 0.5]]) }];
-
-    const got = collection(given);
-
-    expect(got).toStrictEqual(new Map([["fake_item", 0.5]]));
   });
 });
 

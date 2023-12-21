@@ -25,16 +25,13 @@ export function repeatChance(
 
 export type Loot = Map</**item_id*/ string, chance>;
 /** Independently choose whether to place each item  */
-export function collection(
-  items: Array<{ loot: Loot; chance?: chance }>
-): Loot {
-  if (items.length === 1 && (items[0].chance ?? 1) === 1) return items[0].loot;
+export function collection(items: Array<Loot>): Loot {
+  if (items.length === 1) return items[0];
   const ret = new Map();
-  for (const { loot, chance = 1.0 } of items) {
+  for (const loot of items) {
     for (const [item_id, item_chance] of loot.entries()) {
       const current_chance = ret.get(item_id) ?? 0;
-      const add_chance = item_chance * chance;
-      const result = 1 - (1 - current_chance) * (1 - add_chance);
+      const result = 1 - (1 - current_chance) * (1 - item_chance);
       ret.set(item_id, result);
     }
   }
@@ -441,25 +438,24 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   if (lootForMapgenCache.has(mapgen)) return lootForMapgenCache.get(mapgen)!;
   const palette = parsePalette(data, mapgen.object);
   const place_items = (mapgen.object.place_items ?? []).map(
-    ({ item, chance = 100, repeat }) => ({
-      loot: parseItemGroup(data, item, repeat, chance / 100),
-    })
+    ({ item, chance = 100, repeat }) =>
+      parseItemGroup(data, item, repeat, chance / 100)
   );
   const place_item = [
     ...(mapgen.object.place_item ?? []),
     ...(mapgen.object.add ?? []),
-  ].map(({ item, chance = 100, repeat }) => ({
-    loot: new Map([[item, repeatChance(repeat, chance / 100)]]),
-  }));
+  ].map(
+    ({ item, chance = 100, repeat }) =>
+      new Map([[item, repeatChance(repeat, chance / 100)]])
+  );
   const place_loot = (mapgen.object.place_loot ?? []).map(
-    ({ item, group, chance = 100, repeat }) => ({
+    ({ item, group, chance = 100, repeat }) =>
       // This assumes that .item and .group are mutually exclusive
-      loot: item
+      item
         ? new Map([[item, 1]])
         : group
         ? parseItemGroup(data, group, repeat, chance / 100)
-        : new Map(),
-    })
+        : new Map()
   );
   const place_nested = (mapgen.object.place_nested ?? []).map((nested) => {
     const loot = lootForChunks(data, nested.chunks ?? []);
@@ -467,7 +463,7 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
     for (const [id, chance] of loot.entries()) {
       multipliedLoot.set(id, repeatChance(nested.repeat, chance));
     }
-    return { loot: multipliedLoot };
+    return multipliedLoot;
   });
   const additional_items = collection([
     ...place_items,
@@ -480,16 +476,16 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
     for (const char of row)
       if (palette.has(char))
         countByPalette.set(char, (countByPalette.get(char) ?? 0) + 1);
-  const items: { loot: Loot }[] = [];
+  const items: Loot[] = [];
   for (const [sym, count] of countByPalette.entries()) {
     const loot = palette.get(sym)!;
     const multipliedLoot: Loot = new Map();
     for (const [id, chance] of loot.entries()) {
       multipliedLoot.set(id, 1 - Math.pow(1 - chance, count));
     }
-    items.push({ loot: multipliedLoot });
+    items.push(multipliedLoot);
   }
-  items.push({ loot: additional_items });
+  items.push(additional_items);
   const loot = collection(items);
   lootForMapgenCache.set(mapgen, loot);
   return loot;
@@ -504,9 +500,7 @@ export function getFurnitureForMapgen(
     return furnitureForMapgenCache.get(mapgen)!;
   const palette = parseFurniturePalette(data, mapgen.object);
   const place_furniture = (mapgen.object.place_furniture ?? []).map(
-    ({ furn }) => ({
-      loot: new Map([[furn, 1]]),
-    })
+    ({ furn }) => new Map([[furn, 1]])
   );
   const additional_items = collection([...place_furniture]);
   const countByPalette = new Map<string, number>();
@@ -514,16 +508,16 @@ export function getFurnitureForMapgen(
     for (const char of row)
       if (palette.has(char))
         countByPalette.set(char, (countByPalette.get(char) ?? 0) + 1);
-  const items: { loot: Loot }[] = [];
+  const items: Loot[] = [];
   for (const [sym, count] of countByPalette.entries()) {
     const loot = palette.get(sym)!;
     const multipliedLoot: Loot = new Map();
     for (const [id, chance] of loot.entries()) {
       multipliedLoot.set(id, 1 - Math.pow(1 - chance, count));
     }
-    items.push({ loot: multipliedLoot });
+    items.push(multipliedLoot);
   }
-  items.push({ loot: additional_items });
+  items.push(additional_items);
   const loot = collection(items);
   furnitureForMapgenCache.set(mapgen, loot);
   return loot;
@@ -534,25 +528,25 @@ export function getTerrainForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   if (terrainForMapgenCache.has(mapgen))
     return terrainForMapgenCache.get(mapgen)!;
   const palette = parseTerrainPalette(data, mapgen.object);
-  const place_terrain = (mapgen.object.place_terrain ?? []).map(({ ter }) => ({
-    loot: new Map([[ter, 1]]),
-  }));
+  const place_terrain = (mapgen.object.place_terrain ?? []).map(
+    ({ ter }) => new Map([[ter, 1]])
+  );
   const additional_items = collection([...place_terrain]);
   const countByPalette = new Map<string, number>();
   for (const row of mapgen.object.rows ?? [])
     for (const char of row)
       if (palette.has(char))
         countByPalette.set(char, (countByPalette.get(char) ?? 0) + 1);
-  const items: { loot: Loot }[] = [];
+  const items: Loot[] = [];
   for (const [sym, count] of countByPalette.entries()) {
     const loot = palette.get(sym)!;
     const multipliedLoot: Loot = new Map();
     for (const [id, chance] of loot.entries()) {
       multipliedLoot.set(id, 1 - Math.pow(1 - chance, count));
     }
-    items.push({ loot: multipliedLoot });
+    items.push(multipliedLoot);
   }
-  items.push({ loot: additional_items });
+  items.push(additional_items);
   const loot = collection(items);
   terrainForMapgenCache.set(mapgen, loot);
   return loot;
@@ -596,19 +590,7 @@ function mergePalettes(palettes: Map<string, Loot>[]): Map<string, Loot> {
   return [palettes]
     .map((x) => x.flatMap((p) => [...p]))
     .map((x) => [...multimap(x)])
-    .map((x) =>
-      x.map(
-        ([k, v]) =>
-          [
-            k,
-            collection(
-              v.map((l) => ({
-                loot: l,
-              }))
-            ),
-          ] as const
-      )
-    )
+    .map((x) => x.map(([k, v]) => [k, collection(v)] as const))
     .map((x: (readonly [string, Loot])[]) => new Map(x))[0];
 }
 
@@ -626,7 +608,7 @@ type RawPalette = {
 
 function parsePlaceMapping<T>(
   mapping: undefined | raw.PlaceMapping<T>,
-  extract: (t: T) => Iterable<{ chance: chance; loot: Loot }>
+  extract: (t: T) => Iterable<Loot>
 ): Map<string, Loot> {
   return new Map(
     Object.entries(mapping ?? {}).map(([sym, val]) => [
@@ -640,7 +622,7 @@ function parsePlaceMapping<T>(
 
 function parsePlaceMappingAlternative<T>(
   mapping: undefined | raw.PlaceMappingAlternative<T>,
-  extract: (t: T) => Iterable<{ chance: chance; loot: Loot }>
+  extract: (t: T) => Iterable<Loot>
 ): Map<string, Loot> {
   return new Map(
     Object.entries(mapping ?? {}).map(([sym, val]) => {
@@ -651,11 +633,8 @@ function parsePlaceMappingAlternative<T>(
       return [
         sym,
         collection(
-          vals.flatMap((x: [T, number]) =>
-            [...extract(x[0])].map((v) => ({
-              ...v,
-              chance: (v.chance * x[1]) / total,
-            }))
+          vals.flatMap(([x, weight]: [T, number]) =>
+            [...extract(x)].map((v) => attenuateLoot(v, weight / total))
           )
         ),
       ];
@@ -673,49 +652,39 @@ export function parsePalette(
     palette.sealed_item,
     function* ({ item, items, chance = 100 }) {
       if (items)
-        yield {
-          loot: parseItemGroup(
-            data,
-            items.item,
-            items.repeat,
-            ((chance / 100) * (items.chance ?? 100)) / 100
-          ),
-          chance: 1,
-        };
+        yield parseItemGroup(
+          data,
+          items.item,
+          items.repeat,
+          ((chance / 100) * (items.chance ?? 100)) / 100
+        );
       if (item && typeof item.item === "string")
-        yield {
-          loot: new Map([[item.item, 1]]),
-          chance: repeatChance(
-            item.repeat,
-            (chance / 100) * ((item.chance ?? 100) / 100)
-          ),
-        };
+        yield new Map([
+          [
+            item.item,
+            repeatChance(
+              item.repeat,
+              (chance / 100) * ((item.chance ?? 100) / 100)
+            ),
+          ],
+        ]);
     }
   );
   const item = parsePlaceMapping(
     palette.item,
     function* ({ item, chance = 100, repeat }) {
       if (typeof item === "string")
-        yield {
-          loot: new Map([[item, 1]]),
-          chance: repeatChance(repeat, chance / 100),
-        };
+        yield new Map([[item, repeatChance(repeat, chance / 100)]]);
     }
   );
   const items = parsePlaceMapping(
     palette.items,
     function* ({ item, chance = 100, repeat }) {
-      yield {
-        loot: parseItemGroup(data, item, repeat, chance / 100),
-        chance: 1,
-      };
+      yield parseItemGroup(data, item, repeat, chance / 100);
     }
   );
   const nested = parsePlaceMapping(palette.nested, function* ({ chunks }) {
-    yield {
-      loot: lootForChunks(data, chunks ?? []),
-      chance: 1,
-    };
+    yield lootForChunks(data, chunks ?? []);
   });
   const palettes = (palette.palettes ?? []).flatMap((val) => {
     if (typeof val === "string") {
@@ -753,11 +722,7 @@ export function parseFurniturePalette(
     palette.furniture,
     function* (furn) {
       const value = getMapgenValue(furn);
-      if (value)
-        yield {
-          loot: new Map([[value, 1]]),
-          chance: 1,
-        };
+      if (value) yield new Map([[value, 1]]);
     }
   );
   const palettes = (palette.palettes ?? []).flatMap((val) => {
@@ -796,11 +761,7 @@ export function parseTerrainPalette(
     palette.terrain,
     function* (ter) {
       const value = getMapgenValue(ter);
-      if (value)
-        yield {
-          loot: new Map([[value, 1]]),
-          chance: 1,
-        };
+      if (value) yield new Map([[value, 1]]);
     }
   );
   const palettes = (palette.palettes ?? []).flatMap((val) => {
