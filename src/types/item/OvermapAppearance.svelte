@@ -9,7 +9,9 @@ export let overmapSpecial: OvermapSpecial;
 export let showZ: number = 0;
 
 const overmaps = [
-  ...((overmapSpecial as OvermapSpecial & { subtype: "fixed" }).overmaps ?? []),
+  ...(overmapSpecial.subtype !== "mutable"
+    ? overmapSpecial.overmaps ?? []
+    : []),
 ];
 let minX = Infinity,
   minY = Infinity;
@@ -31,7 +33,7 @@ function makeAppearanceGrid(z: number) {
   for (let y = minY; y <= maxY; y++) {
     const appearanceRow: { sym?: string; color: string; name: string }[] = [];
     for (let x = minX; x <= maxX; x++) {
-      const om = overmapsByPoint.get(`${x}|${y}|${showZ}`);
+      const om = overmapsByPoint.get(`${x}|${y}|${z}`);
       if (om) {
         const [, omt_id, dir] = /^(.+?)(?:_(north|south|east|west))?$/.exec(
           om.overmap

@@ -29,7 +29,7 @@ const lootPromise = lootForOmSpecial(data, item, (mg) =>
   getLootForMapgen(data, mg)
 );
 
-let showZ = 0;
+let showZ = levels.includes(0) ? 0 : levels[0];
 </script>
 
 <h1>{singularName(item)}</h1>
@@ -58,12 +58,16 @@ let showZ = 0;
               <option value={level} label={`Z=${level}`} />{/each}
           </datalist>
         </div>
+      {:else if levels[0] !== 0}
+        <div>
+          Z={levels[0]}
+        </div>
       {/if}
     </div>
   {/if}
 
-  <dl>
-    {#if item.flags?.length}
+  {#if item.flags?.length}
+    <dl>
       <dt>{t("Flags")}</dt>
       <dd>
         <ul class="comma-separated">
@@ -72,8 +76,8 @@ let showZ = 0;
           {/each}
         </ul>
       </dd>
-    {/if}
-  </dl>
+    </dl>
+  {/if}
 </section>
 
 {#await lootPromise}

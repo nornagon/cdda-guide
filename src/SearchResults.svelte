@@ -1,5 +1,12 @@
 <script lang="ts">
-import { mapType, singular, singularName, loadProgress, i18n } from "./data";
+import {
+  mapType,
+  singular,
+  singularName,
+  loadProgress,
+  i18n,
+  omsName,
+} from "./data";
 import type { CddaData } from "./data";
 import * as fuzzysort from "fuzzysort";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
@@ -12,6 +19,8 @@ import { setContext } from "svelte";
 import { t } from "@transifex/native";
 import ThingLink from "./types/ThingLink.svelte";
 import LimitedList from "./LimitedList.svelte";
+import LimitedTableList from "./LimitedTableList.svelte";
+import OvermapAppearance from "./types/item/OvermapAppearance.svelte";
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -149,19 +158,32 @@ $: matchingObjectsList = matchingObjects
 
 {#if matchingObjectsList}
   {#each matchingObjectsList as [type, results]}
-    <h1>{type === "overmap_special" ? "location" : type.replace(/_/g, " ")}</h1>
-    <LimitedList items={results} let:item={result} limit={50}>
-      {@const item = data._flatten(result.item)}
-      <ItemSymbol {item} />
-      <ThingLink
-        type={mapType(result.item.type)}
-        id={result.item.id}
-        variantId={result.variant?.id} />
-      {#if /obsolet/.test(result.item.__filename ?? "")}
-        <em style="color: var(--cata-color-gray)"
-          >({t("obsolete", { _context: "Search Results" })})</em>
-      {/if}
-    </LimitedList>
+    {#if type === "overmap_special"}
+      <h1>location</h1>
+      <LimitedTableList items={results} let:item={result} limit={50}>
+        <td style="text-align: center">
+          <OvermapAppearance overmapSpecial={result.item} />
+        </td>
+        <td style="vertical-align: middle">
+          <a href="/overmap_special/{result.item.id}"
+            >{omsName(data, result.item)}</a>
+        </td>
+      </LimitedTableList>
+    {:else}
+      <h1>{type.replace(/_/g, " ")}</h1>
+      <LimitedList items={results} let:item={result} limit={50}>
+        {@const item = data._flatten(result.item)}
+        <ItemSymbol {item} />
+        <ThingLink
+          type={mapType(result.item.type)}
+          id={result.item.id}
+          variantId={result.variant?.id} />
+        {#if /obsolet/.test(result.item.__filename ?? "")}
+          <em style="color: var(--cata-color-gray)"
+            >({t("obsolete", { _context: "Search Results" })})</em>
+        {/if}
+      </LimitedList>
+    {/if}
   {:else}
     <em>{t("No results.", { _context: "Search Results" })}</em>
   {/each}
