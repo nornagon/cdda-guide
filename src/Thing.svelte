@@ -31,6 +31,7 @@ import AddictionType from "./types/AddictionType.svelte";
 import * as Sentry from "@sentry/browser";
 import type { SupportedTypes } from "./types";
 import JsonView from "./JsonView.svelte";
+import OvermapSpecial from "./types/OvermapSpecial.svelte";
 
 export let item: { id: string; type: string };
 
@@ -102,6 +103,8 @@ const displays: Record<string, typeof SvelteComponent> = {
   achievement: Achievement,
   conduct: Achievement,
   bionic: Bionic,
+  overmap_special: OvermapSpecial,
+  city_building: OvermapSpecial,
 };
 
 const display = (obj && displays[obj.type]) ?? Unknown;

@@ -124,7 +124,9 @@ async function yieldable<T>(
   });
 }
 
-function getMapgensByOmt(data: CddaData) {
+const mapgensByOmtCache = new WeakMap<CddaData, Map<string, raw.Mapgen[]>>();
+function getMapgensByOmt(data: CddaData): Map<string, raw.Mapgen[]> {
+  if (mapgensByOmtCache.has(data)) return mapgensByOmtCache.get(data)!;
   const mapgensByOmt = new Map<string, raw.Mapgen[]>();
   const add = (id: string, mapgen: raw.Mapgen) => {
     if (!mapgensByOmt.has(id)) mapgensByOmt.set(id, []);
@@ -152,6 +154,7 @@ function getMapgensByOmt(data: CddaData) {
       }
     }
   }
+  mapgensByOmtCache.set(data, mapgensByOmt);
   return mapgensByOmt;
 }
 
@@ -164,37 +167,51 @@ function normalizeMapgenVar(
   }
 }
 
-const lootByOmSpecialCache = new WeakMap<CddaData, Map<string, Loot>>();
+export function lootForOmt(
+  data: CddaData,
+  omt_id: string,
+  lootFn: (mapgen: raw.Mapgen) => Loot
+) {
+  const mapgensByOmt = getMapgensByOmt(data);
+  const mapgens = mapgensByOmt.get(omt_id) ?? [];
+  const loot = mergeLoot(
+    mapgens.map((mg) => ({
+      weight: normalizeMapgenVar(mg.weight) ?? 1000,
+      loot: lootFn(mg),
+    }))
+  );
+  return loot;
+}
+
+export async function lootForOmSpecial(
+  data: CddaData,
+  om_special: raw.OvermapSpecial,
+  lootFn: (mapgen: raw.Mapgen) => Loot
+): Promise<Loot> {
+  if (om_special.subtype === "mutable") return new Map();
+  const loots: Loot[] = [];
+  await yieldable(async (relinquish) => {
+    for (const om of om_special.overmaps ?? []) {
+      const overmap_id = om.overmap.replace(/_(north|east|west|south)$/, "");
+      loots.push(lootForOmt(data, overmap_id, lootFn));
+      await relinquish();
+    }
+  });
+  return addLoot(loots);
+}
+
 export async function lootByOmSpecial(
   data: CddaData,
   lootFn: (mapgen: raw.Mapgen) => Loot
 ) {
-  if (lootByOmSpecialCache.has(data)) return lootByOmSpecialCache.get(data)!;
-
-  const mapgensByOmt = getMapgensByOmt(data);
   const overmapSpecials = data.byType("overmap_special");
 
   const lootByOmSpecial = new Map<string, Loot>();
-  await yieldable(async (relinquish) => {
-    for (const om_special of overmapSpecials) {
-      if (om_special.subtype === "mutable") continue;
-      const loots: Loot[] = [];
-      for (const om of om_special.overmaps ?? []) {
-        const overmap_id = om.overmap.replace(/_(north|east|west|south)$/, "");
-        const mapgens = mapgensByOmt.get(overmap_id) ?? [];
-        const loot = mergeLoot(
-          mapgens.map((mg) => ({
-            weight: normalizeMapgenVar(mg.weight) ?? 1000,
-            loot: lootFn(mg),
-          }))
-        );
-        loots.push(loot);
-        await relinquish();
-      }
-      lootByOmSpecial.set(om_special.id, addLoot(loots));
-    }
-  });
-  lootByOmSpecialCache.set(data, lootByOmSpecial);
+  for (const om_special of overmapSpecials)
+    lootByOmSpecial.set(
+      om_special.id,
+      await lootForOmSpecial(data, om_special, lootFn)
+    );
   return lootByOmSpecial;
 }
 
@@ -487,6 +504,7 @@ export function getLootForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   }
   items.push(additional_items);
   const loot = collection(items);
+  loot.delete("null");
   lootForMapgenCache.set(mapgen, loot);
   return loot;
 }

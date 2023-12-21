@@ -6,6 +6,7 @@ import { showProbability } from "./utils";
 import type { OvermapSpecial } from "../../types";
 import OvermapAppearance from "./OvermapAppearance.svelte";
 import { t } from "@transifex/native";
+import ThingLink from "../ThingLink.svelte";
 
 export let item_id: string;
 
@@ -95,8 +96,13 @@ let realLimit = 0; // Filled in later
                 <OvermapAppearance overmapSpecial={loc.overmap_special} />
               </td>
               <td style="vertical-align: middle">
-                <span title={loc.ids.join(", ")}
-                  >{omsName(loc.overmap_special)}</span>
+                {#if loc.ids.length === 1}
+                  <a href="/overmap_special/{loc.ids[0]}"
+                    >{omsName(loc.overmap_special)}</a>
+                {:else}
+                  <span title={loc.ids.join(", ")}
+                    >{omsName(loc.overmap_special)}</span>
+                {/if}
                 ({showProbability(loc.chance)})
               </td>
             </tr>
