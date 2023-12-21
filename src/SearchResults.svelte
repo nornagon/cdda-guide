@@ -25,6 +25,7 @@ const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "vehicle",
   "terrain",
   "skill",
+  "overmap_special",
 ]);
 
 type SearchableType = SupportedTypeMapped & {
@@ -42,8 +43,24 @@ type SearchTarget = {
   type: keyof SupportedTypesWithMapped;
 };
 let targets: SearchTarget[];
-function searchableName(data: CddaData, item: any) {
+function searchableName(data: CddaData, item: SupportedTypeMapped) {
   item = data._flatten(item);
+  if (item?.type === "overmap_special" || item?.type === "city_building") {
+    if (item.subtype === "mutable") return item.id;
+    else
+      return (
+        item.overmaps
+          ?.map((omId) => {
+            const normalizedId = omId.overmap.replace(
+              /_(north|south|east|west)$/,
+              ""
+            );
+            const om = data.byIdMaybe("overmap_terrain", normalizedId);
+            return om ? singularName(om) : normalizedId;
+          })
+          .join("\0") ?? item.id
+      );
+  }
   if (item?.type === "vehicle_part" && !item.name && item.item)
     item = data.byId("item", item.item);
   if (i18n.getLocale().startsWith("zh-"))
@@ -67,12 +84,7 @@ $: targets = [...(data?.all() ?? [])]
       typeof x.id === "string" &&
       SEARCHABLE_TYPES.has(mapType(x.type))
   )
-  .filter((x) => {
-    if (x.type === "mutation") {
-      return !/Fake\d$/.test(x.id);
-    }
-    return true;
-  })
+  .filter((x) => (x.type === "mutation" ? !/Fake\d$/.test(x.id) : true))
   .flatMap((x) =>
     [
       {
@@ -137,7 +149,7 @@ $: matchingObjectsList = matchingObjects
 
 {#if matchingObjectsList}
   {#each matchingObjectsList as [type, results]}
-    <h1>{type.replace(/_/g, " ")}</h1>
+    <h1>{type === "overmap_special" ? "location" : type.replace(/_/g, " ")}</h1>
     <LimitedList items={results} let:item={result} limit={50}>
       {@const item = data._flatten(result.item)}
       <ItemSymbol {item} />
