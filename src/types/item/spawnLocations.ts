@@ -348,14 +348,29 @@ function lazily<T extends object, U>(f: (x: T) => U): (x: T) => U {
     return cache.get(x)!;
   };
 }
+async function withTrace<T>(name: string, p: Promise<T>): Promise<T> {
+  console.time(name);
+  const ret = await p;
+  console.timeEnd(name);
+  return ret;
+}
 export const lootByOMSAppearance = lazily((data: CddaData) =>
-  computeLootByOMSAppearance(data, (mg) => getLootForMapgen(data, mg))
+  withTrace(
+    "loot",
+    computeLootByOMSAppearance(data, (mg) => getLootForMapgen(data, mg))
+  )
 );
 export const furnitureByOMSAppearance = lazily((data: CddaData) =>
-  computeLootByOMSAppearance(data, (mg) => getFurnitureForMapgen(data, mg))
+  withTrace(
+    "furniture",
+    computeLootByOMSAppearance(data, (mg) => getFurnitureForMapgen(data, mg))
+  )
 );
 export const terrainByOMSAppearance = lazily((data: CddaData) =>
-  computeLootByOMSAppearance(data, (mg) => getTerrainForMapgen(data, mg))
+  withTrace(
+    "terrain",
+    computeLootByOMSAppearance(data, (mg) => getTerrainForMapgen(data, mg))
+  )
 );
 
 async function computeLootByOMSAppearance(
