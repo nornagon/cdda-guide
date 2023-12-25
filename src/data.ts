@@ -791,11 +791,16 @@ export class CddaData {
       };
     }
 
+    const data = this;
     function normalizeCount(entry: ItemGroupEntry): [number, number] {
       if (entry.count)
         if (typeof entry.count === "number") return [entry.count, entry.count];
         else return entry.count;
-      else if (entry.charges)
+      else if (
+        "item" in entry &&
+        entry.charges &&
+        countsByCharges(data.byId("item", entry.item))
+      )
         if (typeof entry.charges === "number")
           return [entry.charges, entry.charges];
         else return entry.charges;
