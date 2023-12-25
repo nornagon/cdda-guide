@@ -8,6 +8,8 @@ import { showProbability } from "./item/utils";
 import LimitedList from "../LimitedList.svelte";
 import { t } from "@transifex/native";
 import OvermapAppearance from "./item/OvermapAppearance.svelte";
+import ItemSymbol from "./item/ItemSymbol.svelte";
+import LimitedTableList from "../LimitedTableList.svelte";
 
 const data = getContext<CddaData>("data");
 
@@ -94,13 +96,18 @@ let showZ = levels.includes(0) ? 0 : levels[0];
     )}
     <section>
       <h1>{t("Items", { _context })}</h1>
-      <LimitedList items={sortedLoot} let:item={[item_id, chance]}>
-        <ThingLink type="item" id={item_id} />
-        <span
-          >({showProbability(chance.prob)} / {chance.expected.toFixed(
-            2
-          )})</span>
-      </LimitedList>
+      <LimitedTableList items={sortedLoot}>
+        <tr slot="item" let:item={[item_id, chance]}>
+          <td>
+            <ItemSymbol item={data.byId("item", item_id)} />
+            <ThingLink type="item" id={item_id} />
+          </td>
+          <td style="text-align: right; padding-left: 1em;"
+            >{showProbability(chance.prob)}</td>
+          <td style="text-align: right; padding-left: 1em;"
+            >{chance.expected.toFixed(2)}</td>
+        </tr>
+      </LimitedTableList>
     </section>
   {/if}
 {/await}
@@ -129,5 +136,9 @@ input[type="range"] {
 }
 option {
   padding: 0;
+}
+
+td {
+  font-variant-numeric: tabular-nums;
 }
 </style>

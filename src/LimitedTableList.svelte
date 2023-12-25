@@ -20,11 +20,10 @@ let realLimit = isTesting
 </script>
 
 <table>
+  <slot name="header" />
   <tbody>
     {#each items.slice(0, realLimit) as item}
-      <tr>
-        <slot {item} />
-      </tr>
+      <slot name="item" {item} />
     {/each}
   </tbody>
 </table>

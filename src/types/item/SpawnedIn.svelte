@@ -45,23 +45,39 @@ const spawnLocationsPromise = lootByOMSAppearance(data).then(
   {#if spawnLocations.length}
     <section>
       <h1>{t("Loot", { _context: "Obtaining" })}</h1>
-      <LimitedTableList items={spawnLocations} let:item={loc}>
-        <td style="text-align: center">
-          <OvermapAppearance overmapSpecial={loc.overmap_special} />
-        </td>
-        <td style="vertical-align: middle">
-          {#if loc.ids.length === 1}
-            <a href="/overmap_special/{loc.ids[0]}"
-              >{omsName(data, loc.overmap_special)}</a>
-          {:else}
-            <span title={loc.ids.join(", ")}
-              >{omsName(data, loc.overmap_special)}</span>
-          {/if}
-          ({showProbability(loc.chance.prob)} / {loc.chance.expected.toFixed(
-            2
-          )})
-        </td>
+      <LimitedTableList items={spawnLocations}>
+        <tr slot="header">
+          <th />
+          <th><h1>{t("Location")}</h1></th>
+          <th style="text-align: right; padding-left: 1em;"
+            ><h1>{t("Chance")}</h1></th>
+          <th style="text-align: right; padding-left: 1em;"
+            ><h1>{t("Count")}</h1></th>
+        </tr>
+        <tr class="middle" slot="item" let:item={loc}>
+          <td style="text-align: center">
+            <OvermapAppearance overmapSpecial={loc.overmap_special} />
+          </td>
+          <td>
+            {#if loc.ids.length === 1}
+              <a href="/overmap_special/{loc.ids[0]}"
+                >{omsName(data, loc.overmap_special)}</a>
+            {:else}
+              <span title={loc.ids.join(", ")}
+                >{omsName(data, loc.overmap_special)}</span>
+            {/if}
+          </td>
+          <td style="text-align: right;">{showProbability(loc.chance.prob)}</td>
+          <td style="text-align: right;">{loc.chance.expected.toFixed(2)}</td>
+        </tr>
       </LimitedTableList>
     </section>
   {/if}
 {/await}
+
+<style>
+tr.middle td {
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+}
+</style>
