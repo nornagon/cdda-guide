@@ -89,12 +89,17 @@ let showZ = levels.includes(0) ? 0 : levels[0];
   </section>
 {:then loot}
   {#if loot.size}
-    {@const sortedLoot = [...loot.entries()].sort((a, b) => b[1] - a[1])}
+    {@const sortedLoot = [...loot.entries()].sort(
+      (a, b) => b[1].expected - a[1].expected
+    )}
     <section>
       <h1>{t("Items", { _context })}</h1>
       <LimitedList items={sortedLoot} let:item={[item_id, chance]}>
         <ThingLink type="item" id={item_id} />
-        <span>({showProbability(chance)})</span>
+        <span
+          >({showProbability(chance.prob)} / {chance.expected.toFixed(
+            2
+          )})</span>
       </LimitedList>
     </section>
   {/if}

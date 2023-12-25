@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, singularName } from "../../data";
-import { furnitureByOMSAppearance } from "./spawnLocations";
+import { ItemChance, furnitureByOMSAppearance } from "./spawnLocations";
 import { showProbability } from "./utils";
 import type { OvermapSpecial } from "../../types";
 import OvermapAppearance from "./OvermapAppearance.svelte";
@@ -16,7 +16,7 @@ const spawnLocationsPromise = furnitureByOMSAppearance(data).then(
     const spawnLocations: {
       overmap_special: OvermapSpecial;
       ids: string[];
-      chance: number;
+      chance: ItemChance;
     }[] = [];
     for (const { loot, ids } of lootByAppearance.values()) {
       if (loot.has(item_id)) {
@@ -25,7 +25,7 @@ const spawnLocationsPromise = furnitureByOMSAppearance(data).then(
         spawnLocations.push({ overmap_special: oms, ids, chance });
       }
     }
-    spawnLocations.sort((a, b) => b.chance - a.chance);
+    spawnLocations.sort((a, b) => b.chance.expected - a.chance.expected);
     realLimit = spawnLocations.length <= limit + grace ? limit + grace : limit;
     return spawnLocations;
   }
@@ -97,7 +97,9 @@ let realLimit = 0; // Filled in later
               <td style="vertical-align: middle">
                 <span title={loc.ids.join(", ")}
                   >{omsName(loc.overmap_special)}</span>
-                ({showProbability(loc.chance)})
+                ({showProbability(loc.chance.prob)} / {loc.chance.expected.toFixed(
+                  2
+                )})
               </td>
             </tr>
           {/each}

@@ -702,14 +702,21 @@ export class CddaData {
   // This is a WeakMap because flattenItemGroup is sometimes called with temporary objects
   _flattenItemGroupCache = new WeakMap<
     ItemGroupData,
-    { id: string; prob: number; count: [number, number] }[]
+    { id: string; prob: number; expected: number; count: [number, number] }[]
   >();
+  /**
+   * In the result, each |id| will be spawned with probability |prob|. If the item
+   * is spawned, it will be spawned between |count[0]| and |count[1]| times.
+   */
   flattenItemGroup(
     group: ItemGroupData
-  ): { id: string; prob: number; count: [number, number] }[] {
+  ): { id: string; prob: number; expected: number; count: [number, number] }[] {
     if (this._flattenItemGroupCache.has(group))
       return this._flattenItemGroupCache.get(group)!;
-    const retMap = new Map<string, { prob: number; count: [number, number] }>();
+    const retMap = new Map<
+      string,
+      { prob: number; expected: number; count: [number, number] }
+    >();
 
     function addOne({
       id,
@@ -720,16 +727,25 @@ export class CddaData {
       prob: number;
       count: [number, number];
     }) {
-      const { prob: prevProb, count: prevCount } = retMap.get(id) ?? {
+      const {
+        prob: prevProb,
+        count: prevCount,
+        expected: prevExpected,
+      } = retMap.get(id) ?? {
         prob: 0,
         count: [0, 0],
+        expected: 0,
       };
       const newProb = 1 - (1 - prevProb) * (1 - prob);
+
       const newCount: [number, number] = [
         count[0] + prevCount[0],
         count[1] + prevCount[1],
       ];
-      retMap.set(id, { prob: newProb, count: newCount });
+
+      const newExpected = prevExpected + (prob * (count[0] + count[1])) / 2;
+
+      retMap.set(id, { prob: newProb, expected: newExpected, count: newCount });
     }
 
     function add(

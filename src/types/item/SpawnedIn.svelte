@@ -1,7 +1,11 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import { CddaData, omsName, singularName } from "../../data";
-import { lootByOMSAppearance } from "./spawnLocations";
+import {
+  ItemChance,
+  lootByOMSAppearance,
+  parseItemGroup,
+} from "./spawnLocations";
 import { showProbability } from "./utils";
 import type { OvermapSpecial } from "../../types";
 import OvermapAppearance from "./OvermapAppearance.svelte";
@@ -17,7 +21,7 @@ const spawnLocationsPromise = lootByOMSAppearance(data).then(
     const spawnLocations: {
       overmap_special: OvermapSpecial;
       ids: string[];
-      chance: number;
+      chance: ItemChance;
     }[] = [];
     for (const { loot, ids } of lootByAppearance.values()) {
       if (loot.has(item_id)) {
@@ -26,7 +30,7 @@ const spawnLocationsPromise = lootByOMSAppearance(data).then(
         spawnLocations.push({ overmap_special: oms, ids, chance });
       }
     }
-    spawnLocations.sort((a, b) => b.chance - a.chance);
+    spawnLocations.sort((a, b) => b.chance.expected - a.chance.expected);
     return spawnLocations;
   }
 );
@@ -53,7 +57,9 @@ const spawnLocationsPromise = lootByOMSAppearance(data).then(
             <span title={loc.ids.join(", ")}
               >{omsName(data, loc.overmap_special)}</span>
           {/if}
-          ({showProbability(loc.chance)})
+          ({showProbability(loc.chance.prob)} / {loc.chance.expected.toFixed(
+            2
+          )})
         </td>
       </LimitedTableList>
     </section>
