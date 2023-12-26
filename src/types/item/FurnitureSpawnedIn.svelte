@@ -6,6 +6,7 @@ import { showProbability } from "./utils";
 import type { OvermapSpecial } from "../../types";
 import OvermapAppearance from "./OvermapAppearance.svelte";
 import { t } from "@transifex/native";
+import LimitedTableList from "../../LimitedTableList.svelte";
 
 export let item_id: string;
 
@@ -26,7 +27,6 @@ const spawnLocationsPromise = furnitureByOMSAppearance(data).then(
       }
     }
     spawnLocations.sort((a, b) => b.chance.expected - a.chance.expected);
-    realLimit = spawnLocations.length <= limit + grace ? limit + grace : limit;
     return spawnLocations;
   }
 );
@@ -70,12 +70,6 @@ function omsName(oms: OvermapSpecial): string {
   }
   return oms.id;
 }
-
-let limit = 10;
-
-let grace = 4;
-
-let realLimit = 0; // Filled in later
 </script>
 
 {#await spawnLocationsPromise}
@@ -87,33 +81,20 @@ let realLimit = 0; // Filled in later
   {#if spawnLocations.length}
     <section>
       <h1>{t("Found In", { _context: "Terrain/Furniture Locations" })}</h1>
-      <table class="alternating">
-        <tbody>
-          {#each spawnLocations.slice(0, realLimit) as loc}
-            <tr>
-              <td style="text-align: center">
-                <OvermapAppearance overmapSpecial={loc.overmap_special} />
-              </td>
-              <td style="vertical-align: middle">
-                <span title={loc.ids.join(", ")}
-                  >{omsName(loc.overmap_special)}</span>
-                ({showProbability(loc.chance.prob)} / {loc.chance.expected.toFixed(
-                  2
-                )})
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-      {#if spawnLocations.length > realLimit}
-        <button
-          class="disclosure"
-          on:click={(e) => {
-            e.preventDefault();
-            realLimit = Infinity;
-          }}
-          >See all {Number(spawnLocations.length).toLocaleString()}...</button>
-      {/if}
+      <LimitedTableList items={spawnLocations}>
+        <tr slot="item" let:item={loc}>
+          <td style="text-align: center">
+            <OvermapAppearance overmapSpecial={loc.overmap_special} />
+          </td>
+          <td style="vertical-align: middle">
+            <span title={loc.ids.join(", ")}
+              >{omsName(loc.overmap_special)}</span>
+            ({showProbability(loc.chance.prob)} / {loc.chance.expected.toFixed(
+              2
+            )})
+          </td>
+        </tr>
+      </LimitedTableList>
     </section>
   {/if}
 {/await}

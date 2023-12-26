@@ -5,7 +5,6 @@ import { getContext } from "svelte";
 import { getLootForMapgen, lootForOmSpecial } from "./item/spawnLocations";
 import ThingLink from "./ThingLink.svelte";
 import { showProbability } from "./item/utils";
-import LimitedList from "../LimitedList.svelte";
 import { t } from "@transifex/native";
 import OvermapAppearance from "./item/OvermapAppearance.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
@@ -95,8 +94,12 @@ let showZ = levels.includes(0) ? 0 : levels[0];
       (a, b) => b[1].expected - a[1].expected
     )}
     <section>
-      <h1>{t("Items", { _context })}</h1>
       <LimitedTableList items={sortedLoot}>
+        <tr slot="header">
+          <th><h1>{t("Item")}</h1></th>
+          <th style="text-align: right;"><h1>{t("Chance")}</h1></th>
+          <th style="text-align: right;"><h1>{t("Count")}</h1></th>
+        </tr>
         <tr slot="item" let:item={[item_id, chance]}>
           <td>
             <ItemSymbol item={data.byId("item", item_id)} />
@@ -140,5 +143,8 @@ option {
 
 td {
   font-variant-numeric: tabular-nums;
+}
+th {
+  padding: 0;
 }
 </style>

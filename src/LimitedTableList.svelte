@@ -38,3 +38,9 @@ let realLimit = isTesting
       n: Number(items.length).toLocaleString(),
     })}</button>
 {/if}
+
+<style>
+table {
+  border-collapse: collapse;
+}
+</style>

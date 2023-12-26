@@ -1,7 +1,11 @@
 export function showProbability(prob: number) {
-  const ret = (prob * 100).toFixed(2);
-  if (ret === "0.00") return "< 0.01%";
-  return ret + "%";
+  return showNumber(prob * 100) + "%";
+}
+
+export function showNumber(v: number) {
+  const ret = v.toFixed(2);
+  if (ret === "0.00") return "< 0.01";
+  return ret;
 }
 
 export function multimap<K, V>(entries: [K, V][]): Map<K, V[]> {
