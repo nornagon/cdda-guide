@@ -1,10 +1,10 @@
 <script lang="ts">
 import { singularName, type CddaData } from "../data";
 import type { OvermapSpecial } from "../types";
-import { getContext } from "svelte";
+import { getContext, onMount } from "svelte";
 import { getLootForMapgen, lootForOmSpecial } from "./item/spawnLocations";
 import ThingLink from "./ThingLink.svelte";
-import { showProbability } from "./item/utils";
+import { showNumber, showProbability } from "./item/utils";
 import { t } from "@transifex/native";
 import OvermapAppearance from "./item/OvermapAppearance.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
@@ -30,7 +30,21 @@ const lootPromise = lootForOmSpecial(data, item, (mg) =>
   getLootForMapgen(data, mg)
 );
 
-let showZ = levels.includes(0) ? 0 : levels[0];
+const layerElements: HTMLElement[] = [];
+
+onMount(() => {
+  layerElements.forEach((el) => {
+    // Capture the transformed element's size and adjust its wrapper element to fully contain it.
+    // Surely there's a better way to do this.
+    const { x, y, width, height } = el.getBoundingClientRect();
+    el.parentElement!.style.width = `${width}px`;
+    el.parentElement!.style.height = `${height}px`;
+    const p = el.parentElement!.getBoundingClientRect();
+    el.parentElement!.style.position = "relative";
+    el.parentElement!.style.left = `${p.x - x}px`;
+    el.parentElement!.style.top = `${p.y - y}px`;
+  });
+});
 </script>
 
 <h1>{singularName(item)}</h1>
@@ -40,28 +54,27 @@ let showZ = levels.includes(0) ? 0 : levels[0];
     <p>{t("This location's appearance is dynamically generated.")}</p>
   {:else}
     <div class="om-appearance">
-      <OvermapAppearance overmapSpecial={item} {showZ} />
       {#if levels.length > 1}
-        <div
-          class="slider"
-          style={`height: ${
-            (levels[levels.length - 1] - levels[0] + 1) * 25
-          }px`}>
-          <input
-            type="range"
-            name="z"
-            list="z-values"
-            min={levels[0]}
-            max={levels[levels.length - 1]}
-            bind:value={showZ} />
-          <datalist id="z-values">
-            {#each [...levels].reverse() as level}
-              <option value={level} label={`Z=${level}`} />{/each}
-          </datalist>
-        </div>
-      {:else if levels[0] !== 0}
-        <div>
-          Z={levels[0]}
+        {#each [...levels].reverse() as level, i}
+          <div class={`level ${level === 0 ? "ground-level" : ""}`}>
+            <div class="label">
+              {level}
+            </div>
+            <div class="layer-container">
+              <div class="layer" bind:this={layerElements[i]}>
+                <OvermapAppearance overmapSpecial={item} showZ={level} />
+              </div>
+            </div>
+          </div>
+        {/each}
+      {:else}
+        <div class={`level ${levels[0] === 0 ? "ground-level" : ""}`}>
+          <div class="label">
+            {levels[0]}
+          </div>
+          <div class="layer-flat">
+            <OvermapAppearance overmapSpecial={item} showZ={levels[0]} />
+          </div>
         </div>
       {/if}
     </div>
@@ -96,19 +109,23 @@ let showZ = levels.includes(0) ? 0 : levels[0];
     <section>
       <LimitedTableList items={sortedLoot}>
         <tr slot="header">
-          <th><h1>{t("Item")}</h1></th>
-          <th style="text-align: right;"><h1>{t("Chance")}</h1></th>
+          <th colspan="2"><h1>{t("Item")}</h1></th>
           <th style="text-align: right;"><h1>{t("Count")}</h1></th>
+          <th style="text-align: right;"><h1>{t("Chance")}</h1></th>
         </tr>
         <tr slot="item" let:item={[item_id, chance]}>
-          <td>
+          <td style="vertical-align: middle;">
             <ItemSymbol item={data.byId("item", item_id)} />
+          </td>
+          <td style="padding-left: 3px; vertical-align: middle">
             <ThingLink type="item" id={item_id} />
           </td>
-          <td style="text-align: right; padding-left: 1em;"
+          <td
+            style="text-align: right; padding-left: 1em; white-space: nowrap; vertical-align: middle;"
+            >{showNumber(chance.expected)}</td>
+          <td
+            style="text-align: right; padding-left: 1em; white-space: nowrap; vertical-align: middle;"
             >{showProbability(chance.prob)}</td>
-          <td style="text-align: right; padding-left: 1em;"
-            >{chance.expected.toFixed(2)}</td>
         </tr>
       </LimitedTableList>
     </section>
@@ -118,27 +135,32 @@ let showZ = levels.includes(0) ? 0 : levels[0];
 <style>
 .om-appearance {
   display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+.om-appearance > .level {
+  display: flex;
   flex-direction: row;
   align-items: center;
+  color: var(--cata-color-gray);
+  font-weight: bold;
 }
-
-datalist {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 6px 0;
+.om-appearance > .ground-level {
+  color: white;
 }
-
-.slider {
-  display: flex;
-  flex-direction: row;
+.om-appearance > .level > .label {
+  width: 1.5em;
+  margin-right: 1em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
-input[type="range"] {
-  margin: 0;
-  writing-mode: vertical-lr;
+.om-appearance > .level > .layer-container > .layer {
+  transform-origin: center;
+  transform: rotate3d(1, 0, 0, 45deg) translate(50%) rotate(45deg);
 }
-option {
-  padding: 0;
+.layer,
+.layer-container {
+  width: min-content;
 }
 
 td {

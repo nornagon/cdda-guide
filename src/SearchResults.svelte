@@ -160,14 +160,16 @@ $: matchingObjectsList = matchingObjects
   {#each matchingObjectsList as [type, results]}
     {#if type === "overmap_special"}
       <h1>location</h1>
-      <LimitedTableList items={results} let:item={result} limit={50}>
-        <td style="text-align: center">
-          <OvermapAppearance overmapSpecial={result.item} />
-        </td>
-        <td style="vertical-align: middle">
-          <a href="/overmap_special/{result.item.id}"
-            >{omsName(data, result.item)}</a>
-        </td>
+      <LimitedTableList items={results} limit={50}>
+        <tr slot="item" let:item={result}>
+          <td style="text-align: center">
+            <OvermapAppearance overmapSpecial={result.item} />
+          </td>
+          <td style="vertical-align: middle">
+            <a href="/overmap_special/{result.item.id}"
+              >{omsName(data, result.item)}</a>
+          </td>
+        </tr>
       </LimitedTableList>
     {:else}
       <h1>{type.replace(/_/g, " ")}</h1>
