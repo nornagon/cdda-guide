@@ -9,14 +9,14 @@ import type { CddaData } from "../../data";
 import { t } from "@transifex/native";
 import type { SupportedTypesWithMapped } from "src/types";
 
-export let loot: Loot;
+export let loot: Loot | Promise<Loot>;
 export let type: keyof SupportedTypesWithMapped = "item";
 export let heading: string =
   type === "furniture"
-    ? t("Furniture")
+    ? t("Furniture", { _context: "Loot Table" })
     : type === "terrain"
-    ? t("Terrain")
-    : t("Loot");
+    ? t("Terrain", { _context: "Loot Table" })
+    : t("Loot", { _context: "Loot Table" });
 
 function stripType(x: any): any {
   return x;
@@ -25,33 +25,56 @@ function stripType(x: any): any {
 const data = getContext<CddaData>("data");
 </script>
 
-{#if loot.size}
-  {@const sortedLoot = [...loot.entries()].sort((a, b) =>
-    Math.abs(b[1].prob - a[1].prob) * 100 < 0.005
-      ? b[1].expected - a[1].expected
-      : b[1].prob - a[1].prob
-  )}
+{#await Promise.resolve(loot)}
   <section>
-    <LimitedTableList items={sortedLoot}>
-      <tr slot="header">
-        <th colspan="2"><h1>{heading}</h1></th>
-        <th class="numeric"><h1>{t("Avg. Count")}</h1></th>
-        <th class="numeric"><h1>{t("Chance")}</h1></th>
-      </tr>
-      <tr slot="item" let:item={[item_id, chance]}>
-        {@const item = stripType(data.byId(type, item_id))}
-        <td>
-          <ItemSymbol {item} />
-        </td>
-        <td style="padding-left: 5px;">
-          <ThingLink {type} id={item_id} />
-        </td>
-        <td class="numeric">{showNumber(chance.expected)}</td>
-        <td class="numeric">{showProbability(chance.prob)}</td>
-      </tr>
-    </LimitedTableList>
+    <h1>{heading}</h1>
+    <p style="color: var(--cata-color-gray)">
+      <em>{t("Loading...")}</em>
+    </p>
   </section>
-{/if}
+{:then loot}
+  {#if loot.size}
+    {@const sortedLoot = [...loot.entries()].sort((a, b) =>
+      Math.abs(b[1].prob - a[1].prob) * 100 < 0.005
+        ? b[1].expected - a[1].expected
+        : b[1].prob - a[1].prob
+    )}
+    <section>
+      <LimitedTableList items={sortedLoot}>
+        <tr slot="header">
+          <th colspan="2"><h1>{heading}</h1></th>
+          <th class="numeric"
+            ><h1>
+              {t("Avg. Count", {
+                _context: "Loot Table",
+                _comment:
+                  "Column heading in a table: average number of an item found in a location/vehicle, dropped by a monster, etc.",
+              })}
+            </h1></th>
+          <th class="numeric"
+            ><h1>
+              {t("Chance", {
+                _context: "Loot Table",
+                _comment:
+                  "Column heading in a table: chance that at least one of an item is found in a location/vehicle, dropped by a monster, etc.",
+              })}
+            </h1></th>
+        </tr>
+        <tr slot="item" let:item={[item_id, chance]}>
+          {@const item = stripType(data.byId(type, item_id))}
+          <td>
+            <ItemSymbol {item} />
+          </td>
+          <td style="padding-left: 5px;">
+            <ThingLink {type} id={item_id} />
+          </td>
+          <td class="numeric">{showNumber(chance.expected)}</td>
+          <td class="numeric">{showProbability(chance.prob)}</td>
+        </tr>
+      </LimitedTableList>
+    </section>
+  {/if}
+{/await}
 
 <style>
 th,

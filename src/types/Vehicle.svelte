@@ -7,14 +7,12 @@ import {
   CddaData,
   getVehiclePartIdAndVariant,
   itemGroupFromVehicle,
-  showProbability,
   singularName,
 } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import * as Sentry from "@sentry/browser";
 
 import type { Vehicle, VehiclePart } from "../types";
-import ItemSymbol from "./item/ItemSymbol.svelte";
 import { groupBy } from "./item/utils";
 import ThingLink from "./ThingLink.svelte";
 import ItemTable from "./item/ItemTable.svelte";
@@ -206,8 +204,6 @@ for (let x = maxX; x >= minX; x--) {
   grid.push(row);
 }
 
-const loot = data.flattenItemGroupLoot(itemGroupFromVehicle(item));
-
 const parts = normalizedParts
   .flatMap((np) => np.parts)
   .filter((x) => data.byIdMaybe("vehicle_part", x.partId)); // TODO: turrets?
@@ -245,4 +241,4 @@ partsCounted.sort((a, b) => {
   </section>
 {/if}
 
-<ItemTable {loot} />
+<ItemTable loot={data.flattenItemGroupLoot(itemGroupFromVehicle(item))} />

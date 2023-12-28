@@ -61,7 +61,9 @@ onMount(() => {
 
 <section>
   {#if item.subtype === "mutable"}
-    <p>{t("This location's appearance is dynamically generated.")}</p>
+    <p>
+      {t("This location's appearance is dynamically generated.", { _context })}
+    </p>
   {:else}
     <div class="om-appearance">
       {#if levels.length > 1}
@@ -92,7 +94,7 @@ onMount(() => {
   {/if}
 
   <dl>
-    <dt>{t("Locations")}</dt>
+    <dt>{t("Locations", { _context })}</dt>
     <dd>
       <ul class="comma-separated">
         {#each item.locations ?? [] as location}
@@ -111,7 +113,7 @@ onMount(() => {
       </dd>
     {/if}
     {#if lookalikeIds.length > 1}
-      <dt>{t("Variants")}</dt>
+      <dt>{t("Variants", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           <!-- prettier-ignore -->
@@ -122,38 +124,14 @@ onMount(() => {
   </dl>
 </section>
 
-{#await lootForOmSpecial(data, item, (mg) => getLootForMapgen(data, mg))}
-  <section>
-    <h1>{t("Loot", { _context })}</h1>
-    <p style="color: var(--cata-color-gray)">
-      <em>{t("Loading...")}</em>
-    </p>
-  </section>
-{:then loot}
-  <ItemTable {loot} />
-{/await}
-
-{#await lootForOmSpecial(data, item, (mg) => getTerrainForMapgen(data, mg))}
-  <section>
-    <h1>{t("Terrain", { _context })}</h1>
-    <p style="color: var(--cata-color-gray)">
-      <em>{t("Loading...")}</em>
-    </p>
-  </section>
-{:then loot}
-  <ItemTable {loot} type="terrain" />
-{/await}
-
-{#await lootForOmSpecial(data, item, (mg) => getFurnitureForMapgen(data, mg))}
-  <section>
-    <h1>{t("Furniture", { _context })}</h1>
-    <p style="color: var(--cata-color-gray)">
-      <em>{t("Loading...")}</em>
-    </p>
-  </section>
-{:then loot}
-  <ItemTable {loot} type="furniture" />
-{/await}
+<ItemTable
+  loot={lootForOmSpecial(data, item, (mg) => getLootForMapgen(data, mg))} />
+<ItemTable
+  loot={lootForOmSpecial(data, item, (mg) => getTerrainForMapgen(data, mg))} />
+<ItemTable
+  loot={lootForOmSpecial(data, item, (mg) =>
+    getFurnitureForMapgen(data, mg)
+  )} />
 
 <style>
 .om-appearance {

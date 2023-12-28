@@ -10,14 +10,7 @@ export let item_id: string;
 const data = getContext<CddaData>("data");
 </script>
 
-{#await lootByOMSAppearance(data)}
-  <section>
-    <h1>{t("Loot", { _context: "Obtaining" })}</h1>
-    <p style="color: var(--cata-color-gray)"><em>Loading...</em></p>
-  </section>
-{:then loots}
-  <LocationTable
-    id={item_id}
-    {loots}
-    heading={t("Loot", { _context: "Obtaining" })} />
-{/await}
+<LocationTable
+  id={item_id}
+  loots={lootByOMSAppearance(data)}
+  heading={t("Loot", { _context: "Obtaining" })} />
