@@ -8,7 +8,11 @@ import * as fs from "fs";
 import { CddaData, mapType } from "./data";
 
 import Thing from "./Thing.svelte";
-import { lootByOMSAppearance } from "./types/item/spawnLocations";
+import {
+  furnitureByOMSAppearance,
+  lootByOMSAppearance,
+  terrainByOMSAppearance,
+} from "./types/item/spawnLocations";
 
 const json = JSON.parse(
   fs.readFileSync(__dirname + "/../_test/all.json", "utf8")
@@ -60,6 +64,8 @@ test.each(all.filter((_, i) => i % numChunks === chunkIdx))(
   async (type, id) => {
     // Prefill the loot tables, so we don't have to mess with waiting for async load...
     await lootByOMSAppearance(data);
+    await furnitureByOMSAppearance(data);
+    await terrainByOMSAppearance(data);
     const { container } = render(Thing, { item: { type, id }, data });
     if (type !== "technique") {
       expect(container.textContent).not.toMatch(/undefined|NaN|object Object/);
