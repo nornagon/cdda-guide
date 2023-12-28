@@ -731,6 +731,7 @@ export class CddaData {
       prob: number;
       count: [number, number];
     }) {
+      if (id === "null") return;
       const {
         prob: prevProb,
         count: prevCount,

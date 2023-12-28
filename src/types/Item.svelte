@@ -569,7 +569,8 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
         <ul class="comma-separated">
           {#each [item.seed_data.fruit]
             .concat(item.seed_data.byproducts ?? [])
-            .concat(item.seed_data.seeds ?? true ? [item.id] : []) as id}
+            .concat(item.seed_data.seeds ?? true ? [item.id] : [])
+            .filter((x) => x !== "null") as id}
             <li><ThingLink type="item" {id} /></li>
           {/each}
         </ul>
