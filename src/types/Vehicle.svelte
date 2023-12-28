@@ -17,6 +17,7 @@ import type { Vehicle, VehiclePart } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import { groupBy } from "./item/utils";
 import ThingLink from "./ThingLink.svelte";
+import ItemTable from "./item/ItemTable.svelte";
 
 export let item: Vehicle;
 
@@ -205,8 +206,7 @@ for (let x = maxX; x >= minX; x--) {
   grid.push(row);
 }
 
-const items = data.flattenItemGroup(itemGroupFromVehicle(item));
-items.sort((a, b) => b.prob - a.prob);
+const loot = data.flattenItemGroupLoot(itemGroupFromVehicle(item));
 
 const parts = normalizedParts
   .flatMap((np) => np.parts)
@@ -245,13 +245,4 @@ partsCounted.sort((a, b) => {
   </section>
 {/if}
 
-{#if items.length}
-  <section>
-    <h1>{t("Items")}</h1>
-    <LimitedList {items} let:item>
-      <ItemSymbol item={data.byId("item", item.id)} />
-      <ThingLink id={item.id} type="item" />
-      ({showProbability(item.prob)})
-    </LimitedList>
-  </section>
-{/if}
+<ItemTable {loot} />

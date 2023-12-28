@@ -5,12 +5,15 @@ import {
   collection,
   getFurnitureForMapgen,
   getLootForMapgen,
+  parseItemGroup,
   parsePalette,
   repeatChance,
 } from "./spawnLocations";
 import { CddaData } from "../../data";
 import type { ItemGroupData, Mapgen } from "../../types";
 import { describe, it, expect } from "vitest";
+
+const emptyData = new CddaData([]);
 
 describe("collection()", () => {
   it("returns nothing given no items", () => {
@@ -19,7 +22,7 @@ describe("collection()", () => {
     expect(got).toStrictEqual(new Map());
   });
   it("given one item, returns it", () => {
-    const loot = new Map([["fake_item", 1.0]]);
+    const loot = new Map([["fake_item", { prob: 1.0, expected: 1 }]]);
     const given = [loot];
 
     const got = collection(given);
@@ -27,24 +30,75 @@ describe("collection()", () => {
     expect(got).toStrictEqual(loot);
   });
   it("knowns about loot chance", () => {
-    const given = [new Map([["fake_item", 0.5]])];
+    const given = [new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])];
 
     const got = collection(given);
 
-    expect(got).toStrictEqual(new Map([["fake_item", 0.5]]));
+    expect(got).toStrictEqual(
+      new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])
+    );
   });
   it("can add up probabilities", () => {
-    const item = new Map([["fake_item", 0.5]]);
+    const item = new Map([["fake_item", { prob: 0.5, expected: 0.5 }]]);
     const given = [item, item];
 
     const got = collection(given);
 
-    expect(got).toStrictEqual(new Map([["fake_item", 0.75]]));
+    expect(got).toStrictEqual(
+      new Map([["fake_item", { prob: 0.75, expected: 1 }]])
+    );
+  });
+});
+
+describe("parseItemGroup()", () => {
+  it("basic", () => {
+    const got = parseItemGroup(
+      emptyData,
+      {
+        subtype: "collection",
+        items: [["test_pants_fur", 50]],
+      },
+      undefined,
+      1
+    );
+
+    expect(got).toStrictEqual(
+      new Map([["test_pants_fur", { prob: 0.5, expected: 0.5 }]])
+    );
+  });
+  it("repeat", () => {
+    const got = parseItemGroup(
+      emptyData,
+      {
+        subtype: "collection",
+        items: [["test_pants_fur", 50]],
+      },
+      2,
+      1
+    );
+
+    expect(got).toStrictEqual(
+      new Map([["test_pants_fur", { prob: 0.75, expected: 1 }]])
+    );
+  });
+  it("repeat 2", () => {
+    const data = new CddaData([
+      {
+        id: "fake_item_group",
+        type: "item_group",
+        subtype: "collection",
+        items: ["fake_item"],
+      },
+    ]);
+    const x = parseItemGroup(data, "fake_item_group", 2, 0.5);
+    expect(x).toStrictEqual(
+      new Map([["fake_item", { prob: 0.75, expected: 1 }]])
+    );
   });
 });
 
 describe("parsePalette()", () => {
-  it("perses empty pallete", () => {
+  it("perses empty palette", () => {
     const got = parsePalette(new CddaData([]), {});
     expect(got).toStrictEqual(new Map());
   });
@@ -65,7 +119,9 @@ describe("parsePalette()", () => {
     const got = parsePalette(data, rawPalette);
 
     expect(got).toStrictEqual(
-      new Map([["X", new Map([["test_pants_fur", 0.5]])]])
+      new Map([
+        ["X", new Map([["test_pants_fur", { prob: 0.5, expected: 0.5 }]])],
+      ])
     );
   });
 
@@ -90,7 +146,9 @@ describe("parsePalette()", () => {
 
     const got = parsePalette(data, rawPalette);
 
-    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
+    expect(got).toStrictEqual(
+      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]])
+    );
   });
 
   it("knows about chance in .items", () => {
@@ -109,7 +167,9 @@ describe("parsePalette()", () => {
     const got = parsePalette(data, rawPalette);
 
     expect(got).toStrictEqual(
-      new Map([["X", new Map([["test_pants_fur", 0.25]])]])
+      new Map([
+        ["X", new Map([["test_pants_fur", { prob: 0.25, expected: 0.25 }]])],
+      ])
     );
   });
 
@@ -128,7 +188,9 @@ describe("parsePalette()", () => {
 
     const got = parsePalette(data, rawPalette);
 
-    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
+    expect(got).toStrictEqual(
+      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]])
+    );
   });
   it("knows anout .palettes", () => {
     const data = new CddaData([
@@ -151,7 +213,9 @@ describe("parsePalette()", () => {
 
     const got = parsePalette(data, rawPalette);
 
-    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
+    expect(got).toStrictEqual(
+      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]])
+    );
   });
   it("parses inline item group", () => {
     const data = new CddaData([]);
@@ -159,7 +223,7 @@ describe("parsePalette()", () => {
       items: {
         X: {
           item: {
-            subtype: "collection" as "collection",
+            subtype: "collection" as const,
             items: [["fake_item", 50] as [string, number]],
           },
         },
@@ -167,7 +231,9 @@ describe("parsePalette()", () => {
     };
 
     const got = parsePalette(data, rawPalette);
-    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.5]])]]));
+    expect(got).toStrictEqual(
+      new Map([["X", new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])]])
+    );
   });
   it("parses inline item collections", () => {
     const data = new CddaData([]);
@@ -179,7 +245,9 @@ describe("parsePalette()", () => {
       },
     };
     const got = parsePalette(data, rawPalette);
-    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 1]])]]));
+    expect(got).toStrictEqual(
+      new Map([["X", new Map([["fake_item", { prob: 1, expected: 1 }]])]])
+    );
   });
   it("knows about .item", () => {
     const data = new CddaData([]);
@@ -192,12 +260,12 @@ describe("parsePalette()", () => {
     const got = parsePalette(data, rawPalette);
     expect(got).toStrictEqual(
       new Map([
-        ["X", new Map([["i0", 0.75]])],
+        ["X", new Map([["i0", { prob: 0.75, expected: 1 }]])],
         [
           "Y",
           new Map([
-            ["i1", 1],
-            ["i2", 1],
+            ["i1", { prob: 1, expected: 1 }],
+            ["i2", { prob: 1, expected: 1 }],
           ]),
         ],
       ])
@@ -224,8 +292,8 @@ describe("parsePalette()", () => {
 
     expect(got).toStrictEqual(
       new Map([
-        ["X", new Map([["fake_item", 1]])],
-        ["Y", new Map([["fake_item", 0.5]])],
+        ["X", new Map([["fake_item", { prob: 1, expected: 1 }]])],
+        ["Y", new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])],
       ])
     );
   });
@@ -249,7 +317,9 @@ describe("parsePalette()", () => {
 
     const got = parsePalette(data, rawPalette);
 
-    expect(got).toStrictEqual(new Map([["X", new Map([["fake_item", 0.75]])]]));
+    expect(got).toStrictEqual(
+      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]])
+    );
   });
   it("knows about .sealed_item | .[].item", () => {
     const data = new CddaData([]);
@@ -279,10 +349,10 @@ describe("parsePalette()", () => {
 
     expect(got).toStrictEqual(
       new Map([
-        ["X", new Map([["fake_item", 1]])],
-        ["Y", new Map([["fake_item", 0.5]])],
-        ["Z", new Map([["fake_item", 0.5]])],
-        ["A", new Map([["fake_item", 0.75]])],
+        ["X", new Map([["fake_item", { prob: 1, expected: 1 }]])],
+        ["Y", new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])],
+        ["Z", new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])],
+        ["A", new Map([["fake_item", { prob: 0.75, expected: 1 }]])],
       ])
     );
   });
@@ -335,17 +405,27 @@ describe("loot", () => {
     ]);
     const loot = getLootForMapgen(data, data.byType("mapgen")[0]);
     // prob for item_a:
-    //   4x 75% chances for a 33% chance to spawn.
-    //   = 4x 75%*33% = 24.75% chances to spawn
-    //   so prob(spawn) = 1-(1-24.75%)^4
+    //   4x 75% chances for a 1/3 chance to spawn.
+    //   = 4x (75%*1/3 = 25%) chances to spawn
+    //   so prob(spawn) = 1-(1-25%)^4
     //   ~= 68%
-    expect(loot.get("item_a")!.toFixed(2)).toEqual("0.68");
+    expect(loot.get("item_a")!.prob.toFixed(2)).toEqual("0.68");
+    // expected for item_a:
+    //   4x 75% chances for a 1/3 chance to spawn.
+    //   e.v. for one chance = 75% * 1/3 = 0.25
+    //   4x 0.25 = 1
+    expect(loot.get("item_a")!.expected.toFixed(2)).toEqual("1.00");
     // prob for item_b:
     //   4x 75% chances for a 2/3 chance to spawn.
     //   = 4x 75%*2/3 = 50% chances to spawn
     //   so prob(spawn) = 1-(1-50%)^4
     //   ~= 93%
-    expect(loot.get("item_b")!.toFixed(2)).toEqual("0.94");
+    expect(loot.get("item_b")!.prob.toFixed(2)).toEqual("0.94");
+    // expected for item_b:
+    //   4x 75% chances for a 2/3 chance to spawn.
+    //   e.v. for one chance = 75% * 2/3 = 0.5
+    //   4x 0.5 = 2
+    expect(loot.get("item_b")!.expected.toFixed(2)).toEqual("2.00");
   });
 });
 
@@ -376,7 +456,9 @@ describe("nested mapgen", () => {
       } as Mapgen,
     ]);
     const loot = await getLootForMapgen(data, data.byType("mapgen")[0]);
-    expect([...loot.entries()]).toEqual([["test_item", 1]]);
+    expect([...loot.entries()]).toEqual([
+      ["test_item", { prob: 1, expected: 1 }],
+    ]);
   });
 
   it("handles chunk weights", async () => {
@@ -427,8 +509,8 @@ describe("nested mapgen", () => {
     ]);
     const loot = await getLootForMapgen(data, data.byType("mapgen")[0]);
     expect([...loot.entries()]).toEqual([
-      ["test_item", 0.25],
-      ["test_item_2", 0.75],
+      ["test_item", { prob: 0.25, expected: 0.25 }],
+      ["test_item_2", { prob: 0.75, expected: 0.75 }],
     ]);
   });
 
@@ -458,7 +540,9 @@ describe("nested mapgen", () => {
       } as Mapgen,
     ]);
     const loot = await getLootForMapgen(data, data.byType("mapgen")[0]);
-    expect([...loot.entries()]).toEqual([["test_item", 0.51]]);
+    expect([...loot.entries()]).toEqual([
+      ["test_item", { prob: 0.51, expected: 0.6 }],
+    ]);
   });
 
   it.todo("handles repeat range");
@@ -492,7 +576,9 @@ describe("nested mapgen", () => {
     ]);
     // NB, lootByOmSpecial is what handles mapgen offsets, so we have to call through that.
     const loot = await getLootForMapgen(data, data.byType("mapgen")[0]);
-    expect([...loot.entries()]).toEqual([["test_item", 1]]);
+    expect([...loot.entries()]).toEqual([
+      ["test_item", { prob: 1, expected: 1 }],
+    ]);
   });
 });
 
@@ -513,7 +599,7 @@ describe("furniture", () => {
       } as Mapgen,
     ]);
     const loot = getFurnitureForMapgen(data, data.byType("mapgen")[0]);
-    expect(loot.get("f_test_furn")).toEqual(1);
+    expect(loot.get("f_test_furn")).toEqual({ prob: 1, expected: 1 });
   });
 
   it("place_furniture", async () => {
@@ -530,6 +616,6 @@ describe("furniture", () => {
       } as Mapgen,
     ]);
     const loot = getFurnitureForMapgen(data, data.byType("mapgen")[0]);
-    expect(loot.get("f_test_furn")).toEqual(1);
+    expect(loot.get("f_test_furn")).toEqual({ prob: 1, expected: 1 });
   });
 });

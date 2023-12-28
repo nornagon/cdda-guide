@@ -24,7 +24,9 @@ import type {
   MapgenValue,
   ItemBasicInfo,
   ComestibleSlot,
+  OvermapSpecial,
 } from "./types";
+import type { Loot } from "./types/item/spawnLocations";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["AMMO", "item"],
@@ -256,6 +258,9 @@ export class CddaData {
           this._byTypeById.get(mappedType)!.set(obj.id, obj);
         else if (Array.isArray(obj.id))
           for (const id of obj.id)
+            this._byTypeById.get(mappedType)!.set(id, obj);
+        if (Array.isArray(obj.alias))
+          for (const id of obj.alias)
             this._byTypeById.get(mappedType)!.set(id, obj);
       }
       // recipes are id'd by their result
@@ -701,14 +706,21 @@ export class CddaData {
   // This is a WeakMap because flattenItemGroup is sometimes called with temporary objects
   _flattenItemGroupCache = new WeakMap<
     ItemGroupData,
-    { id: string; prob: number; count: [number, number] }[]
+    { id: string; prob: number; expected: number; count: [number, number] }[]
   >();
+  /**
+   * In the result, each |id| will be spawned with probability |prob|. If the item
+   * is spawned, it will be spawned between |count[0]| and |count[1]| times.
+   */
   flattenItemGroup(
     group: ItemGroupData
-  ): { id: string; prob: number; count: [number, number] }[] {
+  ): { id: string; prob: number; expected: number; count: [number, number] }[] {
     if (this._flattenItemGroupCache.has(group))
       return this._flattenItemGroupCache.get(group)!;
-    const retMap = new Map<string, { prob: number; count: [number, number] }>();
+    const retMap = new Map<
+      string,
+      { prob: number; expected: number; count: [number, number] }
+    >();
 
     function addOne({
       id,
@@ -719,16 +731,25 @@ export class CddaData {
       prob: number;
       count: [number, number];
     }) {
-      const { prob: prevProb, count: prevCount } = retMap.get(id) ?? {
+      const {
+        prob: prevProb,
+        count: prevCount,
+        expected: prevExpected,
+      } = retMap.get(id) ?? {
         prob: 0,
         count: [0, 0],
+        expected: 0,
       };
       const newProb = 1 - (1 - prevProb) * (1 - prob);
+
       const newCount: [number, number] = [
         count[0] + prevCount[0],
         count[1] + prevCount[1],
       ];
-      retMap.set(id, { prob: newProb, count: newCount });
+
+      const newExpected = prevExpected + (prob * (count[0] + count[1])) / 2;
+
+      retMap.set(id, { prob: newProb, expected: newExpected, count: newCount });
     }
 
     function add(
@@ -774,11 +795,16 @@ export class CddaData {
       };
     }
 
+    const data = this;
     function normalizeCount(entry: ItemGroupEntry): [number, number] {
       if (entry.count)
         if (typeof entry.count === "number") return [entry.count, entry.count];
         else return entry.count;
-      else if (entry.charges)
+      else if (
+        "item" in entry &&
+        entry.charges &&
+        countsByCharges(data.byId("item", entry.item))
+      )
         if (typeof entry.charges === "number")
           return [entry.charges, entry.charges];
         else return entry.charges;
@@ -905,6 +931,15 @@ export class CddaData {
     const r = [...retMap.entries()].map(([id, v]) => ({ id, ...v }));
     this._flattenItemGroupCache.set(group, r);
     return r;
+  }
+
+  flattenItemGroupLoot(group: ItemGroupData): Loot {
+    return new Map(
+      this.flattenItemGroup(group).map(({ id, prob, expected }) => [
+        id,
+        { prob, expected },
+      ])
+    );
   }
 
   _flatRequirementCache = new WeakMap<any, { id: string; count: number }[][]>();
@@ -1786,3 +1821,43 @@ export const data = {
     set(cddaData);
   },
 };
+
+export function omsName(data: CddaData, oms: OvermapSpecial): string {
+  if (oms.subtype === "mutable") return oms.id;
+  const ground_level_omts = (oms.overmaps ?? []).filter(
+    (p) => p.point[2] === 0
+  );
+  let minX = Infinity,
+    minY = Infinity;
+  let maxX = -Infinity,
+    maxY = -Infinity;
+  const grid = new Map<string, (typeof ground_level_omts)[0]>();
+  for (const omt of ground_level_omts) {
+    const [x, y] = omt.point;
+    if (
+      !data.byIdMaybe(
+        "overmap_terrain",
+        omt.overmap.replace(/_(north|south|east|west)$/, "")
+      )
+    )
+      continue;
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+    grid.set(`${x}|${y}`, omt);
+  }
+  const centerX = minX + Math.floor((maxX - minX) / 2);
+  const centerY = minY + Math.floor((maxY - minY) / 2);
+  const centerOmt = grid.get(`${centerX}|${centerY}`);
+  if (centerOmt) {
+    const omt = data.byId(
+      "overmap_terrain",
+      centerOmt.overmap.replace(/_(north|south|east|west)$/, "")
+    );
+    if (omt) {
+      return singularName(omt);
+    }
+  }
+  return oms.id;
+}

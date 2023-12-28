@@ -17,6 +17,7 @@ import ThingLink from "./types/ThingLink.svelte";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
 import { groupBy } from "./types/item/utils";
 import ProficiencyList from "./types/ProficiencyList.svelte";
+import OvermapAppearance from "./types/item/OvermapAppearance.svelte";
 
 export let type: string;
 export let data: CddaData;
@@ -104,6 +105,9 @@ function isProficiency(t: SupportedTypeMapped): t is Proficiency {
           limit={groupsList.length === 1 ? Infinity : 10}>
           {#if type === "item" || type === "terrain" || type === "furniture" || type === "monster" || type === "vehicle_part"}<ItemSymbol
               {item} />{/if}
+          {#if (type === "overmap_special" || type === "city_building") && item.subtype !== "mutable"}
+            <OvermapAppearance overmapSpecial={item} />
+          {/if}
           <ThingLink type={typeWithCorrectType} id={item.id} />
         </LimitedList>
       {/if}
