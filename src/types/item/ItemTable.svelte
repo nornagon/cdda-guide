@@ -35,7 +35,7 @@ const data = getContext<CddaData>("data");
 {:then loot}
   {#if loot.size}
     {@const sortedLoot = [...loot.entries()].sort((a, b) =>
-      Math.abs(b[1].prob - a[1].prob) * 100 < 0.005
+      Math.abs(b[1].prob - a[1].prob) * 100 < 0.0005
         ? b[1].expected - a[1].expected
         : b[1].prob - a[1].prob
     )}

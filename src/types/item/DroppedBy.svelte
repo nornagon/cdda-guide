@@ -2,23 +2,25 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, showProbability } from "../../data";
+import type { CddaData } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import type { Harvest } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
+import ItemTable from "./ItemTable.svelte";
 
 export let item_id: string;
 
 let data = getContext<CddaData>("data");
-const mons = data.byType("monster").flatMap((mon) => {
-  if (!mon.id) return [];
-  const deathDrops = data.flatDeathDrops(mon.id);
-  const dd = deathDrops.find((dd) => dd.id === item_id);
-  if (dd) return [{ id: mon.id, prob: dd.prob }];
-  return [];
-});
-mons.sort((a, b) => b.prob - a.prob);
+const mons = new Map(
+  data.byType("monster").flatMap((mon) => {
+    if (!mon.id) return [];
+    const deathDrops = data.flatDeathDrops(mon.id);
+    const dd = deathDrops.get(item_id);
+    if (dd) return [[mon.id, { prob: dd.prob, expected: dd.expected }]];
+    return [];
+  })
+);
 
 const itemsFromHarvest = (h: Harvest): string[] =>
   h.entries?.flatMap((e) =>
@@ -40,15 +42,10 @@ const dissectableFrom = data
   .filter((m) => m.id && harvests.some((h) => h.id === m.dissect));
 </script>
 
-{#if mons.length}
-  <section>
-    <h1>{t("Dropped By", { _context: "Obtaining" })}</h1>
-    <LimitedList items={mons} let:item>
-      <ItemSymbol item={data.byId("monster", item.id)} />
-      <ThingLink type="monster" id={item.id} /> ({showProbability(item.prob)})
-    </LimitedList>
-  </section>
-{/if}
+<ItemTable
+  type="monster"
+  loot={mons}
+  heading={t("Dropped By", { _context: "Obtaining" })} />
 
 {#if harvestableFrom.length}
   <section>

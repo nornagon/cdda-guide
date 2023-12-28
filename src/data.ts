@@ -26,7 +26,7 @@ import type {
   ComestibleSlot,
   OvermapSpecial,
 } from "./types";
-import type { Loot } from "./types/item/spawnLocations";
+import type { ItemChance, Loot } from "./types/item/spawnLocations";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["AMMO", "item"],
@@ -526,25 +526,19 @@ export class CddaData {
     return ret;
   }
 
-  _cachedDeathDrops: Map<
-    string,
-    { id: string; prob: number; count: [number, number] }[]
-  > = new Map();
-  flatDeathDrops(
-    mon_id: string
-  ): { id: string; prob: number; count: [number, number] }[] {
+  _cachedDeathDrops: Map<string, Loot> = new Map();
+  flatDeathDrops(mon_id: string): Loot {
     if (this._cachedDeathDrops.has(mon_id))
       return this._cachedDeathDrops.get(mon_id)!;
     const mon = this.byId("monster", mon_id);
     const ret = mon.death_drops
-      ? this.flattenItemGroup(
+      ? this.flattenItemGroupLoot(
           this.normalizeItemGroup(mon.death_drops, "distribution") ?? {
             subtype: "collection",
             entries: [],
           }
         )
-      : [];
-    ret.sort((a, b) => b.prob - a.prob);
+      : new Map();
     this._cachedDeathDrops.set(mon_id, ret);
     return ret;
   }

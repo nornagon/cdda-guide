@@ -64,7 +64,7 @@ onMount(() => {
     <p>
       {t("This location's appearance is dynamically generated.", { _context })}
     </p>
-  {:else}
+  {:else if item.overmaps?.length}
     <div class="om-appearance">
       {#if levels.length > 1}
         {#each [...levels].reverse() as level, i}
@@ -83,7 +83,7 @@ onMount(() => {
       {:else}
         <div class={`level ${levels[0] === 0 ? "ground-level" : ""}`}>
           <div class="label">
-            {levels[0]}
+            Z={levels[0]}
           </div>
           <div class="layer-flat">
             <OvermapAppearance overmapSpecial={item} showZ={levels[0]} />
@@ -94,14 +94,16 @@ onMount(() => {
   {/if}
 
   <dl>
-    <dt>{t("Locations", { _context })}</dt>
-    <dd>
-      <ul class="comma-separated">
-        {#each item.locations ?? [] as location}
-          <li>{location}</li>
-        {/each}
-      </ul>
-    </dd>
+    {#if item.locations?.length}
+      <dt>{t("Locations", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.locations ?? [] as location}
+            <li>{location}</li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
     {#if item.flags?.length}
       <dt>{t("Flags")}</dt>
       <dd>
@@ -113,7 +115,7 @@ onMount(() => {
       </dd>
     {/if}
     {#if lookalikeIds.length > 1}
-      <dt>{t("Variants", { _context })}</dt>
+      <dt>{t("Lookalikes", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
           <!-- prettier-ignore -->

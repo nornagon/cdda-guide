@@ -18,6 +18,7 @@ import SpecialAttack from "./monster/SpecialAttack.svelte";
 import LimitedList from "../LimitedList.svelte";
 import Spoiler from "../Spoiler.svelte";
 import ColorText from "./ColorText.svelte";
+import ItemTable from "./item/ItemTable.svelte";
 
 const _context = "Monster";
 
@@ -513,14 +514,8 @@ let upgrades =
       {/if}
     </dl>
   </section>
-  {#if deathDrops?.length}
-    <section>
-      <h1>{t("Drops", { _context })}</h1>
-      <LimitedList items={deathDrops} let:item>
-        <ItemSymbol item={data.byId("item", item.id)} />
-        <ThingLink type="item" id={item.id} /> ({showProbability(item.prob)})
-      </LimitedList>
-    </section>
+  {#if deathDrops.size}
+    <ItemTable loot={deathDrops} heading={t("Drops")} />
   {/if}
   {#if harvest && (harvest.entries ?? []).length}
     <section>

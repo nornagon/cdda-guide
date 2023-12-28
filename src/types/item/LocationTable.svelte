@@ -31,7 +31,7 @@ function filterLocations(
     }
   }
   spawnLocations.sort((a, b) =>
-    Math.abs(b.chance.prob - a.chance.prob) * 100 < 0.005
+    Math.abs(b.chance.prob - a.chance.prob) * 100 < 0.0005
       ? b.chance.expected - a.chance.expected
       : b.chance.prob - a.chance.prob
   );
