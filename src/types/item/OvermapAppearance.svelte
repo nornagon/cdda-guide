@@ -110,9 +110,17 @@ function omtAppearance(
 }
 </script>
 
-<div style="font-family: Unifont, monospace; line-height: 1; white-space: pre;">
+<div class="appearance-grid">
   {#each makeAppearanceGrid(showZ) as row}{#each row as omt}<span
         class="c_{omt.color}"
         title={omt.name}>{omt.sym ?? "\u00a0"}</span
       >{/each}<br />{/each}
 </div>
+
+<style>
+.appearance-grid {
+  font-family: Unifont, monospace;
+  line-height: 1;
+  white-space: pre;
+}
+</style>

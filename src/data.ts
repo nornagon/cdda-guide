@@ -26,6 +26,7 @@ import type {
   ComestibleSlot,
   OvermapSpecial,
 } from "./types";
+import type { Loot } from "./types/item/spawnLocations";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["AMMO", "item"],
@@ -257,6 +258,9 @@ export class CddaData {
           this._byTypeById.get(mappedType)!.set(obj.id, obj);
         else if (Array.isArray(obj.id))
           for (const id of obj.id)
+            this._byTypeById.get(mappedType)!.set(id, obj);
+        if (Array.isArray(obj.alias))
+          for (const id of obj.alias)
             this._byTypeById.get(mappedType)!.set(id, obj);
       }
       // recipes are id'd by their result
@@ -927,6 +931,15 @@ export class CddaData {
     const r = [...retMap.entries()].map(([id, v]) => ({ id, ...v }));
     this._flattenItemGroupCache.set(group, r);
     return r;
+  }
+
+  flattenItemGroupLoot(group: ItemGroupData): Loot {
+    return new Map(
+      this.flattenItemGroup(group).map(({ id, prob, expected }) => [
+        id,
+        { prob, expected },
+      ])
+    );
   }
 
   _flatRequirementCache = new WeakMap<any, { id: string; count: number }[][]>();

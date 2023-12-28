@@ -2,13 +2,18 @@
 import { singularName, type CddaData } from "../data";
 import type { OvermapSpecial } from "../types";
 import { getContext, onMount } from "svelte";
-import { getLootForMapgen, lootForOmSpecial } from "./item/spawnLocations";
+import {
+  getFurnitureForMapgen,
+  getLootForMapgen,
+  getOMSByAppearance,
+  getTerrainForMapgen,
+  lootForOmSpecial,
+  overmapAppearance,
+} from "./item/spawnLocations";
 import ThingLink from "./ThingLink.svelte";
-import { showNumber, showProbability } from "./item/utils";
 import { t } from "@transifex/native";
 import OvermapAppearance from "./item/OvermapAppearance.svelte";
-import ItemSymbol from "./item/ItemSymbol.svelte";
-import LimitedTableList from "../LimitedTableList.svelte";
+import ItemTable from "./item/ItemTable.svelte";
 
 const data = getContext<CddaData>("data");
 
@@ -24,11 +29,11 @@ const levels = Array.from(
   (_, i) => i + minLevel
 );
 
-const _context = "Overmap Special";
+const lookalikeIds = (
+  getOMSByAppearance(data).get(overmapAppearance(data, item)) ?? []
+).sort((a, b) => a.localeCompare(b));
 
-const lootPromise = lootForOmSpecial(data, item, (mg) =>
-  getLootForMapgen(data, mg)
-);
+const _context = "Overmap Special";
 
 const layerElements: HTMLElement[] = [];
 
@@ -36,13 +41,18 @@ onMount(() => {
   layerElements.forEach((el) => {
     // Capture the transformed element's size and adjust its wrapper element to fully contain it.
     // Surely there's a better way to do this.
-    const { x, y, width, height } = el.getBoundingClientRect();
-    el.parentElement!.style.width = `${width}px`;
-    el.parentElement!.style.height = `${height}px`;
-    const p = el.parentElement!.getBoundingClientRect();
-    el.parentElement!.style.position = "relative";
-    el.parentElement!.style.left = `${p.x - x}px`;
-    el.parentElement!.style.top = `${p.y - y}px`;
+    function makeFitTight() {
+      const { x, y, width, height } = el.getBoundingClientRect();
+      el.parentElement!.style.width = `${width}px`;
+      el.parentElement!.style.height = `${height}px`;
+      const p = el.parentElement!.getBoundingClientRect();
+      el.parentElement!.style.position = "relative";
+      el.parentElement!.style.left = `${p.x - x}px`;
+      el.parentElement!.style.top = `${p.y - y}px`;
+    }
+    // Resize observer needed to handle font changes during loading.
+    new ResizeObserver(makeFitTight).observe(el);
+    makeFitTight();
   });
 });
 </script>
@@ -58,7 +68,8 @@ onMount(() => {
         {#each [...levels].reverse() as level, i}
           <div class={`level ${level === 0 ? "ground-level" : ""}`}>
             <div class="label">
-              {level}
+              <span style={level === 0 ? "" : "visibility: hidden"}>Z=</span
+              >{level}
             </div>
             <div class="layer-container">
               <div class="layer" bind:this={layerElements[i]}>
@@ -80,8 +91,16 @@ onMount(() => {
     </div>
   {/if}
 
-  {#if item.flags?.length}
-    <dl>
+  <dl>
+    <dt>{t("Locations")}</dt>
+    <dd>
+      <ul class="comma-separated">
+        {#each item.locations ?? [] as location}
+          <li>{location}</li>
+        {/each}
+      </ul>
+    </dd>
+    {#if item.flags?.length}
       <dt>{t("Flags")}</dt>
       <dd>
         <ul class="comma-separated">
@@ -90,46 +109,50 @@ onMount(() => {
           {/each}
         </ul>
       </dd>
-    </dl>
-  {/if}
+    {/if}
+    {#if lookalikeIds.length > 1}
+      <dt>{t("Variants")}</dt>
+      <dd>
+        <ul class="comma-separated">
+          <!-- prettier-ignore -->
+          {#each lookalikeIds as id}<li>{#if id === item.id}{id}{:else}<ThingLink type="overmap_special" {id} />{/if}</li>{/each}
+        </ul>
+      </dd>
+    {/if}
+  </dl>
 </section>
 
-{#await lootPromise}
+{#await lootForOmSpecial(data, item, (mg) => getLootForMapgen(data, mg))}
   <section>
-    <h1>{t("Items", { _context })}</h1>
+    <h1>{t("Loot", { _context })}</h1>
     <p style="color: var(--cata-color-gray)">
       <em>{t("Loading...")}</em>
     </p>
   </section>
 {:then loot}
-  {#if loot.size}
-    {@const sortedLoot = [...loot.entries()].sort(
-      (a, b) => b[1].expected - a[1].expected
-    )}
-    <section>
-      <LimitedTableList items={sortedLoot}>
-        <tr slot="header">
-          <th colspan="2"><h1>{t("Item")}</h1></th>
-          <th style="text-align: right;"><h1>{t("Count")}</h1></th>
-          <th style="text-align: right;"><h1>{t("Chance")}</h1></th>
-        </tr>
-        <tr slot="item" let:item={[item_id, chance]}>
-          <td style="vertical-align: middle;">
-            <ItemSymbol item={data.byId("item", item_id)} />
-          </td>
-          <td style="padding-left: 3px; vertical-align: middle">
-            <ThingLink type="item" id={item_id} />
-          </td>
-          <td
-            style="text-align: right; padding-left: 1em; white-space: nowrap; vertical-align: middle;"
-            >{showNumber(chance.expected)}</td>
-          <td
-            style="text-align: right; padding-left: 1em; white-space: nowrap; vertical-align: middle;"
-            >{showProbability(chance.prob)}</td>
-        </tr>
-      </LimitedTableList>
-    </section>
-  {/if}
+  <ItemTable {loot} />
+{/await}
+
+{#await lootForOmSpecial(data, item, (mg) => getTerrainForMapgen(data, mg))}
+  <section>
+    <h1>{t("Terrain", { _context })}</h1>
+    <p style="color: var(--cata-color-gray)">
+      <em>{t("Loading...")}</em>
+    </p>
+  </section>
+{:then loot}
+  <ItemTable {loot} type="terrain" />
+{/await}
+
+{#await lootForOmSpecial(data, item, (mg) => getFurnitureForMapgen(data, mg))}
+  <section>
+    <h1>{t("Furniture", { _context })}</h1>
+    <p style="color: var(--cata-color-gray)">
+      <em>{t("Loading...")}</em>
+    </p>
+  </section>
+{:then loot}
+  <ItemTable {loot} type="furniture" />
 {/await}
 
 <style>
@@ -161,12 +184,5 @@ onMount(() => {
 .layer,
 .layer-container {
   width: min-content;
-}
-
-td {
-  font-variant-numeric: tabular-nums;
-}
-th {
-  padding: 0;
 }
 </style>

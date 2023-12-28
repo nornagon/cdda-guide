@@ -266,7 +266,7 @@ export async function lootByOmSpecial(
   return lootByOmSpecial;
 }
 
-function overmapAppearance(
+export function overmapAppearance(
   data: CddaData,
   oms: raw.OvermapSpecial
 ): string | undefined {
@@ -373,6 +373,18 @@ export const terrainByOMSAppearance = lazily((data: CddaData) =>
   )
 );
 
+export const getOMSByAppearance = lazily(
+  (data: CddaData): Map<string | undefined, string[]> => {
+    const omsByAppearance = new Map<string | undefined, string[]>();
+    for (const oms of data.byType("overmap_special")) {
+      const appearance = overmapAppearance(data, oms);
+      if (!omsByAppearance.has(appearance)) omsByAppearance.set(appearance, []);
+      omsByAppearance.get(appearance)!.push(oms.id);
+    }
+    return omsByAppearance;
+  }
+);
+
 async function computeLootByOMSAppearance(
   data: CddaData,
   lootFn: (mapgen: raw.Mapgen) => Loot
@@ -402,6 +414,9 @@ async function computeLootByOMSAppearance(
       await relinquish();
       l.ids.push(oms_id);
     }
+  });
+  lootByOMSAppearance.forEach((l) => {
+    l.ids.sort((a, b) => a.localeCompare(b));
   });
   return lootByOMSAppearance;
 }
@@ -605,6 +620,7 @@ export function getFurnitureForMapgen(
   }
   items.push(additional_items);
   const loot = collection(items);
+  loot.delete("f_null");
   furnitureForMapgenCache.set(mapgen, loot);
   return loot;
 }
@@ -634,6 +650,7 @@ export function getTerrainForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   }
   items.push(additional_items);
   const loot = collection(items);
+  loot.delete("t_null");
   terrainForMapgenCache.set(mapgen, loot);
   return loot;
 }
