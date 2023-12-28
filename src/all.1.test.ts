@@ -38,6 +38,7 @@ const types = [
   "construction_group",
   "bionic",
   "proficiency",
+  "overmap_special",
 ];
 
 // This lets LimitedList always render expanded.

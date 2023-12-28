@@ -127,8 +127,10 @@ onMount(() => {
 <ItemTable
   loot={lootForOmSpecial(data, item, (mg) => getLootForMapgen(data, mg))} />
 <ItemTable
+  type="terrain"
   loot={lootForOmSpecial(data, item, (mg) => getTerrainForMapgen(data, mg))} />
 <ItemTable
+  type="furniture"
   loot={lootForOmSpecial(data, item, (mg) =>
     getFurnitureForMapgen(data, mg)
   )} />
