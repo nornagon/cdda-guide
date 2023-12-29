@@ -366,6 +366,8 @@ export const getOMSByAppearance = lazily(
       if (!omsByAppearance.has(appearance)) omsByAppearance.set(appearance, []);
       omsByAppearance.get(appearance)!.push(oms.id);
     }
+    for (const v of omsByAppearance.values())
+      v.sort((a, b) => a.localeCompare(b));
     return omsByAppearance;
   }
 );

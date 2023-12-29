@@ -12,6 +12,7 @@ import * as fuzzysort from "fuzzysort";
 import ItemSymbol from "./types/item/ItemSymbol.svelte";
 import type {
   Item,
+  OvermapSpecial,
   SupportedTypeMapped,
   SupportedTypesWithMapped,
 } from "./types";
@@ -21,6 +22,10 @@ import ThingLink from "./types/ThingLink.svelte";
 import LimitedList from "./LimitedList.svelte";
 import LimitedTableList from "./LimitedTableList.svelte";
 import OvermapAppearance from "./types/item/OvermapAppearance.svelte";
+import {
+  getOMSByAppearance,
+  overmapAppearance,
+} from "./types/item/spawnLocations";
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -113,20 +118,16 @@ $: targets = [...(data?.all() ?? [])]
 
 export let search: string;
 
-function filter(
-  text: string
-): Map<
-  string,
-  { item: SearchableType; variant?: { name: string; id: string } }[]
-> {
+type SearchResult = {
+  item: SearchableType;
+  variant?: { name: string; id: string };
+};
+function filter(text: string): Map<string, SearchResult[]> {
   const results = fuzzysort.go(text, targets, {
     keys: ["id", "name", "variant_id"],
     threshold: -10000,
   });
-  const byType = new Map<
-    string,
-    { item: SearchableType; variant?: { name: string; id: string } }[]
-  >();
+  const byType = new Map<string, SearchResult[]>();
   for (const { obj: item } of results) {
     const mappedType = item.type;
     if (!SEARCHABLE_TYPES.has(mappedType)) continue;
@@ -154,20 +155,41 @@ $: matchingObjects =
 $: matchingObjectsList = matchingObjects
   ? [...matchingObjects.entries()]
   : null;
+
+function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
+  const seenAppearances = new Set<string>();
+  const ret: OvermapSpecial[][] = [];
+  for (const r of results) {
+    const oms = r.item as OvermapSpecial;
+    const appearance = overmapAppearance(data, oms);
+    if (!appearance) ret.push([oms]);
+    else if (!seenAppearances.has(appearance)) {
+      ret.push(
+        getOMSByAppearance(data)
+          .get(appearance)!
+          .map((id) => data.byId("overmap_special", id))
+      );
+      seenAppearances.add(appearance);
+    }
+  }
+  return ret;
+}
 </script>
 
 {#if matchingObjectsList}
   {#each matchingObjectsList as [type, results]}
     {#if type === "overmap_special"}
+      {@const grouped = groupByAppearance(results)}
       <h1>location</h1>
-      <LimitedTableList items={results} limit={50}>
+      <LimitedTableList items={grouped} limit={50}>
         <tr slot="item" let:item={result}>
-          <td style="text-align: center">
-            <OvermapAppearance overmapSpecial={result.item} />
+          <td style="text-align: center; padding-left: 2.5em;">
+            <OvermapAppearance overmapSpecial={result[0]} />
           </td>
-          <td style="vertical-align: middle">
-            <a href="/overmap_special/{result.item.id}"
-              >{omsName(data, result.item)}</a>
+          <td style="vertical-align: middle; padding-left: 5px;">
+            <a href="/overmap_special/{result[0].id}"
+              >{omsName(data, result[0])}</a
+            >{#if result.length > 1}{" "}({result.length} variants){/if}
           </td>
         </tr>
       </LimitedTableList>
