@@ -839,7 +839,11 @@ export class CddaData {
           add({ id: entry.item, prob: nProb, count: nCount });
           const item = this.byIdMaybe("item", entry.item);
           if (item && item.container)
-            add({ id: item.container, prob: nProb, count: nCount });
+            add({
+              id: item.container,
+              prob: nProb,
+              count: countsByCharges(item) ? [1, 1] : nCount,
+            });
         } else if ("group" in entry) {
           add(
             ...this.flattenTopLevelItemGroup(
