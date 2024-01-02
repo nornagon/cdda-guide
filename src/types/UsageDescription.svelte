@@ -1,5 +1,5 @@
 <script lang="ts">
-import { CddaData, singularName } from "../data";
+import { CddaData, singular, singularName } from "../data";
 import { getContext } from "svelte";
 import type { UseFunction } from "../types";
 import ThingLink from "./ThingLink.svelte";
@@ -13,10 +13,15 @@ let action =
     ? data.byId("item_action", usage.id)
     : data.byId("item_action", usage.type);
 let description =
-  ("menu_text" in usage ? usage.menu_text : null) ?? singularName(action);
+  ("menu_text" in usage ? usage.menu_text : null) ??
+  ("name" in usage ? singular(usage.name) : null) ??
+  singularName(action);
 </script>
 
-{description}{#if usage.type === "transform" || usage.type === "delayed_transform"}
+<ThingLink
+  type="item_action"
+  id={action.id}
+  overrideText={description} />{#if usage.type === "transform" || usage.type === "delayed_transform"}
   {" "}(⟹
   <ThingLink
     type="item"

@@ -522,6 +522,7 @@ export type UseFunction =
   | HolsterUseFunction
   | AttachMolleUseFunction
   | DetachMolleUseFunction
+  | MessageUseFunction
   | {
       // TODO
       type:
@@ -544,8 +545,7 @@ export type UseFunction =
         | "reveal_map"
         | "unpack"
         | "weigh_self"
-        | "link_up"
-        | "message";
+        | "link_up";
     }
   | {
       // Technically, the type can be any of the custom iuse functions. In
@@ -596,6 +596,7 @@ export type ConsumeDrugUseFunction = {
 
 export type RepairItemUseFunction = {
   type: "repair_item";
+  item_action_type: string;
   materials: string[];
   skill: string;
   cost_scaling: number;
@@ -619,6 +620,12 @@ export type AttachMolleUseFunction = {
 export type DetachMolleUseFunction = {
   type: "detach_molle";
   moves?: integer;
+};
+
+export type MessageUseFunction = {
+  type: "message";
+  name: Translation;
+  message: Translation;
 };
 
 export type ItemBasicInfo = {

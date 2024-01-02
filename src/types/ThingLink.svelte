@@ -20,6 +20,7 @@ export let id: string;
 export let plural: boolean = false;
 export let count: number | [number, number] | undefined = undefined;
 export let variantId: string | undefined = undefined;
+export let overrideText: string | undefined = undefined;
 
 function countToString(count: number | [number, number]): string {
   if (typeof count === "number") return count.toString();
@@ -62,7 +63,9 @@ function isItem(item: SupportedTypeMapped): item is Item {
       ? item.variants.find((v) => v.id === variantId) ?? item
       : item}
   <a href="{import.meta.env.BASE_URL}{type}/{id}"
-    >{item
+    >{overrideText
+      ? overrideText
+      : item
       ? item.type === "addiction_type"
         ? singular(item.type_name)
         : (plural ? pluralName : singularName)(nameSource)

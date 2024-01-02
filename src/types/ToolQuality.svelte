@@ -128,9 +128,9 @@ constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
         </dt>
         <dd>
           <ul class="comma-separated">
-            {#each usages as usage}
-              <li>{singularName(data.byId("item_action", usage))}</li>
-            {/each}
+            {#each usages as usage}<li>
+                <ThingLink type="item_action" id={usage} />
+              </li>{/each}
           </ul>
         </dd>
       {/each}

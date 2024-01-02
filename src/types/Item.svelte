@@ -455,9 +455,8 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
           <dt>{t("Usage", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
-              {#each usage as u}
-                <li><UsageDescription usage={u} /></li>
-              {/each}
+              <!-- prettier-ignore -->
+              {#each usage as u}<li><UsageDescription usage={u} /></li>{/each}
             </ul>
           </dd>
         {/if}
