@@ -89,25 +89,25 @@ harvestBySeasonList.sort(
       <dd><ThingLink type="item" id={item.crafting_pseudo_item} /></dd>
     {/if}
     {#if item.boltcut}
-      <dt>{t("Boltcut", { _context })}</dt>
+      <dt><ThingLink type="item_action" id="BOLTCUTTERS" /></dt>
       <dd>
         <TerFurnActivity act={item.boltcut} resultType="furniture" />
       </dd>
     {/if}
     {#if item.hacksaw}
-      <dt>{t("Hacksaw", { _context })}</dt>
+      <dt><ThingLink type="item_action" id="HACKSAW" /></dt>
       <dd>
         <TerFurnActivity act={item.hacksaw} resultType="furniture" />
       </dd>
     {/if}
     {#if item.oxytorch}
-      <dt>{t("Oxytorch", { _context })}</dt>
+      <dt><ThingLink type="item_action" id="OXYTORCH" /></dt>
       <dd>
         <TerFurnActivity act={item.oxytorch} resultType="furniture" />
       </dd>
     {/if}
     {#if item.prying}
-      <dt>{t("Prying", { _context })}</dt>
+      <dt><ThingLink type="item_action" id="CROWBAR" /></dt>
       <dd>
         <TerFurnActivity act={item.prying} resultType="furniture" />
       </dd>
