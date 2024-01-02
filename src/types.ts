@@ -1977,6 +1977,18 @@ export type ProficiencyCategory = {
   description?: Translation;
 };
 
+export type RegionSettings = {
+  id: string;
+  type: "region_settings";
+  default_groundcover: [string, integer][];
+  region_terrain_and_furniture: {
+    terrain: Record<string, Record<string, integer>>;
+    furniture: Record<string, Record<string, integer>>;
+  }
+
+  // TODO: etc.
+}
+
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
@@ -2037,6 +2049,7 @@ export type SupportedTypes = {
   proficiency: Proficiency;
   proficiency_category: ProficiencyCategory;
   recipe: { type: "recipe" } & Recipe;
+  region_settings: RegionSettings;
   requirement: Requirement;
   rotatable_symbol: RotatableSymbol;
   skill: Skill;

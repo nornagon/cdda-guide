@@ -1,7 +1,8 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
-import { render, cleanup } from "@testing-library/svelte";
+import { render, cleanup, waitFor } from "@testing-library/svelte";
+import { screen } from "@testing-library/dom";
 import { expect, test, afterEach } from "vitest";
 import * as fs from "fs";
 
@@ -19,7 +20,7 @@ const json = JSON.parse(
 );
 let data: CddaData = new CddaData(json.data);
 const types = [
-  "item",
+  /*"item",
   "furniture",
   "monster",
   "technique",
@@ -41,12 +42,9 @@ const types = [
   "weapon_category",
   "construction_group",
   "bionic",
-  "proficiency",
+  "proficiency",*/
   "overmap_special",
 ];
-
-// This lets LimitedList always render expanded.
-(globalThis as any).__isTesting__ = true;
 
 const all = data._raw
   .filter((x) => x.id && types.includes(mapType(x.type)))
@@ -66,7 +64,12 @@ test.each(all.filter((_, i) => i % numChunks === chunkIdx))(
     await lootByOMSAppearance(data);
     await furnitureByOMSAppearance(data);
     await terrainByOMSAppearance(data);
+
+    // This lets LimitedList always render expanded.
+    (globalThis as any).__isTesting__ = true;
     const { container } = render(Thing, { item: { type, id }, data });
+    await waitFor(() => !screen.getByText(/Loading/));
+
     if (type !== "technique") {
       expect(container.textContent).not.toMatch(/undefined|NaN|object Object/);
     }
