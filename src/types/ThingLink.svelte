@@ -62,7 +62,7 @@ function isItem(item: SupportedTypeMapped): item is Item {
     item && variantId && isItem(item) && "variants" in item && item.variants
       ? item.variants.find((v) => v.id === variantId) ?? item
       : item}
-  <a href="{import.meta.env.BASE_URL}{type}/{id}"
+  <a href="{import.meta.env.BASE_URL}{type}/{id}{location.search}"
     >{overrideText
       ? overrideText
       : item
