@@ -14,7 +14,7 @@ let action =
     : data.byId("item_action", usage.type);
 let description =
   ("menu_text" in usage ? usage.menu_text : null) ??
-  ("name" in usage ? singular(usage.name) : null) ??
+  ("name" in usage && usage.name ? singular(usage.name) : null) ??
   singularName(action);
 </script>
 
