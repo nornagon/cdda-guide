@@ -62,7 +62,7 @@ function filterLocations(
             <OvermapAppearance overmapSpecial={loc.overmap_special} />
           </td>
           <td>
-            <a href="/overmap_special/{loc.ids[0]}"
+            <a href="/overmap_special/{loc.ids[0]}{location.search}"
               >{omsName(data, loc.overmap_special)}</a>
             {#if loc.ids.length > 1}
               {t("({n} variants)", { n: loc.ids.length })}
