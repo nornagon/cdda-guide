@@ -128,9 +128,8 @@ constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
         </dt>
         <dd>
           <ul class="comma-separated">
-            {#each usages as usage}<li>
-                <ThingLink type="item_action" id={usage} />
-              </li>{/each}
+            <!-- prettier-ignore -->
+            {#each usages as usage}<li><ThingLink type="item_action" id={usage} /></li>{/each}
           </ul>
         </dd>
       {/each}
