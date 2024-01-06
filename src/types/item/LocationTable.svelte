@@ -42,7 +42,9 @@ function filterLocations(
 {#await loots}
   <section>
     <h1>{heading}</h1>
-    <p style="color: var(--cata-color-gray)"><em>{t("Loading...")}</em></p>
+    <p style="color: var(--cata-color-gray)" data-testid="loading-indicator">
+      <em>{t("Loading...")}</em>
+    </p>
   </section>
 {:then spawnLocationsUnfiltered}
   {@const spawnLocations = filterLocations(spawnLocationsUnfiltered, id)}

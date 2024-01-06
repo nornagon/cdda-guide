@@ -159,6 +159,11 @@ const requestIdleCallback: typeof window.requestIdleCallback =
       };
 
 function yieldUntilIdle(): Promise<IdleDeadline> {
+  if ((globalThis as any).__isTesting__)
+    return Promise.resolve({
+      didTimeout: false,
+      timeRemaining: () => 100,
+    });
   return new Promise<IdleDeadline>((resolve) => {
     requestIdleCallback(resolve, { timeout: 100 });
   });

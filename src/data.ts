@@ -259,9 +259,13 @@ export class CddaData {
         else if (Array.isArray(obj.id))
           for (const id of obj.id)
             this._byTypeById.get(mappedType)!.set(id, obj);
+
+        // TODO: proper alias handling. We want to e.g. be able to collapse them in loot tables.
         if (Array.isArray(obj.alias))
           for (const id of obj.alias)
             this._byTypeById.get(mappedType)!.set(id, obj);
+        else if (typeof obj.alias === "string")
+          this._byTypeById.get(mappedType)!.set(obj.alias, obj);
       }
       // recipes are id'd by their result
       if (

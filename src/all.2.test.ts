@@ -1,7 +1,8 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
-import { render, cleanup } from "@testing-library/svelte";
+import { render, cleanup, act } from "@testing-library/svelte";
+import { screen } from "@testing-library/dom";
 import { expect, test, afterEach } from "vitest";
 import * as fs from "fs";
 
@@ -46,11 +47,14 @@ const types = [
   "item_action",
 ];
 
-// This lets LimitedList always render expanded.
-(globalThis as any).__isTesting__ = true;
-
 const all = data._raw
-  .filter((x) => x.id && types.includes(mapType(x.type)))
+  .filter(
+    (x) =>
+      x.id &&
+      types.includes(mapType(x.type)) &&
+      (!process.env.TEST_ONLY ||
+        process.env.TEST_ONLY === `${mapType(x.type)}/${x.id}`)
+  )
   .map((x) => [mapType(x.type), x.id]);
 
 afterEach(cleanup);
@@ -67,13 +71,19 @@ test.each(all.filter((_, i) => i % numChunks === chunkIdx))(
     await lootByOMSAppearance(data);
     await furnitureByOMSAppearance(data);
     await terrainByOMSAppearance(data);
+
+    // This lets LimitedList always render expanded.
+    (globalThis as any).__isTesting__ = true;
     const { container } = render(Thing, { item: { type, id }, data });
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    expect(screen.queryByTestId("loading-indicator")).toBe(null);
+
     if (type !== "technique") {
       expect(container.textContent).not.toMatch(/undefined|NaN|object Object/);
     }
   },
   {
     // The first test sometimes times out on CI with the default 5sec timeout.
-    timeout: 10000,
+    timeout: 20000,
   }
 );

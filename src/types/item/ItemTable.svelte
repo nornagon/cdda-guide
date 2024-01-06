@@ -28,7 +28,7 @@ const data = getContext<CddaData>("data");
 {#await Promise.resolve(loot)}
   <section>
     <h1>{heading}</h1>
-    <p style="color: var(--cata-color-gray)">
+    <p style="color: var(--cata-color-gray)" data-testid="loading-indicator">
       <em>{t("Loading...")}</em>
     </p>
   </section>
