@@ -449,6 +449,20 @@ export class CddaData {
               (rdu.constant_damage_multiplier ?? 0);
           }
         }
+      } else if (
+        (k === "melee_damage" || (k === "armor" && ret.type === "MONSTER")) &&
+        ret[k]
+      ) {
+        ret[k] = JSON.parse(JSON.stringify(ret[k]));
+        for (const k2 of Object.keys(ret.relative[k])) {
+          ret[k][k2] += ret.relative[k][k2];
+        }
+      } else if (k === "qualities") {
+        ret[k] = JSON.parse(JSON.stringify(ret[k]));
+        for (const [q, l] of ret.relative[k]) {
+          const existing = ret[k].find((x: any) => x[0] === q);
+          existing[1] += l;
+        }
       }
       // TODO: vitamins, mass, volume, time
     }
@@ -494,6 +508,15 @@ export class CddaData {
               (modified.constant_damage_multiplier ?? 0) *
               (pdu.constant_damage_multiplier ?? 1);
           }
+        }
+      } else if (
+        (k === "melee_damage" || (k === "armor" && ret.type === "MONSTER")) &&
+        ret[k]
+      ) {
+        ret[k] = JSON.parse(JSON.stringify(ret[k]));
+        for (const k2 of Object.keys(ret.proportional[k])) {
+          ret[k][k2] *= ret.proportional[k][k2];
+          ret[k][k2] = ret[k][k2] | 0; // most things are ints.. TODO: what keys are float?
         }
       }
       // TODO: mass, volume, time (need to check the base value's type)
