@@ -549,6 +549,16 @@ export class CddaData {
       }
     }
     delete ret.delete;
+    if ("replace_materials" in ret && ret.material) {
+      for (const [toReplace, replacement] of Object.entries(
+        ret.replace_materials
+      )) {
+        ret.material = ret.material.map((x: any) =>
+          x.type === toReplace ? { ...x, type: replacement } : x
+        );
+        // TODO: update weight
+      }
+    }
     this._flattenCache.set(obj, ret);
     return ret;
   }
