@@ -28,7 +28,7 @@ const _context = "Item Comestible Info";
       <dt>{t("Addiction", { _context })}</dt>
       <dd>
         <ul class="comma-separated">
-          {#each normalizeAddictionTypes(item) as { addiction, potential }, i}
+          {#each normalizeAddictionTypes(item) as { addiction, potential }}
             <li>
               <ThingLink type="addiction_type" id={addiction} /> ({potential})
             </li>

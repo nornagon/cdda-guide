@@ -1,7 +1,7 @@
 <script lang="ts">
 import { CddaData, byName, normalizeAddictionTypes, singular } from "../data";
 import ThingLink from "./ThingLink.svelte";
-import type { AddictionType, ComestibleSlot } from "../types";
+import type { AddictionType } from "../types";
 import { getContext } from "svelte";
 import LimitedList from "../LimitedList.svelte";
 import { t } from "@transifex/native";

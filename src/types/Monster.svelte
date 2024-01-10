@@ -15,7 +15,6 @@ import ThingLink from "./ThingLink.svelte";
 import type { Harvest, Monster, MonsterGroup, Resistances } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import SpecialAttack from "./monster/SpecialAttack.svelte";
-import LimitedList from "../LimitedList.svelte";
 import Spoiler from "../Spoiler.svelte";
 import ColorText from "./ColorText.svelte";
 import ItemTable from "./item/ItemTable.svelte";
@@ -268,12 +267,6 @@ let harvest: Harvest | undefined = item.harvest
 let dissect: Harvest | undefined = item.dissect
   ? data.byId("harvest", item.dissect)
   : undefined;
-
-function showProbability(prob: number) {
-  const ret = (prob * 100).toFixed(2);
-  if (ret === "0.00") return "< 0.01%";
-  return ret + "%";
-}
 
 function flattenGroup(mg: MonsterGroup): string[] {
   const results = new Set<string>();
