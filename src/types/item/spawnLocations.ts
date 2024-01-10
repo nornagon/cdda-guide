@@ -248,6 +248,7 @@ export async function lootForOmSpecial(
   const loots: Loot[] = [];
   await yieldable(async (relinquish) => {
     for (const om of om_special.overmaps ?? []) {
+      if (!om.overmap) continue;
       const overmap_id = om.overmap.replace(/_(north|east|west|south)$/, "");
       loots.push(lootForOmt(data, overmap_id, lootFn));
       await relinquish();
@@ -283,6 +284,7 @@ export function overmapAppearance(
     maxY = -Infinity;
   const overmapsByPoint = new Map<string, (typeof overmaps)[0]>();
   for (const om of overmaps) {
+    if (!om.overmap) continue;
     const omt_id = om.overmap.replace(/_(north|south|east|west)$/, "");
     if (!data.byIdMaybe("overmap_terrain", omt_id)) continue;
     const [x, y, z] = om.point;
@@ -299,7 +301,7 @@ export function overmapAppearance(
   for (let y = minY; y <= maxY; y++)
     for (let x = minX; x <= maxX; x++) {
       const om = overmapsByPoint.get(`${x}|${y}`);
-      if (om) {
+      if (om?.overmap) {
         const omt_id = om.overmap.replace(/_(north|south|east|west)$/, "");
         const appearance = omtAppearanceString(omt_id);
         appearanceComponents.push(appearance);

@@ -64,8 +64,9 @@ function searchableName(data: CddaData, item: SupportedTypeMapped) {
     else
       return (
         item.overmaps
-          ?.map((omId) => {
-            const normalizedId = omId.overmap.replace(
+          ?.filter((omEntry) => omEntry.overmap)
+          .map((omEntry) => {
+            const normalizedId = omEntry.overmap!.replace(
               /_(north|south|east|west)$/,
               ""
             );

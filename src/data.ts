@@ -1870,6 +1870,7 @@ export function omsName(data: CddaData, oms: OvermapSpecial): string {
   const grid = new Map<string, (typeof ground_level_omts)[0]>();
   for (const omt of ground_level_omts) {
     const [x, y] = omt.point;
+    if (!omt.overmap) continue;
     if (
       !data.byIdMaybe(
         "overmap_terrain",
@@ -1886,7 +1887,7 @@ export function omsName(data: CddaData, oms: OvermapSpecial): string {
   const centerX = minX + Math.floor((maxX - minX) / 2);
   const centerY = minY + Math.floor((maxY - minY) / 2);
   const centerOmt = grid.get(`${centerX}|${centerY}`);
-  if (centerOmt) {
+  if (centerOmt?.overmap) {
     const omt = data.byId(
       "overmap_terrain",
       centerOmt.overmap.replace(/_(north|south|east|west)$/, "")

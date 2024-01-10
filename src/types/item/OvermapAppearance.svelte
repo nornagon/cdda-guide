@@ -34,7 +34,7 @@ function makeAppearanceGrid(z: number) {
     const appearanceRow: { sym?: string; color: string; name: string }[] = [];
     for (let x = minX; x <= maxX; x++) {
       const om = overmapsByPoint.get(`${x}|${y}|${z}`);
-      if (om) {
+      if (om?.overmap) {
         const [, omt_id, dir] = /^(.+?)(?:_(north|south|east|west))?$/.exec(
           om.overmap
         )!;
