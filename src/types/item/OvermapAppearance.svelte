@@ -21,11 +21,13 @@ const overmapsByPoint = new Map<string, (typeof overmaps)[0]>();
 
 for (const om of overmaps) {
   const [x, y, z] = om.point;
-  if (x < minX) minX = x;
-  if (y < minY) minY = y;
-  if (x > maxX) maxX = x;
-  if (y > maxY) maxY = y;
-  overmapsByPoint.set(`${x}|${y}|${z}`, om);
+  if (om.overmap) {
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+    overmapsByPoint.set(`${x}|${y}|${z}`, om);
+  }
 }
 
 function makeAppearanceGrid(z: number) {
@@ -47,27 +49,7 @@ function makeAppearanceGrid(z: number) {
     appearanceGrid.push(appearanceRow);
   }
 
-  /*
-  while (appearanceGrid.length) {
-    const row = appearanceGrid[0];
-    if (!isEmpty(row)) break;
-    appearanceGrid.shift();
-  }
-
-  while (appearanceGrid.length) {
-    const row = appearanceGrid[appearanceGrid.length - 1];
-    if (!isEmpty(row)) break;
-    appearanceGrid.pop();
-  }
-  */
-
   return appearanceGrid;
-}
-
-function isEmpty(
-  row: { sym?: string; color: string; name: string }[]
-): boolean {
-  return row.every((cell) => cell.sym === " ");
 }
 
 function rotateSymbol(symbol: string, dir: string) {
