@@ -265,9 +265,9 @@ async function getRandomPage() {
 let randomPage: string | null = null;
 function newRandomPage() {
   getRandomPage().then((r) => {
-    randomPage = `${import.meta.env.BASE_URL}${mapType(r.type)}/${
-      r.id
-    }{location.search}`;
+    randomPage = `${import.meta.env.BASE_URL}${mapType(r.type)}/${r.id}${
+      location.search
+    }`;
   });
 }
 newRandomPage();
