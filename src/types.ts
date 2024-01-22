@@ -121,8 +121,8 @@ export type Construction = {
 
   byproducts?: InlineItemGroup;
 
-  pre_special?: string;
-  post_special?: string;
+  pre_special?: string | string[];
+  post_special?: string | string[];
   explain_failure?: string;
 
   vehicle_start?: boolean;
