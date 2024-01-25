@@ -679,7 +679,7 @@ export type ItemBasicInfo = {
     | string
     | UseFunction
     | (string | UseFunction | [string] | [string, number])[];
-  variant_type?: "gun" | "generic";
+  variant_type?: "gun" | "drug" | "generic";
   variants?: {
     id: string;
     name: Translation;
