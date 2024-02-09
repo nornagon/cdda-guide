@@ -790,8 +790,15 @@ export class CddaData {
       args.forEach(addOne);
     }
 
+    function normalizeContainerItem(id: string | { item: string }) {
+      return typeof id === "string" ? id : id.item;
+    }
     if ("container-item" in group && group["container-item"])
-      add({ id: group["container-item"], prob: 1, count: [1, 1] });
+      add({
+        id: normalizeContainerItem(group["container-item"]),
+        prob: 1,
+        count: [1, 1],
+      });
 
     let normalizedEntries: ItemGroupEntry[] = [];
     for (const entry of "entries" in group && group.entries
@@ -856,7 +863,11 @@ export class CddaData {
           const ids = entry[subrefItem];
           if (ids)
             for (const id of [ids].flat())
-              add({ id, prob: nProb, count: [1, 1] });
+              add({
+                id: normalizeContainerItem(id),
+                prob: nProb,
+                count: [1, 1],
+              });
         }
         for (const subrefGroup of [
           "container-group",
@@ -920,7 +931,11 @@ export class CddaData {
           const ids = entry[subrefItem];
           if (ids)
             for (const id of [ids].flat())
-              add({ id, prob: nProb, count: [1, 1] });
+              add({
+                id: normalizeContainerItem(id),
+                prob: nProb,
+                count: [1, 1],
+              });
         }
         for (const subrefGroup of [
           "container-group",

@@ -42,11 +42,12 @@ export type ItemGroupEntry = (
   count?: number | [number, number];
   charges?: number | [number, number];
 
-  // NB! "container-item" isn't greppable in the correct place in the source,
+  // NB! "contents-item" isn't greppable in the correct place in the source,
   // it's made up by load_sub_ref(..., "container"), which then looks for
-  // "container-item" and "container-group". rg '"-item"' to find it.
-  // The same is true for ammo{-item,-group} and contents{-item,-group}.
-  "container-item"?: string;
+  // "contents-item" and "container-group". rg '"-item"' to find it.
+  // The same is true for ammo{-item,-group}. "container-item" is special since
+  // https://github.com/CleverRaven/Cataclysm-DDA/pull/71041.
+  "container-item"?: string | { item: string; variant: string };
   "container-group"?: string;
   "contents-item"?: string | string[];
   "contents-group"?: string | string[];
@@ -78,7 +79,7 @@ export type ItemGroupData = {
 
   // TODO: In theory I think the other -item and -group fields should be
   // allowed here too, but they're not used anywhere at the time of writing.
-  "container-item"?: string;
+  "container-item"?: string | { item: string; variant: string };
 };
 
 export type OldItemGroupData = {
