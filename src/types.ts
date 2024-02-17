@@ -1973,7 +1973,9 @@ export type Bionic = {
 export type ItemCategory = {
   id: string;
   type: "ITEM_CATEGORY";
-  name: Translation;
+  name?: Translation;
+  name_header?: Translation;
+  name_noun?: Translation;
   sort_rank: integer;
   // TODO: zones
 };
