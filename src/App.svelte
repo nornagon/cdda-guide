@@ -568,7 +568,7 @@ Anyway?`,
         {@const build_number =
           version === "latest" ? builds[0].build_number : version}
         <select
-          value={locale ?? "en"}
+          value={locale || "en"}
           on:change={(e) => {
             const url = new URL(location.href);
             const lang = e.currentTarget.value;
