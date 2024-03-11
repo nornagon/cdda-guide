@@ -3,7 +3,7 @@
   <ShortName>HHG</ShortName>
   <LongName>The Hitchhiker's Guide to the Cataclysm</LongName>
   <Description>Search the Hitchhiker's Guide to the Cataclysm</Description>
-  <Url type="text/html" method="get" template="https://cdda-guide.nornagon.net/{searchTerms}?lang={language?}"/>
+  <Url type="text/html" method="get" template="https://cdda-guide.nornagon.net/{searchTerms}"/>
   <Image height="16" width="16" type="image/png">https://cdda-guide.nornagon.net/favicon.png</Image>
   <Image height="192" width="192" type="image/png">https://cdda-guide.nornagon.net/icon-192.png</Image>
   <Query role="example" searchTerms="flashlight" />
