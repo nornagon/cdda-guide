@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Search HHG</ShortName>
+  <LongName>Search the Hitchhiker's Guide to the Cataclysm</LongName>
+  <Description>Search the Hitchhiker's Guide to the Cataclysm</Description>
+  <Url type="text/html" method="get" template="https://cdda-guide.nornagon.net/{searchTerms}?lang={language?}"/>
+  <Image height="16" width="16" type="image/png">https://cdda-guide.nornagon.net/favicon.png</Image>
+  <Image height="192" width="192" type="image/png">https://cdda-guide.nornagon.net/icon-192.png</Image>
+  <Query role="example" searchTerms="flashlight" />
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <Language>en</Language>
+</OpenSearchDescription>
