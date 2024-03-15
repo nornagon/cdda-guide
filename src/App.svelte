@@ -99,6 +99,10 @@ $: tilesetUrl = $data
   : null;
 $: tileData.setURL(tilesetUrl);
 
+function decodeQueryParam(p: string) {
+  return decodeURIComponent(p.replace(/\+/g, " "));
+}
+
 function load() {
   const path = location.pathname.slice(import.meta.env.BASE_URL.length - 1);
   let m: RegExpExecArray | null;
@@ -106,7 +110,7 @@ function load() {
     const [, type, id] = m;
     if (type === "search") {
       item = null;
-      search = decodeURIComponent(id ?? "");
+      search = decodeQueryParam(id ?? "");
     } else {
       item = { type, id: id ? decodeURIComponent(id) : "" };
     }
@@ -147,7 +151,7 @@ const clearItem = () => {
       null,
       "",
       import.meta.env.BASE_URL +
-        (search ? "search/" + search : "") +
+        (search ? "search/" + encodeURIComponent(search) : "") +
         location.search
     );
   else
@@ -155,7 +159,7 @@ const clearItem = () => {
       null,
       "",
       import.meta.env.BASE_URL +
-        (search ? "search/" + search : "") +
+        (search ? "search/" + encodeURIComponent(search) : "") +
         location.search
     );
   item = null;
