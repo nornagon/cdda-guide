@@ -793,7 +793,7 @@ export type FaultFix = {
   faults_added?: string[]; // fault_id
   mod_damage?: number; // int
   mod_degredation?: number; // int
-  requirements?: [string, number][] | RequirementData[];
+  requirements?: ([string, number] | RequirementData)[];
 };
 
 export type JsonFlag = {
