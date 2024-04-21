@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { MartialArt, MartialArtBuff } from "../types";
 import { getContext } from "svelte";
-import { CddaData, singular, singularName } from "../data";
+import { CddaData, i18n, singular, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import ThingLink from "./ThingLink.svelte";
 import Technique from "./Technique.svelte";
@@ -60,8 +60,8 @@ const buffMap = new Map(
       {#if item.learn_difficulty != null}
         <dt>{t("Difficulty to Learn", { _context })}</dt>
         <dd>
-          {item.learn_difficulty} ({learnDifficultyAsText(
-            item.learn_difficulty
+          {item.learn_difficulty} ({i18n.__(
+            learnDifficultyAsText(item.learn_difficulty)
           )})
         </dd>
       {/if}
@@ -145,7 +145,7 @@ const buffMap = new Map(
 {#each buffss as [title, buffs]}
   {#each buffs as buff}
     <section>
-      <h1>{title}: {buff.name}</h1>
+      <h1>{i18n.__(title)}: {singularName(buff)}</h1>
       <dl>
         <MartialArtRequirements item={buff} {buffMap} />
         <BonusContainer item={buff} />
@@ -196,6 +196,9 @@ const buffMap = new Map(
 {#if item.techniques?.length}
   <h1>{t("Techniques", { _context })}</h1>
   {#each item.techniques as tec_id}
-    <Technique item={data.byId("technique", tec_id)} {buffMap} />
+    <Technique
+      item={data.byId("technique", tec_id)}
+      {buffMap}
+      standalone={false} />
   {/each}
 {/if}

@@ -2,15 +2,17 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, i18n, singular } from "../data";
+import { CddaData, byName, i18n, singular, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { MartialArtBuff, Technique } from "../types";
 import BonusContainer from "./BonusContainer.svelte";
 import MartialArtRequirements from "./MartialArtRequirements.svelte";
 import ThingLink from "./ThingLink.svelte";
+import ItemSymbol from "./item/ItemSymbol.svelte";
 
 export let item: Technique;
 export let buffMap: Map<string, MartialArtBuff> = new Map();
+export let standalone: boolean = true;
 
 const data = getContext<CddaData>("data");
 const _context = "Martial Art";
@@ -20,7 +22,7 @@ const weapons = data
   .filter((it) => {
     return it.id && (it.techniques ?? []).includes(item.id);
   })
-  .sort((a, b) => a.id.localeCompare(b.id));
+  .sort(byName);
 
 const type = i18n.__(
   item.block_counter
@@ -53,8 +55,14 @@ if (item.stunned_target)
   );
 </script>
 
+{#if standalone}
+  <h1>{t("Technique", { _context })}: {singularName(item)}</h1>
+{/if}
+
 <section>
-  <h1>{t("Technique", { _context })}: {item.name}</h1>
+  {#if !standalone}
+    <h1>{t("Technique", { _context })}: {singularName(item)}</h1>
+  {/if}
   <dl>
     <dt>{t("Type", { _context })}</dt>
     <dd>{type}</dd>
@@ -114,6 +122,7 @@ if (item.stunned_target)
   <section>
     <h1>{t("Weapons", { _context })}</h1>
     <LimitedList items={weapons} let:item limit={20}>
+      <ItemSymbol {item} />
       <ThingLink type="item" id={item.id} />
     </LimitedList>
   </section>
