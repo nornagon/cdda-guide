@@ -45,6 +45,7 @@ const types = [
   "proficiency",
   "overmap_special",
   "item_action",
+  "technique",
 ];
 
 const all = data._raw
