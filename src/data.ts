@@ -274,7 +274,10 @@ export class CddaData {
       ) {
         if (!this._byTypeById.has(mappedType))
           this._byTypeById.set(mappedType, new Map());
-        const id = obj.result + (obj.id_suffix ? "_" + obj.id_suffix : "");
+        const id =
+          obj.result +
+          (obj.variant && !obj.abstract ? "_" + obj.variant : "") +
+          (obj.id_suffix ? "_" + obj.id_suffix : "");
         this._byTypeById.get(mappedType)!.set(id, obj);
       }
       if (

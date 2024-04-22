@@ -161,6 +161,7 @@ export type Recipe = {
   type: "recipe" | "uncraft" | "practice";
 
   id_suffix?: string; // only for type 'recipe'. not allowed for abstracts
+  variant?: string;
   obsolete?: boolean;
 
   time?: number /* moves */ | string /* duration */;

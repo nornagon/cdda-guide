@@ -101,9 +101,11 @@ function activityLevelName(level: number) {
     {/if}
   </p>
   <dl>
-    {#if showResult && recipe.result}
+    {#if (showResult || recipe.variant) && recipe.result}
       <dt>{t("Result", { _context })}</dt>
-      <dd><ThingLink id={recipe.result} type="item" /></dd>
+      <dd>
+        <ThingLink id={recipe.result} type="item" variantId={recipe.variant} />
+      </dd>
     {/if}
     <dt>{t("Primary Skill", { _context })}</dt>
     <dd>
