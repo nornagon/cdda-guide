@@ -1480,6 +1480,7 @@ class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
     if (!this.#_index) {
       this.#_index = new Map();
       for (const item of this.data.byType(this.objType)) {
+        if (!item.id && !item.result) continue;
         for (const id of this.fn(item)) {
           if (!this.#index.has(id)) this.#index.set(id, []);
           this.#index.get(id)!.push(item);
