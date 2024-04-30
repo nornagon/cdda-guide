@@ -302,7 +302,7 @@ let upgrades =
     {/if}
     {#if item.species && item.species.length}
       <dt>{t("Species", { _context })}</dt>
-      <dd>{(item.species ?? []).join(", ")}</dd>
+      <dd>{[item.species ?? []].flat().join(", ")}</dd>
     {/if}
     <dt>{t("Volume")}</dt>
     <dd>{asLiters(item.volume ?? 0)}</dd>
