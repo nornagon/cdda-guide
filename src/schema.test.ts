@@ -71,7 +71,7 @@ const all = data._raw
   .map((x, i) => [x.type, id(x) ?? i, data._flatten(x)]);
 
 const skipped = new Set<string>([
-  '"veggy_pickled_fried"', // see https://github.com/CleverRaven/Cataclysm-DDA/pull/73406
+  "veggy_pickled_fried", // see https://github.com/CleverRaven/Cataclysm-DDA/pull/73406
 ]);
 
 test.each(all)("schema matches %s %s", (type, id, obj) => {
