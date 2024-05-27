@@ -554,7 +554,7 @@ export type UseFunction =
       // practice, STRONG_ANTIBIOTIC and CROWBAR are the only instances of
       // this. Instead of using the fully generic |string| type, keep this here
       // so we get a schema warning when new use actions are added.
-      type: "STRONG_ANTIBIOTIC" | "CROWBAR";
+      type: "STRONG_ANTIBIOTIC" | "CROWBAR" | "VOLTMETER";
     };
 
 type ItemActionUseFunction = {
