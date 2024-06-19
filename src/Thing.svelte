@@ -1,4 +1,5 @@
 <script lang="ts">
+import { t } from "@transifex/native";
 import { setContext, SvelteComponent } from "svelte";
 
 import type { CddaData } from "./data";
@@ -115,14 +116,18 @@ const display = (obj && displays[obj.type]) ?? Unknown;
 </script>
 
 {#if !obj}
-  Unknown obj: {item.type}/{item.id}
+  {t("Unknown object: {id}", {
+    id: `${item.type}/${item.id}`,
+    _comment: "Error message when an object is not found in the data",
+  })}
 {:else}
   {#if error}
     <section>
-      <h1>Error</h1>
+      <h1>{t("Error")}</h1>
       <p>
-        There was a problem displaying this page. Not all versions of Cataclysm
-        are supported by the Guide currently. Try selecting a different build.
+        {t(
+          "There was a problem displaying this page. Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build."
+        )}
       </p>
       <p>
         <details>
@@ -144,7 +149,7 @@ const display = (obj && displays[obj.type]) ?? Unknown;
   {/if}
 
   <details>
-    <summary>Raw JSON</summary>
+    <summary>{t("Raw JSON")}</summary>
     <JsonView {obj} buildNumber={data.build_number} />
   </details>
 {/if}
