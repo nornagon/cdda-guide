@@ -25,6 +25,7 @@ import type {
   ItemBasicInfo,
   ComestibleSlot,
   OvermapSpecial,
+  ArmorSlot,
 } from "./types";
 import type { ItemChance, Loot } from "./types/item/spawnLocations";
 
@@ -552,14 +553,45 @@ export class CddaData {
       }
     }
     delete ret.delete;
-    if ("replace_materials" in ret && ret.material) {
-      for (const [toReplace, replacement] of Object.entries(
-        ret.replace_materials
-      )) {
-        ret.material = ret.material.map((x: any) =>
-          x.type === toReplace ? { ...x, type: replacement } : x
-        );
+    if ("replace_materials" in ret) {
+      const mats = ret.material as ItemBasicInfo["material"];
+      if (mats) {
+        if (typeof mats === "string") {
+          if (ret.replace_materials[mats]) {
+            ret.material = ret.replace_materials[mats];
+          }
+        } else {
+          ret.material = mats.map((x) => {
+            if (typeof x === "string") {
+              return ret.replace_materials[x] ?? x;
+            } else {
+              if (x.type in ret.replace_materials) {
+                return { ...x, type: ret.replace_materials[x.type] };
+              }
+              return x;
+            }
+          });
+        }
         // TODO: update weight
+      }
+      if ("armor" in ret) {
+        const armor = ret.armor as ArmorSlot["armor"];
+        if (armor) {
+          for (const apd of armor) {
+            if (apd.material) {
+              apd.material = apd.material.map((x) => {
+                if (typeof x === "string") {
+                  return ret.replace_materials[x] ?? x;
+                } else {
+                  if (x.type in ret.replace_materials) {
+                    return { ...x, type: ret.replace_materials[x.type] };
+                  }
+                  return x;
+                }
+              });
+            }
+          }
+        }
       }
     }
     this._flattenCache.set(obj, ret);
