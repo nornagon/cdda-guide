@@ -430,6 +430,14 @@ export type AddictionType = {
   builtin?: string;
 };
 
+export type BreathabilityRating =
+  | "IMPERMEABLE"
+  | "POOR"
+  | "AVERAGE"
+  | "GOOD"
+  | "MOISTURE_WICKING"
+  | "SECOND_SKIN";
+
 export type ArmorPortionData = {
   encumbrance?: integer | [integer, integer];
   encumbrance_modifiers?: (
@@ -439,13 +447,7 @@ export type ArmorPortionData = {
     | "NONE"
   )[];
   coverage?: integer;
-  breathability?:
-    | "IMPERMEABLE"
-    | "POOR"
-    | "AVERAGE"
-    | "GOOD"
-    | "MOISTURE_WICKING"
-    | "SECOND_SKIN";
+  breathability?: BreathabilityRating;
   cover_melee?: integer; // default = coverage
   cover_ranged?: integer; // default = coverage
   cover_vitals?: integer; // default 0
@@ -1685,6 +1687,8 @@ export type Material = {
   repaired_with?: string; // item_id
 
   vitamins?: [string, number][];
+
+  breathability?: BreathabilityRating;
 };
 
 export type MartialArtBuff = {

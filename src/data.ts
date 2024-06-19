@@ -26,8 +26,9 @@ import type {
   ComestibleSlot,
   OvermapSpecial,
   ArmorSlot,
+  BreathabilityRating,
 } from "./types";
-import type { ItemChance, Loot } from "./types/item/spawnLocations";
+import type { Loot } from "./types/item/spawnLocations";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
   ["AMMO", "item"],
@@ -1731,6 +1732,24 @@ export function normalizeUseAction(action: Item["use_action"]): UseFunction[] {
   } else {
     return action ? [action] : [];
   }
+}
+
+export function breathabilityFromRating(br: BreathabilityRating): number {
+  switch (br) {
+    case "IMPERMEABLE":
+      return 0;
+    case "POOR":
+      return 30;
+    case "AVERAGE":
+      return 50;
+    case "GOOD":
+      return 80;
+    case "MOISTURE_WICKING":
+      return 110;
+    case "SECOND_SKIN":
+      return 140;
+  }
+  return 0;
 }
 
 const fetchJsonWithProgress = (

@@ -3,7 +3,12 @@ import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
 
-import { byName, CddaData, singularName } from "../data";
+import {
+  breathabilityFromRating,
+  byName,
+  CddaData,
+  singularName,
+} from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { Material } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
@@ -50,6 +55,8 @@ let itemsWithMaterial = data
     </dd>
     <dt>{t("Latent Heat", { _context })}</dt>
     <dd>{item.latent_heat ?? 334}</dd>
+    <dt>{t("Breathability", { _context })}</dt>
+    <dd>{breathabilityFromRating(item.breathability ?? "IMPERMEABLE")}%</dd>
     <dt>{t("Resistance", { _context })}</dt>
     <dd>
       <dl>
