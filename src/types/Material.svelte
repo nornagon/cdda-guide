@@ -44,17 +44,23 @@ let itemsWithMaterial = data
 <section>
   <h1>{t("Properties", { _context })}</h1>
   <dl>
-    <dt title="Relative to 'powder', which is 1">
-      {t("Density", { _context })}
-    </dt>
-    <dd>{item.density}</dd>
+    <dt>{t("Density", { _context })}</dt>
+    <dd>{item.density} kg / L</dd>
     <dt>{t("Specific Heat", { _context })}</dt>
     <dd>
-      {item.specific_heat_liquid ?? 4.186} ({t("liquid", { _context })}) / {item.specific_heat_solid ??
-        2.108} ({t("solid", { _context })})
+      {#if (item.specific_heat_liquid ?? 4.186) !== (item.specific_heat_solid ?? 2.108)}
+        <dl>
+          <dt>{t("Liquid", { _context })}</dt>
+          <dd>{item.specific_heat_liquid ?? 4.186} J / g / °K</dd>
+          <dt>{t("Solid", { _context })}</dt>
+          <dd>{item.specific_heat_solid ?? 2.108} J / g / °K</dd>
+        </dl>
+      {:else}
+        {item.specific_heat_liquid ?? 4.186} J / g / °K
+      {/if}
     </dd>
     <dt>{t("Latent Heat", { _context })}</dt>
-    <dd>{item.latent_heat ?? 334}</dd>
+    <dd>{item.latent_heat ?? 334} J / g</dd>
     <dt>{t("Breathability", { _context })}</dt>
     <dd>{breathabilityFromRating(item.breathability ?? "IMPERMEABLE")}%</dd>
     <dt>{t("Resistance", { _context })}</dt>
