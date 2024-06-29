@@ -40,6 +40,7 @@ const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "terrain",
   "skill",
   "overmap_special",
+  "proficiency",
 ]);
 
 type SearchableType = SupportedTypeMapped & {
