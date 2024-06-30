@@ -139,6 +139,7 @@ export function showProbability(prob: number) {
   return ret + "%";
 }
 
+// Returns ml
 export function parseVolume(string: string | number): number {
   if (typeof string === "undefined") return 0;
   if (typeof string === "number") return string * 250;
@@ -147,15 +148,36 @@ export function parseVolume(string: string | number): number {
   throw new Error("unknown volume unit: " + string);
 }
 
+// with g as 1
+const massUnitMultiplier = {
+  μg: 1e-6,
+  ug: 1e-6,
+  mcg: 1e-6,
+  mg: 1e-3,
+  g: 1,
+  kg: 1e3,
+};
+
+// Returns grams
 export function parseMass(string: string | number): number {
   if (typeof string === "undefined") return 0;
   if (typeof string === "number") return string;
-  if (string.endsWith("mg")) return parseInt(string) / 1000;
-  if (string.endsWith("kg")) return parseInt(string) * 1000;
-  if (string.endsWith("g")) return parseInt(string);
-  throw new Error("unknown mass unit: " + string);
+  let m: RegExpExecArray | null;
+  let val = 0;
+  const re = new RegExp(
+    `(\\d+)\\s+(${Object.keys(massUnitMultiplier).join("|")})`,
+    "g"
+  );
+  while ((m = re.exec(string))) {
+    const [_, num, unit] = m;
+    val +=
+      parseInt(num) *
+      massUnitMultiplier[unit as keyof typeof massUnitMultiplier];
+  }
+  return val;
 }
 
+// Returns seconds
 export function parseDuration(duration: string | number): number {
   if (typeof duration === "number") return duration / 100;
   const turns = 1;
