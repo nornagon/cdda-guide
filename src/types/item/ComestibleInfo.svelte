@@ -72,7 +72,7 @@ const data = getContext<CddaData>("data");
               typeof rdapct === "number"
                 ? rdapct
                 : mass && massPerUnit
-                ? (mass / massPerUnit) * unitsPerDay
+                ? (mass / massPerUnit / unitsPerDay) * 100
                 : null}
             <dt>
               <ThingLink id={vitamin} type="vitamin" />
@@ -81,9 +81,13 @@ const data = getContext<CddaData>("data");
               {#if v.vit_type === "counter" || v.vit_type === "drug"}
                 {rda} U
               {:else}
-                {rda}%{" "}
+                {rda?.toFixed(2)}%{" "}
                 {#if mass}
-                  ({(mass * 1000).toFixed(0)} μg)
+                  {#if mass >= 0.001}
+                    ({(mass * 1000).toFixed(1)} mg)
+                  {:else}
+                    ({(mass * 1000 * 1000).toFixed(0)} μg)
+                  {/if}
                 {/if}
               {/if}
             </dd>
