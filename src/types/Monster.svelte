@@ -74,7 +74,7 @@ function difficulty(mon: Monster): number {
   difficulty = Math.floor(difficulty);
   difficulty *= ( (hp ?? 1) + speed - attack_cost + ( morale + agro ) * 0.1 ) * 0.01 +
                 ( vision_day + 2 * vision_night ) * 0.01;
-  return Math.floor(difficulty);
+  return Math.max(1, Math.floor(difficulty));
 }
 
 function difficultyDescription(diff: number) {
