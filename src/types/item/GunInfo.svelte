@@ -2,11 +2,14 @@
 import { t } from "@transifex/native";
 
 import type { DamageUnit, GunSlot, ItemBasicInfo } from "../../types";
-
 import ThingLink from "../ThingLink.svelte";
+import { CddaData, singularName } from "../../data";
+import { getContext } from "svelte";
 
 export let item: GunSlot & ItemBasicInfo;
 export const _context = "Item Gun Info";
+
+const data = getContext<CddaData>("data");
 
 // TODO: handle multiple ranged_damage type
 const ranged_damage = Array.isArray(item.ranged_damage)
@@ -33,7 +36,11 @@ const ranged_damage = Array.isArray(item.ranged_damage)
     {/if}
     <dt>{t("Base Damage", { _context })}</dt>
     <dd>
-      {ranged_damage.amount ?? 0} ({ranged_damage.damage_type ?? "bullet"})
+      {ranged_damage.amount ?? 0} ({singularName(
+        data.byIdMaybe("damage_type", ranged_damage.damage_type) ?? {
+          id: ranged_damage.damage_type,
+        }
+      )})
     </dd>
     <dt>{t("Armor Penetration", { _context })}</dt>
     <dd>{ranged_damage.armor_penetration ?? 0}</dd>

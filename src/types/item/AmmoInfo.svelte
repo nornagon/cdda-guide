@@ -1,11 +1,14 @@
 <script lang="ts">
 import { t } from "@transifex/native";
-import { i18n } from "../../data";
+import { CddaData, i18n, singularName } from "../../data";
 import type { AmmoSlot, DamageUnit } from "../../types";
 import ThingLink from "../ThingLink.svelte";
+import { getContext } from "svelte";
 
 export let item: AmmoSlot;
 const _context = "Item Ammo Info";
+
+const data = getContext<CddaData>("data");
 
 // TODO: handle multiple damage type
 const damage = Array.isArray(item.damage)
@@ -36,9 +39,10 @@ function computeLoudness(item: AmmoSlot): number {
       <dd><ThingLink type="ammunition_type" id={item.ammo_type} /></dd>
       <dt>{t("Damage", { _context })}</dt>
       <dd>
-        {damage.amount ?? 0} ({i18n._p(
-          "damage_type",
-          damage.damage_type ?? "bullet"
+        {damage.amount ?? 0} ({singularName(
+          data.byIdMaybe("damage_type", damage.damage_type) ?? {
+            id: damage.damage_type,
+          }
         )})
       </dd>
       <dt>{t("Armor Penetration", { _context })}</dt>

@@ -107,7 +107,11 @@ const piercing =
     <h1>{t("Melee", { _context, _comment: "Section heading" })}</h1>
     <dl>
       {#each Object.entries(item.melee_damage) as [damageType, damage]}
-        <dt>{singularName(data.byId("damage_type", damageType))}</dt>
+        <dt>
+          {singularName(
+            data.byIdMaybe("damage_type", damageType) ?? { id: damageType }
+          )}
+        </dt>
         <dd>{damage}</dd>
       {/each}
       <dt>{t("To Hit", { _context })}</dt>

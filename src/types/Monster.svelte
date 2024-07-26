@@ -64,8 +64,8 @@ function difficulty(mon: Monster): number {
   const melee_dmg_total = normalizedMeleeDamage.reduce((acc, { amount = 0, damage_multiplier = 1, constant_damage_multiplier = 1 }) => acc + amount * damage_multiplier * constant_damage_multiplier, 0)
   let armor_diff = 3
   for (const [damageTypeId, amount] of Object.entries(monsterArmor(mon.armor ?? {}))) {
-    const damageType = data.byId("damage_type", damageTypeId)
-    if (damageType.mon_difficulty)
+    const damageType = data.byIdMaybe("damage_type", damageTypeId)
+    if (damageType?.mon_difficulty)
       armor_diff += amount
   }
   let difficulty = ( melee_skill + 1 ) * melee_dice * ( melee_dmg_total + melee_sides ) * 0.04 +
@@ -375,9 +375,12 @@ let upgrades =
           <dd>
             <dl>
               {#each Object.entries(monsterArmor(item.armor)) as [damageTypeId, value]}
-                {@const damageType = data.byId("damage_type", damageTypeId)}
+                {@const damageType = data.byIdMaybe(
+                  "damage_type",
+                  damageTypeId
+                )}
                 {#if value}
-                  <dt>{singularName(damageType)}</dt>
+                  <dt>{singularName(damageType ?? { id: damageTypeId })}</dt>
                   <dd>{value.toFixed(1)}</dd>
                 {/if}
               {/each}

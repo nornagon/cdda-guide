@@ -310,17 +310,7 @@ export type ToolSlot = {
   rand_charges?: integer[];
 };
 
-export type DamageTypeId =
-  | "pure"
-  | "biological"
-  | "bash"
-  | "cut"
-  | "acid"
-  | "stab"
-  | "bullet"
-  | "heat"
-  | "cold"
-  | "electric"; // TODO maybe no longer static?
+export type DamageTypeId = string;
 
 export type DamageUnit = {
   damage_type: DamageTypeId;
