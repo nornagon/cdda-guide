@@ -484,6 +484,32 @@ function getMapgenValue(val: raw.MapgenValue): string | undefined {
   // TODO: support distribution, param/fallback?
 }
 
+function getMapgenValueDistribution(val: raw.MapgenValue): Map<string, number> {
+  if (typeof val === "string") return new Map([[val, 1]]);
+  if (
+    "switch" in val &&
+    typeof val.switch === "object" &&
+    "fallback" in val.switch &&
+    val.switch.fallback
+  )
+    return new Map([[val.cases[val.switch["fallback"]], 1]]);
+  if ("distribution" in val) {
+    const opts = val.distribution;
+    const totalProb = opts.reduce(
+      (m, it) => m + (typeof it === "string" ? 1 : it[1]),
+      0
+    );
+    return new Map(
+      opts.map((it) =>
+        typeof it === "string"
+          ? [it, 1 / totalProb]
+          : ([it[0], it[1] / totalProb] as [string, number])
+      )
+    );
+  }
+  return new Map();
+}
+
 let onStack = 0;
 function lootForChunks(
   data: CddaData,
@@ -680,18 +706,6 @@ function mergePalettes(palettes: Map<string, Loot>[]): Map<string, Loot> {
     .map((x: (readonly [string, Loot])[]) => new Map(x))[0];
 }
 
-type RawPalette = {
-  item?: raw.PlaceMapping<raw.MapgenSpawnItem>;
-  items?: raw.PlaceMapping<raw.MapgenItemGroup>;
-  sealed_item?: raw.PlaceMapping<raw.MapgenSealedItem>;
-  nested?: raw.PlaceMapping<raw.MapgenNested>;
-
-  furniture?: raw.PlaceMappingAlternative<raw.MapgenValue>;
-  terrain?: raw.PlaceMappingAlternative<raw.MapgenValue>;
-
-  palettes?: raw.MapgenValue[];
-};
-
 function parsePlaceMapping<T>(
   mapping: undefined | raw.PlaceMapping<T>,
   extract: (t: T) => Iterable<Loot>
@@ -728,10 +742,10 @@ function parsePlaceMappingAlternative<T>(
   );
 }
 
-const paletteCache = new WeakMap<RawPalette, Map<string, Loot>>();
+const paletteCache = new WeakMap<raw.PaletteData, Map<string, Loot>>();
 export function parsePalette(
   data: CddaData,
-  palette: RawPalette
+  palette: raw.PaletteData
 ): Map<string, Loot> {
   if (paletteCache.has(palette)) return paletteCache.get(palette)!;
   const sealed_item = parsePlaceMapping(
@@ -801,6 +815,24 @@ export function parsePalette(
           prob(it) / totalProb
         )
       );
+    } else if ("param" in val) {
+      const parameters = palette.parameters;
+      if (parameters && val.param in parameters) {
+        const param = parameters[val.param];
+        if (param.type !== "palette_id") {
+          console.warn(
+            `unexpected parameter type (was ${param.type}, expected palette_id)`
+          );
+          return [];
+        }
+        const id = getMapgenValueDistribution(param.default);
+        return [...id.entries()].map(([id, chance]) =>
+          attenuatePalette(parsePalette(data, data.byId("palette", id)), chance)
+        );
+      } else {
+        console.warn(`missing parameter ${val.param}`);
+        return [];
+      }
     } else return [];
   });
   const ret = mergePalettes([item, items, sealed_item, nested, ...palettes]);
@@ -808,10 +840,10 @@ export function parsePalette(
   return ret;
 }
 
-const furniturePaletteCache = new WeakMap<RawPalette, Map<string, Loot>>();
+const furniturePaletteCache = new WeakMap<raw.PaletteData, Map<string, Loot>>();
 export function parseFurniturePalette(
   data: CddaData,
-  palette: RawPalette
+  palette: raw.PaletteData
 ): Map<string, Loot> {
   if (furniturePaletteCache.has(palette))
     return furniturePaletteCache.get(palette)!;
@@ -847,10 +879,10 @@ export function parseFurniturePalette(
   return ret;
 }
 
-const terrainPaletteCache = new WeakMap<RawPalette, Map<string, Loot>>();
+const terrainPaletteCache = new WeakMap<raw.PaletteData, Map<string, Loot>>();
 export function parseTerrainPalette(
   data: CddaData,
-  palette: RawPalette
+  palette: raw.PaletteData
 ): Map<string, Loot> {
   if (terrainPaletteCache.has(palette))
     return terrainPaletteCache.get(palette)!;
