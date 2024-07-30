@@ -71,11 +71,11 @@ const all = data._raw
   .map((x, i) => [x.type, id(x) ?? i, data._flatten(x)]);
 
 const skipped = new Set<string>([
-  "nursing_home_8", // See https://github.com/CleverRaven/Cataclysm-DDA/pull/75312
+  JSON.stringify(["nursing_home_8"]), // See https://github.com/CleverRaven/Cataclysm-DDA/pull/75312
 ]);
 
 test.each(all)("schema matches %s %s", (type, id, obj) => {
-  if (skipped.has(id)) {
+  if (skipped.has(JSON.stringify(id))) {
     //pending();
     return;
   }
