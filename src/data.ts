@@ -503,6 +503,13 @@ export class CddaData {
             const [, num, unit] = m;
             ret[k] = `${Number(num) * ret.proportional[k]} ${unit}`;
           }
+        } else if (typeof ret[k] === "object") {
+          ret[k] = JSON.parse(JSON.stringify(ret[k]));
+          for (const [k2, v] of Object.entries(ret[k])) {
+            if (typeof v === "number") {
+              ret[k][k2] *= ret.proportional[k];
+            }
+          }
         } else {
           ret[k] *= ret.proportional[k];
           ret[k] = ret[k] | 0; // most things are ints.. TODO: what keys are float?
