@@ -501,7 +501,7 @@ export class CddaData {
           const m = /^\s*(\d+)\s*(.+)$/.exec(ret[k]);
           if (m) {
             const [, num, unit] = m;
-            ret[k] = `${Number(num) * ret.proportional[k]} ${unit}`;
+            ret[k] = `${(Number(num) * ret.proportional[k]) | 0} ${unit}`;
           }
         } else if (typeof ret[k] === "object") {
           ret[k] = JSON.parse(JSON.stringify(ret[k]));
