@@ -12,7 +12,13 @@ import {
   singularName,
 } from "../data";
 import ThingLink from "./ThingLink.svelte";
-import type { Harvest, Monster, MonsterGroup, Resistances } from "../types";
+import type {
+  Harvest,
+  Monster,
+  MonsterGroup,
+  Resistances,
+  SpecialAttack as SpecialAttackT,
+} from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import SpecialAttack from "./monster/SpecialAttack.svelte";
 import Spoiler from "../Spoiler.svelte";
@@ -68,9 +74,12 @@ function difficulty(mon: Monster): number {
     if (damageType?.mon_difficulty)
       armor_diff += amount
   }
+  const irrelevantAttacks = ["PARROT", "PARROT_AT_DANGER", "GRAZE", "EAT_CROP", "EAT_FOOD", "EAT_CARRION"]
+  const id = (a: SpecialAttackT): string => Array.isArray(a) ? a[0] : "id" in a ? a.id : ""
+  const relevantSpecialAttacks = special_attacks.filter(a => !irrelevantAttacks.includes(id(a)))
   let difficulty = ( melee_skill + 1 ) * melee_dice * ( melee_dmg_total + melee_sides ) * 0.04 +
                ( sk_dodge + 1 ) * armor_diff * 0.04 +
-               ( difficulty_base + special_attacks.length + 8 * emit_fields.length );
+               ( difficulty_base + relevantSpecialAttacks.length + 8 * emit_fields.length );
   difficulty = Math.floor(difficulty);
   difficulty *= ( (hp ?? 1) + speed - attack_cost + ( morale + agro ) * 0.1 ) * 0.01 +
                 ( vision_day + 2 * vision_night ) * 0.01;
