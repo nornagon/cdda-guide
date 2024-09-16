@@ -54,7 +54,7 @@ const computeToHit = ({
 const to_hit: number =
   typeof item.to_hit === "object"
     ? computeToHit(item.to_hit)
-    : item.to_hit ?? 0;
+    : item.to_hit ?? -2;
 
 function attackTime(item: Item) {
   return Math.floor(
