@@ -169,15 +169,33 @@ function yieldUntilIdle(): Promise<IdleDeadline> {
   });
 }
 
+const canInputPending =
+  "scheduling" in navigator &&
+  "isInputPending" in (navigator.scheduling as any) &&
+  "scheduler" in window &&
+  "postTask" in (window as any).scheduler;
+
 async function yieldable<T>(
   f: (wait: () => Promise<void>) => Promise<T>
 ): Promise<T> {
-  let deadline = await yieldUntilIdle();
-  return f(async () => {
-    if (deadline.timeRemaining() <= 0) {
-      deadline = await yieldUntilIdle();
-    }
-  });
+  if (canInputPending) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    return f(() => {
+      if ((navigator as any).scheduling.isInputPending()) {
+        return new Promise((resolve) =>
+          (window as any).scheduler.postTask(resolve)
+        );
+      }
+      return Promise.resolve();
+    });
+  } else {
+    let deadline = await yieldUntilIdle();
+    return f(async () => {
+      if (deadline.timeRemaining() <= 0) {
+        deadline = await yieldUntilIdle();
+      }
+    });
+  }
 }
 
 const mapgensByOmtCache = new WeakMap<CddaData, Map<string, raw.Mapgen[]>>();
