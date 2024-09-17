@@ -165,7 +165,7 @@ function yieldUntilIdle(): Promise<IdleDeadline> {
       timeRemaining: () => 100,
     });
   return new Promise<IdleDeadline>((resolve) => {
-    requestIdleCallback(resolve, { timeout: 100 });
+    requestIdleCallback(resolve, { timeout: 1 });
   });
 }
 
