@@ -405,7 +405,9 @@ export type ComestibleSlot = {
   addiction_potential?: integer; // default 0
   calories?: integer;
   vitamins?: [string, integer | mass][];
-  rot_spawn?: string; // mongroup_id
+  rot_spawn?:
+    | string // mongroup_id
+    | { monster?: string; group?: string; chance?: integer };
   rot_spawn_chance?: integer; // default 10
 };
 

@@ -495,7 +495,24 @@ export class CddaData {
     }
     delete ret.relative;
     for (const k of Object.keys(ret.proportional ?? {})) {
-      if (typeof ret.proportional[k] === "number") {
+      if (
+        (ret.type === "ARMOR" || ret.type === "TOOL_ARMOR") &&
+        "armor" in ret
+      ) {
+        ret.armor = JSON.parse(JSON.stringify(ret.armor));
+        if (k === "encumbrance") {
+          for (const apd of ret.armor ?? []) {
+            if (typeof apd.encumbrance === "number") {
+              apd.encumbrance = (apd.encumbrance * ret.proportional[k]) | 0;
+            } else if (Array.isArray(apd.encumbrance)) {
+              apd.encumbrance = apd.encumbrance.map(
+                (x: number) => (x * ret.proportional[k]) | 0
+              );
+            }
+          }
+        }
+      }
+      if (typeof ret.proportional[k] === "number" && k in ret) {
         if (k === "attack_cost" && !(k in ret)) ret[k] = 100;
         if (typeof ret[k] === "string") {
           const m = /^\s*(\d+)\s*(.+)$/.exec(ret[k]);
