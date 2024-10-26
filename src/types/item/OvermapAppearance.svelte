@@ -84,7 +84,7 @@ function omtAppearance(
   const omt = data.byIdMaybe("overmap_terrain", omt_id);
   return omt
     ? {
-        color: omt.color,
+        color: omt.color ?? "black",
         sym: rotateSymbol(omt.sym ?? "\u00a0" /* LINE_XOXO_C */, dir),
         name: singular(omt.name),
       }

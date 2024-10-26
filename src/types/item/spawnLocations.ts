@@ -333,7 +333,7 @@ export function overmapAppearance(
   function omtAppearanceString(omt_id: string): string {
     const omt = data.byId("overmap_terrain", omt_id);
     return omt
-      ? `${omt.sym}\u0001${omt.color}\u0001${omt.name}`
+      ? `${omt.sym}\u0001${omt.color ?? "black"}\u0001${omt.name}`
       : `appearance_unk`;
   }
 }
