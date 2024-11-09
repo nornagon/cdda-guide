@@ -78,12 +78,13 @@ function terrainOrFurniture(id: string) {
     {#if construction.pre_terrain}
       <dt>{t("Requires", { _context })}</dt>
       <dd>
-        <ItemSymbol item={terrainOrFurniture(construction.pre_terrain)} />
-        <ThingLink
-          type={construction.pre_terrain.startsWith("f_")
-            ? "furniture"
-            : "terrain"}
-          id={construction.pre_terrain} />
+        {#each [construction.pre_terrain].flat() as preTerrain, i}
+          {#if i !== 0}{i18n.__(" OR ")}{/if}
+          <ItemSymbol item={terrainOrFurniture(preTerrain)} />
+          <ThingLink
+            type={preTerrain.startsWith("f_") ? "furniture" : "terrain"}
+            id={preTerrain} />
+        {/each}
       </dd>
     {/if}
     {#if preFlags.length}
