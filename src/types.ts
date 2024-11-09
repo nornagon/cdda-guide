@@ -958,7 +958,7 @@ export type Skill = {
   type: "skill";
   id: string;
   name: Translation;
-  description: string;
+  description: Translation;
 };
 
 export type MartialArtRequirements = {
