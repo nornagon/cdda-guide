@@ -1,7 +1,7 @@
 <script lang="ts">
 import { t } from "@transifex/native";
 import { getContext } from "svelte";
-import { CddaData, singularName } from "../../data";
+import { CddaData, i18n, singularName } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
@@ -119,14 +119,14 @@ const toolResults = [...toolRecipes].sort((a, b) =>
         <LimitedList items={constructions} let:item={f}>
           <ThingLink id={f.group} type="construction_group" />
           {#if f.pre_terrain}
-            on <ItemSymbol
-              item={data.byId(
-                f.pre_terrain.startsWith("f_") ? "furniture" : "terrain",
-                f.pre_terrain
-              )} />
-            <ThingLink
-              type={f.pre_terrain.startsWith("f_") ? "furniture" : "terrain"}
-              id={f.pre_terrain} />
+            on {#each [f.pre_terrain].flat() as preTerrain, i}
+              {@const itemType = preTerrain.startsWith("f_")
+                ? "furniture"
+                : "terrain"}
+              {#if i !== 0}{i18n.__(" OR ")}{/if}
+              <ItemSymbol item={data.byId(itemType, preTerrain)} />
+              <ThingLink type={itemType} id={preTerrain} />
+            {/each}
           {/if}
         </LimitedList>
       </section>
@@ -142,14 +142,14 @@ const toolResults = [...toolRecipes].sort((a, b) =>
         <LimitedList items={toolConstructions} let:item={f}>
           <ThingLink id={f.group} type="construction_group" />
           {#if f.pre_terrain}
-            on <ItemSymbol
-              item={data.byId(
-                f.pre_terrain.startsWith("f_") ? "furniture" : "terrain",
-                f.pre_terrain
-              )} />
-            <ThingLink
-              type={f.pre_terrain.startsWith("f_") ? "furniture" : "terrain"}
-              id={f.pre_terrain} />
+            on {#each [f.pre_terrain].flat() as preTerrain, i}
+              {@const itemType = preTerrain.startsWith("f_")
+                ? "furniture"
+                : "terrain"}
+              {#if i !== 0}{i18n.__(" OR ")}{/if}
+              <ItemSymbol item={data.byId(itemType, preTerrain)} />
+              <ThingLink type={itemType} id={preTerrain} />
+            {/each}
           {/if}
         </LimitedList>
       </section>

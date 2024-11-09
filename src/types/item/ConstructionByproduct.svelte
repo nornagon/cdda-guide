@@ -2,7 +2,7 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { byName, CddaData } from "../../data";
+import { byName, CddaData, i18n } from "../../data";
 import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
@@ -28,14 +28,14 @@ const constructions = data
     <LimitedList items={constructions} let:item={f}>
       <ThingLink id={f.group} type="construction_group" />
       {#if f.pre_terrain}
-        on <ItemSymbol
-          item={data.byId(
-            f.pre_terrain.startsWith("f_") ? "furniture" : "terrain",
-            f.pre_terrain
-          )} />
-        <ThingLink
-          type={f.pre_terrain.startsWith("f_") ? "furniture" : "terrain"}
-          id={f.pre_terrain} />
+        on {#each [f.pre_terrain].flat() as preTerrain, i}
+          {@const itemType = preTerrain.startsWith("f_")
+            ? "furniture"
+            : "terrain"}
+          {#if i !== 0}{i18n.__(" OR ")}{/if}
+          <ItemSymbol item={data.byId(itemType, preTerrain)} />
+          <ThingLink type={itemType} id={preTerrain} />
+        {/each}
       {/if}
     </LimitedList>
   </section>
