@@ -366,6 +366,7 @@ const hiddenLocations = showAll
       "gas station bunker",
       "bunker shop",
       "physics_lab_LIXA",
+      "office_tower_hiddenlab",
     ]);
 function lazily<T extends object, U>(f: (x: T) => U): (x: T) => U {
   const cache = new WeakMap<T, U>();
