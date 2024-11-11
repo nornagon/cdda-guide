@@ -879,8 +879,9 @@ export function parseFurniturePalette(
   const furniture = parsePlaceMappingAlternative(
     palette.furniture,
     function* (furn) {
-      const value = getMapgenValue(furn);
-      if (value) yield new Map([[value, { prob: 1, expected: 1 }]]);
+      const value = getMapgenValueDistribution(furn);
+      for (const [f, prob] of value.entries())
+        if (value) yield new Map([[f, { prob, expected: prob }]]);
     }
   );
   const palettes = (palette.palettes ?? []).flatMap((val) => {
@@ -918,8 +919,9 @@ export function parseTerrainPalette(
   const terrain = parsePlaceMappingAlternative(
     palette.terrain,
     function* (ter) {
-      const value = getMapgenValue(ter);
-      if (value) yield new Map([[value, { prob: 1, expected: 1 }]]);
+      const value = getMapgenValueDistribution(ter);
+      for (const [t, prob] of value.entries())
+        if (value) yield new Map([[t, { prob, expected: prob }]]);
     }
   );
   const palettes = (palette.palettes ?? []).flatMap((val) => {
