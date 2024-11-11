@@ -1143,7 +1143,7 @@ interface MapgenPlace {
 }
 
 export type MapgenPlaceTerrain = {
-  ter: string;
+  ter: MapgenValue;
 };
 
 export type MapgenPlaceFurniture = {

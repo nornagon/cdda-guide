@@ -493,15 +493,15 @@ function addLoot(loots: Loot[]): Loot {
 }
 
 function getMapgenValue(val: raw.MapgenValue): string | undefined {
-  if (typeof val === "string") return val;
-  if (
-    "switch" in val &&
-    typeof val.switch === "object" &&
-    "fallback" in val.switch &&
-    val.switch.fallback
-  )
-    return val.cases[val.switch["fallback"]];
-  // TODO: support distribution, param/fallback?
+  const distribution = getMapgenValueDistribution(val);
+  let maxProb = -Infinity;
+  let maxId: string | undefined;
+  for (const [id, prob] of distribution.entries())
+    if (prob > maxProb) {
+      maxProb = prob;
+      maxId = id;
+    }
+  return maxId;
 }
 
 function getMapgenValueDistribution(val: raw.MapgenValue): Map<string, number> {
@@ -512,7 +512,7 @@ function getMapgenValueDistribution(val: raw.MapgenValue): Map<string, number> {
     "fallback" in val.switch &&
     val.switch.fallback
   )
-    return new Map([[val.cases[val.switch["fallback"]], 1]]);
+    return new Map([[val.cases[val.switch.fallback], 1]]);
   if ("distribution" in val) {
     const opts = val.distribution;
     const totalProb = opts.reduce(
@@ -526,6 +526,11 @@ function getMapgenValueDistribution(val: raw.MapgenValue): Map<string, number> {
           : ([it[0], it[1] / totalProb] as [string, number])
       )
     );
+  }
+  if ("param" in val) {
+    if ("fallback" in val && val.fallback) {
+      return new Map([[val.fallback, 1]]);
+    }
   }
   return new Map();
 }
@@ -670,9 +675,13 @@ export function getTerrainForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   if (terrainForMapgenCache.has(mapgen))
     return terrainForMapgenCache.get(mapgen)!;
   const palette = parseTerrainPalette(data, mapgen.object);
-  const place_terrain = (mapgen.object.place_terrain ?? []).map(
-    ({ ter }) => new Map([[ter, { prob: 1, expected: 1 }]])
-  );
+  const place_terrain = (mapgen.object.place_terrain ?? []).map(({ ter }) => {
+    const distribution = getMapgenValueDistribution(ter);
+    const loot = new Map<string, ItemChance>();
+    for (const [id, prob] of distribution.entries())
+      loot.set(id, { prob, expected: prob });
+    return loot;
+  });
   const additional_items = collection([...place_terrain]);
   const countByPalette = new Map<string, number>();
   for (const row of mapgen.object.rows ?? [])
