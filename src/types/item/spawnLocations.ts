@@ -510,7 +510,9 @@ function getMapgenValueDistribution(val: raw.MapgenValue): Map<string, number> {
     "switch" in val &&
     typeof val.switch === "object" &&
     "fallback" in val.switch &&
-    val.switch.fallback
+    val.switch.fallback &&
+    val.switch.fallback in val.cases &&
+    val.cases[val.switch.fallback]
   )
     return new Map([[val.cases[val.switch.fallback], 1]]);
   if ("distribution" in val) {
