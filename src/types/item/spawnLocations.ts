@@ -537,6 +537,16 @@ function getMapgenValueDistribution(val: raw.MapgenValue): Map<string, number> {
   return new Map();
 }
 
+function toLoot(distribution: Map<string, number>): Loot {
+  // TODO: i'm not sure this is correct?
+  return new Map(
+    [...distribution.entries()].map(([id, prob]) => [
+      id,
+      { prob, expected: prob },
+    ])
+  );
+}
+
 let onStack = 0;
 function lootForChunks(
   data: CddaData,
@@ -677,25 +687,34 @@ export function getTerrainForMapgen(data: CddaData, mapgen: raw.Mapgen): Loot {
   if (terrainForMapgenCache.has(mapgen))
     return terrainForMapgenCache.get(mapgen)!;
   const palette = parseTerrainPalette(data, mapgen.object);
-  const place_terrain = (mapgen.object.place_terrain ?? []).map(({ ter }) => {
-    const distribution = getMapgenValueDistribution(ter);
-    const loot = new Map<string, ItemChance>();
-    for (const [id, prob] of distribution.entries())
-      loot.set(id, { prob, expected: prob });
-    return loot;
-  });
+  const fill_ter = mapgen.object.fill_ter
+    ? getMapgenValueDistribution(mapgen.object.fill_ter)
+    : new Map<string, number>();
+  const place_terrain = (mapgen.object.place_terrain ?? []).map(({ ter }) =>
+    toLoot(getMapgenValueDistribution(ter))
+  );
   const additional_items = collection([...place_terrain]);
   const countByPalette = new Map<string, number>();
+  let fillCount = 0;
   for (const row of mapgen.object.rows ?? [])
     for (const char of row)
       if (palette.has(char))
         countByPalette.set(char, (countByPalette.get(char) ?? 0) + 1);
+      else fillCount += 1;
   const items: Loot[] = [];
   for (const [sym, count] of countByPalette.entries()) {
     const loot = palette.get(sym)!;
     const multipliedLoot: Loot = new Map();
     for (const [id, chance] of loot.entries()) {
       multipliedLoot.set(id, repeatItemChance(chance, [count, count]));
+    }
+    items.push(multipliedLoot);
+  }
+  if (fillCount > 0) {
+    const loot = toLoot(fill_ter);
+    const multipliedLoot: Loot = new Map();
+    for (const [id, chance] of loot.entries()) {
+      multipliedLoot.set(id, repeatItemChance(chance, [fillCount, fillCount]));
     }
     items.push(multipliedLoot);
   }

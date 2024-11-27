@@ -1151,7 +1151,7 @@ export type MapgenPlaceFurniture = {
 };
 
 export interface MapgenObject {
-  fill_ter?: string;
+  fill_ter?: MapgenValue;
   rows?: string[];
   terrain?: PlaceMappingAlternative<MapgenValue>;
   place_terrain?: PlaceList<MapgenPlaceTerrain>;
