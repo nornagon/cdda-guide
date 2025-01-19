@@ -1417,19 +1417,16 @@ export type Monster = {
 
 export type MonsterGroup = {
   type: "monstergroup";
-  name: string;
   default?: string;
   is_animal?: boolean;
   monsters?: {
     monster?: string;
     group?: string;
-    freq: integer;
-    cost_multiplier: integer;
     pack_size?: [integer, integer];
-    starts?: integer;
-    ends?: integer;
+    starts?: duration;
+    ends?: duration;
     spawn_data?: {
-      ammo?: { ammo_id: string; qty: integer }[];
+      ammo?: { ammo_id: string; qty: integer | [integer, integer] }[];
     };
     conditions?: string[];
   }[];
