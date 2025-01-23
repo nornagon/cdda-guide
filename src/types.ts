@@ -724,6 +724,7 @@ export type PocketData = {
     | "CORPSE"
     | "SOFTWARE"
     | "EBOOK"
+    | "E_FILE_STORAGE"
     | "MIGRATION";
   description?: Translation;
   name?: Translation;
