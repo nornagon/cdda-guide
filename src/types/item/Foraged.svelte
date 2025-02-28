@@ -14,7 +14,7 @@ const forageGroups = {
   Summer: "forage_summer",
   Autumn: "forage_autumn",
   Winter: "forage_winter",
-  "any season": "trash_forest",
+  "any season": "SUS_trash_no_manmade",
 };
 
 const forageable = Object.entries(forageGroups)
