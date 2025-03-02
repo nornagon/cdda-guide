@@ -482,7 +482,14 @@ export class CddaData {
       ) {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
         for (const k2 of Object.keys(ret.relative[k])) {
-          ret[k][k2] = (ret[k][k2] ?? 0) + ret.relative[k][k2];
+          if (
+            typeof ret[k][k2] === "number" ||
+            typeof ret[k][k2] === "undefined"
+          ) {
+            ret[k][k2] = (ret[k][k2] ?? 0) + ret.relative[k][k2];
+          } else {
+            console.warn("unsupported relative melee_damage in ", ret);
+          }
         }
       } else if (k === "qualities") {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
