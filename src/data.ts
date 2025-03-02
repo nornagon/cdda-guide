@@ -809,7 +809,13 @@ export class CddaData {
       for (const item of group.items ?? [])
         if (Array.isArray(item))
           normalizedEntries.push({ item: item[0], prob: item[1] });
-        else normalizedEntries.push(item);
+        else if (
+          "item" in item ||
+          "group" in item ||
+          "collection" in item ||
+          "distribution" in item
+        )
+          normalizedEntries.push(item);
       const ret: ItemGroupData = {
         subtype: "distribution",
         entries: normalizedEntries,
@@ -895,18 +901,36 @@ export class CddaData {
       : [])
       if (Array.isArray(entry))
         normalizedEntries.push({ item: entry[0], prob: entry[1] });
-      else normalizedEntries.push(entry);
+      else if (
+        "item" in entry ||
+        "group" in entry ||
+        "collection" in entry ||
+        "distribution" in entry
+      )
+        normalizedEntries.push(entry);
     for (const item of group.items ?? [])
       if (Array.isArray(item))
         normalizedEntries.push({ item: item[0], prob: item[1] });
       else if (typeof item === "string")
         normalizedEntries.push({ item, prob: 100 });
-      else normalizedEntries.push(item);
+      else if (
+        "item" in item ||
+        "group" in item ||
+        "distribution" in item ||
+        "collection" in item
+      )
+        normalizedEntries.push(item);
     for (const g of "groups" in group && group.groups ? group.groups : [])
       if (Array.isArray(g)) normalizedEntries.push({ group: g[0], prob: g[1] });
       else if (typeof g === "string")
         normalizedEntries.push({ group: g, prob: 100 });
-      else normalizedEntries.push(g);
+      else if (
+        "item" in g ||
+        "group" in g ||
+        "distribution" in g ||
+        "collection" in g
+      )
+        normalizedEntries.push(g);
     normalizedEntries = normalizedEntries.filter(
       (e) => !("event" in e) || !e.event
     );

@@ -58,7 +58,7 @@ export type ItemGroupEntry = (
   event?: string;
 };
 
-export type ItemGroupEntryOrShortcut = ItemGroupEntry | [string, number]; // item_id, prob (or item_group_id, prob if in 'groups' array)
+export type ItemGroupEntryOrShortcut = ItemGroupEntry | [string, number] | {}; // item_id, prob (or item_group_id, prob if in 'groups' array)
 
 // The top-level item_group. Always has an id.
 export type ItemGroup = {
