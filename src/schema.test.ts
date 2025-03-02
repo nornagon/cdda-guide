@@ -1,7 +1,8 @@
 import * as TJS from "ts-json-schema-generator";
 import * as fs from "fs";
 import * as util from "util";
-import Ajv, { ValidateFunction } from "ajv";
+import Ajv from "ajv";
+import type { ValidateFunction } from "ajv";
 import { CddaData } from "./data";
 import { test, expect } from "vitest";
 
@@ -17,17 +18,19 @@ expect.extend({
   toMatchSchema(obj: any, schema: ValidateFunction) {
     const valid = schema(obj);
     const errors = schema.errors?.slice();
+    const filename = obj.__filename;
     return {
       pass: valid,
       message: () => {
         return (
+          (filename ? `[File: ${filename}]\n` : "") +
           errors
             ?.map((e) => {
               return `${e.instancePath} ${e.message}, but was ${util.inspect(
                 e.data
               )}`;
             })
-            .join("\n") ?? ""
+            .join("\n")
         );
       },
     };
@@ -65,6 +68,7 @@ const id = (x: any) => {
   if (x.result) return x.result;
   if (x.om_terrain) return JSON.stringify(x.om_terrain);
 };
+
 const all = data._raw
   .filter((x) => id(x))
   .filter((x) => schemasByType.has(x.type))
