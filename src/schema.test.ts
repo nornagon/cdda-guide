@@ -18,19 +18,19 @@ expect.extend({
   toMatchSchema(obj: any, schema: ValidateFunction) {
     const valid = schema(obj);
     const errors = schema.errors?.slice();
-    const filename = findFilename(obj, parentMap);
+    const filename = obj.__filename;
     return {
       pass: valid,
       message: () => {
         return (
           (filename ? `[File: ${filename}]\n` : "") +
-            errors
-              ?.map((e) => {
-                return `${e.instancePath} ${e.message}, but was ${util.inspect(
-                  e.data
-                )}`;
-              })
-              .join("\n") ?? ""
+          errors
+            ?.map((e) => {
+              return `${e.instancePath} ${e.message}, but was ${util.inspect(
+                e.data
+              )}`;
+            })
+            .join("\n")
         );
       },
     };
@@ -68,35 +68,6 @@ const id = (x: any) => {
   if (x.result) return x.result;
   if (x.om_terrain) return JSON.stringify(x.om_terrain);
 };
-
-const findFilename = (
-  obj: any,
-  parentMap: WeakMap<object, object | null>
-): string | undefined => {
-  let current: any = obj;
-
-  while (current) {
-    if (current.__filename) return current.__filename;
-    current = parentMap.get(current) || null; // Move up to parent
-  }
-  return undefined;
-};
-
-// Create a parent tracking map before validation
-const parentMap = new WeakMap<object, object | null>();
-
-const buildParentMap = (obj: any, parent: any = null) => {
-  if (typeof obj !== "object" || obj === null) return;
-  parentMap.set(obj, parent);
-  for (const key in obj) {
-    if (typeof obj[key] === "object" && obj[key] !== null) {
-      buildParentMap(obj[key], obj);
-    }
-  }
-};
-
-// Build parent-child relationships
-buildParentMap(data._raw);
 
 const all = data._raw
   .filter((x) => id(x))
