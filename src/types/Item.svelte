@@ -462,9 +462,9 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
         {/if}
 
         {#if item.brewable}
-          {@const results = Array.isArray(item.brewable.results)
-            ? Object.fromEntries(item.brewable.results.map((r) => [r, 1]))
-            : item.brewable.results}
+          {@const results = Array.isArray(item.brewable.brew_results)
+            ? Object.fromEntries(item.brewable.brew_results.map((r) => [r, 1]))
+            : item.brewable.brew_results}
           <dt>{t("Ferments Into", { _context })}</dt>
           <dd>
             <ul class="comma-separated">
@@ -472,7 +472,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
                 <li><ThingLink type="item" id={result_id} {count} /></li>
               {/each}
             </ul>
-            ({item.brewable.time ?? "1 turn"})
+            ({item.brewable.brew_time ?? "1 turn"})
           </dd>
         {/if}
 
