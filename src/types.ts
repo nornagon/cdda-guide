@@ -697,8 +697,28 @@ export type ItemBasicInfo = {
   nanofab_template_group?: string; // item_group_id
 };
 
-export type Item =
-  | SupportedTypes["ITEM"]
+export type ItemSubtypeToSlot = {
+  AMMO: AmmoSlot;
+  ARMOR: ArmorSlot;
+  BATTERY: {};
+  BIONIC_ITEM: BionicSlot;
+  BOOK: BookSlot;
+  COMESTIBLE: ComestibleSlot;
+  ENGINE: EngineSlot;
+  GENERIC: {};
+  GUN: GunSlot;
+  GUNMOD: {};
+  MAGAZINE: {};
+  PET_ARMOR: {};
+  TOOL: ToolSlot;
+  TOOLMOD: {};
+  TOOL_ARMOR: ToolSlot & ArmorSlot;
+  WHEEL: WheelSlot;
+};
+
+export type Item = SupportedTypes["ITEM"] | ItemWithOldSubtype;
+
+export type ItemWithOldSubtype =
   | SupportedTypes["AMMO"]
   | SupportedTypes["ARMOR"]
   | SupportedTypes["BATTERY"]
@@ -1998,7 +2018,7 @@ export type ProficiencyCategory = {
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
-  ITEM: { type: "ITEM" } & ItemBasicInfo;
+  ITEM: { type: "ITEM"; subtypes: string[] } & ItemBasicInfo;
   AMMO: { type: "AMMO" } & ItemBasicInfo & AmmoSlot;
   ARMOR: { type: "ARMOR" } & ItemBasicInfo & ArmorSlot;
   BATTERY: { type: "BATTERY" } & ItemBasicInfo;
@@ -2080,3 +2100,14 @@ export type SupportedTypesWithMapped = SupportedTypes & {
 
 export type SupportedTypeMapped =
   SupportedTypesWithMapped[keyof SupportedTypesWithMapped];
+
+type ItemSubtypes = ItemWithOldSubtype["type"];
+export function isItemSubtype<Subtype extends ItemSubtypes>(
+  subtype: Subtype,
+  item: Item
+): item is Item & ItemSubtypeToSlot[Subtype] {
+  return (
+    item.type === subtype ||
+    (item.type === "ITEM" && item.subtypes.includes(subtype))
+  );
+}

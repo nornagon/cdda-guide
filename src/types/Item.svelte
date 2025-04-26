@@ -13,14 +13,15 @@ import {
   singularName,
   i18n,
 } from "../data";
-import type {
-  ItemBasicInfo,
-  Item,
-  SupportedTypesWithMapped,
-  UseFunction,
-  SupportedTypeMapped,
-  RequirementData,
-  PocketData,
+import {
+  type ItemBasicInfo,
+  type Item,
+  type SupportedTypesWithMapped,
+  type UseFunction,
+  type SupportedTypeMapped,
+  type RequirementData,
+  type PocketData,
+  isItemSubtype,
 } from "../types";
 import AsciiPicture from "./AsciiPicture.svelte";
 import AmmoInfo from "./item/AmmoInfo.svelte";
@@ -243,11 +244,11 @@ const grantedByMutation = data
   .filter((m) => m.id && m.integrated_armor?.some((x) => x === item.id));
 
 function normalizeStackVolume(item: Item): (string | number) | undefined {
-  if (item.type === "AMMO") {
+  if (isItemSubtype("AMMO", item)) {
     const { count } = item;
     return `${parseVolume(item.volume ?? "1 ml") / (count ?? 1)} ml`;
   }
-  if (item.type === "COMESTIBLE") {
+  if (isItemSubtype("COMESTIBLE", item)) {
     const { charges } = item;
     return `${parseVolume(item.volume ?? "1 ml") / (charges ?? 1)} ml`;
   }
@@ -304,9 +305,9 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
               {#each ammo.map( (id) => ({ id, max_charges: maxCharges(id) }) ) as { id: ammo_id, max_charges }}
                 <li>
                   {max_charges}
-                  {item.type === "GUN" ? "round" : "charge"}{max_charges === 1
-                    ? ""
-                    : "s"} of
+                  {isItemSubtype("GUN", item)
+                    ? "round"
+                    : "charge"}{max_charges === 1 ? "" : "s"} of
                   <ThingLink type="ammunition_type" id={ammo_id} />
                 </li>
               {/each}
@@ -527,23 +528,23 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
     </div>
   </div>
 </section>
-{#if item.type === "BOOK"}
+{#if isItemSubtype("BOOK", item)}
   <BookInfo {item} />
 {/if}
-{#if item.type === "ARMOR" || item.type === "TOOL_ARMOR"}
+{#if isItemSubtype("ARMOR", item) || isItemSubtype("TOOL_ARMOR", item)}
   {#if data.build_number?.startsWith("0.F")}
     <ArmorInfo0F {item} />
   {:else}
     <ArmorInfo {item} />
   {/if}
 {/if}
-{#if item.type === "BIONIC_ITEM"}
+{#if isItemSubtype("BIONIC_ITEM", item)}
   <BionicInfo {item} />
 {/if}
-{#if item.type === "TOOL" || item.type === "TOOL_ARMOR"}
+{#if isItemSubtype("TOOL", item) || isItemSubtype("TOOL_ARMOR", item)}
   <ToolInfo {item} />
 {/if}
-{#if item.type === "ENGINE" && item.displacement}
+{#if isItemSubtype("ENGINE", item) && item.displacement}
   <section>
     <h1>Engine</h1>
     <dl>
@@ -552,10 +553,10 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
     </dl>
   </section>
 {/if}
-{#if item.type === "COMESTIBLE"}
+{#if isItemSubtype("COMESTIBLE", item)}
   <ComestibleInfo {item} />
 {/if}
-{#if item.type === "WHEEL"}
+{#if isItemSubtype("WHEEL", item)}
   <WheelInfo {item} />
 {/if}
 <MagazineInfo {item} />
@@ -579,12 +580,12 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
     </dl>
   </section>
 {/if}
-{#if item.bashing || item.cutting || item.melee_damage || item.type === "GUN" || (item.type === "AMMO" && (item.show_stats || item.damage))}
+{#if item.bashing || item.cutting || item.melee_damage || isItemSubtype("GUN", item) || (isItemSubtype("AMMO", item) && (item.show_stats || item.damage))}
   <div class="side-by-side">
     <MeleeInfo {item} />
-    {#if item.type === "GUN"}
+    {#if isItemSubtype("GUN", item)}
       <GunInfo {item} />
-    {:else if item.type === "AMMO"}
+    {:else if isItemSubtype("AMMO", item)}
       <AmmoInfo {item} />
     {/if}
   </div>

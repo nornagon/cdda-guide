@@ -1,32 +1,33 @@
 import { writable } from "svelte/store";
 import makeI18n, { Gettext } from "gettext.js";
 
-import type {
-  Translation,
-  Requirement,
-  ItemGroup,
-  ItemGroupEntry,
-  Recipe,
-  Mapgen,
-  PaletteData,
-  DamageInstance,
-  DamageUnit,
-  RequirementData,
-  SupportedTypesWithMapped,
-  SupportedTypeMapped,
-  Vehicle,
-  Item,
-  UseFunction,
-  Bionic,
-  QualityRequirement,
-  InlineItemGroup,
-  ItemGroupData,
-  MapgenValue,
-  ItemBasicInfo,
-  ComestibleSlot,
-  OvermapSpecial,
-  ArmorSlot,
-  BreathabilityRating,
+import {
+  type Translation,
+  type Requirement,
+  type ItemGroup,
+  type ItemGroupEntry,
+  type Recipe,
+  type Mapgen,
+  type PaletteData,
+  type DamageInstance,
+  type DamageUnit,
+  type RequirementData,
+  type SupportedTypesWithMapped,
+  type SupportedTypeMapped,
+  type Vehicle,
+  type Item,
+  type UseFunction,
+  type Bionic,
+  type QualityRequirement,
+  type InlineItemGroup,
+  type ItemGroupData,
+  type MapgenValue,
+  type ItemBasicInfo,
+  type ComestibleSlot,
+  type OvermapSpecial,
+  type ArmorSlot,
+  type BreathabilityRating,
+  isItemSubtype,
 } from "./types";
 import type { Loot } from "./types/item/spawnLocations";
 
@@ -378,7 +379,7 @@ export class CddaData {
       this._toolReplacements = new Map();
       for (const obj of this.byType("item")) {
         if (
-          obj.type === "TOOL" &&
+          isItemSubtype("TOOL", obj) &&
           Object.hasOwnProperty.call(obj, "sub") &&
           obj.sub
         ) {
@@ -505,18 +506,19 @@ export class CddaData {
     delete ret.relative;
     for (const k of Object.keys(ret.proportional ?? {})) {
       if (
-        (ret.type === "ARMOR" || ret.type === "TOOL_ARMOR") &&
+        (isItemSubtype("TOOL", ret) || isItemSubtype("TOOL_ARMOR", ret)) &&
         "armor" in ret
       ) {
         ret.armor = JSON.parse(JSON.stringify(ret.armor));
         if (k === "encumbrance") {
           for (const apd of ret.armor ?? []) {
             if (typeof apd.encumbrance === "number") {
-              apd.encumbrance = (apd.encumbrance * ret.proportional[k]) | 0;
+              apd.encumbrance =
+                (apd.encumbrance * (ret as any).proportional[k]) | 0;
             } else if (Array.isArray(apd.encumbrance)) {
               apd.encumbrance = apd.encumbrance.map(
-                (x: number) => (x * ret.proportional[k]) | 0
-              );
+                (x: number) => (x * (ret as any).proportional[k]) | 0
+              ) as [number, number];
             }
           }
         }
@@ -1664,7 +1666,11 @@ export function normalize<T>(xs: (T | T[])[] | undefined): T[][] {
 }
 
 export const countsByCharges = (item: any): boolean => {
-  return item.type === "AMMO" || item.type === "COMESTIBLE" || item.stackable;
+  return (
+    isItemSubtype("AMMO", item) ||
+    isItemSubtype("COMESTIBLE", item) ||
+    item.stackable
+  );
 };
 
 export function normalizeDamageInstance(

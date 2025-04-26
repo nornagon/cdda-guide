@@ -4,7 +4,13 @@ import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import { byName, CddaData, singularName, i18n } from "../data";
 import LimitedList from "../LimitedList.svelte";
-import type { Item, VehiclePart, ToolQuality, Construction } from "../types";
+import {
+  type Item,
+  type VehiclePart,
+  type ToolQuality,
+  type Construction,
+  isItemSubtype,
+} from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -25,7 +31,10 @@ for (const it of data.byType("item")) {
       toolsWithQualityByLevel.set(level, []);
     toolsWithQualityByLevel.get(level)!.push(it);
   } else {
-    if (it.type === "GUN" && !it.flags?.includes("PRIMITIVE_RANGED_WEAPON")) {
+    if (
+      isItemSubtype("GUN", it) &&
+      !it.flags?.includes("PRIMITIVE_RANGED_WEAPON")
+    ) {
       if (it.skill.toUpperCase() === item.id) {
         if (!toolsWithQualityByLevel.has(1)) toolsWithQualityByLevel.set(1, []);
         toolsWithQualityByLevel.get(1)!.push(it);

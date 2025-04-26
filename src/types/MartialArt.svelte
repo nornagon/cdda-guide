@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { MartialArt, MartialArtBuff } from "../types";
+import { isItemSubtype, type MartialArt, type MartialArtBuff } from "../types";
 import { getContext } from "svelte";
 import { CddaData, i18n, singular, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
@@ -30,7 +30,7 @@ const _context = "Martial Art";
 
 const books = data
   .byType("item")
-  .filter((b) => b.type === "BOOK" && b.martial_art === item.id);
+  .filter((b) => isItemSubtype("BOOK", b) && b.martial_art === item.id);
 
 const buffss: [string, MartialArtBuff[]][] = [
   ["Passive", item.static_buffs ?? []],

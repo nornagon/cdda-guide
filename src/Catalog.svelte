@@ -3,14 +3,15 @@ import { setContext } from "svelte";
 
 import { byName, CddaData, singularName } from "./data";
 import LimitedList from "./LimitedList.svelte";
-import type {
-  Item,
-  Monster,
-  Mutation,
-  Proficiency,
-  SupportedTypeMapped,
-  SupportedTypesWithMapped,
-  VehiclePart,
+import {
+  isItemSubtype,
+  type Item,
+  type Monster,
+  type Mutation,
+  type Proficiency,
+  type SupportedTypeMapped,
+  type SupportedTypesWithMapped,
+  type VehiclePart,
 } from "./types";
 import MutationCategory from "./types/MutationCategory.svelte";
 import ThingLink from "./types/ThingLink.svelte";
@@ -32,17 +33,18 @@ const things = data
 // Ref https://github.com/CleverRaven/Cataclysm-DDA/blob/658bbe419fb652086fd4d46bf5bbf9e137228464/src/item_factory.cpp#L4774
 function getCategory(i: Item) {
   if (i.category) return i.category.toLowerCase();
-  if (i.type === "GUN") return "guns";
-  if (i.type === "MAGAZINE") return "magazines";
-  if (i.type === "AMMO") return "ammo";
-  if (i.type === "TOOL") return "tools";
-  if (i.type === "ARMOR") return "clothing";
-  if (i.type === "COMESTIBLE")
+  if (isItemSubtype("COMESTIBLE", i))
     return i.comestible_type === "MED" ? "drugs" : "food";
-  if (i.type === "BOOK") return "books";
-  if (i.type === "GUNMOD") return "mods";
-  if (i.type === "BIONIC_ITEM") return "bionics";
-  if (i.bashing || i.cutting) return "weapons";
+  if (isItemSubtype("GUN", i)) return "guns";
+  if (isItemSubtype("MAGAZINE", i)) return "magazines";
+  if (isItemSubtype("AMMO", i)) return "ammo";
+  if (isItemSubtype("TOOL", i)) return "tools";
+  if (isItemSubtype("ARMOR", i)) return "clothing";
+  if (isItemSubtype("BOOK", i)) return "books";
+  if (isItemSubtype("GUNMOD", i)) return "mods";
+  if (isItemSubtype("BIONIC_ITEM", i)) return "bionics";
+  const i2 = i as Item & { bashing?: number; cutting?: number };
+  if (i2.bashing || i2.cutting) return "weapons";
   return "other";
 }
 

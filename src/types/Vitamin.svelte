@@ -12,11 +12,12 @@ import {
 } from "../data";
 import LimitedList from "../LimitedList.svelte";
 
-import type {
-  ConsumeDrugUseFunction,
-  Item,
-  SupportedTypes,
-  Vitamin,
+import {
+  isItemSubtype,
+  type ConsumeDrugUseFunction,
+  type Item,
+  type SupportedTypes,
+  type Vitamin,
 } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
@@ -34,7 +35,7 @@ const containingComestibles = data
   .byType("item")
   .filter(
     (t) =>
-      t.type === "COMESTIBLE" &&
+      isItemSubtype("COMESTIBLE", t) &&
       t.id &&
       (t.vitamins ?? []).some((v) => v[0] === item.id)
   )

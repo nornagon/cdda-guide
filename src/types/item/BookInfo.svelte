@@ -3,10 +3,10 @@ import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import type { CddaData } from "../../data";
 
-import type { BookSlot } from "../../types";
+import type { BookSlot, ItemBasicInfo } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
-export let item: BookSlot & { id: string; type: "BOOK" };
+export let item: BookSlot & ItemBasicInfo;
 const _context = "Item Book Info";
 
 let data = getContext<CddaData>("data");

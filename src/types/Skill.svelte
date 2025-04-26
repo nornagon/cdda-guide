@@ -5,7 +5,11 @@ import { getContext } from "svelte";
 
 import { byName, CddaData, singular, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
-import type { Skill, SupportedTypesWithMapped } from "../types";
+import {
+  isItemSubtype,
+  type Skill,
+  type SupportedTypesWithMapped,
+} from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 import Recipe from "./Recipe.svelte";
@@ -16,7 +20,7 @@ const data = getContext<CddaData>("data");
 
 const booksWithSkill = data
   .byType("item")
-  .filter((t) => t.id && t.type === "BOOK" && t.skill === item.id)
+  .filter((t) => t.id && isItemSubtype("BOOK", t) && t.skill === item.id)
   .sort((a, b) =>
     singularName(a).localeCompare(singularName(b))
   ) as SupportedTypesWithMapped["BOOK"][];
@@ -37,7 +41,7 @@ booksByLevelList.forEach(([, books]) => {
 const itemsUsingSkill = data
   .byType("item")
   .filter(
-    (i) => i.id && i.type === "GUN" && i.skill === item.id
+    (i) => i.id && isItemSubtype("GUN", i) && i.skill === item.id
   ) as SupportedTypesWithMapped["GUN"][];
 itemsUsingSkill.sort(byName);
 
