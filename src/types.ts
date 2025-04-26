@@ -2018,7 +2018,7 @@ export type ProficiencyCategory = {
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
-  ITEM: { type: "ITEM"; subtypes: string[] } & ItemBasicInfo;
+  ITEM: { type: "ITEM"; subtypes?: string[] } & ItemBasicInfo;
   AMMO: { type: "AMMO" } & ItemBasicInfo & AmmoSlot;
   ARMOR: { type: "ARMOR" } & ItemBasicInfo & ArmorSlot;
   BATTERY: { type: "BATTERY" } & ItemBasicInfo;
@@ -2108,6 +2108,6 @@ export function isItemSubtype<Subtype extends ItemSubtypes>(
 ): item is Item & ItemSubtypeToSlot[Subtype] {
   return (
     item.type === subtype ||
-    (item.type === "ITEM" && item.subtypes.includes(subtype))
+    (item.type === "ITEM" && (item.subtypes?.includes(subtype) ?? false))
   );
 }
