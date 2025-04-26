@@ -98,7 +98,15 @@ const primaryMaterial = materials.reduce(
 let flags = [item.flags ?? []]
   .flat()
   .map((id) => data.byIdMaybe("json_flag", id) ?? { id });
-let faults = (item.faults ?? []).map((f) => data.byId("fault", f));
+let faults = (item.faults ?? []).flatMap((f) =>
+  typeof f === "string"
+    ? [data.byId("fault", f)]
+    : "fault" in f
+    ? [data.byId("fault", f.fault)]
+    : data
+        .byId("fault_group", f.fault_group)
+        .group.map((f) => data.byId("fault", f.fault))
+);
 
 const defaultPocketData = {
   pocket_type: "CONTAINER" as const,

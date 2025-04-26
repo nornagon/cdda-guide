@@ -638,7 +638,7 @@ export type ItemBasicInfo = {
   longest_side?: string;
   material?: string | string[] | { type: string; portion?: integer }[]; // material_id
   flags?: string | string[];
-  faults?: string[];
+  faults?: (string | { fault: string } | { fault_group: string })[];
   pocket_data?: PocketData[];
   container?:
     | string
@@ -797,6 +797,12 @@ export type Fault = {
 
   // 0.G
   mending_methods?: MendingMethod[];
+};
+
+export type FaultGroup = {
+  type: "fault_group";
+  id: string;
+  group: { fault: string }[];
 };
 
 export type FaultFix = {
@@ -2055,6 +2061,7 @@ export type SupportedTypes = {
   effect_type: EffectType;
   event_statistic: EventStatistic;
   fault: Fault;
+  fault_group: FaultGroup;
   fault_fix: FaultFix;
   furniture: Furniture;
   harvest: Harvest;
