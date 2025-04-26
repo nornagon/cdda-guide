@@ -698,6 +698,7 @@ export type ItemBasicInfo = {
 };
 
 export type Item =
+  | SupportedTypes["ITEM"]
   | SupportedTypes["AMMO"]
   | SupportedTypes["ARMOR"]
   | SupportedTypes["BATTERY"]
@@ -1997,6 +1998,7 @@ export type ProficiencyCategory = {
 // Used for schema validation.
 export type SupportedTypes = {
   // Item types.
+  ITEM: { type: "ITEM" } & ItemBasicInfo;
   AMMO: { type: "AMMO" } & ItemBasicInfo & AmmoSlot;
   ARMOR: { type: "ARMOR" } & ItemBasicInfo & ArmorSlot;
   BATTERY: { type: "BATTERY" } & ItemBasicInfo;

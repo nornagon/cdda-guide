@@ -84,6 +84,7 @@ const displays: Record<string, typeof SvelteComponent> = {
   BATTERY: Item,
   GENERIC: Item,
   BIONIC_ITEM: Item,
+  ITEM: Item,
   material: Material,
   addiction_type: AddictionType,
   ammunition_type: AmmunitionType,

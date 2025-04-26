@@ -31,6 +31,7 @@ import type {
 import type { Loot } from "./types/item/spawnLocations";
 
 const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
+  ["ITEM", "item"],
   ["AMMO", "item"],
   ["GUN", "item"],
   ["ARMOR", "item"],
@@ -58,6 +59,7 @@ export const mapType = (
 export let i18n: Gettext = makeI18n();
 
 const needsPlural = [
+  "ITEM",
   "AMMO",
   "ARMOR",
   "BATTERY",
