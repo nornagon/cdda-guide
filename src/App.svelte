@@ -415,7 +415,7 @@ files in the game itself.`,
     </p>
     <p>
       {t(`The Guide stores all its data locally and is offline-capable, so you can
-take it with you whereever you go. There's nothing to do to make the Guide
+take it with you wherever you go. There's nothing to do to make the Guide
 work offline, just visit the page and it will work even without internet
 access, as long as you've visited it once before.`)}
       {#if deferredPrompt}
