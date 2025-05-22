@@ -7,7 +7,7 @@ import Catalog from "./Catalog.svelte";
 import dontPanic from "./assets/dont_panic.png";
 import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
 import { t } from "@transifex/native";
-import type { SupportedTypeMapped } from "./types";
+import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import throttle from "lodash/throttle";
 
 let item: { type: string; id: string } | null = null;
@@ -235,7 +235,7 @@ function getLanguageName(code: string) {
   );
 }
 
-const randomableItemTypes = new Set([
+const randomableItemTypes = new Set<keyof SupportedTypesWithMapped>([
   "item",
   "monster",
   "furniture",
@@ -245,7 +245,7 @@ const randomableItemTypes = new Set([
   "mutation",
   "martial_art",
   "json_flag",
-  "achivement",
+  "achievement",
   "conduct",
   "proficiency",
 ]);
