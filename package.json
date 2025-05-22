@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "license": "GPL-3.0-only",
+  "packageManager": "yarn@1.22.22",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
