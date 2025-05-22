@@ -1,8 +1,8 @@
 /**
  * @jest-environment jsdom
  */
-import { test, expect } from "vitest";
-import { render } from "@testing-library/svelte";
+import { test, expect, afterEach } from "vitest";
+import { cleanup, render } from "@testing-library/svelte";
 
 import { CddaData } from "./data";
 
@@ -14,6 +14,8 @@ let data: CddaData = new CddaData([
   { type: "BOOK", id: "ZSG", name: "Zombie Survival Guide", symbol: "?" },
   { type: "AMMO", id: "battery", name: "battery", symbol: "=" },
 ]);
+
+afterEach(cleanup);
 
 test("search results shows results", () => {
   const { container } = render(SearchResults, { data, search: "zombie" });
