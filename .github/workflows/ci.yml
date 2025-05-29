@@ -21,7 +21,7 @@ jobs:
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 22.x
 
       - name: Fetch Dependencies
         run: yarn install --frozen-lockfile
