@@ -60,6 +60,10 @@ export function makeRenderTests(chunkIdx: number, numChunks: number) {
 
   test.each(all.filter((_, i) => i % numChunks === chunkIdx))(
     "render %s %s",
+    {
+      // The first test sometimes times out on CI with the default 5sec timeout.
+      timeout: 20000,
+    },
     async (type, id) => {
       // Prefill the loot tables, so we don't have to mess with waiting for async load...
       await lootByOMSAppearance(data);
@@ -77,10 +81,6 @@ export function makeRenderTests(chunkIdx: number, numChunks: number) {
           /undefined|NaN|object Object/
         );
       }
-    },
-    {
-      // The first test sometimes times out on CI with the default 5sec timeout.
-      timeout: 20000,
     }
   );
 }
