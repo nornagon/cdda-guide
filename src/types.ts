@@ -1149,7 +1149,6 @@ type MonsterAttack = (
 export type SpecialAttack = [string, number] | MonsterAttack;
 export interface Mapgen {
   type: "mapgen";
-  method: "json";
   om_terrain?: string | string[] | string[][];
   weight?: dbl_or_var;
   object: MapgenObject;
