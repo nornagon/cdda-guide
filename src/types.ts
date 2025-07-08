@@ -1273,8 +1273,8 @@ export interface MapgenLoot {
 
 export interface MapgenNested {
   neighbors?: any; // TODO:
-  chunks?: Array<[MapgenValue, number] | MapgenValue>;
-  else_chunks?: Array<[string, number] | string>;
+  chunks?: Array<[MapgenValue, dbl_or_var] | MapgenValue>;
+  else_chunks?: Array<[string, dbl_or_var] | string>;
 }
 
 export interface MapgenSet {

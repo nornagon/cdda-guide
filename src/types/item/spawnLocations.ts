@@ -238,6 +238,7 @@ function normalizeMapgenVar(
   if (dbl_or_var) {
     if (typeof dbl_or_var === "number") return dbl_or_var;
     else if ("default" in dbl_or_var) return Number(dbl_or_var.default);
+    else if ("math" in dbl_or_var || "arithmetic" in dbl_or_var) return 0;
   }
 }
 
@@ -550,16 +551,16 @@ function toLoot(distribution: Map<string, number>): Loot {
 let onStack = 0;
 function lootForChunks(
   data: CddaData,
-  chunks: (raw.MapgenValue | [raw.MapgenValue, number])[]
+  chunks: (raw.MapgenValue | [raw.MapgenValue, raw.dbl_or_var])[]
 ): Loot {
   onStack += 1;
   // TODO: See https://github.com/nornagon/cdda-guide/issues/73
   if (onStack > 4) return new Map();
   const normalizedChunks = (chunks ?? []).map((c) =>
-    Array.isArray(c) ? c : ([c, 100] as [raw.MapgenValue, number])
+    Array.isArray(c) ? c : ([c, 100] as [raw.MapgenValue, raw.dbl_or_var])
   );
   const loot = mergeLoot(
-    normalizedChunks.map(([chunkIdValue, weight]) => {
+    normalizedChunks.map(([chunkIdValue, weightVar]) => {
       const chunkId = getMapgenValue(chunkIdValue);
       const chunkMapgens = chunkId ? data.nestedMapgensById(chunkId) ?? [] : [];
       const loot = mergeLoot(
@@ -569,6 +570,7 @@ function lootForChunks(
           return { loot, weight };
         })
       );
+      const weight = normalizeMapgenVar(weightVar) ?? 100;
       return { loot, weight };
     })
   );
