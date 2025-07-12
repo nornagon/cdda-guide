@@ -4,7 +4,8 @@ import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import { byName, CddaData, singularName } from "../data";
 import LimitedList from "../LimitedList.svelte";
-import type { AmmunitionType, Item } from "../types";
+import type { AmmunitionType, Item, ItemSubtypeToSlot } from "../types";
+import { isItemSubtype } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
@@ -14,11 +15,12 @@ const _context = "Ammunition Type";
 
 const data = getContext<CddaData>("data");
 
-const compatible = data.byType("item").flatMap((x) => {
-  if (x.type !== "AMMO" || !x.id) return [];
-  if (x.ammo_type === item.id) return [x];
-  return [];
-});
+const compatible = data
+  .byType("item")
+  .filter(
+    (x): x is Item & ItemSubtypeToSlot["AMMO"] =>
+      !!x.id && isItemSubtype("AMMO", x) && x.ammo_type === item.id
+  );
 compatible.sort(byName);
 
 const usesAmmoType = (w: Item, t: AmmunitionType): boolean => {
