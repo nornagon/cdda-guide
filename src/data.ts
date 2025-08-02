@@ -618,7 +618,7 @@ export class CddaData {
           if (ret.replace_materials[mats]) {
             ret.material = ret.replace_materials[mats];
           }
-        } else {
+        } else if (Array.isArray(mats)) {
           ret.material = mats.map((x) => {
             if (typeof x === "string") {
               return ret.replace_materials[x] ?? x;
@@ -629,6 +629,13 @@ export class CddaData {
               return x;
             }
           });
+        } else {
+          ret.material = Object.fromEntries(
+            Object.entries(mats).map(([k, v]) => [
+              ret.replace_materials[k] ?? k,
+              v,
+            ])
+          );
         }
         // TODO: update weight
       }

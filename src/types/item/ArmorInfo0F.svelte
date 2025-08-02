@@ -7,7 +7,7 @@ export let item: ItemBasicInfo & ArmorSlot;
 let data = getContext<CddaData>("data");
 
 function isStrings<T>(array: string[] | T[]): array is string[] {
-  return typeof array[0] === "string";
+  return Array.isArray(array) && typeof array[0] === "string";
 }
 
 const normalizedMaterial =
@@ -15,9 +15,14 @@ const normalizedMaterial =
     ? []
     : typeof item.material === "string"
     ? [{ type: item.material, portion: 1 }]
-    : isStrings(item.material)
-    ? item.material.map((s) => ({ type: s, portion: 1 }))
-    : item.material;
+    : Array.isArray(item.material)
+    ? isStrings(item.material)
+      ? item.material.map((s) => ({ type: s, portion: 1 }))
+      : item.material
+    : Object.entries(item.material).map(([type, portion]) => ({
+        type,
+        portion: portion as number,
+      }));
 
 let materials = normalizedMaterial.map((m) => ({
   material: data.byId("material", m.type),

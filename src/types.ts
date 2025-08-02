@@ -636,7 +636,11 @@ export type ItemBasicInfo = {
   volume?: volume;
   weight?: mass;
   longest_side?: string;
-  material?: string | string[] | { type: string; portion?: integer }[]; // material_id
+  material?:
+    | string
+    | string[]
+    | { type: string; portion?: integer }[]
+    | Record<string, number>; // material_id
   flags?: string | string[];
   faults?: (string | { fault: string } | { fault_group: string })[];
   pocket_data?: PocketData[];
