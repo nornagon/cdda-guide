@@ -21,7 +21,7 @@ export let item: Material;
 const _context = "Material";
 
 function isStrings<T>(array: string[] | T[]): array is string[] {
-  return typeof array[0] === "string";
+  return Array.isArray(array) && typeof array[0] === "string";
 }
 
 let itemsWithMaterial = data
@@ -32,9 +32,11 @@ let itemsWithMaterial = data
         ? []
         : typeof i.material === "string"
         ? [i.material]
-        : isStrings(i.material)
-        ? i.material
-        : i.material.map((m) => m.type);
+        : Array.isArray(i.material)
+        ? isStrings(i.material)
+          ? i.material
+          : i.material.map((m) => m.type)
+        : Object.keys(i.material);
     return i.id && normalizedMaterial.some((m) => m === item.id);
   })
   .sort(byName);

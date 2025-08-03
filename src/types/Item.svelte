@@ -80,16 +80,21 @@ let chargedQualities = (item.charged_qualities ?? []).map(([id, level]) => ({
 }));
 
 function isStrings<T>(array: string[] | T[]): array is string[] {
-  return typeof array[0] === "string";
+  return Array.isArray(array) && typeof array[0] === "string";
 }
 const materials =
   item.material == null
     ? []
     : typeof item.material === "string"
     ? [{ type: item.material, portion: 1 }]
-    : isStrings(item.material)
-    ? item.material.map((s) => ({ type: s, portion: 1 }))
-    : item.material.map((s) => ({ type: s.type, portion: s.portion ?? 1 }));
+    : Array.isArray(item.material)
+    ? isStrings(item.material)
+      ? item.material.map((s) => ({ type: s, portion: 1 }))
+      : item.material.map((s) => ({ type: s.type, portion: s.portion ?? 1 }))
+    : Object.entries(item.material).map(([type, portion]) => ({
+        type,
+        portion: portion as number,
+      }));
 const totalMaterialPortion = materials.reduce((m, o) => m + o.portion, 0);
 const primaryMaterial = materials.reduce(
   (m, o) => (!m || o.portion > m.portion ? o : m),
