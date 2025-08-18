@@ -249,6 +249,11 @@ export function asKilograms(string: string | number): string {
 
 export class CddaData {
   _raw: any[];
+  _availableMods: string[];
+  _rawMods: Record<string, { info: any; data: any[] }>;
+
+  _enabledMods: string[] = [];
+
   _byType: Map<string, any[]> = new Map();
   _byTypeById: Map<string, Map<string, any>> = new Map();
   _abstractsByType: Map<string, Map<string, any>> = new Map();
@@ -261,80 +266,144 @@ export class CddaData {
   release: any;
   build_number: string | undefined;
 
-  constructor(raw: any[], build_number?: string, release?: any) {
+  constructor(
+    raw: any[],
+    build_number?: string,
+    release?: any,
+    modlist?: string[],
+    rawMods?: Record<string, { info: any; data: any[] }>,
+    enabledMods?: string[]
+  ) {
     this.release = release;
     this.build_number = build_number;
     // For some reason O—G has the string "mapgen" as one of its objects.
     this._raw = raw.filter((x) => typeof x === "object");
-    for (const obj of raw) {
-      if (!Object.hasOwnProperty.call(obj, "type")) continue;
-      if (obj.type === "MIGRATION") {
-        for (const id of typeof obj.id === "string" ? [obj.id] : obj.id) {
-          const { replace } = obj;
-          this._migrations.set(id, replace);
-        }
-        continue;
-      }
-      const mappedType = mapType(obj.type);
-      if (!this._byType.has(mappedType)) this._byType.set(mappedType, []);
-      this._byType.get(mappedType)!.push(obj);
-      if (Object.hasOwnProperty.call(obj, "id")) {
-        if (!this._byTypeById.has(mappedType))
-          this._byTypeById.set(mappedType, new Map());
-        if (typeof obj.id === "string")
-          this._byTypeById.get(mappedType)!.set(obj.id, obj);
-        else if (Array.isArray(obj.id))
-          for (const id of obj.id)
-            this._byTypeById.get(mappedType)!.set(id, obj);
+    this._availableMods = modlist ?? [];
+    this._rawMods = rawMods ?? {};
+    this._enabledMods = enabledMods ?? [];
+    console.log(this._enabledMods);
 
-        // TODO: proper alias handling. We want to e.g. be able to collapse them in loot tables.
-        if (Array.isArray(obj.alias))
-          for (const id of obj.alias)
-            this._byTypeById.get(mappedType)!.set(id, obj);
-        else if (typeof obj.alias === "string")
-          this._byTypeById.get(mappedType)!.set(obj.alias, obj);
-      }
-      // recipes are id'd by their result
-      if (
-        (mappedType === "recipe" || mappedType === "uncraft") &&
-        Object.hasOwnProperty.call(obj, "result")
-      ) {
-        if (!this._byTypeById.has(mappedType))
-          this._byTypeById.set(mappedType, new Map());
-        const id =
-          obj.result +
-          (obj.variant && !obj.abstract ? "_" + obj.variant : "") +
-          (obj.id_suffix ? "_" + obj.id_suffix : "");
-        this._byTypeById.get(mappedType)!.set(id, obj);
-      }
-      if (
-        mappedType === "monstergroup" &&
-        Object.hasOwnProperty.call(obj, "name")
-      ) {
-        if (!this._byTypeById.has(mappedType))
-          this._byTypeById.set(mappedType, new Map());
-        const id = obj.name;
-        this._byTypeById.get(mappedType)!.set(id, obj);
-      }
-      if (Object.hasOwnProperty.call(obj, "abstract")) {
-        if (!this._abstractsByType.has(mappedType))
-          this._abstractsByType.set(mappedType, new Map());
-        this._abstractsByType.get(mappedType)!.set(obj.abstract, obj);
-      }
+    this.initData();
+  }
 
-      if (Object.hasOwnProperty.call(obj, "crafting_pseudo_item")) {
-        this._craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id);
-      }
+  initData() {
+    this._byType.clear();
+    this._byTypeById.clear();
+    this._abstractsByType.clear();
+    this._toolReplacements?.clear();
+    this._craftingPseudoItems.clear();
+    this._migrations.clear();
+    this._flattenCache.clear();
+    this._nestedMapgensById.clear();
 
-      if (Object.hasOwnProperty.call(obj, "nested_mapgen_id")) {
-        if (!this._nestedMapgensById.has(obj.nested_mapgen_id))
-          this._nestedMapgensById.set(obj.nested_mapgen_id, []);
-        this._nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
+    for (const obj of this._raw) {
+      obj.__mod = "Dark Days Ahead";
+      this.loadObject(obj);
+    }
+
+    for (const mod of this._enabledMods) {
+      if (!(mod in this._rawMods)) continue;
+      for (const obj of this._rawMods[mod].data) {
+        obj.__mod = this._rawMods[mod].info.name;
+        this.loadObject(obj);
       }
     }
     this._byTypeById
       .get("item_group")
       ?.set("EMPTY_GROUP", { id: "EMPTY_GROUP", entries: [] });
+  }
+
+  loadObject(obj: any) {
+    if (!Object.hasOwnProperty.call(obj, "type")) return;
+    if (obj.type === "MIGRATION") {
+      for (const id of typeof obj.id === "string" ? [obj.id] : obj.id) {
+        this._migrations.set(id, obj.replace);
+      }
+      return;
+    }
+    const mappedType = mapType(obj.type);
+    if (!this._byType.has(mappedType)) this._byType.set(mappedType, []);
+
+    obj.__self = obj;
+    obj.__prevSelf = null;
+    obj.__mod = translate(obj.__mod, false, 1);
+
+    if (obj["copy-from"] === obj.id) {
+      const oldIndex = this._byType
+        .get(mappedType)!
+        .findIndex((x) => x.id === obj.id);
+      if (oldIndex !== -1) {
+        const oldObj = this._byType.get(mappedType)![oldIndex];
+        obj.__prevSelf = oldObj;
+      }
+    } else {
+      this._byType.get(mappedType)!.push(obj);
+    }
+
+    if (Object.hasOwnProperty.call(obj, "id")) {
+      if (!this._byTypeById.has(mappedType))
+        this._byTypeById.set(mappedType, new Map());
+      if (typeof obj.id === "string")
+        this._byTypeById.get(mappedType)!.set(obj.id, obj);
+      else if (Array.isArray(obj.id))
+        for (const id of obj.id) this._byTypeById.get(mappedType)!.set(id, obj);
+
+      // TODO: proper alias handling. We want to e.g. be able to collapse them in loot tables.
+      if (Array.isArray(obj.alias))
+        for (const id of obj.alias)
+          this._byTypeById.get(mappedType)!.set(id, obj);
+      else if (typeof obj.alias === "string")
+        this._byTypeById.get(mappedType)!.set(obj.alias, obj);
+    }
+    // recipes are id'd by their result
+    if (
+      (mappedType === "recipe" || mappedType === "uncraft") &&
+      Object.hasOwnProperty.call(obj, "result")
+    ) {
+      if (!this._byTypeById.has(mappedType))
+        this._byTypeById.set(mappedType, new Map());
+      const id =
+        obj.result +
+        (obj.variant && !obj.abstract ? "_" + obj.variant : "") +
+        (obj.id_suffix ? "_" + obj.id_suffix : "");
+      this._byTypeById.get(mappedType)!.set(id, obj);
+    }
+    if (
+      mappedType === "monstergroup" &&
+      Object.hasOwnProperty.call(obj, "name")
+    ) {
+      if (!this._byTypeById.has(mappedType))
+        this._byTypeById.set(mappedType, new Map());
+      const id = obj.name;
+      this._byTypeById.get(mappedType)!.set(id, obj);
+    }
+    if (Object.hasOwnProperty.call(obj, "abstract")) {
+      if (!this._abstractsByType.has(mappedType))
+        this._abstractsByType.set(mappedType, new Map());
+      this._abstractsByType.get(mappedType)!.set(obj.abstract, obj);
+    }
+
+    if (Object.hasOwnProperty.call(obj, "crafting_pseudo_item")) {
+      this._craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id);
+    }
+
+    if (Object.hasOwnProperty.call(obj, "nested_mapgen_id")) {
+      if (!this._nestedMapgensById.has(obj.nested_mapgen_id))
+        this._nestedMapgensById.set(obj.nested_mapgen_id, []);
+      this._nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
+    }
+  }
+
+  availableMods(): string[] {
+    return this._availableMods;
+  }
+
+  getModInfo(modId: string): { info: any; data: any[] } | undefined {
+    return this._rawMods[modId];
+  }
+
+  getEnabledMods(): string[] {
+    return this._enabledMods;
   }
 
   byIdMaybe<TypeName extends keyof SupportedTypesWithMapped>(
@@ -407,17 +476,25 @@ export class CddaData {
   _flatten<T = any>(_obj: T): T {
     const obj: any = _obj;
     if (this._flattenCache.has(obj)) return this._flattenCache.get(obj);
-    const parent =
-      "copy-from" in obj
-        ? this._byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
-          this._abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"])
-        : null;
-    if ("copy-from" in obj && !parent)
-      console.error(
-        `Missing parent in ${
-          obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)
-        }`
-      );
+
+    let parent: any = null;
+    if (obj.__prevSelf != null) {
+      parent = obj.__prevSelf;
+    } else {
+      parent =
+        "copy-from" in obj
+          ? this._byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
+            this._abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"])
+          : null;
+
+      if ("copy-from" in obj && !parent)
+        console.error(
+          `Missing parent in ${
+            obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)
+          }`
+        );
+    }
+
     if (parent === obj) {
       // Working around bad data upstream, see: https://github.com/CleverRaven/Cataclysm-DDA/pull/53930
       console.warn("Object copied from itself:", obj);
@@ -1926,14 +2003,26 @@ const fetchJsonWithIncorrectProgress = async (
   return JSON.parse(result);
 };
 
+export const dataRepo = `https://raw.githubusercontent.com/esphas/cdda-data/main`;
+
 const fetchJson = async (
   version: string,
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/all.json`,
+    `${dataRepo}/data/${version}/all.json`,
     progress
   );
+};
+
+const fetchModsJson = async (
+  version: string,
+  progress: (receivedBytes: number, totalBytes: number) => void
+) => {
+  return fetchJsonWithProgress(
+    `${dataRepo}/data/${version}/all_mods.json`,
+    progress
+  ) as Promise<Record<string, { info: any; data: any[] }>>;
 };
 
 const fetchLocaleJson = async (
@@ -1942,7 +2031,7 @@ const fetchLocaleJson = async (
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/lang/${locale}.json`,
+    `${dataRepo}/data/${version}/lang/${locale}.json`,
     progress
   );
 };
@@ -1964,17 +2053,21 @@ let _hasSetVersion = false;
 const { subscribe, set } = writable<CddaData | null>(null);
 export const data = {
   subscribe,
-  async setVersion(version: string, locale: string | null) {
+  async setVersion(
+    version: string,
+    locale: string | null,
+    enabledMods: string[]
+  ) {
     if (_hasSetVersion) throw new Error("can only set version once");
     _hasSetVersion = true;
-    let totals = [0, 0, 0];
-    let receiveds = [0, 0, 0];
+    let totals = [0, 0, 0, 0];
+    let receiveds = [0, 0, 0, 0];
     const updateProgress = () => {
       const total = totals.reduce((a, b) => a + b, 0);
       const received = receiveds.reduce((a, b) => a + b, 0);
       loadProgressStore.set([received, total]);
     };
-    const [dataJson, localeJson, pinyinNameJson] = await Promise.all([
+    const [dataJson, localeJson, pinyinNameJson, modsJson] = await Promise.all([
       retry(() =>
         fetchJson(version, (receivedBytes, totalBytes) => {
           totals[0] = totalBytes;
@@ -2002,6 +2095,14 @@ export const data = {
             }
           )
         ),
+      enabledMods.length > 0 &&
+        retry(() =>
+          fetchModsJson(version, (receivedBytes, totalBytes) => {
+            totals[3] = totalBytes;
+            receiveds[3] = receivedBytes;
+            updateProgress();
+          })
+        ),
     ]);
     if (locale && localeJson) {
       if (pinyinNameJson) pinyinNameJson[""] = localeJson[""];
@@ -2014,7 +2115,10 @@ export const data = {
     const cddaData = new CddaData(
       dataJson.data,
       dataJson.build_number,
-      dataJson.release
+      dataJson.release,
+      dataJson.modlist,
+      modsJson || {},
+      enabledMods
     );
     set(cddaData);
   },

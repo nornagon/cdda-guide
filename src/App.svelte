@@ -1,6 +1,13 @@
 <script lang="ts">
 import Thing from "./Thing.svelte";
-import { CddaData, data, loadProgress, mapType, singularName } from "./data";
+import {
+  dataRepo,
+  CddaData,
+  data,
+  loadProgress,
+  mapType,
+  singularName,
+} from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
@@ -21,7 +28,7 @@ let builds:
     }[]
   | null = null;
 
-fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
+fetch(`${dataRepo}/builds.json`)
   .then((d) => d.json())
   .then((b) => {
     builds = b;
@@ -33,7 +40,8 @@ fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
 const url = new URL(location.href);
 const version = url.searchParams.get("v") ?? "latest";
 const locale = url.searchParams.get("lang");
-data.setVersion(version, locale);
+const enabledMods = url.searchParams.get("m")?.split(",") ?? [];
+data.setVersion(version, locale, enabledMods);
 
 const tilesets = [
   {
