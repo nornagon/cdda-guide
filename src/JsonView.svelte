@@ -34,24 +34,10 @@ function allSources(o: any): any[] {
         : value,
     2
   )}</pre>
-{#if obj.__prevSelf == null}
-  <a href={`${urlView}/${obj.__filename}`} target="_blank"
-    >{t("View", { _context })}</a>
-  /
-  <a href={`${urlEdit}/${obj.__filename}`} target="_blank"
-    >{t("Edit on GitHub", { _context })}</a>
-{:else}
-  {#each allSources(obj) as o}
-    <details>
-      <summary>{o.__mod}</summary>
-      <pre>{JSON.stringify(
-          o,
-          (key, value) =>
-            ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
-              ? undefined
-              : value,
-          2
-        )}</pre>
+{#each allSources(obj) as o}
+  <details>
+    <summary
+      >{o.__mod}
       {#if o.__filename}
         <a href={`${urlView}/${o.__filename}`} target="_blank"
           >{t("View", { _context })}</a>
@@ -59,6 +45,14 @@ function allSources(o: any): any[] {
         <a href={`${urlEdit}/${o.__filename}`} target="_blank"
           >{t("Edit on GitHub", { _context })}</a>
       {/if}
-    </details>
-  {/each}
-{/if}
+    </summary>
+    <pre>{JSON.stringify(
+        o,
+        (key, value) =>
+          ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
+            ? undefined
+            : value,
+        2
+      )}</pre>
+  </details>
+{/each}
