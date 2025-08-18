@@ -281,7 +281,6 @@ export class CddaData {
     this._availableMods = modlist ?? [];
     this._rawMods = rawMods ?? {};
     this._enabledMods = enabledMods ?? [];
-    console.log(this._enabledMods);
 
     this.initData();
   }
