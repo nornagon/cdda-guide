@@ -254,6 +254,7 @@ export class CddaData {
 
   _enabledMods: string[] = [];
 
+  _rawAll: any[] = [];
   _byType: Map<string, any[]> = new Map();
   _byTypeById: Map<string, Map<string, any>> = new Map();
   _abstractsByType: Map<string, Map<string, any>> = new Map();
@@ -286,6 +287,7 @@ export class CddaData {
   }
 
   initData() {
+    this._rawAll = [];
     this._byType.clear();
     this._byTypeById.clear();
     this._abstractsByType.clear();
@@ -313,6 +315,8 @@ export class CddaData {
   }
 
   loadObject(obj: any) {
+    this._rawAll.push(obj);
+
     if (!Object.hasOwnProperty.call(obj, "type")) return;
     if (obj.type === "MIGRATION") {
       for (const id of typeof obj.id === "string" ? [obj.id] : obj.id) {
@@ -405,6 +409,10 @@ export class CddaData {
     return this._enabledMods;
   }
 
+  modEnabled() {
+    return this._enabledMods.length > 0;
+  }
+
   byIdMaybe<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
     id: string
@@ -469,7 +477,7 @@ export class CddaData {
   }
 
   all(): SupportedTypeMapped[] {
-    return this._raw;
+    return this._rawAll;
   }
 
   _flatten<T = any>(_obj: T): T {
@@ -489,7 +497,6 @@ export class CddaData {
     let parent: any = null;
     if (obj.__prevSelf != null) {
       parent = obj.__prevSelf;
-      console.log(allSources(obj));
     } else {
       parent =
         "copy-from" in obj
@@ -1104,10 +1111,14 @@ export class CddaData {
               count: countsByCharges(item) ? [1, 1] : nCount,
             });
         } else if ("group" in entry) {
+          const group = this.modEnabled()
+            ? this.byIdMaybe("item_group", entry.group)
+            : this.byId("item_group", entry.group);
+          if (!group) continue;
           add(
-            ...this.flattenTopLevelItemGroup(
-              this.byId("item_group", entry.group)
-            ).map((p) => prod(p, nProb, nCount))
+            ...this.flattenTopLevelItemGroup(group).map((p) =>
+              prod(p, nProb, nCount)
+            )
           );
         } else if ("collection" in entry) {
           add(
@@ -1165,10 +1176,14 @@ export class CddaData {
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
         } else if ("group" in entry) {
+          const group = this.modEnabled()
+            ? this.byIdMaybe("item_group", entry.group)
+            : this.byId("item_group", entry.group);
+          if (!group) continue;
           add(
-            ...this.flattenTopLevelItemGroup(
-              this.byId("item_group", entry.group)
-            ).map((p) => prod(p, nProb, nCount))
+            ...this.flattenTopLevelItemGroup(group).map((p) =>
+              prod(p, nProb, nCount)
+            )
           );
         } else if ("collection" in entry) {
           add(

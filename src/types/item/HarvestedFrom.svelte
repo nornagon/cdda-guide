@@ -16,7 +16,10 @@ const harvestedFrom = (data.byType("terrain") as (Terrain | Furniture)[])
   .filter((ter) =>
     (ter.harvest_by_season ?? []).some((h) => {
       if (!h.id) return false;
-      const harvest = data.byId("harvest", h.id);
+      const harvest = data.modEnabled()
+        ? data.byIdMaybe("harvest", h.id)
+        : data.byId("harvest", h.id);
+      if (!harvest) return false;
       return harvest.entries.some((e) => {
         if (e.type === "bionic_group") {
           return data
