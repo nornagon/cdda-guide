@@ -114,7 +114,14 @@ if (item.stunned_target)
   {/if}
   <details>
     <summary>{t("Technique JSON", { _context })}</summary>
-    <pre>{JSON.stringify(item, null, 2)}</pre>
+    <pre>{JSON.stringify(
+        item,
+        (key, value) =>
+          ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
+            ? undefined
+            : value,
+        2
+      )}</pre>
   </details>
 </section>
 
