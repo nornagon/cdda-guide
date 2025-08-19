@@ -21,7 +21,7 @@ let builds:
     }[]
   | null = null;
 
-fetch(`${import.meta.env.CDDA_DATA_SOURCE}/builds.json`)
+fetch(`${process.env.CDDA_DATA_SOURCE}/builds.json`)
   .then((d) => d.json())
   .then((b) => {
     builds = b;

@@ -2033,7 +2033,7 @@ const fetchJson = async (
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `${import.meta.env.CDDA_DATA_SOURCE}/data/${version}/all.json`,
+    `${process.env.CDDA_DATA_SOURCE}/data/${version}/all.json`,
     progress
   );
 };
@@ -2043,7 +2043,7 @@ const fetchModsJson = async (
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `${import.meta.env.CDDA_DATA_SOURCE}/data/${version}/all_mods.json`,
+    `${process.env.CDDA_DATA_SOURCE}/data/${version}/all_mods.json`,
     progress
   ) as Promise<Record<string, { info: any; data: any[] }>>;
 };
@@ -2054,7 +2054,7 @@ const fetchLocaleJson = async (
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `${import.meta.env.CDDA_DATA_SOURCE}/data/${version}/lang/${locale}.json`,
+    `${process.env.CDDA_DATA_SOURCE}/data/${version}/lang/${locale}.json`,
     progress
   );
 };
