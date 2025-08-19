@@ -2079,7 +2079,7 @@ export const data = {
   async setVersion(
     version: string,
     locale: string | null,
-    enabledMods: string[]
+    enabledMods: string[] = []
   ) {
     if (_hasSetVersion) throw new Error("can only set version once");
     _hasSetVersion = true;
@@ -2090,7 +2090,7 @@ export const data = {
       const received = receiveds.reduce((a, b) => a + b, 0);
       loadProgressStore.set([received, total]);
     };
-    const [dataJson, localeJson, pinyinNameJson, modsJson] = await Promise.all([
+    const [dataJson, localeJson, pinyinNameJson] = await Promise.all([
       retry(() =>
         fetchJson(version, (receivedBytes, totalBytes) => {
           totals[0] = totalBytes;
@@ -2118,15 +2118,17 @@ export const data = {
             }
           )
         ),
-      enabledMods.length > 0 &&
-        retry(() =>
-          fetchModsJson(version, (receivedBytes, totalBytes) => {
-            totals[3] = totalBytes;
-            receiveds[3] = receivedBytes;
-            updateProgress();
-          })
-        ),
     ]);
+    let modsJson: Record<string, { info: any; data: any[] }> | undefined;
+    if (dataJson.modlist && enabledMods.length > 0) {
+      modsJson = await retry(() =>
+        fetchModsJson(version, (receivedBytes, totalBytes) => {
+          totals[3] = totalBytes;
+          receiveds[3] = receivedBytes;
+          updateProgress();
+        })
+      );
+    }
     if (locale && localeJson) {
       if (pinyinNameJson) pinyinNameJson[""] = localeJson[""];
       i18n.loadJSON(localeJson);
@@ -2140,7 +2142,7 @@ export const data = {
       dataJson.build_number,
       dataJson.release,
       dataJson.modlist,
-      modsJson || {},
+      modsJson,
       enabledMods
     );
     set(cddaData);
