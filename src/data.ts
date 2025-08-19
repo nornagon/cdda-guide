@@ -2028,14 +2028,12 @@ const fetchJsonWithIncorrectProgress = async (
   return JSON.parse(result);
 };
 
-export const dataRepo = `https://raw.githubusercontent.com/esphas/cdda-data/main`;
-
 const fetchJson = async (
   version: string,
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `${dataRepo}/data/${version}/all.json`,
+    `${import.meta.env.CDDA_DATA_SOURCE}/data/${version}/all.json`,
     progress
   );
 };
@@ -2045,7 +2043,7 @@ const fetchModsJson = async (
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `${dataRepo}/data/${version}/all_mods.json`,
+    `${import.meta.env.CDDA_DATA_SOURCE}/data/${version}/all_mods.json`,
     progress
   ) as Promise<Record<string, { info: any; data: any[] }>>;
 };
@@ -2056,7 +2054,7 @@ const fetchLocaleJson = async (
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `${dataRepo}/data/${version}/lang/${locale}.json`,
+    `${import.meta.env.CDDA_DATA_SOURCE}/data/${version}/lang/${locale}.json`,
     progress
   );
 };

@@ -1,13 +1,6 @@
 <script lang="ts">
 import Thing from "./Thing.svelte";
-import {
-  dataRepo,
-  CddaData,
-  data,
-  loadProgress,
-  mapType,
-  singularName,
-} from "./data";
+import { CddaData, data, loadProgress, mapType, singularName } from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
@@ -28,7 +21,7 @@ let builds:
     }[]
   | null = null;
 
-fetch(`${dataRepo}/builds.json`)
+fetch(`${import.meta.env.CDDA_DATA_SOURCE}/builds.json`)
   .then((d) => d.json())
   .then((b) => {
     builds = b;
