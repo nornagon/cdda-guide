@@ -21,7 +21,11 @@ import {
 } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
-export let item: Vitamin;
+  interface Props {
+    item: Vitamin;
+  }
+
+  let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Vitamin";
@@ -152,12 +156,14 @@ const deficiencyNames = item.deficiency
 {#if containing.length}
   <section>
     <h1>{t("Comestibles", { _context })}</h1>
-    <LimitedList items={containing} let:item={other}>
-      <ThingLink id={other.comestible.id} type="item" /> ({other.pct.toFixed(
-        2
-      )}{item.vit_type === "counter" || item.vit_type === "drug"
-        ? " U"
-        : "% RDA"})
-    </LimitedList>
+    <LimitedList items={containing} >
+      {#snippet children({ item: other })}
+            <ThingLink id={other.comestible.id} type="item" /> ({other.pct.toFixed(
+          2
+        )}{item.vit_type === "counter" || item.vit_type === "drug"
+          ? " U"
+          : "% RDA"})
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

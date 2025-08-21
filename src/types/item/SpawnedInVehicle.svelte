@@ -6,7 +6,11 @@ import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import { t } from "@transifex/native";
 
-export let item_id: string;
+  interface Props {
+    item_id: string;
+  }
+
+  let { item_id }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -26,8 +30,10 @@ vehiclesAndProbabilities.sort((a, b) => b.prob - a.prob);
 {#if vehiclesAndProbabilities.length}
   <section>
     <h1>{t("In Vehicle", { _context: "Obtaining" })}</h1>
-    <LimitedList items={vehiclesAndProbabilities} let:item={{ vehicle, prob }}>
-      <ThingLink id={vehicle.id} type="vehicle" /> ({showProbability(prob)})
-    </LimitedList>
+    <LimitedList items={vehiclesAndProbabilities} >
+      {#snippet children({ item: { vehicle, prob } })}
+            <ThingLink id={vehicle.id} type="vehicle" /> ({showProbability(prob)})
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

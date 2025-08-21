@@ -8,7 +8,11 @@ import type { Bionic } from "../types";
 import MutationList from "./MutationList.svelte";
 import ThingLink from "./ThingLink.svelte";
 
-export let item: Bionic;
+  interface Props {
+    item: Bionic;
+  }
+
+  let { item }: Props = $props();
 const data = getContext<CddaData>("data");
 const _context = "Bionic";
 

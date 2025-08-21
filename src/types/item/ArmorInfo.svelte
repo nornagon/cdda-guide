@@ -14,7 +14,11 @@ import ThingLink from "../ThingLink.svelte";
 import { groupBy, uniq } from "./utils";
 import ColorText from "../ColorText.svelte";
 
-export let item: ItemBasicInfo & ArmorSlot;
+  interface Props {
+    item: ItemBasicInfo & ArmorSlot;
+  }
+
+  let { item }: Props = $props();
 let data = getContext<CddaData>("data");
 
 const _context = "Item Armor Info";
@@ -532,7 +536,7 @@ function fixApd(
             <table style="text-align: center;">
               <tbody>
                 <tr>
-                  <td />
+                  <td></td>
                   {#each apd.material as mat}
                     <td
                       style="writing-mode: vertical-rl; text-align: right; vertical-align: middle;"

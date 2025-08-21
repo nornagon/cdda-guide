@@ -9,7 +9,11 @@ import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 import ItemTable from "./ItemTable.svelte";
 
-export let item_id: string;
+  interface Props {
+    item_id: string;
+  }
+
+  let { item_id }: Props = $props();
 
 let data = getContext<CddaData>("data");
 const mons = new Map(
@@ -50,19 +54,23 @@ const dissectableFrom = data
 {#if harvestableFrom.length}
   <section>
     <h1>{t("Butcher", { _context: "Obtaining" })}</h1>
-    <LimitedList items={harvestableFrom} let:item={m}>
-      <ItemSymbol item={m} />
-      <ThingLink id={m.id} type="monster" />
-    </LimitedList>
+    <LimitedList items={harvestableFrom} >
+      {#snippet children({ item: m })}
+            <ItemSymbol item={m} />
+        <ThingLink id={m.id} type="monster" />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 
 {#if dissectableFrom.length}
   <section>
     <h1>{t("Dissect", { _context: "Obtaining" })}</h1>
-    <LimitedList items={dissectableFrom} let:item={m}>
-      <ItemSymbol item={m} />
-      <ThingLink id={m.id} type="monster" />
-    </LimitedList>
+    <LimitedList items={dissectableFrom} >
+      {#snippet children({ item: m })}
+            <ItemSymbol item={m} />
+        <ThingLink id={m.id} type="monster" />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

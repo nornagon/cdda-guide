@@ -1,6 +1,6 @@
 <script lang="ts">
 import { t } from "@transifex/native";
-import { setContext, SvelteComponent } from "svelte";
+import { setContext, type Component } from "svelte";
 
 import type { CddaData } from "./data";
 import Monster from "./types/Monster.svelte";
@@ -29,7 +29,7 @@ import Achievement from "./types/Achievement.svelte";
 import ObsoletionWarning from "./ObsoletionWarning.svelte";
 import Bionic from "./types/Bionic.svelte";
 import AddictionType from "./types/AddictionType.svelte";
-import * as Sentry from "@sentry/browser";
+import * as Sentry from "@sentry/svelte";
 import type { SupportedTypes } from "./types";
 import JsonView from "./JsonView.svelte";
 import OvermapSpecial from "./types/OvermapSpecial.svelte";
@@ -66,7 +66,7 @@ let obj =
   data.byIdMaybe(item.type as keyof SupportedTypes, item.id) ??
   defaultItem(item.id, item.type);
 
-const displays: Record<string, typeof SvelteComponent> = {
+const displays: Record<string, Component> = {
   MONSTER: Monster,
   AMMO: Item,
   GUN: Item,
@@ -130,12 +130,10 @@ const display = (obj && displays[obj.type]) ?? Unknown;
           "There was a problem displaying this page. Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build."
         )}
       </p>
-      <p>
-        <details>
-          <summary>{error.message}</summary>
-          <pre>{error.stack}</pre>
-        </details>
-      </p>
+      <details>
+        <summary>{error.message}</summary>
+        <pre>{error.stack}</pre>
+      </details>
     </section>
   {:else if typeof globalThis !== "undefined" && globalThis.process}
     <!-- running in tests -->

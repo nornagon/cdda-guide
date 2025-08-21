@@ -6,7 +6,11 @@ import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 import { t } from "@transifex/native";
 
-export let item_id: string;
+  interface Props {
+    item_id: string;
+  }
+
+  let { item_id }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -22,9 +26,11 @@ sources.sort(byName);
 {#if sources.length}
   <section>
     <h1>{t("Smoke", { _context: "Obtaining" })}</h1>
-    <LimitedList items={sources} let:item>
-      <ItemSymbol {item} />
-      <ThingLink type="item" id={item.id} />
-    </LimitedList>
+    <LimitedList items={sources} >
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type="item" id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

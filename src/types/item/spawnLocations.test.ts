@@ -35,7 +35,7 @@ describe("collection()", () => {
     const got = collection(given);
 
     expect(got).toStrictEqual(
-      new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])
+      new Map([["fake_item", { prob: 0.5, expected: 0.5 }]]),
     );
   });
   it("can add up probabilities", () => {
@@ -45,7 +45,7 @@ describe("collection()", () => {
     const got = collection(given);
 
     expect(got).toStrictEqual(
-      new Map([["fake_item", { prob: 0.75, expected: 1 }]])
+      new Map([["fake_item", { prob: 0.75, expected: 1 }]]),
     );
   });
 });
@@ -59,11 +59,11 @@ describe("parseItemGroup()", () => {
         items: [["test_pants_fur", 50]],
       },
       undefined,
-      1
+      1,
     );
 
     expect(got).toStrictEqual(
-      new Map([["test_pants_fur", { prob: 0.5, expected: 0.5 }]])
+      new Map([["test_pants_fur", { prob: 0.5, expected: 0.5 }]]),
     );
   });
   it("repeat", () => {
@@ -74,11 +74,11 @@ describe("parseItemGroup()", () => {
         items: [["test_pants_fur", 50]],
       },
       2,
-      1
+      1,
     );
 
     expect(got).toStrictEqual(
-      new Map([["test_pants_fur", { prob: 0.75, expected: 1 }]])
+      new Map([["test_pants_fur", { prob: 0.75, expected: 1 }]]),
     );
   });
   it("repeat 2", () => {
@@ -92,7 +92,7 @@ describe("parseItemGroup()", () => {
     ]);
     const x = parseItemGroup(data, "fake_item_group", 2, 0.5);
     expect(x).toStrictEqual(
-      new Map([["fake_item", { prob: 0.75, expected: 1 }]])
+      new Map([["fake_item", { prob: 0.75, expected: 1 }]]),
     );
   });
 });
@@ -121,7 +121,7 @@ describe("parsePalette()", () => {
     expect(got).toStrictEqual(
       new Map([
         ["X", new Map([["test_pants_fur", { prob: 0.5, expected: 0.5 }]])],
-      ])
+      ]),
     );
   });
 
@@ -147,7 +147,7 @@ describe("parsePalette()", () => {
     const got = parsePalette(data, rawPalette);
 
     expect(got).toStrictEqual(
-      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]])
+      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]]),
     );
   });
 
@@ -169,7 +169,7 @@ describe("parsePalette()", () => {
     expect(got).toStrictEqual(
       new Map([
         ["X", new Map([["test_pants_fur", { prob: 0.25, expected: 0.25 }]])],
-      ])
+      ]),
     );
   });
 
@@ -189,7 +189,7 @@ describe("parsePalette()", () => {
     const got = parsePalette(data, rawPalette);
 
     expect(got).toStrictEqual(
-      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]])
+      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]]),
     );
   });
   it("knows anout .palettes", () => {
@@ -214,7 +214,7 @@ describe("parsePalette()", () => {
     const got = parsePalette(data, rawPalette);
 
     expect(got).toStrictEqual(
-      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]])
+      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]]),
     );
   });
   it("parses inline item group", () => {
@@ -232,7 +232,7 @@ describe("parsePalette()", () => {
 
     const got = parsePalette(data, rawPalette);
     expect(got).toStrictEqual(
-      new Map([["X", new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])]])
+      new Map([["X", new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])]]),
     );
   });
   it("parses inline item collections", () => {
@@ -246,7 +246,7 @@ describe("parsePalette()", () => {
     };
     const got = parsePalette(data, rawPalette);
     expect(got).toStrictEqual(
-      new Map([["X", new Map([["fake_item", { prob: 1, expected: 1 }]])]])
+      new Map([["X", new Map([["fake_item", { prob: 1, expected: 1 }]])]]),
     );
   });
   it("knows about .item", () => {
@@ -268,7 +268,7 @@ describe("parsePalette()", () => {
             ["i2", { prob: 1, expected: 1 }],
           ]),
         ],
-      ])
+      ]),
     );
   });
   it("knows about .sealed_item.[].items", () => {
@@ -294,7 +294,7 @@ describe("parsePalette()", () => {
       new Map([
         ["X", new Map([["fake_item", { prob: 1, expected: 1 }]])],
         ["Y", new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])],
-      ])
+      ]),
     );
   });
   it("knows about .sealed_item | .[].items | {repeat, chance}", () => {
@@ -318,7 +318,7 @@ describe("parsePalette()", () => {
     const got = parsePalette(data, rawPalette);
 
     expect(got).toStrictEqual(
-      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]])
+      new Map([["X", new Map([["fake_item", { prob: 0.75, expected: 1 }]])]]),
     );
   });
   it("knows about .sealed_item | .[].item", () => {
@@ -353,7 +353,7 @@ describe("parsePalette()", () => {
         ["Y", new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])],
         ["Z", new Map([["fake_item", { prob: 0.5, expected: 0.5 }]])],
         ["A", new Map([["fake_item", { prob: 0.75, expected: 1 }]])],
-      ])
+      ]),
     );
   });
 });

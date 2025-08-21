@@ -10,7 +10,11 @@ import MutationColor from "./MutationColor.svelte";
 import MutationList from "./MutationList.svelte";
 import ThingLink from "./ThingLink.svelte";
 
-export let item: Mutation;
+  interface Props {
+    item: Mutation;
+  }
+
+  let { item }: Props = $props();
 
 let data = getContext<CddaData>("data");
 const _context = "Mutation";

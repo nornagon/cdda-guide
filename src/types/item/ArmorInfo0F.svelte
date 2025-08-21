@@ -3,7 +3,11 @@ import { getContext } from "svelte";
 import { CddaData, singular } from "../../data";
 import type { ArmorPortionData, ArmorSlot, ItemBasicInfo } from "../../types";
 
-export let item: ItemBasicInfo & ArmorSlot;
+  interface Props {
+    item: ItemBasicInfo & ArmorSlot;
+  }
+
+  let { item }: Props = $props();
 let data = getContext<CddaData>("data");
 
 function isStrings<T>(array: string[] | T[]): array is string[] {

@@ -8,7 +8,11 @@ import ItemSymbol from "./item/ItemSymbol.svelte";
 import { t } from "@transifex/native";
 import Recipe from "./Recipe.svelte";
 
-export let item: Proficiency;
+  interface Props {
+    item: Proficiency;
+  }
+
+  let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Proficiency";
@@ -82,19 +86,23 @@ const proficienciesRequiring = data
 {#if proficienciesRequiring.length}
   <section>
     <h1>{t("Required By", { _context })}</h1>
-    <LimitedList items={proficienciesRequiring} let:item>
-      <ThingLink type="proficiency" id={item.id} />
-    </LimitedList>
+    <LimitedList items={proficienciesRequiring} >
+      {#snippet children({ item })}
+            <ThingLink type="proficiency" id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 
 {#if recipesUsingProficiency.length}
   <section>
     <h1>{t("Recipes", { _context })}</h1>
-    <LimitedList items={recipesUsingProficiency} let:item>
-      <ItemSymbol item={data.byId("item", item)} />
-      <ThingLink type="item" id={item} />
-    </LimitedList>
+    <LimitedList items={recipesUsingProficiency} >
+      {#snippet children({ item })}
+            <ItemSymbol item={data.byId("item", item)} />
+        <ThingLink type="item" id={item} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 

@@ -7,8 +7,12 @@ import ThingLink from "./ThingLink.svelte";
 
 const _context = "Martial Art";
 
-export let item: MartialArtRequirements;
-export let buffMap: Map<string, MartialArtBuff> = new Map();
+  interface Props {
+    item: MartialArtRequirements;
+    buffMap?: Map<string, MartialArtBuff>;
+  }
+
+  let { item, buffMap = new Map() }: Props = $props();
 
 const requiredBuffs =
   typeof item.req_buffs === "string" ? [item.req_buffs] : item.req_buffs ?? [];

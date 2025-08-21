@@ -9,8 +9,12 @@ import RequirementData from "./item/RequirementData.svelte";
 import ThingLink from "./ThingLink.svelte";
 import InterpolatedTranslation from "../InterpolatedTranslation.svelte";
 
-export let recipe: Recipe;
-export let showResult: boolean = false;
+  interface Props {
+    recipe: Recipe;
+    showResult?: boolean;
+  }
+
+  let { recipe, showResult = false }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Recipe";
@@ -139,7 +143,7 @@ function activityLevelName(level: number) {
               _comment: "practice recipe skill limit",
             })}
             slot0="skill_limit">
-            <span slot="0">{recipe.practice_data.skill_limit ?? 0}</span>
+  <span slot="s0">{recipe.practice_data.skill_limit ?? 0}</span>
           </InterpolatedTranslation>
         {/if}
       </dd>

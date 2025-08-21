@@ -10,14 +10,18 @@ import {
   singularName,
 } from "../data";
 import LimitedList from "../LimitedList.svelte";
-import * as Sentry from "@sentry/browser";
+import * as Sentry from "@sentry/svelte";
 
 import type { Vehicle, VehiclePart } from "../types";
 import { groupBy } from "./item/utils";
 import ThingLink from "./ThingLink.svelte";
 import ItemTable from "./item/ItemTable.svelte";
 
-export let item: Vehicle;
+  interface Props {
+    item: Vehicle;
+  }
+
+  let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Vehicle";
@@ -235,9 +239,11 @@ partsCounted.sort((a, b) => {
 {#if partsCounted.length}
   <section>
     <h1>{t("Parts", { _context })}</h1>
-    <LimitedList items={partsCounted} let:item={{ id, count }}>
-      <ThingLink {id} type="vehicle_part" /> ({count})
-    </LimitedList>
+    <LimitedList items={partsCounted} >
+      {#snippet children({ item: { id, count } })}
+            <ThingLink {id} type="vehicle_part" /> ({count})
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 

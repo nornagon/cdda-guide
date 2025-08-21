@@ -3,7 +3,8 @@ import { tileData } from "../../tile-data";
 import { colorForName } from "../../colors";
 import { CddaData, mapType } from "../../data";
 import { getContext } from "svelte";
-export let item: {
+  interface Props {
+    item: {
   id: string;
   looks_like?: string;
   color?: string | string[];
@@ -12,21 +13,12 @@ export let item: {
   type: string;
   variants?: any;
 };
+  }
+
+  let { item }: Props = $props();
 
 let data: CddaData = getContext("data");
 
-$: tile_info = $tileData?.tile_info[0];
-$: tile = typeHasTile(item)
-  ? findTileOrLooksLike($tileData, item) ??
-    fallbackTile(
-      $tileData,
-      item.type === "vehicle_part" && item.variants
-        ? item.variants[0].symbols[0]
-        : item.symbol,
-      item.color ?? "white"
-    )
-  : null;
-$: baseUrl = $tileData?.baseUrl;
 
 const sym =
   item.type === "vehicle_part" && item.variants
@@ -212,6 +204,18 @@ function css(obj: Record<string, string>) {
   }
   return result;
 }
+let tile_info = $derived($tileData?.tile_info[0]);
+let tile = $derived(typeHasTile(item)
+  ? findTileOrLooksLike($tileData, item) ??
+    fallbackTile(
+      $tileData,
+      item.type === "vehicle_part" && item.variants
+        ? item.variants[0].symbols[0]
+        : item.symbol,
+      item.color ?? "white"
+    )
+  : null);
+let baseUrl = $derived($tileData?.baseUrl);
 </script>
 
 {#if tile}
@@ -234,7 +238,7 @@ function css(obj: Record<string, string>) {
             -tile.bg.ty * tile.bg.height
           }px`,
           transform: `scale(${tile_info.pixelscale}) translate(${tile.bg.offx}px, ${tile.bg.offy}px)`,
-        })} />
+        })}></div>
     {/if}
     {#if tile.fg != null}
       <div
@@ -249,7 +253,7 @@ function css(obj: Record<string, string>) {
             -tile.fg.ty * tile.fg.height
           }px`,
           transform: `scale(${tile_info.pixelscale}) translate(${tile.fg.offx}px, ${tile.fg.offy}px)`,
-        })} />
+        })}></div>
     {/if}
   </div>
 {:else}

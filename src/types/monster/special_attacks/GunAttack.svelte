@@ -2,7 +2,11 @@
 import type { GunAttack } from "../../../types";
 import ThingLink from "../../ThingLink.svelte";
 
-export let attack: GunAttack & { cooldown?: number };
+	interface Props {
+		attack: GunAttack & { cooldown?: number };
+	}
+
+	let { attack }: Props = $props();
 </script>
 
 <ThingLink type="item" id={attack.gun_type} /> (cooldown: {attack.cooldown})

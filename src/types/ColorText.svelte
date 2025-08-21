@@ -1,6 +1,10 @@
 <script lang="ts">
-export let text: string;
-export let fgOnly: boolean = false;
+  interface Props {
+    text: string;
+    fgOnly?: boolean;
+  }
+
+  let { text, fgOnly = false }: Props = $props();
 
 function parseColorText(text: string): { string: string; color: string }[] {
   let color = ["gray"];

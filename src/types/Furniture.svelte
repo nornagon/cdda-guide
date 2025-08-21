@@ -13,7 +13,11 @@ import LimitedList from "../LimitedList.svelte";
 const data = getContext<CddaData>("data");
 const _context = "Terrain / Furniture";
 
-export let item: Furniture;
+  interface Props {
+    item: Furniture;
+  }
+
+  let { item }: Props = $props();
 
 const deconstruct = item.deconstruct?.items
   ? data.flattenItemGroup({
@@ -218,10 +222,12 @@ harvestBySeasonList.sort(
 {#if bashedFrom.length}
   <section>
     <h1>{t("Bashed From", { _context })}</h1>
-    <LimitedList items={bashedFrom} let:item>
-      <ItemSymbol {item} />
-      <ThingLink type="furniture" id={item.id} />
-    </LimitedList>
+    <LimitedList items={bashedFrom} >
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type="furniture" id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 

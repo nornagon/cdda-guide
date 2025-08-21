@@ -9,7 +9,11 @@ let data = getContext<CddaData>("data");
 const normalizeStringList = (list: string | string[] | undefined) =>
   list ? (Array.isArray(list) ? list : [list]) : [];
 
-export let mutations: Mutation[];
+  interface Props {
+    mutations: Mutation[];
+  }
+
+  let { mutations }: Props = $props();
 const allPrereqs = (m: Mutation) =>
   normalizeStringList(m.prereqs)
     .concat(normalizeStringList(m.prereqs2))

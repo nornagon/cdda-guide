@@ -8,8 +8,12 @@ import { CddaData, i18n, singularName } from "../../data";
 import type { Recipe, RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
-export let requirement: RequirementData & { using?: Recipe["using"] };
-export let direction: "uncraft" | "craft" = "craft";
+  interface Props {
+    requirement: RequirementData & { using?: Recipe["using"] };
+    direction?: "uncraft" | "craft";
+  }
+
+  let { requirement, direction = "craft" }: Props = $props();
 
 const _context = "Requirement";
 const data = getContext<CddaData>("data");
@@ -40,7 +44,7 @@ let { tools, qualities } =
                 )
                 .replace(/\$./g, "")}
               slot0="tool_quality">
-              <ThingLink type="tool_quality" id={quality.id} slot="0" />
+  <ThingLink type="tool_quality" id={quality.id} slot="s0" />
             </InterpolatedTranslation>{/each}
         </li>
       {/each}
@@ -72,7 +76,7 @@ let { tools, qualities } =
                   )
                   .replace(/\$./g, "")}
                 slot0="item">
-                <svelte:fragment slot="0">
+  <svelte:fragment slot="s0">
                   {#if data.craftingPseudoItem(toolId)}
                     <a
                       href="{import.meta.env

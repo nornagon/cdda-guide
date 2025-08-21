@@ -8,7 +8,7 @@ export function createBoundary(Component: any) {
       result: any,
       props: any,
       bindings: any,
-      slots: any
+      slots: any,
     ) => {
       const error = writable(undefined as any);
 
@@ -50,7 +50,7 @@ export function createBoundary(Component: any) {
             }
 
             return block;
-          }
+          },
       );
 
       super(config);

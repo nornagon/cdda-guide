@@ -1,7 +1,11 @@
 <script lang="ts">
 import { t } from "@transifex/native";
-export let obj: any;
-export let buildNumber: string | undefined;
+  interface Props {
+    obj: any;
+    buildNumber: string | undefined;
+  }
+
+  let { obj, buildNumber }: Props = $props();
 const _context = "View/Edit on GitHub";
 </script>
 

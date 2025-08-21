@@ -14,7 +14,11 @@ import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 import Recipe from "./Recipe.svelte";
 
-export let item: Skill;
+  interface Props {
+    item: Skill;
+  }
+
+  let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -81,10 +85,12 @@ practiceRecipes.sort(
 {#if itemsUsingSkill.length}
   <section>
     <h1>{t("Used By", { _context: "Skill" })}</h1>
-    <LimitedList items={itemsUsingSkill} let:item>
-      <ItemSymbol {item} />
-      <ThingLink type="item" id={item.id} />
-    </LimitedList>
+    <LimitedList items={itemsUsingSkill} >
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type="item" id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 

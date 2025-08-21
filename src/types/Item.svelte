@@ -58,7 +58,11 @@ import ColorText from "./ColorText.svelte";
 import InterpolatedTranslation from "../InterpolatedTranslation.svelte";
 import SmokedFrom from "./item/SmokedFrom.svelte";
 
-export let item: Item;
+  interface Props {
+    item: Item;
+  }
+
+  let { item }: Props = $props();
 let data: CddaData = getContext("data");
 
 const _context = "Item Basic Info";
@@ -394,8 +398,8 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
                       .replace(/\$[ds]|<\/?info[^>]*>/g, "")}
                     slot0="level"
                     slot1="quality">
-                    <span slot="0">{level}</span>
-                    <ThingLink slot="1" type="tool_quality" id={quality.id} />
+  <span slot="s0">{level}</span>
+  <ThingLink slot="s1" type="tool_quality" id={quality.id} />
                   </InterpolatedTranslation>
                 </li>
               {/each}
@@ -418,8 +422,8 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
                       .replace(/\$[ds]|<\/?info[^>]*>/g, "")}
                     slot0="level"
                     slot1="quality">
-                    <span slot="0">{level}</span>
-                    <ThingLink slot="1" type="tool_quality" id={quality.id} />
+  <span slot="s0">{level}</span>
+  <ThingLink slot="s1" type="tool_quality" id={quality.id} />
                   </InterpolatedTranslation>
                 </li>
               {/each}
@@ -694,18 +698,22 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
 {#if fuelForItems.length}
   <section>
     <h1>{t("Fuel For", { _context })}</h1>
-    <LimitedList items={fuelForItems} let:item>
-      <ItemSymbol {item} />
-      <ThingLink type={item.type} id={item.id} />
-    </LimitedList>
+    <LimitedList items={fuelForItems} >
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type={item.type} id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 {#if usedToRepair.length}
   <section>
     <h1>{t("Used to Repair", { _context })}</h1>
-    <LimitedList items={usedToRepair} let:item>
-      <ThingLink type="fault" id={item.id} />
-    </LimitedList>
+    <LimitedList items={usedToRepair} >
+      {#snippet children({ item })}
+            <ThingLink type="fault" id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 <ComponentOf item_id={item.id} />

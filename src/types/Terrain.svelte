@@ -20,7 +20,11 @@ import TerrainSpawnedIn from "./item/TerrainSpawnedIn.svelte";
 const data = getContext<CddaData>("data");
 const _context = "Terrain / Furniture";
 
-export let item: Terrain;
+  interface Props {
+    item: Terrain;
+  }
+
+  let { item }: Props = $props();
 
 const deconstruct = item.deconstruct?.items
   ? data.flattenItemGroup({

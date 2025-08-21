@@ -1,11 +1,20 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 import type { Writable } from "svelte/store";
 
-export let error: Writable<Error>;
-export let onError: Function | null = null;
+  interface Props {
+    error: Writable<Error>;
+    onError?: Function | null;
+    children?: import('svelte').Snippet;
+  }
+
+  let { error, onError = null, children }: Props = $props();
 let ENV = typeof process !== "undefined" && process.env && process.env.NODE_ENV;
 let DEV = ENV !== "production";
-$: if ($error && onError) onError($error);
+run(() => {
+    if ($error && onError) onError($error);
+  });
 </script>
 
 {#if $error}
@@ -16,7 +25,7 @@ $: if ($error && onError) onError($error);
     </pre>
   </div>
 {:else}
-  <slot />
+  {@render children?.()}
 {/if}
 
 <style>

@@ -9,14 +9,17 @@ import type { CddaData } from "../../data";
 import { t } from "@transifex/native";
 import type { SupportedTypesWithMapped } from "src/types";
 
-export let loot: Loot | Promise<Loot>;
-export let type: keyof SupportedTypesWithMapped = "item";
-export let heading: string =
-  type === "furniture"
+  interface Props {
+    loot: Loot | Promise<Loot>;
+    type?: keyof SupportedTypesWithMapped;
+    heading?: string;
+  }
+
+  let { loot, type = "item", heading = type === "furniture"
     ? t("Furniture", { _context: "Loot Table" })
     : type === "terrain"
     ? t("Terrain", { _context: "Loot Table" })
-    : t("Loot", { _context: "Loot Table" });
+    : t("Loot", { _context: "Loot Table" }) }: Props = $props();
 
 function stripType(x: any): any {
   return x;
@@ -41,36 +44,40 @@ const data = getContext<CddaData>("data");
     )}
     <section>
       <LimitedTableList items={sortedLoot}>
-        <tr slot="header">
-          <th colspan="2"><h1>{heading}</h1></th>
-          <th class="numeric"
-            ><h1>
-              {t("Avg. Count", {
-                _context: "Loot Table",
-                _comment:
-                  "Column heading in a table: average number of an item found in a location/vehicle, dropped by a monster, etc.",
-              })}
-            </h1></th>
-          <th class="numeric"
-            ><h1>
-              {t("Chance", {
-                _context: "Loot Table",
-                _comment:
-                  "Column heading in a table: chance that at least one of an item is found in a location/vehicle, dropped by a monster, etc.",
-              })}
-            </h1></th>
-        </tr>
-        <tr slot="item" let:item={[item_id, chance]}>
+        {#snippet header()}
+                <tr >
+            <th colspan="2"><h1>{heading}</h1></th>
+            <th class="numeric"
+              ><h1>
+                {t("Avg. Count", {
+                  _context: "Loot Table",
+                  _comment:
+                    "Column heading in a table: average number of an item found in a location/vehicle, dropped by a monster, etc.",
+                })}
+              </h1></th>
+            <th class="numeric"
+              ><h1>
+                {t("Chance", {
+                  _context: "Loot Table",
+                  _comment:
+                    "Column heading in a table: chance that at least one of an item is found in a location/vehicle, dropped by a monster, etc.",
+                })}
+              </h1></th>
+          </tr>
+              {/snippet}
+        {#snippet item({ item: [item_id, chance] })}
           {@const item = stripType(data.byId(type, item_id))}
-          <td>
-            <ItemSymbol {item} />
-          </td>
-          <td style="padding-left: 5px;">
-            <ThingLink {type} id={item_id} />
-          </td>
-          <td class="numeric">{showNumber(chance.expected)}</td>
-          <td class="numeric">{showProbability(chance.prob)}</td>
-        </tr>
+                <tr  >
+            <td>
+              <ItemSymbol {item} />
+            </td>
+            <td style="padding-left: 5px;">
+              <ThingLink {type} id={item_id} />
+            </td>
+            <td class="numeric">{showNumber(chance.expected)}</td>
+            <td class="numeric">{showProbability(chance.prob)}</td>
+          </tr>
+              {/snippet}
       </LimitedTableList>
     </section>
   {/if}

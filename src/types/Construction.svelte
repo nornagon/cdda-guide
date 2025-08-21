@@ -13,8 +13,12 @@ import ThingLink from "./ThingLink.svelte";
 const data = getContext<CddaData>("data");
 const _context = "Construction";
 
-export let construction: Construction;
-export let includeTitle: boolean = false;
+  interface Props {
+    construction: Construction;
+    includeTitle?: boolean;
+  }
+
+  let { construction, includeTitle = false }: Props = $props();
 
 const requirements = data
   .resolveRequirementList(construction.using)

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 import {
   mapType,
   singular,
@@ -47,9 +49,7 @@ type SearchableType = SupportedTypeMapped & {
   id: string;
   type: keyof SupportedTypesWithMapped;
 } & { __filename?: string };
-
-export let data: CddaData;
-$: setContext("data", data);
+
 
 type SearchTarget = {
   id: string;
@@ -57,7 +57,30 @@ type SearchTarget = {
   name: string;
   type: keyof SupportedTypesWithMapped;
 };
-let targets: SearchTarget[];
+let targets: SearchTarget[] = $derived([...(data?.all() ?? [])]
+  .filter(
+    (x) =>
+      "id" in x &&
+      typeof x.id === "string" &&
+      SEARCHABLE_TYPES.has(mapType(x.type))
+  )
+  .filter((x) => (x.type === "mutation" ? !/Fake\d$/.test(x.id) : true))
+  .flatMap((x) =>
+    [
+      {
+        id: (x as any).id,
+        name: searchableName(data, x),
+        type: mapType(x.type),
+      },
+    ].concat(
+      itemVariants(x).map((v) => ({
+        id: (x as any).id,
+        variant_id: v.id,
+        name: singular(v.name),
+        type: mapType(x.type),
+      }))
+    )
+  ));
 function searchableName(data: CddaData, item: SupportedTypeMapped) {
   item = data._flatten(item);
   if (item?.type === "overmap_special" || item?.type === "city_building") {
@@ -93,32 +116,13 @@ function itemVariants(item: SupportedTypeMapped) {
   else return [];
 }
 
-$: targets = [...(data?.all() ?? [])]
-  .filter(
-    (x) =>
-      "id" in x &&
-      typeof x.id === "string" &&
-      SEARCHABLE_TYPES.has(mapType(x.type))
-  )
-  .filter((x) => (x.type === "mutation" ? !/Fake\d$/.test(x.id) : true))
-  .flatMap((x) =>
-    [
-      {
-        id: (x as any).id,
-        name: searchableName(data, x),
-        type: mapType(x.type),
-      },
-    ].concat(
-      itemVariants(x).map((v) => ({
-        id: (x as any).id,
-        variant_id: v.id,
-        name: singular(v.name),
-        type: mapType(x.type),
-      }))
-    )
-  );
 
-export let search: string;
+  interface Props {
+    data: CddaData;
+    search: string;
+  }
+
+  let { data, search }: Props = $props();
 
 type SearchResult = {
   item: SearchableType;
@@ -149,14 +153,6 @@ function filter(text: string): Map<string, SearchResult[]> {
 
 const cjkRegex =
   /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f\u3131-\ud79d]/;
-$: matchingObjects =
-  search &&
-  (search.length >= 2 || cjkRegex.test(search)) &&
-  data &&
-  filter(search);
-$: matchingObjectsList = matchingObjects
-  ? [...matchingObjects.entries()]
-  : null;
 
 function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
   const seenAppearances = new Set<string>();
@@ -176,6 +172,18 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
   }
   return ret;
 }
+run(() => {
+    setContext("data", data);
+  });
+
+let matchingObjects =
+  $derived(search &&
+  (search.length >= 2 || cjkRegex.test(search)) &&
+  data &&
+  filter(search));
+let matchingObjectsList = $derived(matchingObjects
+  ? [...matchingObjects.entries()]
+  : null);
 </script>
 
 {#if matchingObjectsList}
@@ -184,31 +192,35 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
       {@const grouped = groupByAppearance(results)}
       <h1>location</h1>
       <LimitedTableList items={grouped} limit={50}>
-        <tr slot="item" let:item={result}>
-          <td style="text-align: center; padding-left: 2.5em;">
-            <OvermapAppearance overmapSpecial={result[0]} />
-          </td>
-          <td style="vertical-align: middle; padding-left: 5px;">
-            <a href="/overmap_special/{result[0].id}{location.search}"
-              >{omsName(data, result[0])}</a
-            >{#if result.length > 1}{" "}({result.length} variants){/if}
-          </td>
-        </tr>
+        {#snippet item({ item: result })}
+                <tr  >
+            <td style="text-align: center; padding-left: 2.5em;">
+              <OvermapAppearance overmapSpecial={result[0]} />
+            </td>
+            <td style="vertical-align: middle; padding-left: 5px;">
+              <a href="/overmap_special/{result[0].id}{location.search}"
+                >{omsName(data, result[0])}</a
+              >{#if result.length > 1}{" "}({result.length} variants){/if}
+            </td>
+          </tr>
+              {/snippet}
       </LimitedTableList>
     {:else}
       <h1>{type.replace(/_/g, " ")}</h1>
-      <LimitedList items={results} let:item={result} limit={50}>
-        {@const item = data._flatten(result.item)}
-        <ItemSymbol {item} />
-        <ThingLink
-          type={mapType(result.item.type)}
-          id={result.item.id}
-          variantId={result.variant?.id} />
-        {#if /obsolet/.test(result.item.__filename ?? "")}
-          <em style="color: var(--cata-color-gray)"
-            >({t("obsolete", { _context: "Search Results" })})</em>
-        {/if}
-      </LimitedList>
+      <LimitedList items={results}  limit={50}>
+        {#snippet children({ item: result })}
+                {@const item = data._flatten(result.item)}
+          <ItemSymbol {item} />
+          <ThingLink
+            type={mapType(result.item.type)}
+            id={result.item.id}
+            variantId={result.variant?.id} />
+          {#if /obsolet/.test(result.item.__filename ?? "")}
+            <em style="color: var(--cata-color-gray)"
+              >({t("obsolete", { _context: "Search Results" })})</em>
+          {/if}
+                      {/snippet}
+            </LimitedList>
     {/if}
   {:else}
     <em>{t("No results.", { _context: "Search Results" })}</em>

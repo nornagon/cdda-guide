@@ -7,7 +7,11 @@ import { CddaData, plural, singular, singularName } from "../data";
 import type { Achievement } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
-export let item: Achievement;
+  interface Props {
+    item: Achievement;
+  }
+
+  let { item }: Props = $props();
 const data = getContext<CddaData>("data");
 const _context = "Achievement";
 

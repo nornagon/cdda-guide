@@ -8,7 +8,11 @@ import type { Terrain, Furniture, VehiclePart } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
-export let item_id: string;
+  interface Props {
+    item_id: string;
+  }
+
+  let { item_id }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -20,14 +24,16 @@ let bashFrom = (
 {#if bashFrom.length}
   <section>
     <h1>{t("Bash", { _context: "Obtaining" })}</h1>
-    <LimitedList items={bashFrom} let:item={f}>
-      <ItemSymbol item={data.byId(f.type, f.id)} />
-      <ThingLink id={f.id} type={f.type} />
-      {#if f.bash?.str_min}
-        <span style="color: var(--cata-color-gray)">
-          (≥ {f.bash.str_min} STR)
-        </span>
-      {/if}
-    </LimitedList>
+    <LimitedList items={bashFrom} >
+      {#snippet children({ item: f })}
+            <ItemSymbol item={data.byId(f.type, f.id)} />
+        <ThingLink id={f.id} type={f.type} />
+        {#if f.bash?.str_min}
+          <span style="color: var(--cata-color-gray)">
+            (≥ {f.bash.str_min} STR)
+          </span>
+        {/if}
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

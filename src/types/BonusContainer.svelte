@@ -53,7 +53,11 @@ function needsDamageType(stat: string) {
   return stat === "damage" || stat === "armor" || stat === "arpen";
 }
 
-export let item: BonusContainer;
+  interface Props {
+    item: BonusContainer;
+  }
+
+  let { item }: Props = $props();
 </script>
 
 {#if item.mult_bonuses || item.flat_bonuses}

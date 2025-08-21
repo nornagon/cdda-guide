@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
 import type { Recipe as RecipeType } from "../../types";
 // Lazily compute the recipe index.
 let recipeIndex: Record<string, RecipeType[]>;
@@ -55,7 +55,11 @@ import Recipe from "../Recipe.svelte";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
-export let item_id: string;
+  interface Props {
+    item_id: string;
+  }
+
+  let { item_id }: Props = $props();
 
 let data = getContext<CddaData>("data");
 
@@ -78,9 +82,11 @@ const byproducts = getByproductsIndex(data)[item_id] ?? [];
 {#if byproducts.length}
   <section>
     <h1>{t("Byproduct when crafting", { _context: "Obtaining" })}</h1>
-    <LimitedList items={byproducts} let:item>
-      <ItemSymbol item={data.byId("item", item.result)} />
-      <ThingLink type="item" id={item.result} />
-    </LimitedList>
+    <LimitedList items={byproducts} >
+      {#snippet children({ item })}
+            <ItemSymbol item={data.byId("item", item.result)} />
+        <ThingLink type="item" id={item.result} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

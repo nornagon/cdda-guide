@@ -14,7 +14,11 @@ import {
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
-export let item: ToolQuality;
+  interface Props {
+    item: ToolQuality;
+  }
+
+  let { item }: Props = $props();
 
 let data = getContext<CddaData>("data");
 const _context = "Tool Quality";
@@ -154,10 +158,12 @@ constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
           {t("Level {level}", { level, _context })}
         </dt>
         <dd>
-          <LimitedList items={tools} limit={20} let:item>
-            <ItemSymbol {item} />
-            <ThingLink type="item" id={item.id} />
-          </LimitedList>
+          <LimitedList items={tools} limit={20} >
+            {#snippet children({ item })}
+                        <ItemSymbol {item} />
+              <ThingLink type="item" id={item.id} />
+                                  {/snippet}
+                    </LimitedList>
         </dd>
       {/each}
     </dl>
@@ -172,10 +178,12 @@ constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
           {t("Level {level}", { level, _context })}
         </dt>
         <dd>
-          <LimitedList items={vparts.sort(byName)} limit={20} let:item>
-            <ItemSymbol {item} />
-            <ThingLink type="vehicle_part" id={item.id} />
-          </LimitedList>
+          <LimitedList items={vparts.sort(byName)} limit={20} >
+            {#snippet children({ item })}
+                        <ItemSymbol {item} />
+              <ThingLink type="vehicle_part" id={item.id} />
+                                  {/snippet}
+                    </LimitedList>
         </dd>
       {/each}
     </dl>
@@ -190,10 +198,12 @@ constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
           {t("Level {level}", { level, _context })}
         </dt>
         <dd>
-          <LimitedList items={recipes} let:item limit={20}>
-            <ItemSymbol item={data.byId("item", item)} />
-            <ThingLink type="item" id={item} />
-          </LimitedList>
+          <LimitedList items={recipes}  limit={20}>
+            {#snippet children({ item })}
+                        <ItemSymbol item={data.byId("item", item)} />
+              <ThingLink type="item" id={item} />
+                                  {/snippet}
+                    </LimitedList>
         </dd>
       {/each}
     </dl>
@@ -208,19 +218,21 @@ constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
           {t("Level {level}", { level, _context })}
         </dt>
         <dd>
-          <LimitedList items={constructions} let:item={f}>
-            <ThingLink id={f.group} type="construction_group" />
-            {#if f.pre_terrain}
-              on {#each [f.pre_terrain].flat() as preTerrain, i}
-                {@const itemType = preTerrain.startsWith("f_")
-                  ? "furniture"
-                  : "terrain"}
-                {#if i !== 0}{i18n.__(" OR ")}{/if}
-                <ItemSymbol item={data.byId(itemType, preTerrain)} />
-                <ThingLink type={itemType} id={preTerrain} />
-              {/each}
-            {/if}
-          </LimitedList>
+          <LimitedList items={constructions} >
+            {#snippet children({ item: f })}
+                        <ThingLink id={f.group} type="construction_group" />
+              {#if f.pre_terrain}
+                on {#each [f.pre_terrain].flat() as preTerrain, i}
+                  {@const itemType = preTerrain.startsWith("f_")
+                    ? "furniture"
+                    : "terrain"}
+                  {#if i !== 0}{i18n.__(" OR ")}{/if}
+                  <ItemSymbol item={data.byId(itemType, preTerrain)} />
+                  <ThingLink type={itemType} id={preTerrain} />
+                {/each}
+              {/if}
+                                  {/snippet}
+                    </LimitedList>
         </dd>
       {/each}
     </dl>

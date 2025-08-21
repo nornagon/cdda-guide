@@ -20,8 +20,12 @@ import { groupBy } from "./types/item/utils";
 import ProficiencyList from "./types/ProficiencyList.svelte";
 import OvermapAppearance from "./types/item/OvermapAppearance.svelte";
 
-export let type: string;
-export let data: CddaData;
+  interface Props {
+    type: string;
+    data: CddaData;
+  }
+
+  let { type, data }: Props = $props();
 let typeWithCorrectType = type as keyof SupportedTypesWithMapped;
 setContext("data", data);
 
@@ -103,15 +107,17 @@ function isProficiency(t: SupportedTypeMapped): t is Proficiency {
       {:else}
         <LimitedList
           items={group.filter(groupFilter)}
-          let:item
+          
           limit={groupsList.length === 1 ? Infinity : 10}>
-          {#if type === "item" || type === "terrain" || type === "furniture" || type === "monster" || type === "vehicle_part"}<ItemSymbol
-              {item} />{/if}
-          {#if (type === "overmap_special" || type === "city_building") && item.subtype !== "mutable"}
-            <OvermapAppearance overmapSpecial={item} />
-          {/if}
-          <ThingLink type={typeWithCorrectType} id={item.id} />
-        </LimitedList>
+          {#snippet children({ item })}
+                    {#if type === "item" || type === "terrain" || type === "furniture" || type === "monster" || type === "vehicle_part"}<ItemSymbol
+                {item} />{/if}
+            {#if (type === "overmap_special" || type === "city_building") && item.subtype !== "mutable"}
+              <OvermapAppearance overmapSpecial={item} />
+            {/if}
+            <ThingLink type={typeWithCorrectType} id={item.id} />
+                            {/snippet}
+                </LimitedList>
       {/if}
     </section>
   {/if}

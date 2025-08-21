@@ -5,8 +5,12 @@ import type { OvermapSpecial } from "../../types";
 
 const data = getContext<CddaData>("data");
 
-export let overmapSpecial: OvermapSpecial;
-export let showZ: number = 0;
+  interface Props {
+    overmapSpecial: OvermapSpecial;
+    showZ?: number;
+  }
+
+  let { overmapSpecial, showZ = 0 }: Props = $props();
 
 const overmaps = [
   ...(overmapSpecial.subtype !== "mutable"

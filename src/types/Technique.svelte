@@ -10,9 +10,13 @@ import MartialArtRequirements from "./MartialArtRequirements.svelte";
 import ThingLink from "./ThingLink.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 
-export let item: Technique;
-export let buffMap: Map<string, MartialArtBuff> = new Map();
-export let standalone: boolean = true;
+  interface Props {
+    item: Technique;
+    buffMap?: Map<string, MartialArtBuff>;
+    standalone?: boolean;
+  }
+
+  let { item, buffMap = new Map(), standalone = true }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Martial Art";
@@ -121,9 +125,11 @@ if (item.stunned_target)
 {#if weapons.length}
   <section>
     <h1>{t("Weapons", { _context })}</h1>
-    <LimitedList items={weapons} let:item limit={20}>
-      <ItemSymbol {item} />
-      <ThingLink type="item" id={item.id} />
-    </LimitedList>
+    <LimitedList items={weapons}  limit={20}>
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type="item" id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

@@ -12,7 +12,11 @@ import { t } from "@transifex/native";
 import LimitedList from "../LimitedList.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 
-export let item: ItemAction;
+  interface Props {
+    item: ItemAction;
+  }
+
+  let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -40,19 +44,23 @@ const providerQualities = data
 {#if providers.length}
   <section>
     <h1>{t("Provided By", { _context: "Use action" })}</h1>
-    <LimitedList items={providers} let:item>
-      <ItemSymbol {item} />
-      <ThingLink type="item" id={item.id} />
-    </LimitedList>
+    <LimitedList items={providers} >
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type="item" id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 
 {#if providerQualities.length}
   <section>
     <h1>{t("Provided By Quality", { _context: "Use action" })}</h1>
-    <LimitedList items={providerQualities} let:item>
-      <ItemSymbol {item} />
-      <ThingLink type={item.type} id={item.id} />
-    </LimitedList>
+    <LimitedList items={providerQualities} >
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type={item.type} id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

@@ -7,7 +7,11 @@ import LimitedList from "../LimitedList.svelte";
 import { t } from "@transifex/native";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 
-export let item: AddictionType;
+  interface Props {
+    item: AddictionType;
+  }
+
+  let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Addiction Type";
@@ -35,9 +39,11 @@ const itemsWithAddictionType = data
 {#if itemsWithAddictionType.length}
   <section>
     <h1>{t("Items Containing", { _context })}</h1>
-    <LimitedList items={itemsWithAddictionType} let:item={i}>
-      <ItemSymbol item={i} />
-      <ThingLink id={i.id} type="item" />
-    </LimitedList>
+    <LimitedList items={itemsWithAddictionType} >
+      {#snippet children({ item: i })}
+            <ItemSymbol item={i} />
+        <ThingLink id={i.id} type="item" />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

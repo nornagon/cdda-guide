@@ -7,7 +7,11 @@ import type { Recipe } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
-export let item_id: string;
+  interface Props {
+    item_id: string;
+  }
+
+  let { item_id }: Props = $props();
 
 let data = getContext<CddaData>("data");
 
@@ -35,9 +39,11 @@ const uncraftableFrom = [...uncraftableFromSet].sort((a, b) =>
 {#if uncraftableFrom.length}
   <section>
     <h1>{t("Disassemble", { _context: "Obtaining" })}</h1>
-    <LimitedList items={uncraftableFrom} let:item={id}>
-      <ItemSymbol item={data.byId("item", id)} />
-      <ThingLink type="item" {id} />
-    </LimitedList>
+    <LimitedList items={uncraftableFrom} >
+      {#snippet children({ item: id })}
+            <ItemSymbol item={data.byId("item", id)} />
+        <ThingLink type="item" {id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

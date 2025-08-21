@@ -10,7 +10,11 @@ import {
 } from "../../data";
 import { getContext } from "svelte";
 
-export let item: ComestibleSlot;
+  interface Props {
+    item: ComestibleSlot;
+  }
+
+  let { item }: Props = $props();
 
 const _context = "Item Comestible Info";
 

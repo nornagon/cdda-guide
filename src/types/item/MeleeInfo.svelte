@@ -14,7 +14,11 @@ import ThingLink from "../ThingLink.svelte";
 
 let data = getContext<CddaData>("data");
 const _context = "Item Melee Info";
-export let item: Item;
+  interface Props {
+    item: Item;
+  }
+
+  let { item }: Props = $props();
 
 let techniques = (item.techniques ?? []).map((t) => data.byId("technique", t));
 

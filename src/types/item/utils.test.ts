@@ -10,12 +10,12 @@ describe("multimap()", () => {
       multimap([
         ["k1", "v1"],
         ["k2", "v2"],
-      ])
+      ]),
     ).toStrictEqual(
       new Map([
         ["k1", ["v1"]],
         ["k2", ["v2"]],
-      ])
+      ]),
     );
   });
   it("collects multiple entries", () => {
@@ -23,7 +23,7 @@ describe("multimap()", () => {
       multimap([
         ["k", "v1"],
         ["k", "v2"],
-      ])
+      ]),
     ).toStrictEqual(new Map([["k", ["v1", "v2"]]]));
   });
 });

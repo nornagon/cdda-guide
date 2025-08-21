@@ -6,7 +6,11 @@ import ThingLink from "./ThingLink.svelte";
 
 const data = getContext<CddaData>("data");
 
-export let usage: UseFunction;
+  interface Props {
+    usage: UseFunction;
+  }
+
+  let { usage }: Props = $props();
 
 let action =
   usage.type === "__item_action__"

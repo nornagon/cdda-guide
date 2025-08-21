@@ -7,7 +7,11 @@ import ThingLink from "./ThingLink.svelte";
 
 let data = getContext<CddaData>("data");
 
-export let proficiencies: Proficiency[];
+  interface Props {
+    proficiencies: Proficiency[];
+  }
+
+  let { proficiencies }: Props = $props();
 const allPrereqs = (p: Proficiency) => p.required_proficiencies ?? [];
 let sortedMutations = topologicalSortComponentsByRank(proficiencies, (m) =>
   allPrereqs(m).map((x) => data.byId("proficiency", x))

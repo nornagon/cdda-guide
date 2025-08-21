@@ -7,7 +7,11 @@ import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
-export let item_id: string;
+  interface Props {
+    item_id: string;
+  }
+
+  let { item_id }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -25,18 +29,20 @@ const constructions = data
 {#if constructions.length}
   <section>
     <h1>{t("Construct", { _context: "Obtaining" })}</h1>
-    <LimitedList items={constructions} let:item={f}>
-      <ThingLink id={f.group} type="construction_group" />
-      {#if f.pre_terrain}
-        on {#each [f.pre_terrain].flat() as preTerrain, i}
-          {@const itemType = preTerrain.startsWith("f_")
-            ? "furniture"
-            : "terrain"}
-          {#if i !== 0}{i18n.__(" OR ")}{/if}
-          <ItemSymbol item={data.byId(itemType, preTerrain)} />
-          <ThingLink type={itemType} id={preTerrain} />
-        {/each}
-      {/if}
-    </LimitedList>
+    <LimitedList items={constructions} >
+      {#snippet children({ item: f })}
+            <ThingLink id={f.group} type="construction_group" />
+        {#if f.pre_terrain}
+          on {#each [f.pre_terrain].flat() as preTerrain, i}
+            {@const itemType = preTerrain.startsWith("f_")
+              ? "furniture"
+              : "terrain"}
+            {#if i !== 0}{i18n.__(" OR ")}{/if}
+            <ItemSymbol item={data.byId(itemType, preTerrain)} />
+            <ThingLink type={itemType} id={preTerrain} />
+          {/each}
+        {/if}
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

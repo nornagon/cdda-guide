@@ -25,7 +25,11 @@ function learnDifficultyAsText(difficulty: number): string {
   }
 }
 
-export let item: MartialArt;
+  interface Props {
+    item: MartialArt;
+  }
+
+  let { item }: Props = $props();
 const _context = "Martial Art";
 
 const books = data
@@ -135,9 +139,11 @@ const buffMap = new Map(
           singularName(data.byId("item", b))
         )
       )}
-      let:item>
-      <ThingLink id={item} type="item" />
-    </LimitedList>
+      >
+      {#snippet children({ item })}
+            <ThingLink id={item} type="item" />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}
 

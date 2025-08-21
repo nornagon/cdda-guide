@@ -8,7 +8,11 @@ import type { Item, Material } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
-export let item_id: string;
+  interface Props {
+    item_id: string;
+  }
+
+  let { item_id }: Props = $props();
 
 let data = getContext<CddaData>("data");
 
@@ -46,9 +50,11 @@ const salvagedFromMaterials = data
 {#if salvagedFromMaterials.length}
   <section>
     <h1>{t("Salvage", { _context: "Obtaining" })}</h1>
-    <LimitedList items={salvagedFromMaterials} let:item>
-      <ItemSymbol {item} />
-      <ThingLink type="item" id={item.id} />
-    </LimitedList>
+    <LimitedList items={salvagedFromMaterials} >
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type="item" id={item.id} />
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

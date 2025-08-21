@@ -6,7 +6,11 @@ import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
-export let item_id: string;
+  interface Props {
+    item_id: string;
+  }
+
+  let { item_id }: Props = $props();
 
 let data = getContext<CddaData>("data");
 const forageGroups = {
@@ -36,14 +40,16 @@ const forageSources = data
 {#if forageable.length}
   <section>
     <h1>{t("Forage", { _context: "Obtaining" })}</h1>
-    <LimitedList items={forageSources} let:item>
-      <ItemSymbol {item} />
-      <ThingLink type="terrain" id={item.id} /> in
-      <ul class="comma-separated or">
-        {#each forageable as [season, _prob]}
-          <li>{season}</li>
-        {/each}
-      </ul>
-    </LimitedList>
+    <LimitedList items={forageSources} >
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type="terrain" id={item.id} /> in
+        <ul class="comma-separated or">
+          {#each forageable as [season, _prob]}
+            <li>{season}</li>
+          {/each}
+        </ul>
+                {/snippet}
+        </LimitedList>
   </section>
 {/if}

@@ -43,11 +43,11 @@ if (i < str.length) parts.push({ text: str.substring(i) });
 
 {#each parts as part}
   {#if "text" in part}{part.text}{:else if part.slot === 0}<slot
-      name="0" />{:else if part.slot === 1}<slot
-      name="1" />{:else if part.slot === 2}<slot
-      name="2" />{:else if part.slot === 3}<slot
-      name="3" />{:else if part.slot === 4}<slot
-      name="4" />{:else if part.slot === 5}<slot
-      name="5" />{:else if part.slot === 6}<slot
-      name="6" />{:else if part.slot === 7}<slot name="7" />{/if}
+      name="s0" />{:else if part.slot === 1}<slot
+      name="s1" />{:else if part.slot === 2}<slot
+      name="s2" />{:else if part.slot === 3}<slot
+      name="s3" />{:else if part.slot === 4}<slot
+      name="s4" />{:else if part.slot === 5}<slot
+      name="s5" />{:else if part.slot === 6}<slot
+      name="s6" />{:else if part.slot === 7}<slot name="7" />{/if}
 {/each}

@@ -17,7 +17,11 @@ import ItemTable from "./item/ItemTable.svelte";
 
 const data = getContext<CddaData>("data");
 
-export let item: OvermapSpecial;
+  interface Props {
+    item: OvermapSpecial;
+  }
+
+  let { item }: Props = $props();
 const mevels =
   item.subtype === "mutable"
     ? [0]
@@ -35,7 +39,7 @@ const lookalikeIds = (
 
 const _context = "Overmap Special";
 
-const layerElements: HTMLElement[] = [];
+const layerElements: HTMLElement[] = $state([]);
 
 onMount(() => {
   layerElements.forEach((el) => {

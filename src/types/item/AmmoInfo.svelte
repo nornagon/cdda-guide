@@ -5,7 +5,11 @@ import type { AmmoSlot, DamageUnit } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import { getContext } from "svelte";
 
-export let item: AmmoSlot;
+  interface Props {
+    item: AmmoSlot;
+  }
+
+  let { item }: Props = $props();
 const _context = "Item Ammo Info";
 
 const data = getContext<CddaData>("data");

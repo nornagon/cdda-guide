@@ -6,7 +6,11 @@ import type { CddaData } from "../../data";
 import type { BookSlot, ItemBasicInfo } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
-export let item: BookSlot & ItemBasicInfo;
+  interface Props {
+    item: BookSlot & ItemBasicInfo;
+  }
+
+  let { item }: Props = $props();
 const _context = "Item Book Info";
 
 let data = getContext<CddaData>("data");

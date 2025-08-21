@@ -14,7 +14,7 @@ import {
 
 export function makeRenderTests(chunkIdx: number, numChunks: number) {
   const json = JSON.parse(
-    fs.readFileSync(__dirname + "/../_test/all.json", "utf8")
+    fs.readFileSync(__dirname + "/../_test/all.json", "utf8"),
   );
   let data: CddaData = new CddaData(json.data);
   const types = [
@@ -52,7 +52,7 @@ export function makeRenderTests(chunkIdx: number, numChunks: number) {
         x.id &&
         types.includes(mapType(x.type)) &&
         (!process.env.TEST_ONLY ||
-          process.env.TEST_ONLY === `${mapType(x.type)}/${x.id}`)
+          process.env.TEST_ONLY === `${mapType(x.type)}/${x.id}`),
     )
     .map((x) => [mapType(x.type), x.id]);
 
@@ -78,9 +78,9 @@ export function makeRenderTests(chunkIdx: number, numChunks: number) {
 
       if (type !== "technique") {
         expect(container.textContent).not.toMatch(
-          /undefined|NaN|object Object/
+          /undefined|NaN|object Object/,
         );
       }
-    }
+    },
   );
 }

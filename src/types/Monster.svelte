@@ -27,7 +27,11 @@ import ItemTable from "./item/ItemTable.svelte";
 
 const _context = "Monster";
 
-export let item: Monster;
+  interface Props {
+    item: Monster;
+  }
+
+  let { item }: Props = $props();
 
 let data = getContext<CddaData>("data");
 

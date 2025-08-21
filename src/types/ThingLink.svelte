@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ThingLink from './ThingLink.svelte';
 import { getContext } from "svelte";
 import {
   CddaData,
@@ -15,12 +16,23 @@ import type {
 } from "../types";
 import MutationColor from "./MutationColor.svelte";
 
-export let type: keyof SupportedTypesWithMapped;
-export let id: string;
-export let plural: boolean = false;
-export let count: number | [number, number] | undefined = undefined;
-export let variantId: string | undefined = undefined;
-export let overrideText: string | undefined = undefined;
+  interface Props {
+    type: keyof SupportedTypesWithMapped;
+    id: string;
+    plural?: boolean;
+    count?: number | [number, number] | undefined;
+    variantId?: string | undefined;
+    overrideText?: string | undefined;
+  }
+
+  let {
+    type,
+    id,
+    plural = false,
+    count = undefined,
+    variantId = undefined,
+    overrideText = undefined
+  }: Props = $props();
 
 function countToString(count: number | [number, number]): string {
   if (typeof count === "number") return count.toString();
@@ -36,7 +48,7 @@ function countIsPlural(count: number | [number, number]): boolean {
 
 const data = getContext<CddaData>("data");
 
-let item = data.byIdMaybe(type, id);
+let item = $state(data.byIdMaybe(type, id));
 if (item?.type === "vehicle_part" && !item.name && item.item)
   item = data.byId("item", item.item);
 
@@ -48,7 +60,7 @@ function isItem(item: SupportedTypeMapped): item is Item {
 {#if count != null}
   <span style="white-space: nowrap">
     {#if !countsByCharges(item)}{countToString(count)}{/if}
-    <svelte:self
+    <ThingLink
       {type}
       {id}
       plural={countIsPlural(count) &&

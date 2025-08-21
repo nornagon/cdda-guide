@@ -19,7 +19,7 @@ test("flattened item group includes container item for distribution", () => {
       ...x,
       prob: x.prob.toFixed(2),
       expected: x.expected.toFixed(2),
-    }))
+    })),
   ).toEqual([
     { id: "container", count: [1, 1], prob: "0.33", expected: "0.33" },
     { id: "contained_thing", count: [1, 1], prob: "0.33", expected: "0.33" },

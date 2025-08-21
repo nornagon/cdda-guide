@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 import Thing from "./Thing.svelte";
 import { CddaData, data, loadProgress, mapType, singularName } from "./data";
 import { tileData } from "./tile-data";
@@ -10,7 +12,7 @@ import { t } from "@transifex/native";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import throttle from "lodash/throttle";
 
-let item: { type: string; id: string } | null = null;
+let item: { type: string; id: string } | null = $state(null);
 
 let builds:
   | {
@@ -19,7 +21,7 @@ let builds:
       created_at: string;
       langs?: string[];
     }[]
-  | null = null;
+  | null = $state(null);
 
 fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
   .then((d) => d.json())
@@ -92,12 +94,16 @@ function saveTileset(url: string) {
     /* swallow security errors, which can happen when in incognito mode */
   }
 }
-let tilesetUrlTemplate = loadTileset();
-$: saveTileset(tilesetUrlTemplate);
-$: tilesetUrl = $data
+let tilesetUrlTemplate = $state(loadTileset());
+run(() => {
+    saveTileset(tilesetUrlTemplate);
+  });
+let tilesetUrl = $derived($data
   ? tilesetUrlTemplate?.replace("{version}", $data.build_number!) ?? null
-  : null;
-$: tileData.setURL(tilesetUrl);
+  : null);
+run(() => {
+    tileData.setURL(tilesetUrl);
+  });
 
 function decodeQueryParam(p: string) {
   return decodeURIComponent(p.replace(/\+/g, " "));
@@ -122,18 +128,20 @@ function load() {
   }
 }
 
-$: if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
-  const it = $data.byId(item.type as any, item.id);
-  document.title = `${singularName(
-    it
-  )} - The Hitchhiker's Guide to the Cataclysm`;
-} else if (item && !item.id && item.type) {
-  document.title = `${item.type} - The Hitchhiker's Guide to the Cataclysm`;
-} else {
-  document.title = "The Hitchhiker's Guide to the Cataclysm";
-}
+run(() => {
+    if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
+    const it = $data.byId(item.type as any, item.id);
+    document.title = `${singularName(
+      it
+    )} - The Hitchhiker's Guide to the Cataclysm`;
+  } else if (item && !item.id && item.type) {
+    document.title = `${item.type} - The Hitchhiker's Guide to the Cataclysm`;
+  } else {
+    document.title = "The Hitchhiker's Guide to the Cataclysm";
+  }
+  });
 
-let search: string = "";
+let search: string = $state("");
 
 load();
 
@@ -185,7 +193,7 @@ window.addEventListener("popstate", () => {
   load();
 });
 
-let deferredPrompt: any;
+let deferredPrompt: any = $state();
 window.addEventListener("beforeinstallprompt", (e) => {
   deferredPrompt = e;
 });
@@ -266,7 +274,7 @@ async function getRandomPage() {
   return items[(Math.random() * items.length) | 0];
 }
 
-let randomPage: string | null = null;
+let randomPage: string | null = $state(null);
 function newRandomPage() {
   getRandomPage().then((r) => {
     randomPage = `${import.meta.env.BASE_URL}${mapType(r.type)}/${r.id}${
@@ -278,8 +286,10 @@ newRandomPage();
 
 // This is one character behind the actual search value, because
 // of the throttle, but eh, it's good enough.
-let currentHref = location.href;
-$: item, search, (currentHref = location.href);
+let currentHref = $state(location.href);
+run(() => {
+    item, search, (currentHref = location.href);
+  });
 
 function langHref(lang: string, href: string) {
   const u = new URL(href);
@@ -288,7 +298,7 @@ function langHref(lang: string, href: string) {
 }
 </script>
 
-<svelte:window on:click={maybeNavigate} on:keydown={maybeFocusSearch} />
+<svelte:window onclick={maybeNavigate} onkeydown={maybeFocusSearch} />
 
 <svelte:head>
   {#if builds}
@@ -306,11 +316,11 @@ function langHref(lang: string, href: string) {
 <header>
   <nav>
     <div class="title">
-      <!-- svelte-ignore a11y-invalid-attribute -->
+      <!-- svelte-ignore a11y_invalid_attribute -->
       <strong>
         <a
           href={import.meta.env.BASE_URL + location.search}
-          on:click={() => (search = "")}
+          onclick={() => (search = "")}
           ><span class="wide">Hitchhiker's Guide to the Cataclysm</span><span
             class="narrow">HHG</span
           ></a>
@@ -324,7 +334,7 @@ function langHref(lang: string, href: string) {
         })}
         type="search"
         bind:value={search}
-        on:input={clearItem}
+        oninput={clearItem}
         id="search" />
     </div>
   </nav>
@@ -396,19 +406,19 @@ files in the game itself.`,
         slot2="link_flashlight"
         slot3="link_table"
         slot4="link_zombie">
-        <strong slot="0">Hitchhiker's Guide to the Cataclysm</strong>
-        <a slot="1" href="https://cataclysmdda.org/"
+  <strong slot="s0">Hitchhiker's Guide to the Cataclysm</strong>
+  <a slot="s1" href="https://cataclysmdda.org/"
           >Cataclysm: Dark Days Ahead</a>
-        <a
-          slot="2"
+  <a
+          slot="s2"
           href="{import.meta.env.BASE_URL}item/flashlight{location.search}"
           >{t("flashlight", { _comment: "Item name" })}</a>
-        <a
-          slot="3"
+  <a
+          slot="s3"
           href="{import.meta.env.BASE_URL}furniture/f_table{location.search}"
           >{t("table", { _comment: "Furniture" })}</a>
-        <a
-          slot="4"
+  <a
+          slot="s4"
           href="{import.meta.env.BASE_URL}monster/mon_zombie{location.search}"
           >{t("zombie", { _comment: "Monster name" })}</a>
       </InterpolatedTranslation>
@@ -425,10 +435,10 @@ access, as long as you've visited it once before.`)}
             { installable_button: "{installable_button}" }
           )}
           slot0="installable_button">
-          <button
-            slot="0"
+  <button
+            slot="s0"
             class="disclosure"
-            on:click={(e) => {
+            onclick={(e) => {
               e.preventDefault();
               deferredPrompt.prompt();
             }}
@@ -465,9 +475,9 @@ Anyway?`,
         slot0="link_github"
         slot1="link_nornagon"
         slot2="link_file_an_issue">
-        <a slot="0" href="https://github.com/nornagon/cdda-guide">GitHub</a>
-        <a slot="1" href="https://www.nornagon.net">nornagon</a>
-        <a slot="2" href="https://github.com/nornagon/cdda-guide/issues"
+  <a slot="s0" href="https://github.com/nornagon/cdda-guide">GitHub</a>
+  <a slot="s1" href="https://www.nornagon.net">nornagon</a>
+  <a slot="s2" href="https://github.com/nornagon/cdda-guide/issues"
           >{t("file an issue")}</a>
       </InterpolatedTranslation>
     </p>
@@ -480,8 +490,8 @@ Anyway?`,
             { link_transifex: "{link_transifex}" }
           )}
           slot0="link_transifex">
-          <a
-            slot="0"
+  <a
+            slot="s0"
             href="https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/"
             >Transifex</a>
         </InterpolatedTranslation>
@@ -511,7 +521,7 @@ Anyway?`,
         link_random_page: "{link_random_page}",
       })}
       slot0="link_random_page">
-      <a slot="0" href={randomPage} on:click={() => setTimeout(newRandomPage)}
+  <a slot="s0" href={randomPage} onclick={() => setTimeout(newRandomPage)}
         >{t("random page")}</a>
     </InterpolatedTranslation>
   {/if}
@@ -520,11 +530,10 @@ Anyway?`,
     {t("Version:")}
     {#if $data || builds}
       {#if builds}
-        <!-- svelte-ignore a11y-no-onchange -->
         <select
           value={$data?.build_number ??
             (version === "latest" ? builds[0].build_number : version)}
-          on:change={(e) => {
+          onchange={(e) => {
             const url = new URL(location.href);
             const buildNumber = e.currentTarget.value;
             if (buildNumber === builds?.[0].build_number)
@@ -554,10 +563,9 @@ Anyway?`,
     {/if}
     <span style="white-space: nowrap">
       {t("Tileset:")}
-      <!-- svelte-ignore a11y-no-onchange -->
       <select
         value={tilesetUrlTemplate}
-        on:change={(e) => {
+        onchange={(e) => {
           tilesetUrlTemplate = e.currentTarget.value;
         }}>
         <option value="">None (ASCII)</option>
@@ -573,7 +581,7 @@ Anyway?`,
           version === "latest" ? builds[0].build_number : version}
         <select
           value={locale || "en"}
-          on:change={(e) => {
+          onchange={(e) => {
             const url = new URL(location.href);
             const lang = e.currentTarget.value;
             if (lang === "en") url.searchParams.delete("lang");

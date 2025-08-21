@@ -9,7 +9,11 @@ import { isItemSubtype } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
-export let item: AmmunitionType;
+  interface Props {
+    item: AmmunitionType;
+  }
+
+  let { item }: Props = $props();
 
 const _context = "Ammunition Type";
 
@@ -69,10 +73,12 @@ usedBy.sort(composeSort(byType, byName));
 <section>
   <h1>{t("Used By", { _context })}</h1>
   {#if usedBy.length > 0}
-    <LimitedList items={usedBy} let:item>
-      <ItemSymbol {item} />
-      <ThingLink type="item" id={item.id} />
-    </LimitedList>
+    <LimitedList items={usedBy} >
+      {#snippet children({ item })}
+            <ItemSymbol {item} />
+        <ThingLink type="item" id={item.id} />
+                {/snippet}
+        </LimitedList>
   {:else}
     <p>
       <em style="color: var(--cata-color-gray)"

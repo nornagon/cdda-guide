@@ -1,7 +1,11 @@
 <script lang="ts">
 import type { AsciiArt } from "../types";
 
-export let picture: AsciiArt;
+  interface Props {
+    picture: AsciiArt;
+  }
+
+  let { picture }: Props = $props();
 
 let color = ["white"];
 const parsed: { string: string; color: string }[][] = [];

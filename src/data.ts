@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import makeI18n, { Gettext } from "gettext.js";
+import makeI18n, { type Gettext } from "gettext.js";
 
 import {
   type Translation,
@@ -54,7 +54,7 @@ const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
 ]);
 
 export const mapType = (
-  type: keyof SupportedTypesWithMapped
+  type: keyof SupportedTypesWithMapped,
 ): keyof SupportedTypesWithMapped => typeMappings.get(type) ?? type;
 
 export let i18n: Gettext = makeI18n();
@@ -91,22 +91,23 @@ function getMsgIdPlural(t: Translation): string {
   return typeof t === "string"
     ? t + "s"
     : "str_sp" in t
-    ? t.str_sp
-    : "str_pl" in t && t.str_pl
-    ? t.str_pl
-    : t.str + "s";
+      ? t.str_sp
+      : "str_pl" in t && t.str_pl
+        ? t.str_pl
+        : t.str + "s";
 }
 
 export function translate(
   t: Translation,
   needsPlural: boolean,
   n: number,
-  domain?: string
+  domain?: string,
 ): string {
   const sg = getMsgId(t);
   const pl = needsPlural ? getMsgIdPlural(t) : "";
   return (
-    i18n.dcnpgettext(domain, undefined, sg, pl, n) || (n === 1 ? sg : pl ?? sg)
+    i18n.dcnpgettext(domain, undefined, sg, pl, n) ||
+    (n === 1 ? sg : (pl ?? sg))
   );
 }
 
@@ -122,7 +123,7 @@ export const singularName = (obj: any, domain?: string): string =>
 export const pluralName = (
   obj: any,
   n: number = 2,
-  domain?: string
+  domain?: string,
 ): string => {
   const name: Translation = obj?.name?.male ?? obj?.name;
   if (name == null) return obj?.id ?? obj?.abstract;
@@ -169,7 +170,7 @@ export function parseMass(string: string | number): number {
   let val = 0;
   const re = new RegExp(
     `(\\d+)\\s+(${Object.keys(massUnitMultiplier).join("|")})`,
-    "g"
+    "g",
   );
   while ((m = re.exec(string))) {
     const [_, num, unit] = m;
@@ -339,7 +340,7 @@ export class CddaData {
 
   byIdMaybe<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
-    id: string
+    id: string,
   ): (SupportedTypesWithMapped[TypeName] & { __filename: string }) | undefined {
     if (typeof id !== "string") throw new Error("Requested non-string id");
     const byId = this._byTypeById.get(type);
@@ -351,7 +352,7 @@ export class CddaData {
 
   byId<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
-    id: string
+    id: string,
   ): SupportedTypesWithMapped[TypeName] & { __filename: string } {
     const ret = this.byIdMaybe(type, id);
     if (!ret)
@@ -360,14 +361,14 @@ export class CddaData {
   }
 
   byType<TypeName extends keyof SupportedTypesWithMapped>(
-    type: TypeName
+    type: TypeName,
   ): SupportedTypesWithMapped[TypeName][] {
     return this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
   }
 
   abstractById<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
-    id: string
+    id: string,
   ): object | undefined /* abstracts don't have ids, for instance */ {
     if (typeof id !== "string") throw new Error("Requested non-string id");
     const obj = this._abstractsByType.get(type)?.get(id);
@@ -409,14 +410,14 @@ export class CddaData {
     if (this._flattenCache.has(obj)) return this._flattenCache.get(obj);
     const parent =
       "copy-from" in obj
-        ? this._byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
-          this._abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"])
+        ? (this._byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
+          this._abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"]))
         : null;
     if ("copy-from" in obj && !parent)
       console.error(
         `Missing parent in ${
           obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)
-        }`
+        }`,
       );
     if (parent === obj) {
       // Working around bad data upstream, see: https://github.com/CleverRaven/Cataclysm-DDA/pull/53930
@@ -433,7 +434,7 @@ export class CddaData {
     if (parentProps.vitamins && obj.vitamins) {
       ret.vitamins = [
         ...parentProps.vitamins.filter(
-          (x: any) => !obj.vitamins.some((y: any) => y[0] === x[0])
+          (x: any) => !obj.vitamins.some((y: any) => y[0] === x[0]),
         ),
         ...obj.vitamins,
       ];
@@ -445,7 +446,7 @@ export class CddaData {
       if (typeof ret.relative[k] === "number") {
         if (k === "melee_damage") {
           const di = normalizeDamageInstance(
-            JSON.parse(JSON.stringify(ret.melee_damage))
+            JSON.parse(JSON.stringify(ret.melee_damage)),
           );
           for (const du of di) du.amount = (du.amount ?? 0) + ret.relative[k];
           ret.melee_damage = di;
@@ -458,11 +459,11 @@ export class CddaData {
         for (const rdu of relativeDamage) {
           const modified: DamageUnit = Array.isArray(ret[k])
             ? ret[k].find(
-                (du: DamageUnit) => du.damage_type === rdu.damage_type
+                (du: DamageUnit) => du.damage_type === rdu.damage_type,
               )
             : ret[k].damage_type === rdu.damage_type
-            ? ret[k]
-            : null;
+              ? ret[k]
+              : null;
           if (modified) {
             modified.amount = (modified.amount ?? 0) + (rdu.amount ?? 0);
             modified.armor_penetration =
@@ -517,7 +518,7 @@ export class CddaData {
                 (apd.encumbrance * (ret as any).proportional[k]) | 0;
             } else if (Array.isArray(apd.encumbrance)) {
               apd.encumbrance = apd.encumbrance.map(
-                (x: number) => (x * (ret as any).proportional[k]) | 0
+                (x: number) => (x * (ret as any).proportional[k]) | 0,
               ) as [number, number];
             }
           }
@@ -545,16 +546,16 @@ export class CddaData {
       } else if (k === "damage" && ret[k]) {
         ret.damage = JSON.parse(JSON.stringify(ret.damage));
         const proportionalDamage = normalizeDamageInstance(
-          ret.proportional.damage
+          ret.proportional.damage,
         );
         for (const pdu of proportionalDamage) {
           const modified: DamageUnit = Array.isArray(ret.damage)
             ? ret.damage.find(
-                (du: DamageUnit) => du.damage_type === pdu.damage_type
+                (du: DamageUnit) => du.damage_type === pdu.damage_type,
               )
             : ret.damage.damage_type === pdu.damage_type
-            ? ret.damage
-            : null;
+              ? ret.damage
+              : null;
           if (modified) {
             modified.amount = (modified.amount ?? 0) * (pdu.amount ?? 1);
             modified.armor_penetration =
@@ -589,7 +590,7 @@ export class CddaData {
         if (k === "flags")
           // Unique
           ret[k] = (ret[k] ?? []).concat(
-            ret.extend[k].filter((x: any) => !ret[k]?.includes(x))
+            ret.extend[k].filter((x: any) => !ret[k]?.includes(x)),
           );
         else ret[k] = (ret[k] ?? []).concat(ret.extend[k]);
       }
@@ -606,7 +607,7 @@ export class CddaData {
             x.length === y.length &&
             x.every((j, i) => isEqual(j, y[i])));
         ret[k] = (ret[k] ?? []).filter(
-          (x: any) => !ret.delete[k].some((y: any) => isEqual(y, x))
+          (x: any) => !ret.delete[k].some((y: any) => isEqual(y, x)),
         );
       }
     }
@@ -634,7 +635,7 @@ export class CddaData {
             Object.entries(mats).map(([k, v]) => [
               ret.replace_materials[k] ?? k,
               v,
-            ])
+            ]),
           );
         }
         // TODO: update weight
@@ -673,7 +674,7 @@ export class CddaData {
           this.normalizeItemGroup(mon.death_drops, "distribution") ?? {
             subtype: "collection",
             entries: [],
-          }
+          },
         )
       : new Map();
     this._cachedDeathDrops.set(mon_id, ret);
@@ -714,8 +715,8 @@ export class CddaData {
         typeof v === "string"
           ? this.convertTopLevelItemGroup(this.byId("item_group", v))
           : Array.isArray(v)
-          ? { subtype: "collection" as const, entries: v }
-          : v;
+            ? { subtype: "collection" as const, entries: v }
+            : v;
       if (group) {
         for (const { id } of this.flattenItemGroup(group)) add(c, id);
       } else {
@@ -773,8 +774,8 @@ export class CddaData {
         typeof v.item === "string"
           ? this.convertTopLevelItemGroup(this.byId("item_group", v.item))
           : Array.isArray(v.item)
-          ? { subtype: "collection" as const, entries: v.item }
-          : v.item;
+            ? { subtype: "collection" as const, entries: v.item }
+            : v.item;
       if (group) {
         for (const { id } of this.flattenItemGroup(group)) ret.add(id);
       } else {
@@ -789,7 +790,7 @@ export class CddaData {
       if (v.item) ret.add(v.item);
       if (v.group)
         for (const { id } of this.flattenTopLevelItemGroup(
-          this.byId("item_group", v.group)
+          this.byId("item_group", v.group),
         ))
           ret.add(id);
     }
@@ -850,7 +851,7 @@ export class CddaData {
    * is spawned, it will be spawned between |count[0]| and |count[1]| times.
    */
   flattenItemGroup(
-    group: ItemGroupData
+    group: ItemGroupData,
   ): { id: string; prob: number; expected: number; count: [number, number] }[] {
     if (this._flattenItemGroupCache.has(group))
       return this._flattenItemGroupCache.get(group)!;
@@ -943,13 +944,13 @@ export class CddaData {
       )
         normalizedEntries.push(g);
     normalizedEntries = normalizedEntries.filter(
-      (e) => !("event" in e) || !e.event
+      (e) => !("event" in e) || !e.event,
     );
 
     function prod(
       p: { id: string; prob: number; count: [number, number] },
       prob: number,
-      count: [number, number]
+      count: [number, number],
     ): { id: string; prob: number; count: [number, number] } {
       return {
         id: p.id,
@@ -1003,8 +1004,8 @@ export class CddaData {
             for (const id of [ids].flat())
               add(
                 ...this.flattenTopLevelItemGroup(
-                  this.byId("item_group", id)
-                ).map((p) => prod(p, nProb, nCount))
+                  this.byId("item_group", id),
+                ).map((p) => prod(p, nProb, nCount)),
               );
         }
         if ("item" in entry) {
@@ -1019,22 +1020,22 @@ export class CddaData {
         } else if ("group" in entry) {
           add(
             ...this.flattenTopLevelItemGroup(
-              this.byId("item_group", entry.group)
-            ).map((p) => prod(p, nProb, nCount))
+              this.byId("item_group", entry.group),
+            ).map((p) => prod(p, nProb, nCount)),
           );
         } else if ("collection" in entry) {
           add(
             ...this.flattenItemGroup({
               subtype: "collection",
               entries: entry.collection,
-            }).map((p) => prod(p, nProb, nCount))
+            }).map((p) => prod(p, nProb, nCount)),
           );
         } else if ("distribution" in entry) {
           add(
             ...this.flattenItemGroup({
               subtype: "distribution",
               entries: entry.distribution,
-            }).map((p) => prod(p, nProb, nCount))
+            }).map((p) => prod(p, nProb, nCount)),
           );
         } else {
           console.warn(`unknown item group entry: ${JSON.stringify(entry)}`);
@@ -1071,8 +1072,8 @@ export class CddaData {
             for (const id of [ids].flat())
               add(
                 ...this.flattenTopLevelItemGroup(
-                  this.byId("item_group", id)
-                ).map((p) => prod(p, nProb, nCount))
+                  this.byId("item_group", id),
+                ).map((p) => prod(p, nProb, nCount)),
               );
         }
         if ("item" in entry) {
@@ -1080,22 +1081,22 @@ export class CddaData {
         } else if ("group" in entry) {
           add(
             ...this.flattenTopLevelItemGroup(
-              this.byId("item_group", entry.group)
-            ).map((p) => prod(p, nProb, nCount))
+              this.byId("item_group", entry.group),
+            ).map((p) => prod(p, nProb, nCount)),
           );
         } else if ("collection" in entry) {
           add(
             ...this.flattenItemGroup({
               subtype: "collection",
               entries: entry.collection,
-            }).map((p) => prod(p, nProb, nCount))
+            }).map((p) => prod(p, nProb, nCount)),
           );
         } else if ("distribution" in entry) {
           add(
             ...this.flattenItemGroup({
               subtype: "distribution",
               entries: entry.distribution,
-            }).map((p) => prod(p, nProb, nCount))
+            }).map((p) => prod(p, nProb, nCount)),
           );
         } else {
           console.warn(`unknown item group entry: ${JSON.stringify(entry)}`);
@@ -1113,7 +1114,7 @@ export class CddaData {
       this.flattenItemGroup(group).map(({ id, prob, expected }) => [
         id,
         { prob, expected },
-      ])
+      ]),
     );
   }
 
@@ -1132,7 +1133,7 @@ export class CddaData {
   }): WeakMap<any, { id: string; count: number }[][]> {
     if (opts?.expandSubstitutes && opts?.onlyRecoverable)
       throw new Error(
-        "didn't expect to see expandSubstitutes && onlyRecoverable"
+        "didn't expect to see expandSubstitutes && onlyRecoverable",
       );
     if (opts?.expandSubstitutes) return this._flatRequirementCacheExpandSubs;
     if (opts?.onlyRecoverable) return this._flatRequirementCacheOnlyRecoverable;
@@ -1141,7 +1142,7 @@ export class CddaData {
   flattenRequirement<T>(
     required: (T | T[])[],
     get: (x: Requirement) => (T | T[])[] | undefined,
-    opts?: { expandSubstitutes?: boolean; onlyRecoverable?: boolean }
+    opts?: { expandSubstitutes?: boolean; onlyRecoverable?: boolean },
   ): { id: string; count: number }[][] {
     const cache = this._flatRequirementCacheForOpts(opts);
     if (cache.has(required)) return cache.get(required)!;
@@ -1150,7 +1151,7 @@ export class CddaData {
       onlyRecoverable = false,
     } = opts ?? {};
     const maybeExpandSubstitutes: (
-      x: { id: string; count: number }[]
+      x: { id: string; count: number }[],
     ) => { id: string; count: number }[] = doExpandSubstitutes
       ? (x) => x.flatMap((y) => expandSubstitutes(this, y))
       : (x) => x;
@@ -1161,17 +1162,19 @@ export class CddaData {
             this,
             x,
             (q) => normalize(get(q) ?? []),
-            onlyRecoverable
-          )
-        )
+            onlyRecoverable,
+          ),
+        ),
       )
       .map((x) =>
         onlyRecoverable
           ? x.filter(
               (c) =>
-                !(this.byId("item", c.id).flags ?? []).includes("UNRECOVERABLE")
+                !(this.byId("item", c.id).flags ?? []).includes(
+                  "UNRECOVERABLE",
+                ),
             )
-          : x
+          : x,
       )
       .filter((x) => x.length);
     cache.set(required, ret);
@@ -1183,7 +1186,7 @@ export class CddaData {
     ReturnType<typeof this.normalizeRequirementsForDisassembly>
   >();
   normalizeRequirementsForDisassembly(
-    requirement: RequirementData & { using?: Recipe["using"] }
+    requirement: RequirementData & { using?: Recipe["using"] },
   ): {
     tools: [string, number][][];
     qualities: QualityRequirement[][];
@@ -1193,7 +1196,7 @@ export class CddaData {
       return this._normalizeRequirementsCache.get(requirement)!;
     const { tools, qualities, components } = this.normalizeRequirements(
       requirement,
-      { onlyRecoverable: true }
+      { onlyRecoverable: true },
     );
     let removeFire = false;
     const newQualities: typeof qualities = [];
@@ -1252,15 +1255,15 @@ export class CddaData {
 
     const finalQualities = filteredQualities.concat(
       newQualities.filter(
-        (q) => !filteredQualities.some((q2) => q2[0].id === q[0].id)
-      )
+        (q) => !filteredQualities.some((q2) => q2[0].id === q[0].id),
+      ),
     );
 
     const filteredComponents = components
       .map((c) =>
         c.filter(
-          (c) => !this.byId("item", c[0])?.flags?.includes("UNRECOVERABLE")
-        )
+          (c) => !this.byId("item", c[0])?.flags?.includes("UNRECOVERABLE"),
+        ),
       )
       .filter((c) => c.length);
 
@@ -1277,7 +1280,7 @@ export class CddaData {
 
   normalizeRequirementUsing(
     requirements: (readonly [RequirementData, number])[],
-    opts?: { onlyRecoverable?: boolean }
+    opts?: { onlyRecoverable?: boolean },
   ): {
     components: [string, number][][];
     qualities: QualityRequirement[][];
@@ -1286,17 +1289,17 @@ export class CddaData {
     const tools = requirements.flatMap(([req, count]) =>
       this.flattenRequirement(req.tools ?? [], (x) => x.tools, {
         expandSubstitutes: true,
-      }).map((x) => x.map((x) => [x.id, x.count * count] as [string, number]))
+      }).map((x) => x.map((x) => [x.id, x.count * count] as [string, number])),
     );
     const qualities = requirements.flatMap(([req, _count]) =>
-      (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x]))
+      (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x])),
     );
     const components = requirements.flatMap(([req, count]) =>
       this.flattenRequirement(
         req.components ?? [],
         (x) => x.components,
-        opts
-      ).map((x) => x.map((x) => [x.id, x.count * count] as [string, number]))
+        opts,
+      ).map((x) => x.map((x) => [x.id, x.count * count] as [string, number])),
     );
     return { tools, qualities, components };
   }
@@ -1321,7 +1324,7 @@ export class CddaData {
 
   normalizeRequirements(
     requirement: RequirementData & { using?: Recipe["using"] },
-    opts?: { onlyRecoverable?: boolean }
+    opts?: { onlyRecoverable?: boolean },
   ) {
     const requirements = this.resolveRequirementList(requirement.using).concat([
       [requirement, 1],
@@ -1346,7 +1349,7 @@ export class CddaData {
         [recipe, 1] as [RequirementData, number],
       ]);
       const tools = requirements.flatMap(([req]) =>
-        this.flattenRequirement(req.tools ?? [], (x) => x.tools)
+        this.flattenRequirement(req.tools ?? [], (x) => x.tools),
       );
       for (const toolOptions of tools)
         for (const tool of toolOptions) {
@@ -1354,7 +1357,10 @@ export class CddaData {
           itemsByTool.get(tool.id)!.add(recipe.result);
         }
       const components = requirements.flatMap(([req]) =>
-        this.flattenRequirement(req.components ?? [], (x) => x.components ?? [])
+        this.flattenRequirement(
+          req.components ?? [],
+          (x) => x.components ?? [],
+        ),
       );
       for (const componentOptions of components)
         for (const component of componentOptions) {
@@ -1403,7 +1409,7 @@ export class CddaData {
 
   normalizeItemGroup(
     g: undefined | string | ItemGroupData | ItemGroupEntry[],
-    subtype: "collection" | "distribution"
+    subtype: "collection" | "distribution",
   ): ItemGroupData {
     if (g) {
       if (typeof g === "string") {
@@ -1420,7 +1426,7 @@ export class CddaData {
   itemForBionic(bionic: Bionic): Item | undefined {
     return (
       this.byType("item").find(
-        (i) => "bionic_id" in i && i.id && i.bionic_id === bionic.id
+        (i) => "bionic_id" in i && i.id && i.bionic_id === bionic.id,
       ) ?? this.byIdMaybe("item", bionic.id)
     );
   }
@@ -1468,7 +1474,7 @@ export class CddaData {
 
   #brewedFromIndex = new ReverseIndex(this, "item", (x) => {
     function normalize(
-      results: undefined | string[] | Record<string, number>
+      results: undefined | string[] | Record<string, number>,
     ): string[] {
       if (!results) return [];
       if (Array.isArray(results)) return results;
@@ -1482,8 +1488,8 @@ export class CddaData {
 
   #transformedFromIndex = new ReverseIndex(this, "item", (x) =>
     normalizeUseAction(x.use_action).flatMap((a) =>
-      "target" in a ? [a.target] : []
-    )
+      "target" in a ? [a.target] : [],
+    ),
   );
   transformedFrom(item_id: string) {
     return this.#transformedFromIndex.lookup(item_id);
@@ -1525,10 +1531,10 @@ export class CddaData {
       typeof vp.breaks_into === "string"
         ? this.convertTopLevelItemGroup(this.byId("item_group", vp.breaks_into))
         : Array.isArray(vp.breaks_into)
-        ? { subtype: "collection", entries: vp.breaks_into }
-        : vp.breaks_into
-        ? vp.breaks_into
-        : null;
+          ? { subtype: "collection", entries: vp.breaks_into }
+          : vp.breaks_into
+            ? vp.breaks_into
+            : null;
     const breaksIntoGroupFlattened =
       breaksIntoGroup && this.flattenItemGroup(breaksIntoGroup);
     return breaksIntoGroupFlattened?.map((x) => x.id) ?? [];
@@ -1576,7 +1582,7 @@ export class CddaData {
       | "bionic_info"
       | "pet_prot_info"
       | "melee_combat_info"
-      | "ablative_info" = "protection_info"
+      | "ablative_info" = "protection_info",
   ) {
     return this.byType("damage_info_order")
       .sort((a, b) => (a[sort_key]?.order ?? -1) - (b[sort_key]?.order ?? -1))
@@ -1587,7 +1593,7 @@ class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
   constructor(
     private data: CddaData,
     private objType: T,
-    private fn: (x: SupportedTypesWithMapped[T]) => string[]
+    private fn: (x: SupportedTypesWithMapped[T]) => string[],
   ) {}
 
   #_index: Map<string, SupportedTypesWithMapped[T][]> | null = null;
@@ -1614,7 +1620,7 @@ function flattenChoices<T>(
   data: CddaData,
   choices: T[],
   get: (x: Requirement) => T[][],
-  onlyRecoverable: boolean = false
+  onlyRecoverable: boolean = false,
 ): { id: string; count: number }[] {
   const flatChoices: { id: string; count: number }[] = [];
   for (const choice of choices) {
@@ -1630,7 +1636,7 @@ function flattenChoices<T>(
             : (id as Requirement);
         if (otherRequirement.type !== "requirement") {
           console.error(
-            `Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`
+            `Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`,
           );
         }
         const otherRequirementTools = get(otherRequirement) ?? [];
@@ -1641,8 +1647,8 @@ function flattenChoices<T>(
               data,
               otherRequirementChoices,
               get,
-              onlyRecoverable
-            ).map((x) => ({ ...x, count: x.count * count }))
+              onlyRecoverable,
+            ).map((x) => ({ ...x, count: x.count * count })),
           );
         }
       } else {
@@ -1659,7 +1665,7 @@ function flattenChoices<T>(
 
 function expandSubstitutes(
   data: CddaData,
-  r: { id: string; count: number }
+  r: { id: string; count: number },
 ): { id: string; count: number }[] {
   const replacements = data.replacementTools(r.id);
   return [r, ...replacements.map((o) => ({ id: o, count: r.count }))];
@@ -1678,7 +1684,7 @@ export const countsByCharges = (item: any): boolean => {
 };
 
 export function normalizeDamageInstance(
-  damageInstance: DamageInstance
+  damageInstance: DamageInstance,
 ): DamageUnit[] {
   if (Array.isArray(damageInstance)) return damageInstance;
   else if ("values" in damageInstance) return damageInstance.values;
@@ -1686,7 +1692,7 @@ export function normalizeDamageInstance(
 }
 
 export function normalizeAddictionTypes(
-  comestible: ComestibleSlot
+  comestible: ComestibleSlot,
 ): { addiction: string; potential: number }[] {
   const addictionType = comestible.addiction_type;
   if (typeof addictionType === "string") {
@@ -1700,7 +1706,7 @@ export function normalizeAddictionTypes(
     return addictionType.map((a) =>
       typeof a === "string"
         ? { addiction: a, potential: comestible.addiction_potential ?? 0 }
-        : a
+        : a,
     );
   } else {
     return [];
@@ -1754,7 +1760,7 @@ const vpartVariants = [
 
 export const getVehiclePartIdAndVariant = (
   data: CddaData,
-  compositePartId: string
+  compositePartId: string,
 ): [string, string] => {
   if (data.byIdMaybe("vehicle_part", compositePartId))
     return [compositePartId, ""];
@@ -1843,7 +1849,7 @@ export function breathabilityFromRating(br: BreathabilityRating): number {
 
 const fetchJsonWithProgress = (
   url: string,
-  progress: (receivedBytes: number, totalBytes: number) => void
+  progress: (receivedBytes: number, totalBytes: number) => void,
 ): Promise<any> => {
   // GoogleBot has a 15MB limit on the size of the response, so we need to
   // serve it double-gzipped JSON.
@@ -1880,7 +1886,7 @@ async function fetchGzippedJsonForGoogleBot(url: string): Promise<any> {
 
   // Use DecompressionStream to decompress the gzipped response
   const decompressionStream = new (globalThis as any).DecompressionStream(
-    "gzip"
+    "gzip",
   );
   const decompressedStream: ReadableStream<ArrayBuffer> =
     res.body.pipeThrough(decompressionStream);
@@ -1892,7 +1898,7 @@ async function fetchGzippedJsonForGoogleBot(url: string): Promise<any> {
 // Sigh, the fetch spec has a bug: https://github.com/whatwg/fetch/issues/1358
 const fetchJsonWithIncorrectProgress = async (
   url: string,
-  progress: (receivedBytes: number, totalBytes: number) => void
+  progress: (receivedBytes: number, totalBytes: number) => void,
 ) => {
   const res = await fetch(url, { mode: "cors" });
   if (!res.ok)
@@ -1925,22 +1931,22 @@ const fetchJsonWithIncorrectProgress = async (
 
 const fetchJson = async (
   version: string,
-  progress: (receivedBytes: number, totalBytes: number) => void
+  progress: (receivedBytes: number, totalBytes: number) => void,
 ) => {
   return fetchJsonWithProgress(
     `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/all.json`,
-    progress
+    progress,
   );
 };
 
 const fetchLocaleJson = async (
   version: string,
   locale: string,
-  progress: (receivedBytes: number, totalBytes: number) => void
+  progress: (receivedBytes: number, totalBytes: number) => void,
 ) => {
   return fetchJsonWithProgress(
     `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/lang/${locale}.json`,
-    progress
+    progress,
   );
 };
 
@@ -1977,7 +1983,7 @@ export const data = {
           totals[0] = totalBytes;
           receiveds[0] = receivedBytes;
           updateProgress();
-        })
+        }),
       ),
       locale &&
         retry(() =>
@@ -1985,7 +1991,7 @@ export const data = {
             totals[1] = totalBytes;
             receiveds[1] = receivedBytes;
             updateProgress();
-          })
+          }),
         ),
       locale?.startsWith("zh_") &&
         retry(() =>
@@ -1996,8 +2002,8 @@ export const data = {
               totals[2] = totalBytes;
               receiveds[2] = receivedBytes;
               updateProgress();
-            }
-          )
+            },
+          ),
         ),
     ]);
     if (locale && localeJson) {
@@ -2011,7 +2017,7 @@ export const data = {
     const cddaData = new CddaData(
       dataJson.data,
       dataJson.build_number,
-      dataJson.release
+      dataJson.release,
     );
     set(cddaData);
   },
@@ -2020,7 +2026,7 @@ export const data = {
 export function omsName(data: CddaData, oms: OvermapSpecial): string {
   if (oms.subtype === "mutable") return oms.id;
   const ground_level_omts = (oms.overmaps ?? []).filter(
-    (p) => p.point[2] === 0
+    (p) => p.point[2] === 0,
   );
   let minX = Infinity,
     minY = Infinity;
@@ -2033,7 +2039,7 @@ export function omsName(data: CddaData, oms: OvermapSpecial): string {
     if (
       !data.byIdMaybe(
         "overmap_terrain",
-        omt.overmap.replace(/_(north|south|east|west)$/, "")
+        omt.overmap.replace(/_(north|south|east|west)$/, ""),
       )
     )
       continue;
@@ -2049,7 +2055,7 @@ export function omsName(data: CddaData, oms: OvermapSpecial): string {
   if (centerOmt?.overmap) {
     const omt = data.byId(
       "overmap_terrain",
-      centerOmt.overmap.replace(/_(north|south|east|west)$/, "")
+      centerOmt.overmap.replace(/_(north|south|east|west)$/, ""),
     );
     if (omt) {
       return singularName(omt);

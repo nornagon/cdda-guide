@@ -6,7 +6,11 @@ import ThingLink from "../ThingLink.svelte";
 
 const _context = "Item Tool Info";
 
-export let item: ToolSlot;
+  interface Props {
+    item: ToolSlot;
+  }
+
+  let { item }: Props = $props();
 </script>
 
 {#if item.charges_per_use || item.sub || item.power_draw || item.turns_per_charge}

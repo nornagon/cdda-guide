@@ -23,7 +23,7 @@ let realLimit = isTesting
   <slot name="header" />
   <tbody>
     {#each items.slice(0, realLimit) as item}
-      <slot name="item" {item} />
+      <slot name="sitem" {item} />
     {/each}
   </tbody>
 </table>

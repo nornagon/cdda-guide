@@ -11,7 +11,11 @@ import JsonView from "../JsonView.svelte";
 const data = getContext<CddaData>("data");
 const _context = "Fault";
 
-export let item: Fault;
+  interface Props {
+    item: Fault;
+  }
+
+  let { item }: Props = $props();
 
 // 0.G
 const mendingMethods = (item.mending_methods ?? []).map((mm) => {
