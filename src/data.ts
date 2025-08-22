@@ -248,9 +248,14 @@ export function asKilograms(string: string | number): string {
   return `${(g / 1000).toFixed(2)} kg`;
 }
 
+interface ModInfo {
+  id: string;
+  name: string;
+}
+
 export class CddaData {
   _raw: any[];
-  _availableMods: string[];
+  _modlist: Record<string, ModInfo>;
   _rawMods: Record<string, { info: any; data: any[] }>;
 
   _enabledMods: string[] = [];
@@ -272,15 +277,15 @@ export class CddaData {
     raw: any[],
     build_number?: string,
     release?: any,
-    modlist?: string[],
+    modlist?: Record<string, ModInfo>,
     rawMods?: Record<string, { info: any; data: any[] }>,
-    enabledMods?: string[]
+    enabledMods?: string[],
   ) {
     this.release = release;
     this.build_number = build_number;
     // For some reason O—G has the string "mapgen" as one of its objects.
     this._raw = raw.filter((x) => typeof x === "object");
-    this._availableMods = modlist ?? [];
+    this._modlist = modlist ?? {};
     this._rawMods = rawMods ?? {};
     this._enabledMods = enabledMods ?? [];
 
@@ -398,8 +403,10 @@ export class CddaData {
     }
   }
 
-  availableMods(): string[] {
-    return this._availableMods;
+  availableMods(): { id: string; label: string }[] {
+    return Object.entries(this._modlist)
+      .map(([id, info]) => ({ id, label: translate(info.name, false, 1) }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }
 
   getModInfo(modId: string): { info: any; data: any[] } | undefined {
@@ -408,6 +415,14 @@ export class CddaData {
 
   getEnabledMods(): string[] {
     return this._enabledMods;
+  }
+
+  setEnabledMods(enabledMods: string[]) {
+    if (JSON.stringify(this._enabledMods) === JSON.stringify(enabledMods)) {
+      return;
+    }
+    this._enabledMods = enabledMods;
+    this.initData();
   }
 
   modEnabled() {
@@ -501,15 +516,15 @@ export class CddaData {
     } else {
       parent =
         "copy-from" in obj
-          ? this._byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
-            this._abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"])
+          ? (this._byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
+            this._abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"]))
           : null;
 
       if ("copy-from" in obj && !parent)
         console.error(
           `Missing parent in ${
             obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)
-          }`
+          }`,
         );
     }
 
@@ -1118,8 +1133,8 @@ export class CddaData {
           if (!group) continue;
           add(
             ...this.flattenTopLevelItemGroup(group).map((p) =>
-              prod(p, nProb, nCount)
-            )
+              prod(p, nProb, nCount),
+            ),
           );
         } else if ("collection" in entry) {
           add(
@@ -1183,8 +1198,8 @@ export class CddaData {
           if (!group) continue;
           add(
             ...this.flattenTopLevelItemGroup(group).map((p) =>
-              prod(p, nProb, nCount)
-            )
+              prod(p, nProb, nCount),
+            ),
           );
         } else if ("collection" in entry) {
           add(
@@ -2037,17 +2052,17 @@ const fetchJson = async (
 ) => {
   return fetchJsonWithProgress(
     `${process.env.CDDA_DATA_SOURCE}/data/${version}/all.json`,
-    progress
+    progress,
   );
 };
 
 const fetchModsJson = async (
   version: string,
-  progress: (receivedBytes: number, totalBytes: number) => void
+  progress: (receivedBytes: number, totalBytes: number) => void,
 ) => {
   return fetchJsonWithProgress(
     `${process.env.CDDA_DATA_SOURCE}/data/${version}/all_mods.json`,
-    progress
+    progress,
   ) as Promise<Record<string, { info: any; data: any[] }>>;
 };
 
@@ -2058,7 +2073,7 @@ const fetchLocaleJson = async (
 ) => {
   return fetchJsonWithProgress(
     `${process.env.CDDA_DATA_SOURCE}/data/${version}/lang/${locale}.json`,
-    progress
+    progress,
   );
 };
 
@@ -2082,7 +2097,7 @@ export const data = {
   async setVersion(
     version: string,
     locale: string | null,
-    enabledMods: string[] = []
+    enabledMods: string[] = [],
   ) {
     if (_hasSetVersion) throw new Error("can only set version once");
     _hasSetVersion = true;
@@ -2129,7 +2144,7 @@ export const data = {
           totals[3] = totalBytes;
           receiveds[3] = receivedBytes;
           updateProgress();
-        })
+        }),
       );
     }
     if (locale && localeJson) {
@@ -2146,7 +2161,7 @@ export const data = {
       dataJson.release,
       dataJson.modlist,
       modsJson,
-      enabledMods
+      enabledMods,
     );
     set(cddaData);
   },

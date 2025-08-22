@@ -4614,6 +4614,11 @@ svelte-check@^4.0.0:
     picocolors "^1.0.0"
     sade "^1.7.4"
 
+svelte-multiselect@^11.2.3:
+  version "11.2.3"
+  resolved "https://registry.npmmirror.com/svelte-multiselect/-/svelte-multiselect-11.2.3.tgz#f866314db400e4340aa7a275d9d520546fed1927"
+  integrity sha512-nm4ShKfRQPkrHZhH/jfWaW+21jSODLBwBF9UuKFE+2yV0RSaOuItsYUW32hk9VGD3QI9DZvmyFtIex/fi9Byng==
+
 svelte-preprocess@^6.0.0:
   version "6.0.3"
   resolved "https://registry.npmmirror.com/svelte-preprocess/-/svelte-preprocess-6.0.3.tgz#fdc1f9dc41b6f22bf8b1f059e9f21eaaae181eeb"

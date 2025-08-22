@@ -1,6 +1,13 @@
 <script lang="ts">
 import Thing from "./Thing.svelte";
-import { CddaData, data, loadProgress, mapType, singularName } from "./data";
+import {
+  CddaData,
+  data,
+  loadProgress,
+  mapType,
+  singularName,
+  translate,
+} from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
@@ -9,6 +16,8 @@ import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
 import { t } from "@transifex/native";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import throttle from "lodash/throttle";
+import Multiselect from "svelte-multiselect";
+import { untrack } from "svelte";
 
 let item: { type: string; id: string } | null = $state(null);
 
@@ -33,8 +42,33 @@ fetch(`${process.env.CDDA_DATA_SOURCE}/builds.json`)
 const url = new URL(location.href);
 const version = url.searchParams.get("v") ?? "latest";
 const locale = url.searchParams.get("lang");
-const enabledMods = url.searchParams.get("m")?.split(",") ?? [];
-data.setVersion(version, locale, enabledMods);
+
+let availableMods = $derived($data?.availableMods() ?? []);
+let enabledMods: { id: string; label: string }[] = $state(
+  (url.searchParams.get("m")?.split(",") ?? []).map((id) => ({
+    id,
+    label: id,
+  })),
+);
+$effect(() => {
+  availableMods;
+  untrack(() => {
+    enabledMods = enabledMods.map(
+      (m1) =>
+        availableMods.find((m2) => m2.id === m1.id) ?? {
+          id: m1.id,
+          label: m1.label,
+        },
+    );
+  });
+});
+
+// svelte-ignore state_referenced_locally
+data.setVersion(
+  version,
+  locale,
+  enabledMods.map((mod) => mod.id),
+);
 
 const tilesets = [
   {
@@ -137,6 +171,15 @@ $effect(() => {
   } else {
     document.title = "The Hitchhiker's Guide to the Cataclysm";
   }
+});
+
+$effect(() => {
+  const modIds = enabledMods.map((mod) => mod.id);
+  const url = new URL(location.href);
+  url.searchParams.set("m", modIds.join(","));
+  replaceState(null, "", url.toString());
+  $data?.setEnabledMods(modIds);
+  load();
 });
 
 let search: string = $state("");
@@ -595,6 +638,16 @@ Anyway?`,
       {:else}
         <select disabled><option>{t("Loading...")}</option></select>
       {/if}
+    </span>
+  </p>
+  <p class="data-options">
+    <span style="white-space: nowrap">
+      {t("Mods:")}
+      <Multiselect
+        options={availableMods}
+        bind:selected={enabledMods}
+        placeholder={t("No mods selected.")}>
+      </Multiselect>
     </span>
   </p>
 </main>
