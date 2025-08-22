@@ -176,7 +176,11 @@ $effect(() => {
 $effect(() => {
   const modIds = enabledMods.map((mod) => mod.id);
   const url = new URL(location.href);
-  url.searchParams.set("m", modIds.join(","));
+  if (modIds.length > 0) {
+    url.searchParams.set("m", modIds.join(","));
+  } else {
+    url.searchParams.delete("m");
+  }
   replaceState(null, "", url.toString());
   $data?.setEnabledMods(modIds);
   load();
@@ -646,7 +650,8 @@ Anyway?`,
       <Multiselect
         options={availableMods}
         bind:selected={enabledMods}
-        placeholder={t("No mods selected.")}>
+        placeholder={t("No mods selected.")}
+        style="--sms-border: 1px solid #303030; --sms-options-border: 1px solid #303030; --sms-selected-bg: #333; --sms-options-bg: black; --sms-li-active-bg: #333;">
       </Multiselect>
     </span>
   </p>
