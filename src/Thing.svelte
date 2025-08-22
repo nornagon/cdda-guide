@@ -17,7 +17,6 @@ import Fault from "./types/Fault.svelte";
 import Vitamin from "./types/Vitamin.svelte";
 import VehiclePart from "./types/VehiclePart.svelte";
 import MartialArt from "./types/MartialArt.svelte";
-import ErrorBoundary from "./ErrorBoundary.mjs";
 import Mutation from "./types/Mutation.svelte";
 import MutationCategory from "./types/MutationCategory.svelte";
 import MutationType from "./types/MutationType.svelte";
@@ -36,14 +35,16 @@ import OvermapSpecial from "./types/OvermapSpecial.svelte";
 import ItemAction from "./types/ItemAction.svelte";
 import Technique from "./types/Technique.svelte";
 
-export let item: { id: string; type: string };
+let { item, data }: { item: { id: string; type: string }; data: CddaData } =
+  $props();
 
-export let data: CddaData;
 setContext("data", data);
-let error: Error | null = null;
 
-function onError(e: Error) {
-  error = e;
+let error: Error | null = $state(null);
+
+function onError(e: unknown, reset: () => void) {
+  console.log(e);
+  error = e as Error;
   Sentry.captureException(e, {
     contexts: {
       item: {
@@ -113,7 +114,7 @@ const displays: Record<string, Component<any>> = {
   technique: Technique,
 };
 
-const display = (obj && displays[obj.type]) ?? Unknown;
+const Display = (obj && displays[obj.type]) ?? Unknown;
 </script>
 
 {#if !obj}
@@ -135,16 +136,19 @@ const display = (obj && displays[obj.type]) ?? Unknown;
         <pre>{error.stack}</pre>
       </details>
     </section>
-  {:else if typeof globalThis !== "undefined" && globalThis.process}
-    <!-- running in tests -->
-    <svelte:component this={display} item={obj} />
-  {:else}
-    <ErrorBoundary {onError}>
-      {#if /obsolet/.test(obj.__filename)}
-        <ObsoletionWarning item={obj} />
-      {/if}
-      <svelte:component this={display} item={obj} />
-    </ErrorBoundary>
+  {/if}
+  {#if !error}
+    {#if typeof globalThis !== "undefined" && globalThis.process}
+      <!-- running in tests -->
+      <Display item={obj} />
+    {:else}
+      <svelte:boundary onerror={onError}>
+        {#if /obsolet/.test(obj.__filename)}
+          <ObsoletionWarning item={obj} />
+        {/if}
+        <Display item={obj} />
+      </svelte:boundary>
+    {/if}
   {/if}
 
   <details>

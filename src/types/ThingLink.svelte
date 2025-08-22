@@ -49,6 +49,7 @@ function countIsPlural(count: number | [number, number]): boolean {
 const data = getContext<CddaData>("data");
 
 let item = $state(data.byIdMaybe(type, id));
+// svelte-ignore state_referenced_locally
 if (item?.type === "vehicle_part" && !item.name && item.item)
   item = data.byId("item", item.item);
 

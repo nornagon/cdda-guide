@@ -22,11 +22,9 @@ let {
 const isTesting =
   typeof globalThis !== undefined && (globalThis as any)?.__isTesting__;
 
-let realLimit = isTesting
-  ? Infinity
-  : items.length <= limit + grace
-    ? limit + grace
-    : limit;
+let realLimit = $state(
+  isTesting ? Infinity : items.length <= limit + grace ? limit + grace : limit,
+);
 </script>
 
 <table>
