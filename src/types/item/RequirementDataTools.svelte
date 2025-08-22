@@ -8,12 +8,12 @@ import { CddaData, i18n, singularName } from "../../data";
 import type { Recipe, RequirementData } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
-  interface Props {
-    requirement: RequirementData & { using?: Recipe["using"] };
-    direction?: "uncraft" | "craft";
-  }
+interface Props {
+  requirement: RequirementData & { using?: Recipe["using"] };
+  direction?: "uncraft" | "craft";
+}
 
-  let { requirement, direction = "craft" }: Props = $props();
+let { requirement, direction = "craft" }: Props = $props();
 
 const _context = "Requirement";
 const data = getContext<CddaData>("data");
@@ -40,11 +40,11 @@ let { tools, qualities } =
                   quality.amount ?? 1,
                   quality.amount ?? 1,
                   "{tool_quality}",
-                  quality.level
+                  quality.level,
                 )
                 .replace(/\$./g, "")}
               slot0="tool_quality">
-  <ThingLink type="tool_quality" id={quality.id} slot="s0" />
+              <ThingLink type="tool_quality" id={quality.id} slot="s0" />
             </InterpolatedTranslation>{/each}
         </li>
       {/each}
@@ -56,7 +56,7 @@ let { tools, qualities } =
               {#if data.craftingPseudoItem(toolId)}
                 <a
                   href="/furniture/{data.craftingPseudoItem(
-                    toolId
+                    toolId,
                   )}{location.search}"
                   >{singularName(data.byId("item", toolId))}</a>
               {:else}
@@ -72,16 +72,16 @@ let { tools, qualities } =
                     "%1$s (%2$d charges)",
                     count,
                     "{item}",
-                    count
+                    count,
                   )
                   .replace(/\$./g, "")}
                 slot0="item">
-  <svelte:fragment slot="s0">
+                <svelte:fragment slot="s0">
                   {#if data.craftingPseudoItem(toolId)}
                     <a
                       href="{import.meta.env
                         .BASE_URL}furniture/{data.craftingPseudoItem(
-                        toolId
+                        toolId,
                       )}{location.search}"
                       >{singularName(data.byId("item", toolId))}</a>
                   {:else}

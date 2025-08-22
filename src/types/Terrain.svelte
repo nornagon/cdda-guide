@@ -20,11 +20,11 @@ import TerrainSpawnedIn from "./item/TerrainSpawnedIn.svelte";
 const data = getContext<CddaData>("data");
 const _context = "Terrain / Furniture";
 
-  interface Props {
-    item: Terrain;
-  }
+interface Props {
+  item: Terrain;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 const deconstruct = item.deconstruct?.items
   ? data.flattenItemGroup({
@@ -60,7 +60,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
 const seasonOrder = ["winter", "spring", "summer", "autumn"];
 const harvestBySeasonList = [...harvestBySeason.entries()];
 harvestBySeasonList.sort(
-  (a, b) => seasonOrder.indexOf(a[0]) - seasonOrder.indexOf(b[0])
+  (a, b) => seasonOrder.indexOf(a[0]) - seasonOrder.indexOf(b[0]),
 );
 
 const constructions = data
@@ -140,7 +140,7 @@ const constructions = data
                         <li>
                           <ItemSymbol item={data.byId("item", id)} />
                           <ThingLink type="item" {id} /> ({(prob * 100).toFixed(
-                            2
+                            2,
                           )}%)
                         </li>
                       {/each}

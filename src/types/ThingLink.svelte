@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ThingLink from './ThingLink.svelte';
+import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import {
   CddaData,
@@ -16,23 +16,23 @@ import type {
 } from "../types";
 import MutationColor from "./MutationColor.svelte";
 
-  interface Props {
-    type: keyof SupportedTypesWithMapped;
-    id: string;
-    plural?: boolean;
-    count?: number | [number, number] | undefined;
-    variantId?: string | undefined;
-    overrideText?: string | undefined;
-  }
+interface Props {
+  type: keyof SupportedTypesWithMapped;
+  id: string;
+  plural?: boolean;
+  count?: number | [number, number] | undefined;
+  variantId?: string | undefined;
+  overrideText?: string | undefined;
+}
 
-  let {
-    type,
-    id,
-    plural = false,
-    count = undefined,
-    variantId = undefined,
-    overrideText = undefined
-  }: Props = $props();
+let {
+  type,
+  id,
+  plural = false,
+  count = undefined,
+  variantId = undefined,
+  overrideText = undefined,
+}: Props = $props();
 
 function countToString(count: number | [number, number]): string {
   if (typeof count === "number") return count.toString();
@@ -65,22 +65,22 @@ function isItem(item: SupportedTypeMapped): item is Item {
       {id}
       plural={countIsPlural(count) &&
         !countsByCharges(
-          item
+          item,
         )} />{#if countsByCharges(item)}{" "}({countToString(
-        count
+        count,
       )}){/if}</span>
 {:else}
   {@const nameSource =
     item && variantId && isItem(item) && "variants" in item && item.variants
-      ? item.variants.find((v) => v.id === variantId) ?? item
+      ? (item.variants.find((v) => v.id === variantId) ?? item)
       : item}
   <a href="{import.meta.env.BASE_URL}{type}/{id}{location.search}"
     >{overrideText
       ? overrideText
       : item
-      ? item.type === "addiction_type"
-        ? singular(item.type_name)
-        : (plural ? pluralName : singularName)(nameSource)
-      : id}</a
+        ? item.type === "addiction_type"
+          ? singular(item.type_name)
+          : (plural ? pluralName : singularName)(nameSource)
+        : id}</a
   >{#if item?.type === "mutation"}&nbsp;<MutationColor mutation={item} />{/if}
 {/if}

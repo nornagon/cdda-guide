@@ -13,12 +13,12 @@ import ThingLink from "./ThingLink.svelte";
 const data = getContext<CddaData>("data");
 const _context = "Construction";
 
-  interface Props {
-    construction: Construction;
-    includeTitle?: boolean;
-  }
+interface Props {
+  construction: Construction;
+  includeTitle?: boolean;
+}
 
-  let { construction, includeTitle = false }: Props = $props();
+let { construction, includeTitle = false }: Props = $props();
 
 const requirements = data
   .resolveRequirementList(construction.using)
@@ -31,7 +31,7 @@ const components = requirements.flatMap(([req, count]) => {
 });
 
 const byproducts = data.flattenItemGroup(
-  data.normalizeItemGroup(construction.byproducts, "collection")
+  data.normalizeItemGroup(construction.byproducts, "collection"),
 );
 
 const preFlags: { flag: string; force_terrain?: boolean }[] = [];
@@ -69,7 +69,7 @@ function terrainOrFurniture(id: string) {
     <dd>
       {typeof construction.time === "number"
         ? `${construction.time} m`
-        : construction.time ?? "0 m"}
+        : (construction.time ?? "0 m")}
     </dd>
     {#if construction.pre_terrain}
       <dt>{t("Requires", { _context })}</dt>
@@ -100,7 +100,7 @@ function terrainOrFurniture(id: string) {
         <ul>
           {#each components as componentChoices}
             <li>
-              {#each componentChoices.map( (c) => ({ ...c, item: data.byId("item", c.id) }) ) as { id, count }, i}
+              {#each componentChoices.map( (c) => ({ ...c, item: data.byId("item", c.id) }), ) as { id, count }, i}
                 {#if i !== 0}{i18n.__(" OR ")}{/if}
                 <ThingLink {id} {count} type="item" />
               {/each}

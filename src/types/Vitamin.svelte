@@ -21,11 +21,11 @@ import {
 } from "../types";
 import ThingLink from "./ThingLink.svelte";
 
-  interface Props {
-    item: Vitamin;
-  }
+interface Props {
+  item: Vitamin;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Vitamin";
@@ -41,7 +41,7 @@ const containingComestibles = data
     (t) =>
       isItemSubtype("COMESTIBLE", t) &&
       t.id &&
-      (t.vitamins ?? []).some((v) => v[0] === item.id)
+      (t.vitamins ?? []).some((v) => v[0] === item.id),
   )
   .map((c) => {
     const comestible = c as SupportedTypes["COMESTIBLE"];
@@ -66,8 +66,8 @@ const containingDrugs = data
     normalizeUseAction(t.use_action).some(
       (u) =>
         u.type === "consume_drug" &&
-        (u.vitamins ?? []).some((v) => v[0] === item.id)
-    )
+        (u.vitamins ?? []).some((v) => v[0] === item.id),
+    ),
   )
   .map((c) => {
     return {
@@ -83,14 +83,14 @@ const containing = containingComestibles.concat(containingDrugs);
 containing.sort((a, b) =>
   b.pct - a.pct === 0
     ? singularName(a.comestible).localeCompare(singularName(b.comestible))
-    : b.pct - a.pct
+    : b.pct - a.pct,
 );
 
 const excessNames = item.excess
-  ? data.byId("effect_type", item.excess).name ?? []
+  ? (data.byId("effect_type", item.excess).name ?? [])
   : [];
 const deficiencyNames = item.deficiency
-  ? data.byId("effect_type", item.deficiency).name ?? []
+  ? (data.byId("effect_type", item.deficiency).name ?? [])
   : [];
 </script>
 
@@ -137,7 +137,7 @@ const deficiencyNames = item.deficiency
       <dd>
         1 / {typeof item.rate === "string"
           ? item.rate.replace(/-/, "")
-          : -(item.rate ?? 0) ?? "0 m"}
+          : -(item.rate ?? 0) || "0 m"}
       </dd>
     {/if}
     {#if item.decays_into?.length}
@@ -156,14 +156,14 @@ const deficiencyNames = item.deficiency
 {#if containing.length}
   <section>
     <h1>{t("Comestibles", { _context })}</h1>
-    <LimitedList items={containing} >
+    <LimitedList items={containing}>
       {#snippet children({ item: other })}
-            <ThingLink id={other.comestible.id} type="item" /> ({other.pct.toFixed(
-          2
+        <ThingLink id={other.comestible.id} type="item" /> ({other.pct.toFixed(
+          2,
         )}{item.vit_type === "counter" || item.vit_type === "drug"
           ? " U"
           : "% RDA"})
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

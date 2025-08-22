@@ -53,11 +53,11 @@ function needsDamageType(stat: string) {
   return stat === "damage" || stat === "armor" || stat === "arpen";
 }
 
-  interface Props {
-    item: BonusContainer;
-  }
+interface Props {
+  item: BonusContainer;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 </script>
 
 {#if item.mult_bonuses || item.flat_bonuses}
@@ -79,7 +79,7 @@ function needsDamageType(stat: string) {
           {i18n.__(stringFromAffectedStat(bon.stat))}:
           {#if bon["scaling-stat"]}
             {bon.scale < 0 ? "" : "+"}{(bon.scale * 100).toFixed(0)}% of {i18n.__(
-              stringFromScalingStat(bon["scaling-stat"])
+              stringFromScalingStat(bon["scaling-stat"]),
             )}
           {:else}
             {bon.scale < 0 ? "" : "+"}{bon.scale}

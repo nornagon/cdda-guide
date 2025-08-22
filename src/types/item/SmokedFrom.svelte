@@ -6,18 +6,18 @@ import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 import { t } from "@transifex/native";
 
-  interface Props {
-    item_id: string;
-  }
+interface Props {
+  item_id: string;
+}
 
-  let { item_id }: Props = $props();
+let { item_id }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
 const sources = data
   .byType("item")
   .filter(
-    (it) => it.id && "smoking_result" in it && it.smoking_result === item_id
+    (it) => it.id && "smoking_result" in it && it.smoking_result === item_id,
   );
 
 sources.sort(byName);
@@ -26,11 +26,11 @@ sources.sort(byName);
 {#if sources.length}
   <section>
     <h1>{t("Smoke", { _context: "Obtaining" })}</h1>
-    <LimitedList items={sources} >
+    <LimitedList items={sources}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="item" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

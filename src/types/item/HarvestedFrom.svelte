@@ -7,11 +7,11 @@ import type { Furniture, Terrain } from "../../types";
 import ItemSymbol from "./ItemSymbol.svelte";
 import { t } from "@transifex/native";
 
-  interface Props {
-    item_id: string;
-  }
+interface Props {
+  item_id: string;
+}
 
-  let { item_id }: Props = $props();
+let { item_id }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -30,7 +30,7 @@ const harvestedFrom = (data.byType("terrain") as (Terrain | Furniture)[])
           return e.drop === item_id;
         }
       });
-    })
+    }),
   );
 
 harvestedFrom.sort(byName);
@@ -39,11 +39,11 @@ harvestedFrom.sort(byName);
 {#if harvestedFrom.length}
   <section>
     <h1>{t("Harvest", { _context: "Obtaining" })}</h1>
-    <LimitedList items={harvestedFrom} >
+    <LimitedList items={harvestedFrom}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type={item.type} id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

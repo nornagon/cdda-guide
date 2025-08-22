@@ -6,12 +6,12 @@ import { getContext } from "svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
-  interface Props {
-    act: ActivityDataCommon & { result?: string };
-    resultType: "terrain" | "furniture";
-  }
+interface Props {
+  act: ActivityDataCommon & { result?: string };
+  resultType: "terrain" | "furniture";
+}
 
-  let { act, resultType }: Props = $props();
+let { act, resultType }: Props = $props();
 
 const data = getContext<CddaData>("data");
 

@@ -1,11 +1,11 @@
 <script lang="ts">
 import type { AsciiArt } from "../types";
 
-  interface Props {
-    picture: AsciiArt;
-  }
+interface Props {
+  picture: AsciiArt;
+}
 
-  let { picture }: Props = $props();
+let { picture }: Props = $props();
 
 let color = ["white"];
 const parsed: { string: string; color: string }[][] = [];
@@ -26,7 +26,7 @@ for (const line of picture.picture) {
         color.unshift(nextColorTag[1].substring(1));
       }
       remaining = remaining.substring(
-        nextColorTag.index + nextColorTag[0].length
+        nextColorTag.index + nextColorTag[0].length,
       );
     } else break;
   }

@@ -27,11 +27,11 @@ import ItemTable from "./item/ItemTable.svelte";
 
 const _context = "Monster";
 
-  interface Props {
-    item: Monster;
-  }
+interface Props {
+  item: Monster;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 let data = getContext<CddaData>("data");
 
@@ -122,7 +122,7 @@ function damage(mon: Monster) {
   //melee_damage = melee_damage ?? [ { damage_type: "bash", amount: `${melee_dice}d${melee_dice_sides}` } ]
   return (
     `${melee_dice}d${melee_dice_sides} ${singularName(
-      data.byIdMaybe("damage_type", "bash") ?? { id: "bash" }
+      data.byIdMaybe("damage_type", "bash") ?? { id: "bash" },
     )}` +
     du
       .map(
@@ -130,8 +130,8 @@ function damage(mon: Monster) {
           ` + ${u.amount} ${singularName(
             data.byIdMaybe("damage_type", u.damage_type) ?? {
               id: u.damage_type,
-            }
-          )}`
+            },
+          )}`,
       )
       .join("")
   );
@@ -309,8 +309,8 @@ let upgrades =
         monsters: item.upgrades.into
           ? [item.upgrades.into]
           : item.upgrades.into_group
-          ? flattenGroup(data.byId("monstergroup", item.upgrades.into_group))
-          : [],
+            ? flattenGroup(data.byId("monstergroup", item.upgrades.into_group))
+            : [],
       }
     : null;
 </script>
@@ -399,7 +399,7 @@ let upgrades =
               {#each Object.entries(monsterArmor(item.armor)) as [damageTypeId, value]}
                 {@const damageType = data.byIdMaybe(
                   "damage_type",
-                  damageTypeId
+                  damageTypeId,
                 )}
                 {#if value}
                   <dt>{singularName(damageType ?? { id: damageTypeId })}</dt>
@@ -501,7 +501,7 @@ let upgrades =
         <dd>
           {#if item.death_function.effect?.id && data.byIdMaybe("SPELL", item.death_function.effect.id)}
             {singularName(data.byId("SPELL", item.death_function.effect.id))} ({singular(
-              data.byId("SPELL", item.death_function.effect.id).description
+              data.byId("SPELL", item.death_function.effect.id).description,
             )})
           {:else}
             {item.death_function.effect?.id ??
@@ -525,7 +525,7 @@ let upgrades =
           {:else if upgrades.half_life}
             {t(
               "with a half-life of {half_life} {half_life, plural, =1 {day} other {days}}",
-              { _context, half_life: upgrades.half_life }
+              { _context, half_life: upgrades.half_life },
             )}
           {/if}
         </dd>

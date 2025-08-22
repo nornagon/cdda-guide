@@ -9,11 +9,11 @@ import ColorText from "./ColorText.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
-  interface Props {
-    item: JsonFlag;
-  }
+interface Props {
+  item: JsonFlag;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 let data = getContext<CddaData>("data");
 
@@ -36,7 +36,7 @@ const bionicWithFlag = data
       f.id &&
       (f.flags?.includes(item.id) ||
         f.active_flags?.includes(item.id) ||
-        f.inactive_flags?.includes(item.id))
+        f.inactive_flags?.includes(item.id)),
   );
 </script>
 
@@ -49,55 +49,55 @@ const bionicWithFlag = data
 {#if itemsWithFlag.length}
   <section>
     <h1>{t("Items", { _comment: "Section heading" })}</h1>
-    <LimitedList items={itemsWithFlag.sort(byName)} >
+    <LimitedList items={itemsWithFlag.sort(byName)}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="item" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
 {#if vpartsWithFlag.length}
   <section>
     <h1>{t("Vehicle Parts")}</h1>
-    <LimitedList items={vpartsWithFlag.sort(byName)} >
+    <LimitedList items={vpartsWithFlag.sort(byName)}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="vehicle_part" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
 {#if terrainWithFlag.length}
   <section>
     <h1>{t("Terrain")}</h1>
-    <LimitedList items={terrainWithFlag.sort(byName)} >
+    <LimitedList items={terrainWithFlag.sort(byName)}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="terrain" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
 {#if furnitureWithFlag.length}
   <section>
     <h1>{t("Furniture")}</h1>
-    <LimitedList items={furnitureWithFlag.sort(byName)} >
+    <LimitedList items={furnitureWithFlag.sort(byName)}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="furniture" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
 {#if bionicWithFlag.length}
   <section>
     <h1>{t("Bionics")}</h1>
-    <LimitedList items={bionicWithFlag.sort(byName)} >
+    <LimitedList items={bionicWithFlag.sort(byName)}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="bionic" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

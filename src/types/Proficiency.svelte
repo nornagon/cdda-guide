@@ -8,11 +8,11 @@ import ItemSymbol from "./item/ItemSymbol.svelte";
 import { t } from "@transifex/native";
 import Recipe from "./Recipe.svelte";
 
-  interface Props {
-    item: Proficiency;
-  }
+interface Props {
+  item: Proficiency;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Proficiency";
@@ -23,27 +23,27 @@ const recipesUsingProficiency = [
       .byType("recipe")
       .filter((recipe) =>
         (recipe.proficiencies ?? []).some(
-          (prof) => prof.proficiency === item.id
-        )
+          (prof) => prof.proficiency === item.id,
+        ),
       )
       .map((recipe) => recipe.result)
-      .filter((x): x is string => !!x)
+      .filter((x): x is string => !!x),
   ),
 ].sort((a, b) =>
   singularName(data.byId("item", a)).localeCompare(
-    singularName(data.byId("item", b))
-  )
+    singularName(data.byId("item", b)),
+  ),
 );
 
 const practiceRecipesUsingProficiency = data
   .byType("practice")
   .filter((recipe) =>
-    (recipe.proficiencies ?? []).some((prof) => prof.proficiency === item.id)
+    (recipe.proficiencies ?? []).some((prof) => prof.proficiency === item.id),
   )
   .sort(
     (a, b) =>
       (a.practice_data?.min_difficulty ?? 0) -
-      (b.practice_data?.min_difficulty ?? 0)
+      (b.practice_data?.min_difficulty ?? 0),
   );
 
 const proficienciesRequiring = data
@@ -51,7 +51,7 @@ const proficienciesRequiring = data
   .filter(
     (prof) =>
       prof.id &&
-      (prof.required_proficiencies ?? []).some((prof) => prof === item.id)
+      (prof.required_proficiencies ?? []).some((prof) => prof === item.id),
   );
 </script>
 
@@ -86,23 +86,23 @@ const proficienciesRequiring = data
 {#if proficienciesRequiring.length}
   <section>
     <h1>{t("Required By", { _context })}</h1>
-    <LimitedList items={proficienciesRequiring} >
+    <LimitedList items={proficienciesRequiring}>
       {#snippet children({ item })}
-            <ThingLink type="proficiency" id={item.id} />
-                {/snippet}
-        </LimitedList>
+        <ThingLink type="proficiency" id={item.id} />
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
 
 {#if recipesUsingProficiency.length}
   <section>
     <h1>{t("Recipes", { _context })}</h1>
-    <LimitedList items={recipesUsingProficiency} >
+    <LimitedList items={recipesUsingProficiency}>
       {#snippet children({ item })}
-            <ItemSymbol item={data.byId("item", item)} />
+        <ItemSymbol item={data.byId("item", item)} />
         <ThingLink type="item" id={item} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
 

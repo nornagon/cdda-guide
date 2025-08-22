@@ -66,7 +66,7 @@ let obj =
   data.byIdMaybe(item.type as keyof SupportedTypes, item.id) ??
   defaultItem(item.id, item.type);
 
-const displays: Record<string, Component> = {
+const displays: Record<string, Component<any>> = {
   MONSTER: Monster,
   AMMO: Item,
   GUN: Item,
@@ -127,7 +127,7 @@ const display = (obj && displays[obj.type]) ?? Unknown;
       <h1>{t("Error")}</h1>
       <p>
         {t(
-          "There was a problem displaying this page. Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build."
+          "There was a problem displaying this page. Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build.",
         )}
       </p>
       <details>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
+import { run } from "svelte/legacy";
 
 import {
   mapType,
@@ -29,6 +29,13 @@ import {
   overmapAppearance,
 } from "./types/item/spawnLocations";
 
+interface Props {
+  data: CddaData;
+  search: string;
+}
+
+let { data, search }: Props = $props();
+
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
   "monster",
@@ -49,7 +56,6 @@ type SearchableType = SupportedTypeMapped & {
   id: string;
   type: keyof SupportedTypesWithMapped;
 } & { __filename?: string };
-
 
 type SearchTarget = {
   id: string;
@@ -57,30 +63,32 @@ type SearchTarget = {
   name: string;
   type: keyof SupportedTypesWithMapped;
 };
-let targets: SearchTarget[] = $derived([...(data?.all() ?? [])]
-  .filter(
-    (x) =>
-      "id" in x &&
-      typeof x.id === "string" &&
-      SEARCHABLE_TYPES.has(mapType(x.type))
-  )
-  .filter((x) => (x.type === "mutation" ? !/Fake\d$/.test(x.id) : true))
-  .flatMap((x) =>
-    [
-      {
-        id: (x as any).id,
-        name: searchableName(data, x),
-        type: mapType(x.type),
-      },
-    ].concat(
-      itemVariants(x).map((v) => ({
-        id: (x as any).id,
-        variant_id: v.id,
-        name: singular(v.name),
-        type: mapType(x.type),
-      }))
+let targets: SearchTarget[] = $derived(
+  [...(data?.all() ?? [])]
+    .filter(
+      (x) =>
+        "id" in x &&
+        typeof x.id === "string" &&
+        SEARCHABLE_TYPES.has(mapType(x.type)),
     )
-  ));
+    .filter((x) => (x.type === "mutation" ? !/Fake\d$/.test(x.id) : true))
+    .flatMap((x) =>
+      [
+        {
+          id: (x as any).id,
+          name: searchableName(data, x),
+          type: mapType(x.type),
+        },
+      ].concat(
+        itemVariants(x).map((v) => ({
+          id: (x as any).id,
+          variant_id: v.id,
+          name: singular(v.name),
+          type: mapType(x.type),
+        })),
+      ),
+    ),
+);
 function searchableName(data: CddaData, item: SupportedTypeMapped) {
   item = data._flatten(item);
   if (item?.type === "overmap_special" || item?.type === "city_building") {
@@ -92,7 +100,7 @@ function searchableName(data: CddaData, item: SupportedTypeMapped) {
           .map((omEntry) => {
             const normalizedId = omEntry.overmap!.replace(
               /_(north|south|east|west)$/,
-              ""
+              "",
             );
             const om = data.byIdMaybe("overmap_terrain", normalizedId);
             return om ? singularName(om) : normalizedId;
@@ -115,14 +123,6 @@ function itemVariants(item: SupportedTypeMapped) {
   if (isItem(item) && "variants" in item && item.variants) return item.variants;
   else return [];
 }
-
-
-  interface Props {
-    data: CddaData;
-    search: string;
-  }
-
-  let { data, search }: Props = $props();
 
 type SearchResult = {
   item: SearchableType;
@@ -165,7 +165,7 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
       ret.push(
         getOMSByAppearance(data)
           .get(appearance)!
-          .map((id) => data.byId("overmap_special", id))
+          .map((id) => data.byId("overmap_special", id)),
       );
       seenAppearances.add(appearance);
     }
@@ -173,17 +173,18 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
   return ret;
 }
 run(() => {
-    setContext("data", data);
-  });
+  setContext("data", data);
+});
 
-let matchingObjects =
-  $derived(search &&
-  (search.length >= 2 || cjkRegex.test(search)) &&
-  data &&
-  filter(search));
-let matchingObjectsList = $derived(matchingObjects
-  ? [...matchingObjects.entries()]
-  : null);
+let matchingObjects = $derived(
+  search &&
+    (search.length >= 2 || cjkRegex.test(search)) &&
+    data &&
+    filter(search),
+);
+let matchingObjectsList = $derived(
+  matchingObjects ? [...matchingObjects.entries()] : null,
+);
 </script>
 
 {#if matchingObjectsList}
@@ -193,7 +194,7 @@ let matchingObjectsList = $derived(matchingObjects
       <h1>location</h1>
       <LimitedTableList items={grouped} limit={50}>
         {#snippet item({ item: result })}
-                <tr  >
+          <tr>
             <td style="text-align: center; padding-left: 2.5em;">
               <OvermapAppearance overmapSpecial={result[0]} />
             </td>
@@ -203,13 +204,13 @@ let matchingObjectsList = $derived(matchingObjects
               >{#if result.length > 1}{" "}({result.length} variants){/if}
             </td>
           </tr>
-              {/snippet}
+        {/snippet}
       </LimitedTableList>
     {:else}
       <h1>{type.replace(/_/g, " ")}</h1>
-      <LimitedList items={results}  limit={50}>
+      <LimitedList items={results} limit={50}>
         {#snippet children({ item: result })}
-                {@const item = data._flatten(result.item)}
+          {@const item = data._flatten(result.item)}
           <ItemSymbol {item} />
           <ThingLink
             type={mapType(result.item.type)}
@@ -219,8 +220,8 @@ let matchingObjectsList = $derived(matchingObjects
             <em style="color: var(--cata-color-gray)"
               >({t("obsolete", { _context: "Search Results" })})</em>
           {/if}
-                      {/snippet}
-            </LimitedList>
+        {/snippet}
+      </LimitedList>
     {/if}
   {:else}
     <em>{t("No results.", { _context: "Search Results" })}</em>

@@ -9,17 +9,21 @@ import type { CddaData } from "../../data";
 import { t } from "@transifex/native";
 import type { SupportedTypesWithMapped } from "src/types";
 
-  interface Props {
-    loot: Loot | Promise<Loot>;
-    type?: keyof SupportedTypesWithMapped;
-    heading?: string;
-  }
+interface Props {
+  loot: Loot | Promise<Loot>;
+  type?: keyof SupportedTypesWithMapped;
+  heading?: string;
+}
 
-  let { loot, type = "item", heading = type === "furniture"
+let {
+  loot,
+  type = "item",
+  heading = type === "furniture"
     ? t("Furniture", { _context: "Loot Table" })
     : type === "terrain"
-    ? t("Terrain", { _context: "Loot Table" })
-    : t("Loot", { _context: "Loot Table" }) }: Props = $props();
+      ? t("Terrain", { _context: "Loot Table" })
+      : t("Loot", { _context: "Loot Table" }),
+}: Props = $props();
 
 function stripType(x: any): any {
   return x;
@@ -40,12 +44,12 @@ const data = getContext<CddaData>("data");
     {@const sortedLoot = [...loot.entries()].sort((a, b) =>
       (b[1].prob * 100).toFixed(2) === (a[1].prob * 100).toFixed(2)
         ? b[1].expected - a[1].expected
-        : b[1].prob - a[1].prob
+        : b[1].prob - a[1].prob,
     )}
     <section>
       <LimitedTableList items={sortedLoot}>
         {#snippet header()}
-                <tr >
+          <tr>
             <th colspan="2"><h1>{heading}</h1></th>
             <th class="numeric"
               ><h1>
@@ -64,10 +68,10 @@ const data = getContext<CddaData>("data");
                 })}
               </h1></th>
           </tr>
-              {/snippet}
+        {/snippet}
         {#snippet item({ item: [item_id, chance] })}
           {@const item = stripType(data.byId(type, item_id))}
-                <tr  >
+          <tr>
             <td>
               <ItemSymbol {item} />
             </td>
@@ -77,7 +81,7 @@ const data = getContext<CddaData>("data");
             <td class="numeric">{showNumber(chance.expected)}</td>
             <td class="numeric">{showProbability(chance.prob)}</td>
           </tr>
-              {/snippet}
+        {/snippet}
       </LimitedTableList>
     </section>
   {/if}

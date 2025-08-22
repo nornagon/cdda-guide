@@ -4,11 +4,11 @@ import { CddaData, singularName } from "../data";
 import type { ConstructionGroup } from "../types";
 import Construction from "./Construction.svelte";
 
-  interface Props {
-    item: ConstructionGroup;
-  }
+interface Props {
+  item: ConstructionGroup;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 

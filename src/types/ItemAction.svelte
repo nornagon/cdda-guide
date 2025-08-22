@@ -12,11 +12,11 @@ import { t } from "@transifex/native";
 import LimitedList from "../LimitedList.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 
-  interface Props {
-    item: ItemAction;
-  }
+interface Props {
+  item: ItemAction;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -29,8 +29,8 @@ const providers = data
         i.type === "__item_action__"
           ? i.id === item.id
           : (i.type === "repair_item" && i.item_action_type === item.id) ||
-            i.type === item.id
-      )
+            i.type === item.id,
+      ),
   );
 providers.sort(byName);
 
@@ -44,23 +44,23 @@ const providerQualities = data
 {#if providers.length}
   <section>
     <h1>{t("Provided By", { _context: "Use action" })}</h1>
-    <LimitedList items={providers} >
+    <LimitedList items={providers}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="item" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
 
 {#if providerQualities.length}
   <section>
     <h1>{t("Provided By Quality", { _context: "Use action" })}</h1>
-    <LimitedList items={providerQualities} >
+    <LimitedList items={providerQualities}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type={item.type} id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

@@ -11,22 +11,22 @@ import ThingLink from "./ThingLink.svelte";
 let data = getContext<CddaData>("data");
 const _context = "Mutation";
 
-  interface Props {
-    item: MutationCategory;
-    inCatalog?: boolean;
-  }
+interface Props {
+  item: MutationCategory;
+  inCatalog?: boolean;
+}
 
-  let { item, inCatalog = false }: Props = $props();
+let { item, inCatalog = false }: Props = $props();
 
 const mutationsInCategory = data
   .byType("mutation")
   .filter((m) => (m.category ?? []).includes(item.id))
   .sort(byName);
 const preThreshold = mutationsInCategory.filter(
-  (t) => !t.threshreq || t.threshreq.length === 0
+  (t) => !t.threshreq || t.threshreq.length === 0,
 );
 const postThreshold = mutationsInCategory.filter(
-  (t) => !(!t.threshreq || t.threshreq.length === 0)
+  (t) => !(!t.threshreq || t.threshreq.length === 0),
 );
 </script>
 

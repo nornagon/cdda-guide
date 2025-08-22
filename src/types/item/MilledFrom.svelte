@@ -6,11 +6,11 @@ import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 import { t } from "@transifex/native";
 
-  interface Props {
-    item_id: string;
-  }
+interface Props {
+  item_id: string;
+}
 
-  let { item_id }: Props = $props();
+let { item_id }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -24,11 +24,11 @@ milledFrom.sort(byName);
 {#if milledFrom.length}
   <section>
     <h1>{t("Mill", { _context: "Obtaining" })}</h1>
-    <LimitedList items={milledFrom} >
+    <LimitedList items={milledFrom}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="item" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

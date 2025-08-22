@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
 import Thing from "./Thing.svelte";
 import { CddaData, data, loadProgress, mapType, singularName } from "./data";
 import { tileData } from "./tile-data";
@@ -95,15 +93,14 @@ function saveTileset(url: string) {
   }
 }
 let tilesetUrlTemplate = $state(loadTileset());
-run(() => {
-    saveTileset(tilesetUrlTemplate);
-  });
-let tilesetUrl = $derived($data
-  ? tilesetUrlTemplate?.replace("{version}", $data.build_number!) ?? null
-  : null);
-run(() => {
-    tileData.setURL(tilesetUrl);
-  });
+$effect(() => saveTileset(tilesetUrlTemplate));
+
+let tilesetUrl = $derived(
+  $data
+    ? (tilesetUrlTemplate?.replace("{version}", $data.build_number!) ?? null)
+    : null,
+);
+$effect(() => tileData.setURL(tilesetUrl));
 
 function decodeQueryParam(p: string) {
   return decodeURIComponent(p.replace(/\+/g, " "));
@@ -128,18 +125,18 @@ function load() {
   }
 }
 
-run(() => {
-    if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
+$effect(() => {
+  if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
     const it = $data.byId(item.type as any, item.id);
     document.title = `${singularName(
-      it
+      it,
     )} - The Hitchhiker's Guide to the Cataclysm`;
   } else if (item && !item.id && item.type) {
     document.title = `${item.type} - The Hitchhiker's Guide to the Cataclysm`;
   } else {
     document.title = "The Hitchhiker's Guide to the Cataclysm";
   }
-  });
+});
 
 let search: string = $state("");
 
@@ -160,7 +157,7 @@ const clearItem = () => {
       "",
       import.meta.env.BASE_URL +
         (search ? "search/" + encodeURIComponent(search) : "") +
-        location.search
+        location.search,
     );
   else
     replaceState(
@@ -168,7 +165,7 @@ const clearItem = () => {
       "",
       import.meta.env.BASE_URL +
         (search ? "search/" + encodeURIComponent(search) : "") +
-        location.search
+        location.search,
     );
   item = null;
 };
@@ -269,7 +266,7 @@ async function getRandomPage() {
   const items = d
     .all()
     .filter(
-      (x) => "id" in x && randomableItemTypes.has(mapType(x.type))
+      (x) => "id" in x && randomableItemTypes.has(mapType(x.type)),
     ) as (SupportedTypeMapped & { id: string })[];
   return items[(Math.random() * items.length) | 0];
 }
@@ -286,10 +283,11 @@ newRandomPage();
 
 // This is one character behind the actual search value, because
 // of the throttle, but eh, it's good enough.
-let currentHref = $state(location.href);
-run(() => {
-    item, search, (currentHref = location.href);
-  });
+let currentHref = $derived.by(() => {
+  item;
+  search;
+  return location.href;
+});
 
 function langHref(lang: string, href: string) {
   const u = new URL(href);
@@ -304,7 +302,7 @@ function langHref(lang: string, href: string) {
   {#if builds}
     {@const build_number =
       version === "latest" ? builds[0].build_number : version}
-    {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b) ) as lang}
+    {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b), ) as lang}
       <link
         rel="alternate"
         hreflang={lang}
@@ -399,25 +397,25 @@ files in the game itself.`,
             link_flashlight: "{link_flashlight}",
             link_table: "{link_table}",
             link_zombie: "{link_zombie}",
-          }
+          },
         )}
         slot0="hhg"
         slot1="link_cdda"
         slot2="link_flashlight"
         slot3="link_table"
         slot4="link_zombie">
-  <strong slot="s0">Hitchhiker's Guide to the Cataclysm</strong>
-  <a slot="s1" href="https://cataclysmdda.org/"
+        <strong slot="s0">Hitchhiker's Guide to the Cataclysm</strong>
+        <a slot="s1" href="https://cataclysmdda.org/"
           >Cataclysm: Dark Days Ahead</a>
-  <a
+        <a
           slot="s2"
           href="{import.meta.env.BASE_URL}item/flashlight{location.search}"
           >{t("flashlight", { _comment: "Item name" })}</a>
-  <a
+        <a
           slot="s3"
           href="{import.meta.env.BASE_URL}furniture/f_table{location.search}"
           >{t("table", { _comment: "Furniture" })}</a>
-  <a
+        <a
           slot="s4"
           href="{import.meta.env.BASE_URL}monster/mon_zombie{location.search}"
           >{t("zombie", { _comment: "Monster name" })}</a>
@@ -432,10 +430,10 @@ access, as long as you've visited it once before.`)}
         <InterpolatedTranslation
           str={t(
             `It's also {installable_button}, so you can pop it out of your browser and use it like a regular app.`,
-            { installable_button: "{installable_button}" }
+            { installable_button: "{installable_button}" },
           )}
           slot0="installable_button">
-  <button
+          <button
             slot="s0"
             class="disclosure"
             onclick={(e) => {
@@ -459,7 +457,7 @@ Anyway?`,
         {
           _comment:
             "This is a quote from the Hitchhiker's Guide to the Galaxy, by Douglas Adams",
-        }
+        },
       )}
     </p>
     <p>
@@ -470,14 +468,14 @@ Anyway?`,
             link_github: "{link_github}",
             link_nornagon: "{link_nornagon}",
             link_file_an_issue: "{link_file_an_issue}",
-          }
+          },
         )}
         slot0="link_github"
         slot1="link_nornagon"
         slot2="link_file_an_issue">
-  <a slot="s0" href="https://github.com/nornagon/cdda-guide">GitHub</a>
-  <a slot="s1" href="https://www.nornagon.net">nornagon</a>
-  <a slot="s2" href="https://github.com/nornagon/cdda-guide/issues"
+        <a slot="s0" href="https://github.com/nornagon/cdda-guide">GitHub</a>
+        <a slot="s1" href="https://www.nornagon.net">nornagon</a>
+        <a slot="s2" href="https://github.com/nornagon/cdda-guide/issues"
           >{t("file an issue")}</a>
       </InterpolatedTranslation>
     </p>
@@ -487,10 +485,10 @@ Anyway?`,
         <InterpolatedTranslation
           str={t(
             `You can help translate the Guide into your language on {link_transifex}.`,
-            { link_transifex: "{link_transifex}" }
+            { link_transifex: "{link_transifex}" },
           )}
           slot0="link_transifex">
-  <a
+          <a
             slot="s0"
             href="https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/"
             >Transifex</a>
@@ -521,7 +519,7 @@ Anyway?`,
         link_random_page: "{link_random_page}",
       })}
       slot0="link_random_page">
-  <a slot="s0" href={randomPage} onclick={() => setTimeout(newRandomPage)}
+      <a slot="s0" href={randomPage} onclick={() => setTimeout(newRandomPage)}
         >{t("random page")}</a>
     </InterpolatedTranslation>
   {/if}
@@ -589,7 +587,7 @@ Anyway?`,
             location.href = url.toString();
           }}>
           <option value="en">English</option>
-          {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b) ) as lang}
+          {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b), ) as lang}
             <option value={lang}>{getLanguageName(lang)}</option>
           {/each}
         </select>

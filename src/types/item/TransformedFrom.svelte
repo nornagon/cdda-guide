@@ -16,33 +16,33 @@ import LimitedList from "../../LimitedList.svelte";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
-  interface Props {
-    item_id: string;
-  }
+interface Props {
+  item_id: string;
+}
 
-  let { item_id }: Props = $props();
+let { item_id }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const transformedFrom = data.transformedFrom(item_id);
 const getTransformAction = (item: Item) =>
   normalizeUseAction(item.use_action).find(
-    (a) => "target" in a && a.target === item_id
+    (a) => "target" in a && a.target === item_id,
   ) as TransformUseFunction | DelayedTransformUseFunction;
 </script>
 
 {#if transformedFrom.length}
   <section>
     <h1>{t("Transformed From", { _context: "Obtaining" })}</h1>
-    <LimitedList items={transformedFrom} >
+    <LimitedList items={transformedFrom}>
       {#snippet children({ item })}
-            {@const ua = getTransformAction(item)}
+        {@const ua = getTransformAction(item)}
         <ItemSymbol item={data.byId("item", item.id)} />
         <ThingLink
           type="item"
           id={item.id} />{#if ua.type === "delayed_transform" && ua.transform_age}{" "}({asHumanReadableDuration(
-            ua.transform_age * 100
+            ua.transform_age * 100,
           )}){/if}
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

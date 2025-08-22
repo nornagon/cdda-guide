@@ -1,11 +1,11 @@
 <script lang="ts">
 import { mapType } from "./data";
 
-  interface Props {
-    item: any;
-  }
+interface Props {
+  item: any;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 </script>
 
 <section class="obsoletion-warning">

@@ -55,11 +55,11 @@ import Recipe from "../Recipe.svelte";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
-  interface Props {
-    item_id: string;
-  }
+interface Props {
+  item_id: string;
+}
 
-  let { item_id }: Props = $props();
+let { item_id }: Props = $props();
 
 let data = getContext<CddaData>("data");
 
@@ -67,7 +67,7 @@ const recipes = getRecipeIndex(data)[item_id] ?? [];
 recipes.sort(
   (a, b) =>
     ((a.never_learn ?? false) as unknown as number) -
-    ((b.never_learn ?? false) as unknown as number)
+    ((b.never_learn ?? false) as unknown as number),
 );
 
 const byproducts = getByproductsIndex(data)[item_id] ?? [];
@@ -82,11 +82,11 @@ const byproducts = getByproductsIndex(data)[item_id] ?? [];
 {#if byproducts.length}
   <section>
     <h1>{t("Byproduct when crafting", { _context: "Obtaining" })}</h1>
-    <LimitedList items={byproducts} >
+    <LimitedList items={byproducts}>
       {#snippet children({ item })}
-            <ItemSymbol item={data.byId("item", item.result)} />
+        <ItemSymbol item={data.byId("item", item.result)} />
         <ThingLink type="item" id={item.result} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

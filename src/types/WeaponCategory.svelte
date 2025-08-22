@@ -8,11 +8,11 @@ import type { WeaponCategory } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 
-  interface Props {
-    item: WeaponCategory;
-  }
+interface Props {
+  item: WeaponCategory;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 
@@ -33,12 +33,12 @@ martialArts.sort(byName);
 <section>
   <h1>{t("Weapons", { _context: "Martial Art" })}</h1>
   {#if itemsInCategory.length}
-    <LimitedList items={itemsInCategory} >
+    <LimitedList items={itemsInCategory}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="item" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   {:else}
     <p style="color: var(--cata-color-gray)">
       {t("There are no weapons in this category.")}
@@ -49,12 +49,12 @@ martialArts.sort(byName);
 <section>
   <h1>{t("Martial Arts")}</h1>
   {#if martialArts.length}
-    <LimitedList items={martialArts} >
+    <LimitedList items={martialArts}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="martial_art" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   {:else}
     <p style="color: var(--cata-color-gray)">
       {t("There are no martial arts that use this weapon category.")}

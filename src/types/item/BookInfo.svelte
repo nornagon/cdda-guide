@@ -6,11 +6,11 @@ import type { CddaData } from "../../data";
 import type { BookSlot, ItemBasicInfo } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 
-  interface Props {
-    item: BookSlot & ItemBasicInfo;
-  }
+interface Props {
+  item: BookSlot & ItemBasicInfo;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 const _context = "Item Book Info";
 
 let data = getContext<CddaData>("data");
@@ -19,7 +19,7 @@ const bookRecipes = new Map<string, number>();
 function add(recipe_id: string, level: number) {
   bookRecipes.set(
     recipe_id,
-    Math.min(level, bookRecipes.get(recipe_id) ?? Infinity)
+    Math.min(level, bookRecipes.get(recipe_id) ?? Infinity),
   );
 }
 for (const recipe of data.byType("recipe")) {
@@ -28,7 +28,7 @@ for (const recipe of data.byType("recipe")) {
       if (id === item.id) add(recipe.result, level);
       else if (recipe.book_learn)
         for (const [id, obj] of Object.entries(
-          recipe.book_learn as Record<string, any>
+          recipe.book_learn as Record<string, any>,
         ))
           if (id === item.id) add(recipe.result, obj.skill_level ?? 0);
 }

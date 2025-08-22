@@ -8,11 +8,11 @@ import type { Bionic } from "../types";
 import MutationList from "./MutationList.svelte";
 import ThingLink from "./ThingLink.svelte";
 
-  interface Props {
-    item: Bionic;
-  }
+interface Props {
+  item: Bionic;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 const data = getContext<CddaData>("data");
 const _context = "Bionic";
 
@@ -205,7 +205,7 @@ const containingBionics = data
       <dd>
         <MutationList
           mutations={item.canceled_mutations.map((id) =>
-            data.byId("mutation", id)
+            data.byId("mutation", id),
           )} />
       </dd>
     {/if}

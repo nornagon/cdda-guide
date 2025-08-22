@@ -10,13 +10,13 @@ import MartialArtRequirements from "./MartialArtRequirements.svelte";
 import ThingLink from "./ThingLink.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 
-  interface Props {
-    item: Technique;
-    buffMap?: Map<string, MartialArtBuff>;
-    standalone?: boolean;
-  }
+interface Props {
+  item: Technique;
+  buffMap?: Map<string, MartialArtBuff>;
+  standalone?: boolean;
+}
 
-  let { item, buffMap = new Map(), standalone = true }: Props = $props();
+let { item, buffMap = new Map(), standalone = true }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Martial Art";
@@ -32,14 +32,14 @@ const type = i18n.__(
   item.block_counter
     ? "Block Counter"
     : item.dodge_counter
-    ? "Dodge Counter"
-    : item.miss_recovery
-    ? "Miss Recovery"
-    : item.grab_break
-    ? "Grab Break"
-    : item.defensive
-    ? "Defensive"
-    : "Offensive"
+      ? "Dodge Counter"
+      : item.miss_recovery
+        ? "Miss Recovery"
+        : item.grab_break
+          ? "Grab Break"
+          : item.defensive
+            ? "Defensive"
+            : "Offensive",
 );
 
 const extractInfo = (s: string): string =>
@@ -47,15 +47,15 @@ const extractInfo = (s: string): string =>
 const targetRequirements: string[] = [];
 if (item.human_target)
   targetRequirements.push(
-    extractInfo(i18n.__("* Only works on a <info>humanoid</info> target"))
+    extractInfo(i18n.__("* Only works on a <info>humanoid</info> target")),
   );
 if (item.downed_target)
   targetRequirements.push(
-    extractInfo(i18n.__("* Only works on a <info>downed</info> target"))
+    extractInfo(i18n.__("* Only works on a <info>downed</info> target")),
   );
 if (item.stunned_target)
   targetRequirements.push(
-    extractInfo(i18n.__("* Only works on a <info>stunned</info> target"))
+    extractInfo(i18n.__("* Only works on a <info>stunned</info> target")),
   );
 </script>
 
@@ -76,8 +76,11 @@ if (item.stunned_target)
       {item.crit_ok
         ? t("Yes")
         : item.crit_tec
-        ? t("Only", { _context: "Martial Art", _comment: "Activate on Crit?" })
-        : t("No")}
+          ? t("Only", {
+              _context: "Martial Art",
+              _comment: "Activate on Crit?",
+            })
+          : t("No")}
     </dd>
     {#if item.weighting && item.weighting !== 1}
       <dt>{t("Chance to Activate", { _context })}</dt>
@@ -125,11 +128,11 @@ if (item.stunned_target)
 {#if weapons.length}
   <section>
     <h1>{t("Weapons", { _context })}</h1>
-    <LimitedList items={weapons}  limit={20}>
+    <LimitedList items={weapons} limit={20}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="item" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

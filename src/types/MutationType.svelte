@@ -7,11 +7,11 @@ import { CddaData, singularName } from "../data";
 import type { MutationType } from "../types";
 import MutationList from "./MutationList.svelte";
 
-  interface Props {
-    item: MutationType;
-  }
+interface Props {
+  item: MutationType;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 let data = getContext<CddaData>("data");
 

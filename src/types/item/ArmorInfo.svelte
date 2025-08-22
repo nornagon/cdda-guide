@@ -14,18 +14,18 @@ import ThingLink from "../ThingLink.svelte";
 import { groupBy, uniq } from "./utils";
 import ColorText from "../ColorText.svelte";
 
-  interface Props {
-    item: ItemBasicInfo & ArmorSlot;
-  }
+interface Props {
+  item: ItemBasicInfo & ArmorSlot;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 let data = getContext<CddaData>("data");
 
 const _context = "Item Armor Info";
 
 function addRange(
   x: number | [number, number],
-  y: number | [number, number]
+  y: number | [number, number],
 ): [number, number] {
   const [xlo, xhi] = typeof x === "number" ? [x, x] : x;
   const [ylo, yhi] = typeof y === "number" ? [y, y] : y;
@@ -43,15 +43,15 @@ const itemMaterials =
   item.material == null
     ? []
     : typeof item.material === "string"
-    ? [{ type: item.material, portion: 1 }]
-    : Array.isArray(item.material)
-    ? isStrings(item.material)
-      ? item.material.map((s) => ({ type: s, portion: 1 }))
-      : item.material.map((s) => ({ portion: 1, ...s }))
-    : Object.entries(item.material).map(([type, portion]) => ({
-        type,
-        portion: portion as number,
-      }));
+      ? [{ type: item.material, portion: 1 }]
+      : Array.isArray(item.material)
+        ? isStrings(item.material)
+          ? item.material.map((s) => ({ type: s, portion: 1 }))
+          : item.material.map((s) => ({ portion: 1, ...s }))
+        : Object.entries(item.material).map(([type, portion]) => ({
+            type,
+            portion: portion as number,
+          }));
 const totalMaterialPortion = itemMaterials.reduce((m, o) => m + o.portion, 0);
 
 const normalizedPortionData: (ArmorPortionData & {
@@ -72,12 +72,12 @@ for (const apd of item.armor ?? []) {
   for (const bp_id of uniq(apd.covers ?? [])) {
     const bp = data.byId("body_part", bp_id);
     const existing = normalizedPortionData.find((apd2) =>
-      apd2.covers.includes(bp_id)
+      apd2.covers.includes(bp_id),
     );
     if (existing) {
       existing.encumbrance = addRange(
         existing.encumbrance ?? 0,
-        apd.encumbrance ?? 0
+        apd.encumbrance ?? 0,
       );
       const scale = maxCoverage(bp, apd) / 100;
       const existingScale = maxCoverage(bp, existing) / 100;
@@ -120,7 +120,7 @@ for (const apd of item.armor ?? []) {
         if (!existing.layers.includes(layer)) existing.layers.push(layer);
       for (const newMat of mats) {
         const existingMat = (existing.material! as PartMaterial[]).find(
-          (s) => s.type === newMat.type
+          (s) => s.type === newMat.type,
         );
         if (existingMat) {
           const maxCoverageNew = maxCoverage(bp, apd);
@@ -137,7 +137,7 @@ for (const apd of item.armor ?? []) {
         } else {
           const maxCoverageNew = maxCoverage(bp, apd);
           const modifiedMat = JSON.parse(
-            JSON.stringify(newMat)
+            JSON.stringify(newMat),
           ) as PartMaterial;
           modifiedMat.covered_by_mat =
             ((newMat.covered_by_mat ?? 100) * maxCoverageNew) / 100;
@@ -218,14 +218,14 @@ const allCoveredPartIds = [
 
 const grouped = groupBy(allCoveredPartIds, (bp_id) => {
   const { covers, ...apdModuloCovers } = normalizedPortionData.find((x) =>
-    x.covers.includes(bp_id)
+    x.covers.includes(bp_id),
   )!; // we know there is exactly 1
   return [JSON.stringify(apdModuloCovers)];
 });
 
 const coveredPartGroups = [...grouped.values()].map((bp_ids) => {
   const apdCoveringBp = normalizedPortionData.find((x) =>
-    x.covers.includes(bp_ids[0])
+    x.covers.includes(bp_ids[0]),
   )!;
   return {
     bp_ids,
@@ -246,11 +246,11 @@ function calcEncumbrance(apd: ArmorPortionData, weight: number, bpId: string) {
   const massToEncumbrance = data.byId("body_part", bpId).encumbrance_per_weight;
   if (!massToEncumbrance) return 0;
   const parsedMassToEncumbrance = massToEncumbrance.map(
-    ({ weight, encumbrance }) => ({ weight: parseMass(weight), encumbrance })
+    ({ weight, encumbrance }) => ({ weight: parseMass(weight), encumbrance }),
   );
   parsedMassToEncumbrance.sort((a, b) => a.weight - b.weight);
   const postIndex = parsedMassToEncumbrance.findIndex(
-    ({ weight: w }) => w > weight
+    ({ weight: w }) => w > weight,
   );
   const preIndex = postIndex - 1;
   const pre = parsedMassToEncumbrance[preIndex];
@@ -284,12 +284,12 @@ const computeMaxEncumber = (apd: ArmorPortionData, enc: number): number => {
             !o.rigid
               ? parseVolume(o.max_contains_volume ?? 0) *
                   (o.volume_encumber_modifier ?? 1)
-              : 0
+              : 0,
           ),
-        0
+        0,
       ) ?? 0) *
         (apd.volume_encumber_modifier ?? 1)) /
-        250
+        250,
     )
   );
 };
@@ -298,7 +298,7 @@ const encumbrance = (cp: (typeof coveredPartGroups)[0]): [number, number] => {
     let encumber = calcEncumbrance(
       cp.apd,
       parseMass(item.weight ?? 1),
-      cp.bp_ids[0]
+      cp.bp_ids[0],
     );
     if (item.flags?.includes("VARSIZE"))
       encumber = Math.min(encumber * 2, encumber + 10);
@@ -306,7 +306,7 @@ const encumbrance = (cp: (typeof coveredPartGroups)[0]): [number, number] => {
   }
   return typeof cp.apd.encumbrance === "number"
     ? [cp.apd.encumbrance, computeMaxEncumber(cp.apd, cp.apd.encumbrance)]
-    : cp.apd.encumbrance ?? [0, 0];
+    : (cp.apd.encumbrance ?? [0, 0]);
 };
 const fitsEncumbrance = (enc: number) =>
   Math.max(Math.floor(enc / 2), enc - 10);
@@ -342,7 +342,7 @@ function getEnvResist() {
     normalizedPortionData.reduce(
       (m, o) =>
         m + (o.environmental_protection ?? item.environmental_protection ?? 0),
-      0
+      0,
     ) / normalizedPortionData.length;
   return avgEnvResist;
 }
@@ -409,7 +409,7 @@ function computeMats() {
 }
 
 function fixApd(
-  apd: ArmorPortionData
+  apd: ArmorPortionData,
 ): ArmorPortionData & { material: PartMaterial[] } {
   return apd as any;
 }

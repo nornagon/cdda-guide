@@ -1,11 +1,21 @@
 <script lang="ts">
 import { t } from "@transifex/native";
 
-export let items: any[];
+interface Props {
+  items: any[];
+  limit?: number;
+  grace?: number;
+  header?: () => any;
+  item: (props: { item: any }) => any;
+}
 
-export let limit = 10;
-
-export let grace = 4;
+let {
+  items,
+  limit = 10,
+  grace = 4,
+  header = () => null,
+  item,
+}: Props = $props();
 
 // In test mode, always render the expanded list to catch any render bugs that
 // only show up when the full list is shown.
@@ -15,22 +25,22 @@ const isTesting =
 let realLimit = isTesting
   ? Infinity
   : items.length <= limit + grace
-  ? limit + grace
-  : limit;
+    ? limit + grace
+    : limit;
 </script>
 
 <table>
-  <slot name="header" />
+  {@render header()}
   <tbody>
-    {#each items.slice(0, realLimit) as item}
-      <slot name="sitem" {item} />
+    {#each items.slice(0, realLimit) as it}
+      {@render item({ item: it })}
     {/each}
   </tbody>
 </table>
 {#if items.length > realLimit}
   <button
     class="disclosure"
-    on:click={(e) => {
+    onclick={(e) => {
       e.preventDefault();
       realLimit = Infinity;
     }}

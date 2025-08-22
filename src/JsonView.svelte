@@ -1,18 +1,18 @@
 <script lang="ts">
 import { t } from "@transifex/native";
-  interface Props {
-    obj: any;
-    buildNumber: string | undefined;
-  }
+interface Props {
+  obj: any;
+  buildNumber: string | undefined;
+}
 
-  let { obj, buildNumber }: Props = $props();
+let { obj, buildNumber }: Props = $props();
 const _context = "View/Edit on GitHub";
 </script>
 
 <pre>{JSON.stringify(
     obj,
     (key, value) => (key === "__filename" ? undefined : value),
-    2
+    2,
   )}</pre>
 {#if obj.__filename}
   <a

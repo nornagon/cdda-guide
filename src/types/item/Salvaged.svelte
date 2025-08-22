@@ -8,11 +8,11 @@ import type { Item, Material } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import ItemSymbol from "./ItemSymbol.svelte";
 
-  interface Props {
-    item_id: string;
-  }
+interface Props {
+  item_id: string;
+}
 
-  let { item_id }: Props = $props();
+let { item_id }: Props = $props();
 
 let data = getContext<CddaData>("data");
 
@@ -27,12 +27,12 @@ function itemsWithOnlyMaterial(soughtMat: Material): Item[] {
         it.material == null
           ? []
           : typeof it.material === "string"
-          ? [it.material]
-          : Array.isArray(it.material)
-          ? typeof it.material[0] === "string"
-            ? it.material
-            : it.material.map((m) => (typeof m === "string" ? m : m.type))
-          : Object.keys(it.material);
+            ? [it.material]
+            : Array.isArray(it.material)
+              ? typeof it.material[0] === "string"
+                ? it.material
+                : it.material.map((m) => (typeof m === "string" ? m : m.type))
+              : Object.keys(it.material);
       return mat.length === 1 && mat[0] === soughtMat.id;
     });
 }
@@ -50,11 +50,11 @@ const salvagedFromMaterials = data
 {#if salvagedFromMaterials.length}
   <section>
     <h1>{t("Salvage", { _context: "Obtaining" })}</h1>
-    <LimitedList items={salvagedFromMaterials} >
+    <LimitedList items={salvagedFromMaterials}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink type="item" id={item.id} />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}

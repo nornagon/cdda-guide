@@ -5,16 +5,16 @@ import type { OvermapSpecial } from "../../types";
 
 const data = getContext<CddaData>("data");
 
-  interface Props {
-    overmapSpecial: OvermapSpecial;
-    showZ?: number;
-  }
+interface Props {
+  overmapSpecial: OvermapSpecial;
+  showZ?: number;
+}
 
-  let { overmapSpecial, showZ = 0 }: Props = $props();
+let { overmapSpecial, showZ = 0 }: Props = $props();
 
 const overmaps = [
   ...(overmapSpecial.subtype !== "mutable"
-    ? overmapSpecial.overmaps ?? []
+    ? (overmapSpecial.overmaps ?? [])
     : []),
 ];
 let minX = Infinity,
@@ -42,7 +42,7 @@ function makeAppearanceGrid(z: number) {
       const om = overmapsByPoint.get(`${x}|${y}|${z}`);
       if (om?.overmap) {
         const [, omt_id, dir] = /^(.+?)(?:_(north|south|east|west))?$/.exec(
-          om.overmap
+          om.overmap,
         )!;
         const appearance = omtAppearance(omt_id, dir || "north");
         appearanceRow.push(appearance);
@@ -61,12 +61,12 @@ function rotateSymbol(symbol: string, dir: string) {
     dir === "north"
       ? 0
       : dir === "east"
-      ? 1
-      : dir === "south"
-      ? 2
-      : dir === "west"
-      ? 3
-      : 0;
+        ? 1
+        : dir === "south"
+          ? 2
+          : dir === "west"
+            ? 3
+            : 0;
   if (dirNum === 0) return symbol;
   const rotatable = data
     .byType("rotatable_symbol")
@@ -79,7 +79,7 @@ function rotateSymbol(symbol: string, dir: string) {
 
 function omtAppearance(
   omt_id: string,
-  dir: string = "north"
+  dir: string = "north",
 ): {
   color: string;
   sym: string;

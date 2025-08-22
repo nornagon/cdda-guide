@@ -3,11 +3,11 @@ import { getContext } from "svelte";
 import { CddaData, singular } from "../../data";
 import type { ArmorPortionData, ArmorSlot, ItemBasicInfo } from "../../types";
 
-  interface Props {
-    item: ItemBasicInfo & ArmorSlot;
-  }
+interface Props {
+  item: ItemBasicInfo & ArmorSlot;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 let data = getContext<CddaData>("data");
 
 function isStrings<T>(array: string[] | T[]): array is string[] {
@@ -18,15 +18,15 @@ const normalizedMaterial =
   item.material == null
     ? []
     : typeof item.material === "string"
-    ? [{ type: item.material, portion: 1 }]
-    : Array.isArray(item.material)
-    ? isStrings(item.material)
-      ? item.material.map((s) => ({ type: s, portion: 1 }))
-      : item.material
-    : Object.entries(item.material).map(([type, portion]) => ({
-        type,
-        portion: portion as number,
-      }));
+      ? [{ type: item.material, portion: 1 }]
+      : Array.isArray(item.material)
+        ? isStrings(item.material)
+          ? item.material.map((s) => ({ type: s, portion: 1 }))
+          : item.material
+        : Object.entries(item.material).map(([type, portion]) => ({
+            type,
+            portion: portion as number,
+          }));
 
 let materials = normalizedMaterial.map((m) => ({
   material: data.byId("material", m.type),
@@ -34,7 +34,7 @@ let materials = normalizedMaterial.map((m) => ({
 }));
 const totalMaterialPortion = materials.reduce(
   (m, o) => m + (o.portion ?? 1),
-  0
+  0,
 );
 
 function covers(body_part_id: string): boolean {
@@ -158,7 +158,7 @@ function coverageLabel(apd: ArmorPortionData): string[] {
                 (materials.reduce(
                   (m, o) =>
                     m + (o.material.bash_resist ?? 0) * (o.portion ?? 1),
-                  0
+                  0,
                 ) *
                   (item.material_thickness ?? 0)) /
                 totalMaterialPortion
@@ -169,7 +169,7 @@ function coverageLabel(apd: ArmorPortionData): string[] {
               {(
                 (materials.reduce(
                   (m, o) => m + (o.material.cut_resist ?? 0) * (o.portion ?? 1),
-                  0
+                  0,
                 ) *
                   (item.material_thickness ?? 0)) /
                 totalMaterialPortion
@@ -181,7 +181,7 @@ function coverageLabel(apd: ArmorPortionData): string[] {
                 (materials.reduce(
                   (m, o) =>
                     m + (o.material.bullet_resist ?? 0) * (o.portion ?? 1),
-                  0
+                  0,
                 ) *
                   (item.material_thickness ?? 0)) /
                 totalMaterialPortion
@@ -194,7 +194,7 @@ function coverageLabel(apd: ArmorPortionData): string[] {
                   materials.reduce(
                     (m, o) =>
                       m + (o.material.acid_resist ?? 0) * (o.portion ?? 1),
-                    0
+                    0,
                   ) / totalMaterialPortion;
                 const env = item.environmental_protection ?? 0;
                 if (env < 10) resist *= env / 10;
@@ -208,7 +208,7 @@ function coverageLabel(apd: ArmorPortionData): string[] {
                   materials.reduce(
                     (m, o) =>
                       m + (o.material.fire_resist ?? 0) * (o.portion ?? 1),
-                    0
+                    0,
                   ) / totalMaterialPortion;
                 const env = item.environmental_protection ?? 0;
                 if (env < 10) resist *= env / 10;

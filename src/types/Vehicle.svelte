@@ -17,11 +17,11 @@ import { groupBy } from "./item/utils";
 import ThingLink from "./ThingLink.svelte";
 import ItemTable from "./item/ItemTable.svelte";
 
-  interface Props {
-    item: Vehicle;
-  }
+interface Props {
+  item: Vehicle;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 
 const data = getContext<CddaData>("data");
 const _context = "Vehicle";
@@ -99,7 +99,7 @@ const specialSymbol = (symbol: string): string => {
 
 const symbolForVehiclePartVariant = (
   partId: string,
-  variant: string
+  variant: string,
 ): string => {
   // TODO: https://github.com/CleverRaven/Cataclysm-DDA/pull/59563
   const vehiclePart =
@@ -219,7 +219,7 @@ const partsCounted = [...partsGrouped.entries()].map(([id, list]) => ({
 partsCounted.sort((a, b) => {
   if (a.count === b.count)
     return singularName(data.byId("vehicle_part", a.id)).localeCompare(
-      singularName(data.byId("vehicle_part", b.id))
+      singularName(data.byId("vehicle_part", b.id)),
     );
   else return b.count - a.count;
 });
@@ -239,11 +239,11 @@ partsCounted.sort((a, b) => {
 {#if partsCounted.length}
   <section>
     <h1>{t("Parts", { _context })}</h1>
-    <LimitedList items={partsCounted} >
+    <LimitedList items={partsCounted}>
       {#snippet children({ item: { id, count } })}
-            <ThingLink {id} type="vehicle_part" /> ({count})
-                {/snippet}
-        </LimitedList>
+        <ThingLink {id} type="vehicle_part" /> ({count})
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
 

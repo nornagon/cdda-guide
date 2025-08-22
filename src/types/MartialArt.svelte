@@ -25,11 +25,11 @@ function learnDifficultyAsText(difficulty: number): string {
   }
 }
 
-  interface Props {
-    item: MartialArt;
-  }
+interface Props {
+  item: MartialArt;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 const _context = "Martial Art";
 
 const books = data
@@ -51,7 +51,7 @@ const buffss: [string, MartialArtBuff[]][] = [
 ];
 
 const buffMap = new Map(
-  buffss.flatMap((x) => x[1]).map((buff) => [buff.id, buff])
+  buffss.flatMap((x) => x[1]).map((buff) => [buff.id, buff]),
 );
 </script>
 
@@ -65,7 +65,7 @@ const buffMap = new Map(
         <dt>{t("Difficulty to Learn", { _context })}</dt>
         <dd>
           {item.learn_difficulty} ({i18n.__(
-            learnDifficultyAsText(item.learn_difficulty)
+            learnDifficultyAsText(item.learn_difficulty),
           )})
         </dd>
       {/if}
@@ -136,14 +136,13 @@ const buffMap = new Map(
     <LimitedList
       items={[...item.weapons].sort((a, b) =>
         singularName(data.byId("item", a)).localeCompare(
-          singularName(data.byId("item", b))
-        )
-      )}
-      >
+          singularName(data.byId("item", b)),
+        ),
+      )}>
       {#snippet children({ item })}
-            <ThingLink id={item} type="item" />
-                {/snippet}
-        </LimitedList>
+        <ThingLink id={item} type="item" />
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
 

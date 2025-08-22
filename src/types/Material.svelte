@@ -17,11 +17,11 @@ import ThingLink from "./ThingLink.svelte";
 
 const data = getContext<CddaData>("data");
 
-  interface Props {
-    item: Material;
-  }
+interface Props {
+  item: Material;
+}
 
-  let { item }: Props = $props();
+let { item }: Props = $props();
 const _context = "Material";
 
 function isStrings<T>(array: string[] | T[]): array is string[] {
@@ -35,12 +35,12 @@ let itemsWithMaterial = data
       i.material == null
         ? []
         : typeof i.material === "string"
-        ? [i.material]
-        : Array.isArray(i.material)
-        ? isStrings(i.material)
-          ? i.material
-          : i.material.map((m) => m.type)
-        : Object.keys(i.material);
+          ? [i.material]
+          : Array.isArray(i.material)
+            ? isStrings(i.material)
+              ? i.material
+              : i.material.map((m) => m.type)
+            : Object.keys(i.material);
     return i.id && normalizedMaterial.some((m) => m === item.id);
   })
   .sort(byName);
@@ -119,11 +119,11 @@ let itemsWithMaterial = data
 {#if itemsWithMaterial.length}
   <section>
     <h1>{t("Items Made From {material}", { material: singularName(item) })}</h1>
-    <LimitedList items={itemsWithMaterial} >
+    <LimitedList items={itemsWithMaterial}>
       {#snippet children({ item })}
-            <ItemSymbol {item} />
+        <ItemSymbol {item} />
         <ThingLink id={item.id} type="item" />
-                {/snippet}
-        </LimitedList>
+      {/snippet}
+    </LimitedList>
   </section>
 {/if}
