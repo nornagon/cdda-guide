@@ -257,6 +257,7 @@ export class CddaData {
   _raw: any[];
   _modlist: Record<string, ModInfo>;
   _rawMods: Record<string, { info: any; data: any[] }>;
+  _modsFetched: boolean;
 
   _enabledMods: string[] = [];
 
@@ -287,6 +288,7 @@ export class CddaData {
     this._raw = raw.filter((x) => typeof x === "object");
     this._modlist = modlist ?? {};
     this._rawMods = rawMods ?? {};
+    this._modsFetched = rawMods != null;
     this._enabledMods = enabledMods ?? [];
 
     this.initData();
@@ -302,6 +304,27 @@ export class CddaData {
     this._migrations.clear();
     this._flattenCache.clear();
     this._nestedMapgensById.clear();
+    this._cachedDeathDrops.clear();
+    this._cachedUncraftRecipes?.clear();
+    this._cachedMapgenSpawnItems.clear();
+    this._convertedTopLevelItemGroups.clear();
+    this._flattenItemGroupCache = new WeakMap();
+    this._flatRequirementCache = new WeakMap();
+    this._flatRequirementCacheExpandSubs = new WeakMap();
+    this._flatRequirementCacheOnlyRecoverable = new WeakMap();
+    this._normalizeRequirementsCache.clear();
+    this._itemComponentCache = null;
+    this._constructionComponentCache = null;
+    this.#compatibleItemsIdIndex.clear();
+    this.#compatibleItemsFlagIndex.clear();
+    this.#grownFromIndex.clear();
+    this.#brewedFromIndex.clear();
+    this.#transformedFromIndex.clear();
+    this.#bashFromFurnitureIndex.clear();
+    this.#bashFromTerrainIndex.clear();
+    this.#bashFromVehiclePartIndex.clear();
+    this.#deconstructFromFurnitureIndex.clear();
+    this.#deconstructFromTerrainIndex.clear();
 
     for (const obj of this._raw) {
       obj.__mod = "Dark Days Ahead";
@@ -403,18 +426,14 @@ export class CddaData {
     }
   }
 
+  modsFetched() {
+    return this._modsFetched;
+  }
+
   availableMods(): { id: string; label: string }[] {
     return Object.entries(this._modlist)
       .map(([id, info]) => ({ id, label: translate(info.name, false, 1) }))
       .sort((a, b) => a.label.localeCompare(b.label));
-  }
-
-  getModInfo(modId: string): { info: any; data: any[] } | undefined {
-    return this._rawMods[modId];
-  }
-
-  getEnabledMods(): string[] {
-    return this._enabledMods;
   }
 
   setEnabledMods(enabledMods: string[]) {
@@ -1714,6 +1733,11 @@ class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
   ) {}
 
   #_index: Map<string, SupportedTypesWithMapped[T][]> | null = null;
+
+  clear() {
+    this.#_index = null;
+  }
+
   get #index() {
     if (!this.#_index) {
       this.#_index = new Map();

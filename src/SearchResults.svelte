@@ -1,6 +1,4 @@
 <script lang="ts">
-import { run } from "svelte/legacy";
-
 import {
   mapType,
   singular,
@@ -35,6 +33,8 @@ interface Props {
 }
 
 let { data, search }: Props = $props();
+
+setContext("data", data);
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -172,9 +172,6 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
   }
   return ret;
 }
-run(() => {
-  setContext("data", data);
-});
 
 let matchingObjects = $derived(
   search &&

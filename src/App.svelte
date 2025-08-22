@@ -1,13 +1,6 @@
 <script lang="ts">
 import Thing from "./Thing.svelte";
-import {
-  CddaData,
-  data,
-  loadProgress,
-  mapType,
-  singularName,
-  translate,
-} from "./data";
+import { CddaData, data, loadProgress, mapType, singularName } from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
@@ -158,6 +151,7 @@ function load() {
     item = null;
     search = "";
   }
+  mods = enabledMods.map((m) => m.id).join(",");
 }
 
 $effect(() => {
@@ -181,12 +175,20 @@ $effect(() => {
   } else {
     url.searchParams.delete("m");
   }
-  replaceState(null, "", url.toString());
-  $data?.setEnabledMods(modIds);
-  load();
+  if ($data && !$data.modsFetched() && modIds.length > 0) {
+    location.href = url.toString();
+  } else {
+    replaceState(null, "", url.toString());
+    $data?.setEnabledMods(modIds);
+    load();
+  }
 });
 
 let search: string = $state("");
+
+// this is not derived from enabledMods because it's only changed after data has finished loading
+// svelte-ignore state_referenced_locally
+let mods = $state(enabledMods.map((m) => m.id).join(","));
 
 load();
 
@@ -388,7 +390,7 @@ function langHref(lang: string, href: string) {
 <main>
   {#if item}
     {#if $data}
-      {#key item}
+      {#key [item, mods]}
         {#if item.id}
           <Thing {item} data={$data} />
         {:else}
@@ -409,7 +411,7 @@ function langHref(lang: string, href: string) {
     {/if}
   {:else if search}
     {#if $data}
-      {#key search}
+      {#key [search, mods]}
         <SearchResults data={$data} {search} />
       {/key}
     {:else}
@@ -644,16 +646,20 @@ Anyway?`,
       {/if}
     </span>
   </p>
-  <p class="data-options">
-    <span style="white-space: nowrap">
+  <p class="data-options" style="display: flex; align-items: center;">
+    {#if $data && availableMods.length === 0}
+      <em style="color: var(--cata-color-gray)"
+        >{t("Mods data not processed for this version.")}</em>
+    {:else}
       {t("Mods:")}
       <Multiselect
+        loading={availableMods.length === 0}
         options={availableMods}
         bind:selected={enabledMods}
         placeholder={t("No mods selected.")}
         style="--sms-border: 1px solid #303030; --sms-options-border: 1px solid #303030; --sms-selected-bg: #333; --sms-options-bg: black; --sms-li-active-bg: #333;">
       </Multiselect>
-    </span>
+    {/if}
   </p>
 </main>
 
