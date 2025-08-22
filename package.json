@@ -27,7 +27,7 @@
     "@testing-library/svelte": "^5.2.8",
     "@transifex/cli": "^7.1.4",
     "@transifex/native": "^7.1.4",
-    "@tsconfig/svelte": "^5.0.4",
+    "@tsconfig/svelte": "^5.0.5",
     "@types/gettext.js": "^2.0.0",
     "@types/lodash.throttle": "^4.1.9",
     "@types/node": "^24.3.0",
