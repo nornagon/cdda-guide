@@ -16,6 +16,7 @@ import {
   type SupportedTypeMapped,
   type Vehicle,
   type Item,
+  type Monster,
   type UseFunction,
   type Bionic,
   type QualityRequirement,
@@ -271,6 +272,10 @@ export class CddaData {
   _flattenCache: Map<any, any> = new Map();
   _nestedMapgensById: Map<string, Mapgen[]> = new Map();
 
+  _monsterBlacklist: any[] = [];
+  _monsterWhitelist: any[] = [];
+  _monsterWhitelistExclusive: any[] = [];
+
   release: any;
   build_number: string | undefined;
 
@@ -338,6 +343,7 @@ export class CddaData {
         this.loadObject(obj);
       }
     }
+
     this._byTypeById
       .get("item_group")
       ?.set("EMPTY_GROUP", { id: "EMPTY_GROUP", entries: [] });
@@ -424,6 +430,52 @@ export class CddaData {
         this._nestedMapgensById.set(obj.nested_mapgen_id, []);
       this._nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
     }
+
+    if (obj.type === "MONSTER_BLACKLIST") {
+      this._monsterBlacklist.push(obj);
+    } else if (obj.type === "MONSTER_WHITELIST") {
+      if (obj.mode === "EXCLUSIVE") {
+        this._monsterWhitelistExclusive.push(obj);
+      } else {
+        this._monsterWhitelist.push(obj);
+      }
+    }
+  }
+
+  isMonsterInList(mon: Monster, list: any) {
+    if (Object.hasOwnProperty.call(list, "monsters")) {
+      return list.monsters.includes(mon.id);
+    } else if (Object.hasOwnProperty.call(list, "species")) {
+      if (typeof mon.species === "string") {
+        return list.species.includes(mon.species);
+      } else if (Array.isArray(mon.species)) {
+        return mon.species.some((s) => list.species.includes(s));
+      }
+    } else if (Object.hasOwnProperty.call(list, "categories")) {
+      if (Array.isArray(mon.categories)) {
+        return mon.categories.some((c) => list.categories.includes(c));
+      }
+    }
+    return false;
+  }
+
+  isMonsterBlacklisted(mon: Monster): boolean {
+    return (
+      this._monsterBlacklist.some((obj) => this.isMonsterInList(mon, obj)) ||
+      (this._monsterWhitelistExclusive.length > 0 &&
+        this._monsterWhitelistExclusive.every(
+          (obj) => !this.isMonsterInList(mon, obj),
+        ))
+    );
+  }
+
+  isMonsterWhitelisted(mon: Monster): boolean {
+    return (
+      this._monsterWhitelist.some((obj) => this.isMonsterInList(mon, obj)) ||
+      this._monsterWhitelistExclusive.some((obj) =>
+        this.isMonsterInList(mon, obj),
+      )
+    );
   }
 
   modsFetched() {
@@ -457,7 +509,16 @@ export class CddaData {
     if (type === "item" && !byId?.has(id) && this._migrations.has(id))
       return this.byIdMaybe(type, this._migrations.get(id)!);
     const obj = byId?.get(id);
-    if (obj) return this._flatten(obj);
+    if (!obj) return;
+    const flattened = this._flatten(obj);
+    if (
+      type === "monster" &&
+      this.isMonsterBlacklisted(flattened) &&
+      !this.isMonsterWhitelisted(flattened)
+    ) {
+      return;
+    }
+    return flattened;
   }
 
   byId<TypeName extends keyof SupportedTypesWithMapped>(
@@ -473,7 +534,14 @@ export class CddaData {
   byType<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
   ): SupportedTypesWithMapped[TypeName][] {
-    return this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
+    let list = this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
+    if (type === "monster") {
+      list = list.filter(
+        (mon) =>
+          !this.isMonsterBlacklisted(mon) || this.isMonsterWhitelisted(mon),
+      );
+    }
+    return list;
   }
 
   abstractById<TypeName extends keyof SupportedTypesWithMapped>(

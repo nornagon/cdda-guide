@@ -72,6 +72,14 @@ let targets: SearchTarget[] = $derived(
         SEARCHABLE_TYPES.has(mapType(x.type)),
     )
     .filter((x) => (x.type === "mutation" ? !/Fake\d$/.test(x.id) : true))
+    .filter((x) => {
+      if (x.type !== "MONSTER") return true;
+      const mon = data.byIdMaybe("monster", x.id);
+      return (
+        mon &&
+        (!data.isMonsterBlacklisted(mon) || data.isMonsterWhitelisted(mon))
+      );
+    })
     .flatMap((x) =>
       [
         {
