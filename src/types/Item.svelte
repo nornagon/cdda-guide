@@ -19,7 +19,6 @@ import {
   type SupportedTypesWithMapped,
   type UseFunction,
   type SupportedTypeMapped,
-  type RequirementData,
   type PocketData,
   isItemSubtype,
 } from "../types";
@@ -231,15 +230,7 @@ const fuelForItems = (fuelForVPs.sort(byName) as SupportedTypeMapped[]).concat(
 
 const usedToRepair = data.byType("fault").filter((f) => {
   const mendingMethods = (f.mending_methods ?? []).map((mm) => {
-    const requirements: [RequirementData, number][] =
-      typeof mm.requirements === "string"
-        ? [[data.byId("requirement", mm.requirements), 1]]
-        : Array.isArray(mm.requirements)
-        ? mm.requirements.map(
-            ([id, num]) =>
-              [data.byId("requirement", id), num] as [RequirementData, number]
-          )
-        : [[mm.requirements, 1]];
+    const requirements = data.resolveRequirementList(mm.requirements);
     const requirement = data.normalizeRequirementUsing(requirements);
     const components = data.flattenRequirement(
       requirement.components,

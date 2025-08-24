@@ -1301,26 +1301,41 @@ export class CddaData {
     return { tools, qualities, components };
   }
 
+  resolveRequirementList(
+    list?:
+      | string
+      | RequirementData
+      | ([string | RequirementData, number, ...string[]] | RequirementData)[]
+  ): [RequirementData, number][] {
+    if (!list) return [];
+    const arr =
+      typeof list === "string" || !Array.isArray(list) ? [list] : list;
+    return arr
+      .map((entry): [RequirementData | undefined, number] => {
+        if (Array.isArray(entry)) {
+          const [id, count] = entry;
+          const req =
+            typeof id === "string"
+              ? (this.byIdMaybe("requirement", id) as RequirementData)
+              : id;
+          return [req, count];
+        }
+        const req =
+          typeof entry === "string"
+            ? (this.byIdMaybe("requirement", entry) as RequirementData)
+            : entry;
+        return [req, 1];
+      })
+      .filter((x): x is [RequirementData, number] => !!x[0]);
+  }
+
   normalizeRequirements(
     requirement: RequirementData & { using?: Recipe["using"] },
     opts?: { onlyRecoverable?: boolean }
   ) {
-    const using =
-      typeof requirement.using === "string"
-        ? ([[requirement.using, 1]] as const)
-        : requirement.using;
-
-    const requirements = (using ?? [])
-      .map(
-        ([id, count]) =>
-          [
-            this.byIdMaybe("requirement", id) as RequirementData,
-            count as number,
-          ] as const
-      )
-      .filter((x) => x[0])
-      .concat([[requirement, 1] as const])
-      .filter((x) => x[0]); // NB. to cope with some data errors in obsolete parts
+    const requirements = this.resolveRequirementList(requirement.using).concat([
+      [requirement, 1],
+    ]);
 
     return this.normalizeRequirementUsing(requirements, opts);
   }
@@ -1337,20 +1352,9 @@ export class CddaData {
     this.byType("recipe").forEach((recipe) => {
       if (!recipe.result || !this.byIdMaybe("item", recipe.result))
         return false;
-      const using =
-        typeof recipe.using === "string"
-          ? ([[recipe.using, 1]] as const)
-          : recipe.using;
-
-      const requirements = (using ?? [])
-        .map(
-          ([id, count]) =>
-            [
-              this.byId("requirement", id) as RequirementData,
-              count as number,
-            ] as const
-        )
-        .concat([[recipe, 1] as const]);
+      const requirements = this.resolveRequirementList(recipe.using).concat([
+        [recipe, 1] as [RequirementData, number],
+      ]);
       const tools = requirements.flatMap(([req]) =>
         this.flattenRequirement(req.tools ?? [], (x) => x.tools)
       );
@@ -1630,7 +1634,10 @@ function flattenChoices<T>(
       const noRecover = rest.includes("NO_RECOVER");
       if (noRecover && onlyRecoverable) continue;
       if (isList) {
-        const otherRequirement = data.byId("requirement", id);
+        const otherRequirement =
+          typeof id === "string"
+            ? data.byId("requirement", id)
+            : (id as Requirement);
         if (otherRequirement.type !== "requirement") {
           console.error(
             `Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`

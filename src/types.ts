@@ -105,8 +105,8 @@ export type Construction = {
   using?:
     | string
     | (
-        | [string /* requirement_id */, number /* count */]
-        | [string, number, "LIST"]
+        | [string | RequirementData, number /* count */]
+        | [string | RequirementData, number, "LIST"]
       )[];
   pre_note?: string;
 
@@ -213,7 +213,12 @@ export type Recipe = {
     | "fake";
 
   delete_flags?: string[]; // flag_id
-  using?: string | ([string, number] | [string, number, "LIST"])[]; // requirement_id
+  using?:
+    | string
+    | (
+        | [string | RequirementData, number]
+        | [string | RequirementData, number, "LIST"]
+      )[]; // requirement_id or inline requirement
 
   // for type: 'recipe' only
   category?: string;
@@ -1470,7 +1475,7 @@ export type MonsterGroup = {
 export type VehiclePartRequirements = {
   skills?: ([string, number] | [string])[];
   time?: number /* moves */ | string /* duration */;
-  using?: string | [string, number][];
+  using?: string | [string | RequirementData, number][];
 } & RequirementData;
 
 export type VehiclePart = {
