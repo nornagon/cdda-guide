@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { svelteTesting } from "@testing-library/svelte/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import EnvironmentPlugin from "vite-plugin-environment";
 
@@ -20,6 +21,7 @@ export default defineConfig({
         "https://raw.githubusercontent.com/nornagon/cdda-data/main",
     }),
     svelte(),
+    svelteTesting(),
     VitePWA({
       devOptions: {
         enabled: true,
