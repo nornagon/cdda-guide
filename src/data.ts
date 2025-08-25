@@ -1308,23 +1308,13 @@ export class CddaData {
       | ([string | RequirementData, number, ...string[]] | RequirementData)[]
   ): [RequirementData, number][] {
     if (!list) return [];
-    const arr =
-      typeof list === "string" || !Array.isArray(list) ? [list] : list;
+    const arr = Array.isArray(list) ? list : [list];
     return arr
-      .map((entry): [RequirementData | undefined, number] => {
-        if (Array.isArray(entry)) {
-          const [id, count] = entry;
-          const req =
-            typeof id === "string"
-              ? (this.byIdMaybe("requirement", id) as RequirementData)
-              : id;
-          return [req, count];
-        }
+      .map((entry) => {
+        const [id, count] = Array.isArray(entry) ? entry : [entry, 1];
         const req =
-          typeof entry === "string"
-            ? (this.byIdMaybe("requirement", entry) as RequirementData)
-            : entry;
-        return [req, 1];
+          typeof id === "string" ? this.byIdMaybe("requirement", id) : id;
+        return [req, count];
       })
       .filter((x): x is [RequirementData, number] => !!x[0]);
   }
