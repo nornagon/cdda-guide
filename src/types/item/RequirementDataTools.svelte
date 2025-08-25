@@ -42,9 +42,12 @@ let { tools, qualities } =
                   "{tool_quality}",
                   quality.level,
                 )
-                .replace(/\$./g, "")}
-              slot0="tool_quality">
-              <ThingLink type="tool_quality" id={quality.id} slot="s0" />
+                .replace(/\$./g, "")}>
+              {#snippet contents(name: string)}
+                {#if name === "tool_quality"}
+                  <ThingLink type="tool_quality" id={quality.id} />
+                {/if}
+              {/snippet}
             </InterpolatedTranslation>{/each}
         </li>
       {/each}
@@ -74,20 +77,21 @@ let { tools, qualities } =
                     "{item}",
                     count,
                   )
-                  .replace(/\$./g, "")}
-                slot0="item">
-                <svelte:fragment slot="s0">
-                  {#if data.craftingPseudoItem(toolId)}
-                    <a
-                      href="{import.meta.env
-                        .BASE_URL}furniture/{data.craftingPseudoItem(
-                        toolId,
-                      )}{location.search}"
-                      >{singularName(data.byId("item", toolId))}</a>
-                  {:else}
-                    <ThingLink type="item" id={toolId} />
+                  .replace(/\$./g, "")}>
+                {#snippet contents(name: string)}
+                  {#if name === "item"}
+                    {#if data.craftingPseudoItem(toolId)}
+                      <a
+                        href="{import.meta.env
+                          .BASE_URL}furniture/{data.craftingPseudoItem(
+                          toolId,
+                        )}{location.search}"
+                        >{singularName(data.byId("item", toolId))}</a>
+                    {:else}
+                      <ThingLink type="item" id={toolId} />
+                    {/if}
                   {/if}
-                </svelte:fragment>
+                {/snippet}
               </InterpolatedTranslation>
             {/if}
           {/each}

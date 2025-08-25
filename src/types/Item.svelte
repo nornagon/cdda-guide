@@ -399,11 +399,14 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
                         "{level}",
                         "{quality}",
                       )
-                      .replace(/\$[ds]|<\/?info[^>]*>/g, "")}
-                    slot0="level"
-                    slot1="quality">
-                    <span slot="s0">{level}</span>
-                    <ThingLink slot="s1" type="tool_quality" id={quality.id} />
+                      .replace(/\$[ds]|<\/?info[^>]*>/g, "")}>
+                    {#snippet contents(name: string)}
+                      {#if name === "level"}
+                        <span>{level}</span>
+                      {:else if name === "quality"}
+                        <ThingLink type="tool_quality" id={quality.id} />
+                      {/if}
+                    {/snippet}
                   </InterpolatedTranslation>
                 </li>
               {/each}
@@ -423,11 +426,14 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
                         "{level}",
                         "{quality}",
                       )
-                      .replace(/\$[ds]|<\/?info[^>]*>/g, "")}
-                    slot0="level"
-                    slot1="quality">
-                    <span slot="s0">{level}</span>
-                    <ThingLink slot="s1" type="tool_quality" id={quality.id} />
+                      .replace(/\$[ds]|<\/?info[^>]*>/g, "")}>
+                    {#snippet contents(name: string)}
+                      {#if name === "level"}
+                        <span>{level}</span>
+                      {:else if name === "quality"}
+                        <ThingLink type="tool_quality" id={quality.id} />
+                      {/if}
+                    {/snippet}
                   </InterpolatedTranslation>
                 </li>
               {/each}

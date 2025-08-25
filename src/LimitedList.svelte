@@ -1,11 +1,12 @@
 <script lang="ts">
 import { t } from "@transifex/native";
+import type { Snippet } from "svelte";
 
 interface Props {
   items: any[];
   limit?: number;
   grace?: number;
-  children?: import("svelte").Snippet<[any]>;
+  children?: Snippet<[any]>;
 }
 
 let { items, limit = 10, grace = 4, children }: Props = $props();

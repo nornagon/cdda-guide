@@ -456,27 +456,27 @@ files in the game itself.`,
             link_table: "{link_table}",
             link_zombie: "{link_zombie}",
           },
-        )}
-        slot0="hhg"
-        slot1="link_cdda"
-        slot2="link_flashlight"
-        slot3="link_table"
-        slot4="link_zombie">
-        <strong slot="s0">Hitchhiker's Guide to the Cataclysm</strong>
-        <a slot="s1" href="https://cataclysmdda.org/"
-          >Cataclysm: Dark Days Ahead</a>
-        <a
-          slot="s2"
-          href="{import.meta.env.BASE_URL}item/flashlight{location.search}"
-          >{t("flashlight", { _comment: "Item name" })}</a>
-        <a
-          slot="s3"
-          href="{import.meta.env.BASE_URL}furniture/f_table{location.search}"
-          >{t("table", { _comment: "Furniture" })}</a>
-        <a
-          slot="s4"
-          href="{import.meta.env.BASE_URL}monster/mon_zombie{location.search}"
-          >{t("zombie", { _comment: "Monster name" })}</a>
+        )}>
+        {#snippet contents(name: string)}
+          {#if name === "hhg"}
+            <strong>Hitchhiker's Guide to the Cataclysm</strong>
+          {:else if name === "link_cdda"}
+            <a href="https://cataclysmdda.org/">Cataclysm: Dark Days Ahead</a>
+          {:else if name === "link_flashlight"}
+            <a href="{import.meta.env.BASE_URL}item/flashlight{location.search}"
+              >{t("flashlight", { _comment: "Item name" })}</a>
+          {:else if name === "link_table"}
+            <a
+              href="{import.meta.env
+                .BASE_URL}furniture/f_table{location.search}"
+              >{t("table", { _comment: "Furniture" })}</a>
+          {:else if name === "link_zombie"}
+            <a
+              href="{import.meta.env
+                .BASE_URL}monster/mon_zombie{location.search}"
+              >{t("zombie", { _comment: "Monster name" })}</a>
+          {/if}
+        {/snippet}
       </InterpolatedTranslation>
     </p>
     <p>
@@ -489,19 +489,22 @@ access, as long as you've visited it once before.`)}
           str={t(
             `It's also {installable_button}, so you can pop it out of your browser and use it like a regular app.`,
             { installable_button: "{installable_button}" },
-          )}
-          slot0="installable_button">
-          <button
-            slot="s0"
-            class="disclosure"
-            onclick={(e) => {
-              e.preventDefault();
-              deferredPrompt.prompt();
-            }}
-            >{t("installable", {
-              _context: "Front page",
-              _comment: "Meaning, install the Hitchhiker's Guide app itself.",
-            })}</button>
+          )}>
+          {#snippet contents(name: string)}
+            {#if name === "installable_button"}
+              <button
+                class="disclosure"
+                onclick={(e) => {
+                  e.preventDefault();
+                  deferredPrompt.prompt();
+                }}
+                >{t("installable", {
+                  _context: "Front page",
+                  _comment:
+                    "Meaning, install the Hitchhiker's Guide app itself.",
+                })}</button>
+            {/if}
+          {/snippet}
         </InterpolatedTranslation>
       {/if}
     </p>
@@ -527,14 +530,17 @@ Anyway?`,
             link_nornagon: "{link_nornagon}",
             link_file_an_issue: "{link_file_an_issue}",
           },
-        )}
-        slot0="link_github"
-        slot1="link_nornagon"
-        slot2="link_file_an_issue">
-        <a slot="s0" href="https://github.com/nornagon/cdda-guide">GitHub</a>
-        <a slot="s1" href="https://www.nornagon.net">nornagon</a>
-        <a slot="s2" href="https://github.com/nornagon/cdda-guide/issues"
-          >{t("file an issue")}</a>
+        )}>
+        {#snippet contents(name: string)}
+          {#if name === "link_github"}
+            <a href="https://github.com/nornagon/cdda-guide">GitHub</a>
+          {:else if name === "link_nornagon"}
+            <a href="https://www.nornagon.net">nornagon</a>
+          {:else if name === "link_file_an_issue"}
+            <a href="https://github.com/nornagon/cdda-guide/issues"
+              >{t("file an issue")}</a>
+          {/if}
+        {/snippet}
       </InterpolatedTranslation>
     </p>
 
@@ -544,12 +550,14 @@ Anyway?`,
           str={t(
             `You can help translate the Guide into your language on {link_transifex}.`,
             { link_transifex: "{link_transifex}" },
-          )}
-          slot0="link_transifex">
-          <a
-            slot="s0"
-            href="https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/"
-            >Transifex</a>
+          )}>
+          {#snippet contents(name: string)}
+            {#if name === "link_transifex"}
+              <a
+                href="https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/"
+                >Transifex</a>
+            {/if}
+          {/snippet}
         </InterpolatedTranslation>
       </p>
     {/if}
@@ -578,10 +586,13 @@ Anyway?`,
     <InterpolatedTranslation
       str={t(`Or visit a {link_random_page}.`, {
         link_random_page: "{link_random_page}",
-      })}
-      slot0="link_random_page">
-      <a slot="s0" href={randomPage} onclick={() => setTimeout(newRandomPage)}
-        >{t("random page")}</a>
+      })}>
+      {#snippet contents(name: string)}
+        {#if name === "link_random_page"}
+          <a href={randomPage} onclick={() => setTimeout(newRandomPage)}
+            >{t("random page")}</a>
+        {/if}
+      {/snippet}
     </InterpolatedTranslation>
   {/if}
 

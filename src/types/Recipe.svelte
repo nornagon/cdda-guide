@@ -139,9 +139,12 @@ function activityLevelName(level: number) {
               skill_limit: "{skill_limit}",
               _context,
               _comment: "practice recipe skill limit",
-            })}
-            slot0="skill_limit">
-            <span slot="s0">{recipe.practice_data.skill_limit ?? 0}</span>
+            })}>
+            {#snippet contents(name: string)}
+              {#if name === "skill_limit"}
+                <span>{recipe.practice_data?.skill_limit ?? 0}</span>
+              {/if}
+            {/snippet}
           </InterpolatedTranslation>
         {/if}
       </dd>
