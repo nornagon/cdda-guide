@@ -254,6 +254,14 @@ interface ModInfo {
   name: string;
 }
 
+export const hiddenAttributes = [
+  "__mod",
+  "__modName",
+  "__filename",
+  "__self",
+  "__prevSelf",
+];
+
 export class CddaData {
   _raw: any[];
   _modlist: Record<string, ModInfo>;
@@ -265,6 +273,7 @@ export class CddaData {
   _rawAll: any[] = [];
   _byType: Map<string, any[]> = new Map();
   _byTypeById: Map<string, Map<string, any>> = new Map();
+  _byModByType: Map<string, Map<string, any[]>> = new Map();
   _abstractsByType: Map<string, Map<string, any>> = new Map();
   _toolReplacements: Map<string, string[]> | null = null;
   _craftingPseudoItems: Map<string, string> = new Map();
@@ -303,6 +312,7 @@ export class CddaData {
     this._rawAll = [];
     this._byType.clear();
     this._byTypeById.clear();
+    this._byModByType.clear();
     this._abstractsByType.clear();
     this._toolReplacements?.clear();
     this._craftingPseudoItems.clear();
@@ -332,14 +342,16 @@ export class CddaData {
     this.#deconstructFromTerrainIndex.clear();
 
     for (const obj of this._raw) {
-      obj.__mod = "Dark Days Ahead";
+      obj.__mod = "dda";
+      obj.__modName = translate("Dark Days Ahead", false, 1);
       this.loadObject(obj);
     }
 
     for (const mod of this._enabledMods) {
       if (!(mod in this._rawMods)) continue;
       for (const obj of this._rawMods[mod].data) {
-        obj.__mod = this._rawMods[mod].info.name;
+        obj.__mod = mod;
+        obj.__modName = translate(this._rawMods[mod].info.name, false, 1);
         this.loadObject(obj);
       }
     }
@@ -361,10 +373,13 @@ export class CddaData {
     }
     const mappedType = mapType(obj.type);
     if (!this._byType.has(mappedType)) this._byType.set(mappedType, []);
+    if (!this._byModByType.has(obj.__mod))
+      this._byModByType.set(obj.__mod, new Map());
+    if (!this._byModByType.get(obj.__mod)!.has(mappedType))
+      this._byModByType.get(obj.__mod)!.set(mappedType, []);
 
     obj.__self = obj;
     obj.__prevSelf = null;
-    obj.__mod = translate(obj.__mod, false, 1);
 
     if (obj["copy-from"] && obj["copy-from"] === obj.id) {
       const oldIndex = this._byType
@@ -379,6 +394,8 @@ export class CddaData {
     } else {
       this._byType.get(mappedType)!.push(obj);
     }
+    // assume a mod won't override its own objects
+    this._byModByType.get(obj.__mod)!.get(mappedType)!.push(obj);
 
     if (Object.hasOwnProperty.call(obj, "id")) {
       if (!this._byTypeById.has(mappedType))
@@ -482,6 +499,18 @@ export class CddaData {
 
   modsFetched() {
     return this._modsFetched;
+  }
+
+  getModInfo(mod: string): ModInfo | undefined {
+    return this._rawMods[mod]?.info ?? this._modlist[mod];
+  }
+
+  activeMods(): string[] {
+    return Array.from(this._byModByType.keys());
+  }
+
+  activeModObjects(mod: string, type: string) {
+    return this._byModByType.get(mod)?.get(type) ?? [];
   }
 
   availableMods(): { id: string; label: string }[] {

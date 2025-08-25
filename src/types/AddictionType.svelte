@@ -28,7 +28,10 @@ const itemsWithAddictionType = data
   .sort(byName);
 </script>
 
-<h1>{t("Addiction Type")}: {singular(item.type_name)} <ModTag {item} /></h1>
+<h1>
+  {t("Addiction Type")}: {singular(item.type_name)}
+  <ModTag {item} clickable />
+</h1>
 <section>
   <dl>
     <dt>{t("Effect Name", { _context })}</dt>

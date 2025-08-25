@@ -18,7 +18,7 @@ const constructions = data
   .filter((x) => x.group === item.id);
 </script>
 
-<h1>{singularName(item)} <ModTag {item} /></h1>
+<h1>{singularName(item)} <ModTag {item} clickable /></h1>
 
 {#each constructions as construction}
   <Construction {construction} />

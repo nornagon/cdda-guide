@@ -67,7 +67,7 @@ harvestBySeasonList.sort(
 );
 </script>
 
-<h1><ItemSymbol {item} /> {singularName(item)} <ModTag {item} /></h1>
+<h1><ItemSymbol {item} /> {singularName(item)} <ModTag {item} clickable /></h1>
 
 <section>
   <h1>{t("General", { _context })}</h1>

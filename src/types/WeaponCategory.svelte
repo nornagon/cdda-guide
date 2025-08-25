@@ -30,7 +30,10 @@ const martialArts = data
 martialArts.sort(byName);
 </script>
 
-<h1>{t("Weapon Category")}: {singularName(item)} <ModTag {item} /></h1>
+<h1>
+  {t("Weapon Category")}: {singularName(item)}
+  <ModTag {item} clickable />
+</h1>
 <section>
   <h1>{t("Weapons", { _context: "Martial Art" })}</h1>
   {#if itemsInCategory.length}

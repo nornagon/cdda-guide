@@ -133,7 +133,7 @@ constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
 
 <h1>
   {t("Quality", { _comment: "Tool Quality" })}: {singularName(item)}
-  <ModTag {item} />
+  <ModTag {item} clickable />
 </h1>
 {#if item.usages}
   <section>

@@ -32,7 +32,10 @@ const postThreshold = mutationsInCategory.filter(
 </script>
 
 {#if !inCatalog}
-  <h1>{t("Mutation Category")}: {singularName(item)} <ModTag {item} /></h1>
+  <h1>
+    {t("Mutation Category")}: {singularName(item)}
+    <ModTag {item} clickable />
+  </h1>
 {/if}
 
 <section>

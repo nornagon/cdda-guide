@@ -23,7 +23,7 @@ const containingBionics = data
   .filter((x) => x.id && x.included_bionics?.includes(item.id));
 </script>
 
-<h1>{t("Bionic")}: {singularName(item)} <ModTag {item} /></h1>
+<h1>{t("Bionic")}: {singularName(item)} <ModTag {item} clickable /></h1>
 <section>
   <h1>{t("General", { _context, _comment: "Section heading" })}</h1>
   <dl>

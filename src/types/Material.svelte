@@ -47,7 +47,7 @@ let itemsWithMaterial = data
   .sort(byName);
 </script>
 
-<h1>{t("Material")}: {singularName(item)} <ModTag {item} /></h1>
+<h1>{t("Material")}: {singularName(item)} <ModTag {item} clickable /></h1>
 <section>
   <h1>{t("Properties", { _context })}</h1>
   <dl>

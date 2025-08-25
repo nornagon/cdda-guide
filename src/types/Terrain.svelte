@@ -72,7 +72,7 @@ const constructions = data
 <h1>
   <ItemSymbol {item} />
   {singularName(item)}
-  <ModTag {item} />
+  <ModTag {item} clickable />
 </h1>
 
 <section>

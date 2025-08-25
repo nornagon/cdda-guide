@@ -43,7 +43,7 @@ const bionicWithFlag = data
 
 <h1>
   {t("Flag", { _comment: "Section heading" })}: {item.id}
-  <ModTag {item} />
+  <ModTag {item} clickable />
 </h1>
 {#if item.info}
   <section>

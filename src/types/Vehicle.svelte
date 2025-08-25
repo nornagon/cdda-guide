@@ -226,7 +226,7 @@ partsCounted.sort((a, b) => {
 });
 </script>
 
-<h1>{singularName(item)} <ModTag {item} /></h1>
+<h1>{singularName(item)} <ModTag {item} clickable /></h1>
 
 <section>
   <pre

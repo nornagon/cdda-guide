@@ -57,7 +57,10 @@ function byType(a: Item, b: Item) {
 usedBy.sort(composeSort(byType, byName));
 </script>
 
-<h1>{t("Ammunition Type")}: {singularName(item)} <ModTag {item} /></h1>
+<h1>
+  {t("Ammunition Type")}: {singularName(item)}
+  <ModTag {item} clickable />
+</h1>
 <section>
   <h1>{t("Compatible Variants", { _context })}</h1>
   <ul>

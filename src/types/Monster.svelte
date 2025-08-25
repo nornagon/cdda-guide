@@ -316,7 +316,7 @@ let upgrades =
     : null;
 </script>
 
-<h1><ItemSymbol {item} /> {singularName(item)} <ModTag {item} /></h1>
+<h1><ItemSymbol {item} /> {singularName(item)} <ModTag {item} clickable /></h1>
 <section>
   <dl>
     {#if item.bodytype}

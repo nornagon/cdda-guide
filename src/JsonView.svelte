@@ -1,6 +1,6 @@
 <script lang="ts">
 import { t } from "@transifex/native";
-import { getAllObjectSources } from "./data";
+import { getAllObjectSources, hiddenAttributes } from "./data";
 
 interface Props {
   obj: any;
@@ -20,16 +20,13 @@ const urlEdit = `https://github.dev/CleverRaven/Cataclysm-DDA/blob/${
 
 <pre>{JSON.stringify(
     obj,
-    (key, value) =>
-      ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
-        ? undefined
-        : value,
+    (key, value) => (hiddenAttributes.includes(key) ? undefined : value),
     2,
   )}</pre>
 {#each getAllObjectSources(obj) as o}
   <details>
     <summary
-      >{o.__mod}
+      >{o.__modName}
       {#if o.__filename}
         <a href={`${urlView}/${o.__filename}`} target="_blank"
           >{t("View", { _context })}</a>
@@ -40,10 +37,7 @@ const urlEdit = `https://github.dev/CleverRaven/Cataclysm-DDA/blob/${
     </summary>
     <pre>{JSON.stringify(
         o,
-        (key, value) =>
-          ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
-            ? undefined
-            : value,
+        (key, value) => (hiddenAttributes.includes(key) ? undefined : value),
         2,
       )}</pre>
   </details>

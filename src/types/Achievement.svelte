@@ -27,7 +27,7 @@ const unlocks = data
   {item.type === "achievement" ? "Achievement" : "Conduct"}: {singularName(
     item,
   )}
-  <ModTag {item} />
+  <ModTag {item} clickable />
 </h1>
 
 <section>

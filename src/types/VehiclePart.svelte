@@ -90,7 +90,7 @@ vehiclesContainingPart.sort((a, b) =>
     : item.item
       ? singularName(data.byId("item", item.item))
       : item.id}
-  <ModTag {item} />
+  <ModTag {item} clickable />
 </h1>
 
 <section>

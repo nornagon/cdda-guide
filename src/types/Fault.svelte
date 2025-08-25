@@ -68,7 +68,7 @@ const fault_flag_descriptions: Record<string, string> = {
 };
 </script>
 
-<h1>{t("Fault")}: {singularName(item)} <ModTag {item} /></h1>
+<h1>{t("Fault")}: {singularName(item)} <ModTag {item} clickable /></h1>
 
 <section>
   <dl>

@@ -56,7 +56,7 @@ const proficienciesRequiring = data
   );
 </script>
 
-<h1>{t("Proficiency")}: {singularName(item)} <ModTag {item} /></h1>
+<h1>{t("Proficiency")}: {singularName(item)} <ModTag {item} clickable /></h1>
 <section>
   <dl>
     <dt>{t("Time to Learn", { _context })}</dt>

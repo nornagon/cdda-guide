@@ -95,7 +95,7 @@ const deficiencyNames = item.deficiency
   : [];
 </script>
 
-<h1>{t("Vitamin")}: {singularName(item)} <ModTag {item} /></h1>
+<h1>{t("Vitamin")}: {singularName(item)} <ModTag {item} clickable /></h1>
 <section>
   <dl>
     <dt>{t("Type", { _context })}</dt>

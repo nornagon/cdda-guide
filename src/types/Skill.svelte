@@ -60,7 +60,7 @@ practiceRecipes.sort(
 );
 </script>
 
-<h1>{t("Skill")}: {singularName(item)} <ModTag {item} /></h1>
+<h1>{t("Skill")}: {singularName(item)} <ModTag {item} clickable /></h1>
 <section>
   <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
 </section>

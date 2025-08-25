@@ -4,6 +4,7 @@ import { CddaData, data, loadProgress, mapType, singularName } from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
+import ModCategory from "./ModCategory.svelte";
 import dontPanic from "./assets/dont_panic.png";
 import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
 import { t } from "@transifex/native";
@@ -175,7 +176,12 @@ $effect(() => {
   } else {
     url.searchParams.delete("m");
   }
-  if ($data && !$data.modsFetched() && modIds.length > 0) {
+  if (
+    $data &&
+    $data.availableMods().length > 0 &&
+    !$data.modsFetched() &&
+    modIds.length > 0
+  ) {
     location.href = url.toString();
   } else {
     replaceState(null, "", url.toString());
@@ -391,7 +397,9 @@ function langHref(lang: string, href: string) {
   {#if item}
     {#if $data}
       {#key [item, mods]}
-        {#if item.id}
+        {#if item.type === "mod"}
+          <ModCategory id={item.id} data={$data} />
+        {:else if item.id}
           <Thing {item} data={$data} />
         {:else}
           <Catalog type={item.type} data={$data} />
@@ -562,6 +570,9 @@ Anyway?`,
         <a href="/conduct{location.search}">{t("Conducts")}</a>
       </li>
       <li><a href="/proficiency{location.search}">{t("Proficiencies")}</a></li>
+      {#if $data && $data.activeMods().length > 0}
+        <li><a href="/mod{location.search}">{t("Mods")}</a></li>
+      {/if}
     </ul>
 
     <InterpolatedTranslation
