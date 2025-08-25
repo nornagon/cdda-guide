@@ -3,7 +3,7 @@ import { asHumanReadableDuration, i18n, singular, singularName } from "../data";
 import type { CddaData } from "../data";
 import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
-import type { Fault, RequirementData } from "../types";
+import type { Fault } from "../types";
 import { t } from "@transifex/native";
 import RequirementDataTools from "./item/RequirementDataTools.svelte";
 import JsonView from "../JsonView.svelte";
@@ -15,15 +15,7 @@ export let item: Fault;
 
 // 0.G
 const mendingMethods = (item.mending_methods ?? []).map((mm) => {
-  const requirements: [RequirementData, number][] =
-    typeof mm.requirements === "string"
-      ? [[data.byId("requirement", mm.requirements), 1]]
-      : Array.isArray(mm.requirements)
-      ? mm.requirements.map(
-          ([id, num]) =>
-            [data.byId("requirement", id), num] as [RequirementData, number]
-        )
-      : [[mm.requirements, 1]];
+  const requirements = data.resolveRequirementList(mm.requirements);
   const requirement = data.normalizeRequirementUsing(requirements);
   const components = data.flattenRequirement(
     requirement.components,
@@ -36,12 +28,7 @@ const faultFixes = data
   .byType("fault_fix")
   .filter((f) => f.faults_removed?.includes(item.id))
   .map((ff) => {
-    const requirements: [RequirementData, number][] =
-      ff.requirements?.map((req) =>
-        Array.isArray(req)
-          ? [data.byId("requirement", req[0]), req[1]]
-          : [req, 1]
-      ) ?? [];
+    const requirements = data.resolveRequirementList(ff.requirements);
     const requirement = data.normalizeRequirementUsing(requirements);
     const components = data.flattenRequirement(
       requirement.components,
