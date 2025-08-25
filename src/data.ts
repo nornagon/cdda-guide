@@ -371,7 +371,9 @@ export class CddaData {
         .get(mappedType)!
         .findIndex((x) => x.id === obj.id);
       if (oldIndex !== -1) {
-        const oldObj = this._byType.get(mappedType)![oldIndex];
+        const oldObj = this._byType
+          .get(mappedType)!
+          .splice(oldIndex, 1, obj)[0];
         obj.__prevSelf = oldObj;
       }
     } else {
@@ -1512,7 +1514,7 @@ export class CddaData {
     list?:
       | string
       | RequirementData
-      | ([string | RequirementData, number, ...string[]] | RequirementData)[]
+      | ([string | RequirementData, number, ...string[]] | RequirementData)[],
   ): [RequirementData, number][] {
     if (!list) return [];
     const arr = Array.isArray(list) ? list : [list];
