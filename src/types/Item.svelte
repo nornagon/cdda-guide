@@ -57,6 +57,7 @@ import UsageDescription from "./UsageDescription.svelte";
 import ColorText from "./ColorText.svelte";
 import InterpolatedTranslation from "../InterpolatedTranslation.svelte";
 import SmokedFrom from "./item/SmokedFrom.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: Item;
@@ -267,7 +268,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
 }
 </script>
 
-<h1><ItemSymbol {item} /> {singularName(item)}</h1>
+<h1><ItemSymbol {item} /> {singularName(item)} <ModTag {item} /></h1>
 <section>
   <h1>{t("General", { _context })}</h1>
   <div class="side-by-side no-margin">

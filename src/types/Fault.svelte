@@ -7,6 +7,7 @@ import type { Fault } from "../types";
 import { t } from "@transifex/native";
 import RequirementDataTools from "./item/RequirementDataTools.svelte";
 import JsonView from "../JsonView.svelte";
+import ModTag from "./ModTag.svelte";
 
 const data = getContext<CddaData>("data");
 const _context = "Fault";
@@ -67,7 +68,7 @@ const fault_flag_descriptions: Record<string, string> = {
 };
 </script>
 
-<h1>{t("Fault")}: {singularName(item)}</h1>
+<h1>{t("Fault")}: {singularName(item)} <ModTag {item} /></h1>
 
 <section>
   <dl>

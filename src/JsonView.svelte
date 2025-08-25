@@ -1,5 +1,7 @@
 <script lang="ts">
 import { t } from "@transifex/native";
+import { getAllObjectSources } from "./data";
+
 interface Props {
   obj: any;
   buildNumber: string | undefined;
@@ -14,16 +16,6 @@ const urlView = `https://github.com/CleverRaven/Cataclysm-DDA/blob/${
 const urlEdit = `https://github.dev/CleverRaven/Cataclysm-DDA/blob/${
   buildNumber ?? "master"
 }`;
-
-function allSources(o: any): any[] {
-  const sources: any[] = [];
-  sources.push(o.__self);
-  while (o.__prevSelf) {
-    sources.push(o.__prevSelf);
-    o = o.__prevSelf;
-  }
-  return sources.reverse();
-}
 </script>
 
 <pre>{JSON.stringify(
@@ -32,9 +24,9 @@ function allSources(o: any): any[] {
       ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
         ? undefined
         : value,
-    2
+    2,
   )}</pre>
-{#each allSources(obj) as o}
+{#each getAllObjectSources(obj) as o}
   <details>
     <summary
       >{o.__mod}
@@ -52,7 +44,7 @@ function allSources(o: any): any[] {
           ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
             ? undefined
             : value,
-        2
+        2,
       )}</pre>
   </details>
 {/each}

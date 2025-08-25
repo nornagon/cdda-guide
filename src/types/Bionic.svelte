@@ -7,6 +7,7 @@ import { CddaData, singular, singularName } from "../data";
 import type { Bionic } from "../types";
 import MutationList from "./MutationList.svelte";
 import ThingLink from "./ThingLink.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: Bionic;
@@ -22,7 +23,7 @@ const containingBionics = data
   .filter((x) => x.id && x.included_bionics?.includes(item.id));
 </script>
 
-<h1>{t("Bionic")}: {singularName(item)}</h1>
+<h1>{t("Bionic")}: {singularName(item)} <ModTag {item} /></h1>
 <section>
   <h1>{t("General", { _context, _comment: "Section heading" })}</h1>
   <dl>

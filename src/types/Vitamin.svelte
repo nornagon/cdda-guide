@@ -20,6 +20,7 @@ import {
   type Vitamin,
 } from "../types";
 import ThingLink from "./ThingLink.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: Vitamin;
@@ -94,7 +95,7 @@ const deficiencyNames = item.deficiency
   : [];
 </script>
 
-<h1>{t("Vitamin")}: {singularName(item)}</h1>
+<h1>{t("Vitamin")}: {singularName(item)} <ModTag {item} /></h1>
 <section>
   <dl>
     <dt>{t("Type", { _context })}</dt>

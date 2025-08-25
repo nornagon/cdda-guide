@@ -9,6 +9,7 @@ import type { Mutation } from "../types";
 import MutationColor from "./MutationColor.svelte";
 import MutationList from "./MutationList.svelte";
 import ThingLink from "./ThingLink.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: Mutation;
@@ -55,6 +56,7 @@ const conflictsWithBionics = data
   {item.threshold ? t("Threshold Mutation") : t("Mutation")}: {singularName(
     item,
   )}
+  <ModTag {item} />
 </h1>
 <section>
   <dl>

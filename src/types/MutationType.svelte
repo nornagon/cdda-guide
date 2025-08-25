@@ -6,6 +6,7 @@ import { getContext } from "svelte";
 import { CddaData, singularName } from "../data";
 import type { MutationType } from "../types";
 import MutationList from "./MutationList.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: MutationType;
@@ -20,7 +21,7 @@ const mutationsWithType = data
   .filter((m) => (m.types ?? []).includes(item.id));
 </script>
 
-<h1>{t("Mutation Type")}: {singularName(item)}</h1>
+<h1>{t("Mutation Type")}: {singularName(item)} <ModTag {item} /></h1>
 <section>
   <dl>
     <dt>{t("Mutations")}</dt>

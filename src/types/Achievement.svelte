@@ -6,6 +6,7 @@ import { getContext } from "svelte";
 import { CddaData, plural, singular, singularName } from "../data";
 import type { Achievement } from "../types";
 import ThingLink from "./ThingLink.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: Achievement;
@@ -26,6 +27,7 @@ const unlocks = data
   {item.type === "achievement" ? "Achievement" : "Conduct"}: {singularName(
     item,
   )}
+  <ModTag {item} />
 </h1>
 
 <section>

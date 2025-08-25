@@ -7,6 +7,7 @@ import { byName, CddaData, singularName } from "../data";
 import type { MutationCategory } from "../types";
 import MutationList from "./MutationList.svelte";
 import ThingLink from "./ThingLink.svelte";
+import ModTag from "./ModTag.svelte";
 
 let data = getContext<CddaData>("data");
 const _context = "Mutation";
@@ -31,12 +32,12 @@ const postThreshold = mutationsInCategory.filter(
 </script>
 
 {#if !inCatalog}
-  <h1>{t("Mutation Category")}: {singularName(item)}</h1>
+  <h1>{t("Mutation Category")}: {singularName(item)} <ModTag {item} /></h1>
 {/if}
 
 <section>
   {#if inCatalog}
-    <h1>{singularName(item)}</h1>
+    <h1>{singularName(item)} <ModTag {item} /></h1>
   {/if}
   <dl>
     {#if item.vitamin}

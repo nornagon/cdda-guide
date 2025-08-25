@@ -134,7 +134,7 @@ function decodeQueryParam(p: string) {
   return decodeURIComponent(p.replace(/\+/g, " "));
 }
 
-function load() {
+function load(noScroll: boolean = false) {
   const path = location.pathname.slice(import.meta.env.BASE_URL.length - 1);
   let m: RegExpExecArray | null;
   if ((m = /^\/([^\/]+)(?:\/(.+))?$/.exec(path))) {
@@ -146,7 +146,7 @@ function load() {
       item = { type, id: id ? decodeURIComponent(id) : "" };
     }
 
-    window.scrollTo(0, 0);
+    if (!noScroll) window.scrollTo(0, 0);
   } else {
     item = null;
     search = "";
@@ -180,7 +180,7 @@ $effect(() => {
   } else {
     replaceState(null, "", url.toString());
     $data?.setEnabledMods(modIds);
-    load();
+    load(true);
   }
 });
 

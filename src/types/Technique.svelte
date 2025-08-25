@@ -9,6 +9,7 @@ import BonusContainer from "./BonusContainer.svelte";
 import MartialArtRequirements from "./MartialArtRequirements.svelte";
 import ThingLink from "./ThingLink.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: Technique;
@@ -60,12 +61,18 @@ if (item.stunned_target)
 </script>
 
 {#if standalone}
-  <h1>{t("Technique", { _context })}: {singularName(item)}</h1>
+  <h1>
+    {t("Technique", { _context })}: {singularName(item)}
+    <ModTag {item} />
+  </h1>
 {/if}
 
 <section>
   {#if !standalone}
-    <h1>{t("Technique", { _context })}: {singularName(item)}</h1>
+    <h1>
+      {t("Technique", { _context })}: {singularName(item)}
+      <ModTag {item} />
+    </h1>
   {/if}
   <dl>
     <dt>{t("Type", { _context })}</dt>
@@ -127,7 +134,7 @@ if (item.stunned_target)
           ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
             ? undefined
             : value,
-        2
+        2,
       )}</pre>
   </details>
 </section>

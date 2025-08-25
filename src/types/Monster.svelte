@@ -24,6 +24,7 @@ import SpecialAttack from "./monster/SpecialAttack.svelte";
 import Spoiler from "../Spoiler.svelte";
 import ColorText from "./ColorText.svelte";
 import ItemTable from "./item/ItemTable.svelte";
+import ModTag from "./ModTag.svelte";
 
 const _context = "Monster";
 
@@ -315,7 +316,7 @@ let upgrades =
     : null;
 </script>
 
-<h1><ItemSymbol {item} /> {singularName(item)}</h1>
+<h1><ItemSymbol {item} /> {singularName(item)} <ModTag {item} /></h1>
 <section>
   <dl>
     {#if item.bodytype}

@@ -9,6 +9,7 @@ import { t } from "@transifex/native";
 import TerFurnActivity from "./TerFurnActivity.svelte";
 import FurnitureSpawnedIn from "./item/FurnitureSpawnedIn.svelte";
 import LimitedList from "../LimitedList.svelte";
+import ModTag from "./ModTag.svelte";
 
 const data = getContext<CddaData>("data");
 const _context = "Terrain / Furniture";
@@ -66,7 +67,7 @@ harvestBySeasonList.sort(
 );
 </script>
 
-<h1><ItemSymbol {item} /> {singularName(item)}</h1>
+<h1><ItemSymbol {item} /> {singularName(item)} <ModTag {item} /></h1>
 
 <section>
   <h1>{t("General", { _context })}</h1>

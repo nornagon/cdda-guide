@@ -11,6 +11,7 @@ import ThingLink from "./ThingLink.svelte";
 import { t } from "@transifex/native";
 import LimitedList from "../LimitedList.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: ItemAction;
@@ -39,7 +40,7 @@ const providerQualities = data
   .filter((i) => i.id && i.usages?.some((u) => u[1].includes(item.id)));
 </script>
 
-<h1>{singularName(item)}</h1>
+<h1>{singularName(item)} <ModTag {item} /></h1>
 
 {#if providers.length}
   <section>

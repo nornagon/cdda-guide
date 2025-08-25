@@ -2056,6 +2056,16 @@ export function breathabilityFromRating(br: BreathabilityRating): number {
   return 0;
 }
 
+export function getAllObjectSources(obj: any): any[] {
+  const sources: any[] = [];
+  sources.push(obj.__self);
+  while (obj.__prevSelf) {
+    sources.push(obj.__prevSelf);
+    obj = obj.__prevSelf;
+  }
+  return sources.reverse();
+}
+
 const fetchJsonWithProgress = (
   url: string,
   progress: (receivedBytes: number, totalBytes: number) => void,

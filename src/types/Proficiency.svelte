@@ -7,6 +7,7 @@ import LimitedList from "../LimitedList.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import { t } from "@transifex/native";
 import Recipe from "./Recipe.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: Proficiency;
@@ -55,7 +56,7 @@ const proficienciesRequiring = data
   );
 </script>
 
-<h1>{t("Proficiency")}: {singularName(item)}</h1>
+<h1>{t("Proficiency")}: {singularName(item)} <ModTag {item} /></h1>
 <section>
   <dl>
     <dt>{t("Time to Learn", { _context })}</dt>

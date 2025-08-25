@@ -8,6 +8,7 @@ import type { JsonFlag } from "../types";
 import ColorText from "./ColorText.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: JsonFlag;
@@ -40,7 +41,10 @@ const bionicWithFlag = data
   );
 </script>
 
-<h1>{t("Flag", { _comment: "Section heading" })}: {item.id}</h1>
+<h1>
+  {t("Flag", { _comment: "Section heading" })}: {item.id}
+  <ModTag {item} />
+</h1>
 {#if item.info}
   <section>
     <p><ColorText text={singular(item.info)} /></p>

@@ -13,6 +13,7 @@ import {
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
 import Recipe from "./Recipe.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: Skill;
@@ -59,7 +60,7 @@ practiceRecipes.sort(
 );
 </script>
 
-<h1>{t("Skill")}: {singularName(item)}</h1>
+<h1>{t("Skill")}: {singularName(item)} <ModTag {item} /></h1>
 <section>
   <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
 </section>

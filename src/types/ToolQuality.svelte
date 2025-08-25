@@ -13,6 +13,7 @@ import {
 } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import ThingLink from "./ThingLink.svelte";
+import ModTag from "./ModTag.svelte";
 
 interface Props {
   item: ToolQuality;
@@ -130,7 +131,10 @@ constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
 });
 </script>
 
-<h1>{t("Quality", { _comment: "Tool Quality" })}: {singularName(item)}</h1>
+<h1>
+  {t("Quality", { _comment: "Tool Quality" })}: {singularName(item)}
+  <ModTag {item} />
+</h1>
 {#if item.usages}
   <section>
     <h1>{t("Usages", { _context })}</h1>
