@@ -2070,6 +2070,7 @@ export function breathabilityFromRating(br: BreathabilityRating): number {
 }
 
 export function getAllObjectSources(obj: any): any[] {
+  if (!obj.__self) return [];
   const sources: any[] = [];
   sources.push(obj.__self);
   while (obj.__prevSelf) {
