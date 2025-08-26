@@ -16,17 +16,9 @@ const _context = "Construction";
 export let construction: Construction;
 export let includeTitle: boolean = false;
 
-const using =
-  typeof construction.using === "string"
-    ? [[construction.using, 1] as [string, number]]
-    : construction.using ?? [];
-
-const requirements = using
-  .map(
-    ([id, count]) =>
-      [data.byId("requirement", id) as RequirementData, count] as const
-  )
-  .concat([[construction, 1]]);
+const requirements = data
+  .resolveRequirementList(construction.using)
+  .concat([[construction, 1] as [RequirementData, number]]);
 
 const components = requirements.flatMap(([req, count]) => {
   return data
