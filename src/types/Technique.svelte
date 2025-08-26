@@ -2,7 +2,14 @@
 import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
-import { CddaData, byName, i18n, singular, singularName } from "../data";
+import {
+  CddaData,
+  byName,
+  hiddenAttributes,
+  i18n,
+  singular,
+  singularName,
+} from "../data";
 import LimitedList from "../LimitedList.svelte";
 import type { MartialArtBuff, Technique } from "../types";
 import BonusContainer from "./BonusContainer.svelte";
@@ -116,10 +123,7 @@ if (item.stunned_target)
     <summary>{t("Technique JSON", { _context })}</summary>
     <pre>{JSON.stringify(
         item,
-        (key, value) =>
-          ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
-            ? undefined
-            : value,
+        (key, value) => (hiddenAttributes.includes(key) ? undefined : value),
         2
       )}</pre>
   </details>

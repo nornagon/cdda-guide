@@ -1,6 +1,6 @@
 <script lang="ts">
 import { t } from "@transifex/native";
-import { CddaData, i18n, singularName } from "../../data";
+import { CddaData, singularName } from "../../data";
 import type { AmmoSlot, DamageUnit } from "../../types";
 import ThingLink from "../ThingLink.svelte";
 import { getContext } from "svelte";

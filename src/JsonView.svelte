@@ -1,5 +1,7 @@
 <script lang="ts">
 import { t } from "@transifex/native";
+import { getAllObjectSources, hiddenAttributes } from "./data";
+
 export let obj: any;
 export let buildNumber: string | undefined;
 const _context = "View/Edit on GitHub";
@@ -10,30 +12,17 @@ const urlView = `https://github.com/CleverRaven/Cataclysm-DDA/blob/${
 const urlEdit = `https://github.dev/CleverRaven/Cataclysm-DDA/blob/${
   buildNumber ?? "master"
 }`;
-
-function allSources(o: any): any[] {
-  const sources: any[] = [];
-  sources.push(o.__self);
-  while (o.__prevSelf) {
-    sources.push(o.__prevSelf);
-    o = o.__prevSelf;
-  }
-  return sources.reverse();
-}
 </script>
 
 <pre>{JSON.stringify(
     obj,
-    (key, value) =>
-      ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
-        ? undefined
-        : value,
+    (key, value) => (hiddenAttributes.includes(key) ? undefined : value),
     2
   )}</pre>
-{#each allSources(obj) as o}
+{#each getAllObjectSources(obj) as o}
   <details>
     <summary
-      >{o.__mod}
+      >{o.__modName}
       {#if o.__filename}
         <a href={`${urlView}/${o.__filename}`} target="_blank"
           >{t("View", { _context })}</a>
@@ -44,10 +33,7 @@ function allSources(o: any): any[] {
     </summary>
     <pre>{JSON.stringify(
         o,
-        (key, value) =>
-          ["__mod", "__filename", "__self", "__prevSelf"].includes(key)
-            ? undefined
-            : value,
+        (key, value) => (hiddenAttributes.includes(key) ? undefined : value),
         2
       )}</pre>
   </details>

@@ -16,6 +16,7 @@ import {
   type SupportedTypeMapped,
   type Vehicle,
   type Item,
+  type Monster,
   type UseFunction,
   type Bionic,
   type QualityRequirement,
@@ -247,22 +248,41 @@ export function asKilograms(string: string | number): string {
   return `${(g / 1000).toFixed(2)} kg`;
 }
 
+export interface ModInfo {
+  id: string;
+  name: string;
+}
+
+export const hiddenAttributes = [
+  "__mod",
+  "__modName",
+  "__filename",
+  "__self",
+  "__prevSelf",
+];
+
 export class CddaData {
   _raw: any[];
-  _availableMods: string[];
+  _mods: Record<string, ModInfo>;
   _rawMods: Record<string, { info: any; data: any[] }>;
+  _modsFetched: boolean;
 
   _enabledMods: string[] = [];
 
   _rawAll: any[] = [];
   _byType: Map<string, any[]> = new Map();
   _byTypeById: Map<string, Map<string, any>> = new Map();
+  _byModByType: Map<string, Map<string, any[]>> = new Map();
   _abstractsByType: Map<string, Map<string, any>> = new Map();
   _toolReplacements: Map<string, string[]> | null = null;
   _craftingPseudoItems: Map<string, string> = new Map();
   _migrations: Map<string, string> = new Map();
   _flattenCache: Map<any, any> = new Map();
   _nestedMapgensById: Map<string, Mapgen[]> = new Map();
+
+  _monsterBlacklist: any[] = [];
+  _monsterWhitelist: any[] = [];
+  _monsterWhitelistExclusive: any[] = [];
 
   release: any;
   build_number: string | undefined;
@@ -271,7 +291,7 @@ export class CddaData {
     raw: any[],
     build_number?: string,
     release?: any,
-    modlist?: string[],
+    mods?: Record<string, ModInfo>,
     rawMods?: Record<string, { info: any; data: any[] }>,
     enabledMods?: string[]
   ) {
@@ -279,8 +299,9 @@ export class CddaData {
     this.build_number = build_number;
     // For some reason O—G has the string "mapgen" as one of its objects.
     this._raw = raw.filter((x) => typeof x === "object");
-    this._availableMods = modlist ?? [];
+    this._mods = mods ?? {};
     this._rawMods = rawMods ?? {};
+    this._modsFetched = rawMods != null;
     this._enabledMods = enabledMods ?? [];
 
     this.initData();
@@ -290,25 +311,50 @@ export class CddaData {
     this._rawAll = [];
     this._byType.clear();
     this._byTypeById.clear();
+    this._byModByType.clear();
     this._abstractsByType.clear();
     this._toolReplacements?.clear();
     this._craftingPseudoItems.clear();
     this._migrations.clear();
     this._flattenCache.clear();
     this._nestedMapgensById.clear();
+    this._cachedDeathDrops.clear();
+    this._cachedUncraftRecipes?.clear();
+    this._cachedMapgenSpawnItems.clear();
+    this._convertedTopLevelItemGroups.clear();
+    this._flattenItemGroupCache = new WeakMap();
+    this._flatRequirementCache = new WeakMap();
+    this._flatRequirementCacheExpandSubs = new WeakMap();
+    this._flatRequirementCacheOnlyRecoverable = new WeakMap();
+    this._normalizeRequirementsCache.clear();
+    this._itemComponentCache = null;
+    this._constructionComponentCache = null;
+    this.#compatibleItemsIdIndex.clear();
+    this.#compatibleItemsFlagIndex.clear();
+    this.#grownFromIndex.clear();
+    this.#brewedFromIndex.clear();
+    this.#transformedFromIndex.clear();
+    this.#bashFromFurnitureIndex.clear();
+    this.#bashFromTerrainIndex.clear();
+    this.#bashFromVehiclePartIndex.clear();
+    this.#deconstructFromFurnitureIndex.clear();
+    this.#deconstructFromTerrainIndex.clear();
 
     for (const obj of this._raw) {
-      obj.__mod = "Dark Days Ahead";
+      obj.__mod = "dda";
+      obj.__modName = translate("Dark Days Ahead", false, 1);
       this.loadObject(obj);
     }
 
     for (const mod of this._enabledMods) {
       if (!(mod in this._rawMods)) continue;
       for (const obj of this._rawMods[mod].data) {
-        obj.__mod = this._rawMods[mod].info.name;
+        obj.__mod = mod;
+        obj.__modName = translate(this._rawMods[mod].info.name, false, 1);
         this.loadObject(obj);
       }
     }
+
     this._byTypeById
       .get("item_group")
       ?.set("EMPTY_GROUP", { id: "EMPTY_GROUP", entries: [] });
@@ -326,22 +372,30 @@ export class CddaData {
     }
     const mappedType = mapType(obj.type);
     if (!this._byType.has(mappedType)) this._byType.set(mappedType, []);
+    if (!this._byModByType.has(obj.__mod))
+      this._byModByType.set(obj.__mod, new Map());
+    if (!this._byModByType.get(obj.__mod)!.has(mappedType))
+      this._byModByType.get(obj.__mod)!.set(mappedType, []);
 
     obj.__self = obj;
     obj.__prevSelf = null;
-    obj.__mod = translate(obj.__mod, false, 1);
 
     if (obj["copy-from"] && obj["copy-from"] === obj.id) {
       const oldIndex = this._byType
         .get(mappedType)!
         .findIndex((x) => x.id === obj.id);
       if (oldIndex !== -1) {
-        const oldObj = this._byType.get(mappedType)![oldIndex];
+        // update _byType
+        const oldObj = this._byType
+          .get(mappedType)!
+          .splice(oldIndex, 1, obj)[0];
         obj.__prevSelf = oldObj;
       }
     } else {
       this._byType.get(mappedType)!.push(obj);
     }
+    // assume a mod won't override its own objects
+    this._byModByType.get(obj.__mod)!.get(mappedType)!.push(obj);
 
     if (Object.hasOwnProperty.call(obj, "id")) {
       if (!this._byTypeById.has(mappedType))
@@ -395,22 +449,87 @@ export class CddaData {
         this._nestedMapgensById.set(obj.nested_mapgen_id, []);
       this._nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
     }
+
+    if (obj.type === "MONSTER_BLACKLIST") {
+      this._monsterBlacklist.push(obj);
+    } else if (obj.type === "MONSTER_WHITELIST") {
+      if (obj.mode === "EXCLUSIVE") {
+        this._monsterWhitelistExclusive.push(obj);
+      } else {
+        this._monsterWhitelist.push(obj);
+      }
+    }
   }
 
-  availableMods(): string[] {
-    return this._availableMods;
+  isMonsterInList(mon: Monster, list: any) {
+    if (Object.hasOwnProperty.call(list, "monsters")) {
+      return list.monsters.includes(mon.id);
+    } else if (Object.hasOwnProperty.call(list, "species")) {
+      if (typeof mon.species === "string") {
+        return list.species.includes(mon.species);
+      } else if (Array.isArray(mon.species)) {
+        return mon.species.some((s) => list.species.includes(s));
+      }
+    } else if (Object.hasOwnProperty.call(list, "categories")) {
+      if (Array.isArray(mon.categories)) {
+        return mon.categories.some((c) => list.categories.includes(c));
+      }
+    }
+    return false;
   }
 
-  getModInfo(modId: string): { info: any; data: any[] } | undefined {
-    return this._rawMods[modId];
+  isMonsterBlacklisted(mon: Monster): boolean {
+    return (
+      this._monsterBlacklist.some((obj) => this.isMonsterInList(mon, obj)) ||
+      (this._monsterWhitelistExclusive.length > 0 &&
+        this._monsterWhitelistExclusive.every(
+          (obj) => !this.isMonsterInList(mon, obj)
+        ))
+    );
   }
 
-  getEnabledMods(): string[] {
+  isMonsterWhitelisted(mon: Monster): boolean {
+    return (
+      this._monsterWhitelist.some((obj) => this.isMonsterInList(mon, obj)) ||
+      this._monsterWhitelistExclusive.some((obj) =>
+        this.isMonsterInList(mon, obj)
+      )
+    );
+  }
+
+  get modsFetched() {
+    return this._modsFetched;
+  }
+
+  getModInfo(mod: string): ModInfo | undefined {
+    return this._rawMods[mod]?.info ?? this._mods[mod];
+  }
+
+  get activeMods(): string[] {
+    return Array.from(this._byModByType.keys());
+  }
+
+  activeModObjects(mod: string, type: string) {
+    return this._byModByType.get(mod)?.get(type) ?? [];
+  }
+
+  get availableMods(): { id: string; label: string }[] {
+    return Object.entries(this._mods)
+      .filter(([id]) => id !== "dda")
+      .map(([id, info]) => ({ id, label: translate(info.name, false, 1) }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }
+
+  get enabledMods() {
     return this._enabledMods;
   }
 
-  modEnabled() {
-    return this._enabledMods.length > 0;
+  setEnabledMods(enabledMods: string[]) {
+    if (JSON.stringify(this._enabledMods) === JSON.stringify(enabledMods)) {
+      return;
+    }
+    this._enabledMods = enabledMods;
+    this.initData();
   }
 
   byIdMaybe<TypeName extends keyof SupportedTypesWithMapped>(
@@ -422,7 +541,16 @@ export class CddaData {
     if (type === "item" && !byId?.has(id) && this._migrations.has(id))
       return this.byIdMaybe(type, this._migrations.get(id)!);
     const obj = byId?.get(id);
-    if (obj) return this._flatten(obj);
+    if (!obj) return;
+    const flattened = this._flatten(obj);
+    if (
+      type === "monster" &&
+      this.isMonsterBlacklisted(flattened) &&
+      !this.isMonsterWhitelisted(flattened)
+    ) {
+      return;
+    }
+    return flattened;
   }
 
   byId<TypeName extends keyof SupportedTypesWithMapped>(
@@ -438,7 +566,14 @@ export class CddaData {
   byType<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName
   ): SupportedTypesWithMapped[TypeName][] {
-    return this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
+    let list = this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
+    if (type === "monster") {
+      list = list.filter(
+        (mon) =>
+          !this.isMonsterBlacklisted(mon) || this.isMonsterWhitelisted(mon)
+      );
+    }
+    return list;
   }
 
   abstractById<TypeName extends keyof SupportedTypesWithMapped>(
@@ -1111,9 +1246,7 @@ export class CddaData {
               count: countsByCharges(item) ? [1, 1] : nCount,
             });
         } else if ("group" in entry) {
-          const group = this.modEnabled()
-            ? this.byIdMaybe("item_group", entry.group)
-            : this.byId("item_group", entry.group);
+          const group = this.byIdMaybe("item_group", entry.group);
           if (!group) continue;
           add(
             ...this.flattenTopLevelItemGroup(group).map((p) =>
@@ -1176,9 +1309,7 @@ export class CddaData {
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
         } else if ("group" in entry) {
-          const group = this.modEnabled()
-            ? this.byIdMaybe("item_group", entry.group)
-            : this.byId("item_group", entry.group);
+          const group = this.byIdMaybe("item_group", entry.group);
           if (!group) continue;
           add(
             ...this.flattenTopLevelItemGroup(group).map((p) =>
@@ -1693,6 +1824,11 @@ class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
   ) {}
 
   #_index: Map<string, SupportedTypesWithMapped[T][]> | null = null;
+
+  clear() {
+    this.#_index = null;
+  }
+
   get #index() {
     if (!this.#_index) {
       this.#_index = new Map();
@@ -1943,6 +2079,16 @@ export function breathabilityFromRating(br: BreathabilityRating): number {
   return 0;
 }
 
+export function getAllObjectSources(obj: any): any[] {
+  const sources: any[] = [];
+  sources.push(obj.__self);
+  while (obj.__prevSelf) {
+    sources.push(obj.__prevSelf);
+    obj = obj.__prevSelf;
+  }
+  return sources.reverse();
+}
+
 const fetchJsonWithProgress = (
   url: string,
   progress: (receivedBytes: number, totalBytes: number) => void
@@ -2117,7 +2263,7 @@ export const data = {
         ),
     ]);
     let modsJson: Record<string, { info: any; data: any[] }> | undefined;
-    if (dataJson.modlist && enabledMods.length > 0) {
+    if (dataJson.mods && enabledMods.length > 0) {
       modsJson = await retry(() =>
         fetchModsJson(version, (receivedBytes, totalBytes) => {
           totals[3] = totalBytes;
@@ -2138,7 +2284,7 @@ export const data = {
       dataJson.data,
       dataJson.build_number,
       dataJson.release,
-      dataJson.modlist,
+      dataJson.mods,
       modsJson,
       enabledMods
     );
