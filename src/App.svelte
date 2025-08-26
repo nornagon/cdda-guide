@@ -382,7 +382,7 @@ function langHref(lang: string, href: string) {
     {/if}
   {:else if search}
     {#if $data}
-      {#key search}
+      {#key [search, enabledMods]}
         <SearchResults data={$data} {search} />
       {/key}
     {:else}
