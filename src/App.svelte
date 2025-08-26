@@ -635,6 +635,8 @@ Anyway?`,
         multiple
         bind:value={enabledMods}
         placeholder={t("No mods selected.")} />
+    {:else}
+      <em style="color: var(--cata-color-gray)">{t("Loading...")}</em>
     {/if}
   </p>
 </main>
