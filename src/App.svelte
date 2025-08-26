@@ -10,6 +10,7 @@ import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
 import { t } from "@transifex/native";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import throttle from "lodash/throttle";
+import Svelecte from "svelecte";
 
 let item: { type: string; id: string } | null = null;
 
@@ -35,18 +36,9 @@ const url = new URL(location.href);
 const version = url.searchParams.get("v") ?? "latest";
 const locale = url.searchParams.get("lang");
 
-let enabledMods: { id: string; label: string }[] = (
-  url.searchParams.get("m")?.split(",") ?? []
-).map((id) => ({
-  id,
-  label: id,
-}));
+let enabledMods: string[] = url.searchParams.get("m")?.split(",") ?? [];
 
-data.setVersion(
-  version,
-  locale,
-  enabledMods.map((m) => m.id)
-);
+data.setVersion(version, locale, enabledMods);
 
 const tilesets = [
   {
@@ -147,7 +139,7 @@ $: if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
 }
 
 $: {
-  const modIds = enabledMods.map((mod) => mod.id);
+  const modIds = enabledMods;
   const url = new URL(location.href);
   if (modIds.length > 0) {
     url.searchParams.set("m", modIds.join(","));
@@ -634,10 +626,15 @@ Anyway?`,
     {#if $data && $data.availableMods.length === 0}
       <em style="color: var(--cata-color-gray)"
         >{t("Mods data not processed for this version.")}</em>
-    {:else}
+    {:else if $data}
       {t("Mods:")}
-      <!-- TODO: a multiselect component for mods -->
-      {enabledMods.map((m) => m.label).join(", ")}
+      <Svelecte
+        options={$data.availableMods}
+        strictMode={false}
+        highlightFirstItem={false}
+        multiple
+        bind:value={enabledMods}
+        placeholder={t("No mods selected.")} />
     {/if}
   </p>
 </main>

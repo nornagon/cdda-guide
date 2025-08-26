@@ -619,16 +619,6 @@ export class CddaData {
     const obj: any = _obj;
     if (this._flattenCache.has(obj)) return this._flattenCache.get(obj);
 
-    function allSources(o: any): any[] {
-      const sources: any[] = [];
-      sources.push(o.__self);
-      while (o.__prevSelf) {
-        sources.push(o.__prevSelf);
-        o = o.__prevSelf;
-      }
-      return sources.reverse();
-    }
-
     let parent: any = null;
     if (obj.__prevSelf != null) {
       parent = obj.__prevSelf;

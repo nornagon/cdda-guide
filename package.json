@@ -41,6 +41,7 @@
     "lodash": "^4.17.21",
     "prettier": "^2.3.2",
     "prettier-plugin-svelte": "^2.4.0",
+    "svelecte": "^4.5.2",
     "svelte": "^3.58.0",
     "svelte-check": "^2.2.7",
     "svelte-preprocess": "^4.9.8",
