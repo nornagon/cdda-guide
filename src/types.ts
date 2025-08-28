@@ -297,6 +297,7 @@ export type BookSlot = {
   time?: number /* mins */ | string /* duration */;
 
   skill?: string; // skill_id
+  read_skill?: string; // skill_id
   martial_art?: string; // matype_id
   chapters?: number; // default: 0
   proficiencies?: BookProficiencyBonus[];

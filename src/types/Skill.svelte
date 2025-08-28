@@ -20,7 +20,12 @@ const data = getContext<CddaData>("data");
 
 const booksWithSkill = data
   .byType("item")
-  .filter((t) => t.id && isItemSubtype("BOOK", t) && t.skill === item.id)
+  .filter(
+    (t) =>
+      t.id &&
+      isItemSubtype("BOOK", t) &&
+      (t.read_skill === item.id || t.skill === item.id)
+  )
   .sort((a, b) =>
     singularName(a).localeCompare(singularName(b))
   ) as SupportedTypesWithMapped["BOOK"][];
