@@ -22,9 +22,7 @@ const booksWithSkill = data
   .byType("item")
   .filter(
     (t) =>
-      t.id &&
-      isItemSubtype("BOOK", t) &&
-      (t.read_skill === item.id || t.skill === item.id)
+      t.id && isItemSubtype("BOOK", t) && (t.read_skill ?? t.skill) === item.id
   )
   .sort((a, b) =>
     singularName(a).localeCompare(singularName(b))

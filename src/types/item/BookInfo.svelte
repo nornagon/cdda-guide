@@ -30,14 +30,16 @@ for (const recipe of data.byType("recipe")) {
       if (id === item.id) add(recipe.result, obj.skill_level ?? 0);
   }
 }
+
+const readSkill = item.read_skill ?? item.skill;
 </script>
 
 <section>
   <h1>{t("Book", { _context, _comment: "Section heading" })}</h1>
   <dl>
-    {#if item.skill}
+    {#if readSkill}
       <dt>{t("Skill", { _context })}</dt>
-      <dd><ThingLink id={item.skill} type="skill" /></dd>
+      <dd><ThingLink id={readSkill} type="skill" /></dd>
       <dt>{t("Required Level", { _context })}</dt>
       <dd>{item.required_level ?? 0}</dd>
       <dt>{t("Maximum Level", { _context })}</dt>
