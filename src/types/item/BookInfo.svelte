@@ -19,14 +19,16 @@ function add(recipe_id: string, level: number) {
   );
 }
 for (const recipe of data.byType("recipe")) {
-  if (recipe.result && Array.isArray(recipe.book_learn))
+  if (!recipe.result) continue;
+  if (Array.isArray(recipe.book_learn)) {
     for (const [id, level = 0] of recipe.book_learn)
       if (id === item.id) add(recipe.result, level);
-      else if (recipe.book_learn)
-        for (const [id, obj] of Object.entries(
-          recipe.book_learn as Record<string, any>
-        ))
-          if (id === item.id) add(recipe.result, obj.skill_level ?? 0);
+  } else if (recipe.book_learn) {
+    for (const [id, obj] of Object.entries(
+      recipe.book_learn as Record<string, any>
+    ))
+      if (id === item.id) add(recipe.result, obj.skill_level ?? 0);
+  }
 }
 </script>
 
