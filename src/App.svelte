@@ -4,13 +4,12 @@ import { CddaData, data, loadProgress, mapType, singularName } from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
-import ModCategory from "./ModCategory.svelte";
 import dontPanic from "./assets/dont_panic.png";
 import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
 import { t } from "@transifex/native";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import throttle from "lodash/throttle";
-import Svelecte from "svelecte";
+import ModCatalog from "./ModCatalog.svelte";
 
 let item: { type: string; id: string } | null = null;
 
@@ -108,6 +107,18 @@ function decodeQueryParam(p: string) {
   return decodeURIComponent(p.replace(/\+/g, " "));
 }
 
+function setModEnabled(mod: string, enabled: boolean) {
+  if (enabled) {
+    if (!enabledMods.includes(mod)) {
+      enabledMods = [...enabledMods, mod];
+    }
+  } else {
+    if (enabledMods.includes(mod)) {
+      enabledMods = enabledMods.filter((m) => m !== mod);
+    }
+  }
+}
+
 function load(noScroll: boolean = false) {
   const path = location.pathname.slice(import.meta.env.BASE_URL.length - 1);
   let m: RegExpExecArray | null;
@@ -152,8 +163,10 @@ $: {
     !$data.modsFetched &&
     modIds.length > 0
   ) {
+    console.log("reloading data for mods", modIds);
     location.href = url.toString();
   } else {
+    console.log("setting mods to", modIds);
     replaceState(null, "", url.toString());
     $data?.setEnabledMods(modIds);
     load(true);
@@ -196,13 +209,31 @@ function maybeNavigate(event: MouseEvent) {
   const target = event.target as HTMLElement | null;
   const anchor = target?.closest("a") as HTMLAnchorElement | null;
   if (anchor && anchor.href) {
-    const { origin, pathname } = new URL(anchor.href);
+    const { origin, pathname, search } = new URL(anchor.href);
     if (
       origin === location.origin &&
       pathname.startsWith(import.meta.env.BASE_URL)
     ) {
       event.preventDefault();
-      history.pushState(null, "", pathname + location.search);
+      const newSearchParams = new URLSearchParams(search);
+      const searchParams = new URLSearchParams(location.search);
+      const mod = newSearchParams.get("mod");
+      if (
+        mod &&
+        /^\/([^\/]+)$/.test(pathname.slice(import.meta.env.BASE_URL.length - 1))
+      ) {
+        // Navigating to a catalog, allow the "&mod=" query param to persist.
+        searchParams.set("mod", mod);
+      } else {
+        // Navigating to an item or something else, drop the "&mod=" query param.
+        searchParams.delete("mod");
+      }
+      const newSearch = searchParams.toString();
+      history.pushState(
+        null,
+        "",
+        pathname + (newSearch ? "?" + newSearch : "")
+      );
       load();
     }
   }
@@ -359,15 +390,17 @@ function langHref(lang: string, href: string) {
 <main>
   {#if item}
     {#if $data}
-      {#key [item, enabledMods]}
-        {#if item.type === "mod"}
-          <ModCategory id={item.id} data={$data} />
-        {:else if item.id}
+      {#if item.type === "mods"}
+        <ModCatalog data={$data} {enabledMods} {setModEnabled} />
+      {:else if item.id}
+        {#key [item, enabledMods]}
           <Thing {item} data={$data} />
-        {:else}
+        {/key}
+      {:else}
+        {#key [item.type, enabledMods]}
           <Catalog type={item.type} data={$data} />
-        {/if}
-      {/key}
+        {/key}
+      {/if}
     {:else}
       <span style="color: var(--cata-color-gray)">
         <em>{t("Loading...")}</em>
@@ -623,21 +656,22 @@ Anyway?`,
     </span>
   </p>
   <p class="data-options" style="display: flex; align-items: center;">
-    {#if $data && $data.availableMods.length === 0}
-      <em style="color: var(--cata-color-gray)"
-        >{t("Mods data not processed for this version.")}</em>
-    {:else if $data}
-      {t("Mods:")}
-      <Svelecte
-        options={$data.availableMods}
-        strictMode={false}
-        highlightFirstItem={false}
-        multiple
-        bind:value={enabledMods}
-        placeholder={t("No mods selected.")} />
-    {:else}
-      <em style="color: var(--cata-color-gray)">{t("Loading...")}</em>
-    {/if}
+    <a href="{import.meta.env.BASE_URL}mods{location.search}">{t("Mods")}</a>:
+    <span style="margin-left: 0.5em">
+      {#if $data && $data.availableMods.length === 0}
+        <em style="color: var(--cata-color-gray)"
+          >{t("Mods data not processed for this version.")}</em>
+      {:else if $data}
+        {#key enabledMods}
+          {#each $data.activeMods.filter((m) => m !== "dda") as mod, i}
+            {#if i > 0}, {/if}{$data.availableMods.find((am) => am.id === mod)
+              ?.label ?? mod}
+          {/each}
+        {/key}
+      {:else}
+        <em style="color: var(--cata-color-gray)">{t("Loading...")}</em>
+      {/if}
+    </span>
   </p>
 </main>
 

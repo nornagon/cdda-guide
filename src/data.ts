@@ -251,6 +251,7 @@ export function asKilograms(string: string | number): string {
 export interface ModInfo {
   id: string;
   name: string;
+  description?: string;
 }
 
 export const hiddenAttributes = [
@@ -501,6 +502,9 @@ export class CddaData {
     return this._modsFetched;
   }
 
+  getRawModData(id: string): any[] {
+    return this._rawMods[id]?.data ?? [];
+  }
   getModInfo(mod: string): ModInfo | undefined {
     return this._rawMods[mod]?.info ?? this._mods[mod];
   }
@@ -513,10 +517,16 @@ export class CddaData {
     return this._byModByType.get(mod)?.get(type) ?? [];
   }
 
-  get availableMods(): { id: string; label: string }[] {
+  get availableMods(): { id: string; label: string; description?: string }[] {
     return Object.entries(this._mods)
       .filter(([id]) => id !== "dda")
-      .map(([id, info]) => ({ id, label: translate(info.name, false, 1) }))
+      .map(([id, info]) => ({
+        id,
+        label: translate(info.name, false, 1),
+        description: info.description
+          ? translate(info.description, false, 1)
+          : undefined,
+      }))
       .sort((a, b) => a.label.localeCompare(b.label));
   }
 
@@ -2279,6 +2289,10 @@ export const data = {
       modsJson,
       enabledMods
     );
+    console.log(
+      `Loaded data for version ${version} (build ${dataJson.build_number}, release ${dataJson.release})`
+    );
+    if (typeof window !== "undefined") (window as any)._cddaData = cddaData; // for debugging
     set(cddaData);
   },
 };
