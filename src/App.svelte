@@ -566,9 +566,6 @@ Anyway?`,
         <a href="/conduct{location.search}">{t("Conducts")}</a>
       </li>
       <li><a href="/proficiency{location.search}">{t("Proficiencies")}</a></li>
-      {#if $data && $data.activeMods.length > 1}
-        <li><a href="/mod{location.search}">{t("Mods")}</a></li>
-      {/if}
     </ul>
 
     <InterpolatedTranslation
@@ -663,6 +660,10 @@ Anyway?`,
           >{t("Mods data not processed for this version.")}</em>
       {:else if $data}
         {#key enabledMods}
+          {#if $data.activeMods.length === 1}
+            <em style="color: var(--cata-color-gray)"
+              >{t("No mods enabled.")}</em>
+          {/if}
           {#each $data.activeMods.filter((m) => m !== "dda") as mod, i}
             {#if i > 0}, {/if}{$data.availableMods.find((am) => am.id === mod)
               ?.label ?? mod}
