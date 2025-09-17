@@ -5065,13 +5065,6 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
-svelecte@^4.5.2:
-  version "4.5.2"
-  resolved "https://registry.npmmirror.com/svelecte/-/svelecte-4.5.2.tgz#b3f8fc766d065ce0f1e6d5bf11d4a1e530fd2da9"
-  integrity sha512-KKGa1ZY4mw3ReaArWlvNwR6jxMs+lRrAEYcfsVQzRC7qu30GNIUqRAw04Sg/MzgZAyHEAnURvVpzHYXK/K2pJg==
-  dependencies:
-    svelte-tiny-virtual-list "^2.1.0"
-
 svelte-check@^2.2.7:
   version "2.10.3"
   resolved "https://registry.yarnpkg.com/svelte-check/-/svelte-check-2.10.3.tgz#c16426c47630e024bf3cd5fab9b8c4f1702db34a"
@@ -5102,11 +5095,6 @@ svelte-preprocess@^4.0.0, svelte-preprocess@^4.9.8:
     magic-string "^0.25.7"
     sorcery "^0.10.0"
     strip-indent "^3.0.0"
-
-svelte-tiny-virtual-list@^2.1.0:
-  version "2.1.2"
-  resolved "https://registry.npmmirror.com/svelte-tiny-virtual-list/-/svelte-tiny-virtual-list-2.1.2.tgz#db826e5915f0374b793798bc8125b8a66fbc6c34"
-  integrity sha512-jeP/WMvgFUR4mYXHGPiCexjX5DuzSO+3xzHNhxfcsFyy+uYPtnqI5UGb383swpzQAyXB0OBqYfzpYihD/5gxnA==
 
 svelte@^3.58.0:
   version "3.58.0"

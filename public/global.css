@@ -236,14 +236,6 @@ pre {
   --cata-color-light_magenta: rgb(254,0,254);
   --cata-color-light_cyan: rgb(0,240,255);
   --cata-color-white: rgb(255,255,255);
-
-  /* svelecte */
-  --sv-bg: var(--cata-color-black);
-  --sv-border: 1px solid var(--cata-color-dark_gray);
-  --sv-dropdown-border: 1px solid var(--cata-color-dark_gray);
-  --sv-item-selected-bg: #333;
-  --sv-dropdown-active-bg: #333;
-  --sv-dropdown-selected-bg: #333;
 }
 .c_black { color: var(--cata-color-black); background: var(--cata-color-black); }
 .c_white { color: var(--cata-color-white); background: var(--cata-color-black); }
