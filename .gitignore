@@ -1,6 +1,7 @@
 /node_modules/
 dist
 dev-dist
+schema.json
 
 .DS_Store
 _test/

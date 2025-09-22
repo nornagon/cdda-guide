@@ -44,7 +44,9 @@ const program = TJS.createGenerator({
 
 const ajv = new Ajv({ allowUnionTypes: true, verbose: true });
 const typesSchema = program.createSchema("SupportedTypes");
-fs.writeFileSync("schema.json", JSON.stringify(typesSchema, null, 2));
+if (process.env.WRITE_SCHEMA)
+  fs.writeFileSync("schema.json", JSON.stringify(typesSchema, null, 2));
+
 const schemasByType = new Map(
   Object.entries(
     (typesSchema!.definitions!["SupportedTypes"] as any).properties
