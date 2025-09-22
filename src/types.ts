@@ -155,6 +155,19 @@ export type RequirementData = {
   tools?: (ToolComponent | ToolComponent[])[];
 };
 
+export type BatchTimeFactors =
+  | [number /* percent */, number /* batch size */]
+  | {
+      mode: "linear";
+      setup: duration;
+      max?: number;
+    }
+  | {
+      mode: "logistic";
+      percent: number;
+      at: number;
+    };
+
 export type Recipe = {
   result?: string;
   abstract?: string; // mutex with result
@@ -172,7 +185,7 @@ export type Recipe = {
   container?: string /* item_id, implies contained */;
   sealed?: boolean;
 
-  batch_time_factors?: [number /* int */, number /* int */]; // [rscale (percentage), rsize]
+  batch_time_factors?: BatchTimeFactors;
 
   charges?: number; // int, no default
   result_mult?: number; // int, default: 1

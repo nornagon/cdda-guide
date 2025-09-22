@@ -2,7 +2,13 @@
 import { t } from "@transifex/native";
 import JsonView from "../JsonView.svelte";
 import { getContext } from "svelte";
-import { CddaData, i18n, singular, singularName } from "../data";
+import {
+  CddaData,
+  asHumanReadableDuration,
+  i18n,
+  singular,
+  singularName,
+} from "../data";
 
 import type { Recipe } from "../types";
 import RequirementData from "./item/RequirementData.svelte";
@@ -75,6 +81,41 @@ function activityLevelName(level: number) {
 
   return i18n.pgettext("activity description", activity_descriptions[idx]);
 }
+
+const LOGISTIC_TEMPLATE = "%1$d%% at >%2$d units";
+const LINEAR_TEMPLATE = "%1$s per unit";
+const LINEAR_WITH_MAX_TEMPLATE = "%1$s per unit to %2$d units";
+
+const translateTemplate = (
+  template: string,
+  ...values: (string | number)[]
+): string => i18n.gettext(template, ...values).replace(/\$[ds]/g, "");
+
+function formatBatchTimeSavings(
+  factors: Recipe["batch_time_factors"]
+): string | null {
+  if (!factors) return null;
+  if (Array.isArray(factors)) {
+    const [percent, batch] = factors;
+    if (percent == null || batch == null) return null;
+    return translateTemplate(LOGISTIC_TEMPLATE, percent, batch);
+  }
+  if (factors.mode === "logistic") {
+    return translateTemplate(LOGISTIC_TEMPLATE, factors.percent, factors.at);
+  }
+  if (factors.mode === "linear") {
+    const setup =
+      typeof factors.setup === "number"
+        ? asHumanReadableDuration(factors.setup)
+        : factors.setup;
+    return factors.max != null
+      ? translateTemplate(LINEAR_WITH_MAX_TEMPLATE, setup, factors.max)
+      : translateTemplate(LINEAR_TEMPLATE, setup);
+  }
+  return null;
+}
+
+const batchTimeSavings = formatBatchTimeSavings(recipe.batch_time_factors);
 </script>
 
 <section class="recipe">
@@ -192,11 +233,8 @@ function activityLevelName(level: number) {
     </dd>
     <dt>{t("Batch Time Savings", { _context })}</dt>
     <dd>
-      {#if recipe.batch_time_factors}
-        {recipe.batch_time_factors[0]}% at >{recipe.batch_time_factors[1]} unit{recipe
-          .batch_time_factors[1] === 1
-          ? ""
-          : "s"}
+      {#if batchTimeSavings}
+        {batchTimeSavings}
       {:else}
         <em>{t("none")}</em>
       {/if}
