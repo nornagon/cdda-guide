@@ -1,7 +1,7 @@
 import App from "./App.svelte";
 import * as Sentry from "@sentry/browser";
 import "@fontsource/unifont";
-import { registerSW } from "virtual:pwa-register";
+// import { registerSW } from "virtual:pwa-register";
 import { tx } from "@transifex/native";
 
 tx.init({
@@ -18,7 +18,7 @@ if (location.hostname !== "localhost")
     }),
   });
 
-registerSW({});
+// registerSW({});
 
 if (location.hash) {
   history.replaceState(

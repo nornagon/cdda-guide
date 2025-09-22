@@ -3,5 +3,7 @@ dist
 dev-dist
 schema.json
 
+.env
+
 .DS_Store
 _test/
