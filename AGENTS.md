@@ -41,6 +41,7 @@ When making changes, if it is easy to maintain compatibility with older versions
 ## Translation
 
 There are two sources for translation strings:
+
 - For text from the game itself, we rely on the translations provided by the Cataclysm-DDA project.
   These are usable via the i18n.gettext helpers (`singular` / `plural` / `translate` / etc. in data.ts for data from items, or `i18n.__` / `i18n.gettext` for UI strings).
   It's preferable to use these when possible as they match the in-game strings and don't require further translation.
