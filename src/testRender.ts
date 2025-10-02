@@ -2,6 +2,7 @@ import { render, cleanup, act } from "@testing-library/svelte";
 import { screen } from "@testing-library/dom";
 import { expect, test, afterEach } from "vitest";
 import * as fs from "fs";
+import path from "path";
 
 import { CddaData, mapType } from "./data";
 
@@ -76,11 +77,114 @@ export function makeRenderTests(chunkIdx: number, numChunks: number) {
       await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
       expect(screen.queryByTestId("loading-indicator")).toBe(null);
 
-      if (type !== "technique") {
-        expect(container.textContent).not.toMatch(
-          /undefined|NaN|object Object/
+      if (process.env.DUMP_PAGES) {
+        const filename = path.resolve(
+          process.cwd(),
+          "_rendered",
+          type,
+          id + ""
         );
+        const dumpStr = dumpElement(container);
+        fs.mkdirSync(path.dirname(filename), { recursive: true });
+        fs.writeFileSync(filename, dumpStr);
       }
+
+      const { textContent } = container;
+      expect(textContent).not.toMatch(/undefined|NaN|object Object/);
     }
   );
+}
+
+const BLOCK_TAGS = new Set([
+  "ADDRESS",
+  "ARTICLE",
+  "ASIDE",
+  "BLOCKQUOTE",
+  "DETAILS",
+  "DIALOG",
+  "DD",
+  "DIV",
+  "DL",
+  "DT",
+  "FIELDSET",
+  "FIGCAPTION",
+  "FIGURE",
+  "FOOTER",
+  "FORM",
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6",
+  "HEADER",
+  "HGROUP",
+  "HR",
+  "LI",
+  "MAIN",
+  "NAV",
+  "OL",
+  "P",
+  "PRE",
+  "SECTION",
+  "TABLE",
+  "TR",
+  "THEAD",
+  "TBODY",
+  "TFOOT",
+  "UL",
+]);
+function dumpElement(el: HTMLElement): string {
+  let out = "";
+
+  let preserveWhitespace = false;
+
+  const append = (s: string) => {
+    if (!s) return;
+    if (!preserveWhitespace) {
+      s = s.replace(/\s+/g, " ");
+      if (out.endsWith(" ") && s.startsWith(" ")) s = s.slice(1);
+    }
+    out += s;
+  };
+
+  const rec = (node: Node) => {
+    if (node.nodeType === node.TEXT_NODE) {
+      append((node as Text).nodeValue || "");
+      return;
+    }
+
+    if (node.nodeType !== node.ELEMENT_NODE) return;
+    const el = node as HTMLElement;
+    const tag = el.tagName;
+
+    const wasPreserve = preserveWhitespace;
+    if (tag === "PRE") preserveWhitespace = true;
+
+    const isBlock = BLOCK_TAGS.has(tag);
+    const isBr = tag === "BR";
+
+    if (isBr) {
+      if (!out.endsWith("\n")) out += "\n";
+      return;
+    }
+
+    if (isBlock && !out.endsWith("\n")) out += "\n";
+
+    // For table-ish elements, insert lightweight separators
+    if (tag === "TR" && !out.endsWith("\n")) out += "\n";
+
+    // Recurse children
+    for (const child of Array.from(el.childNodes)) rec(child);
+
+    // Close block with newline
+    if (isBlock && !out.endsWith("\n")) out += "\n";
+
+    preserveWhitespace = wasPreserve;
+  };
+
+  for (const child of el.childNodes) {
+    rec(child);
+  }
+  return out;
 }

@@ -5,3 +5,4 @@ schema.json
 
 .DS_Store
 _test/
+_rendered/
