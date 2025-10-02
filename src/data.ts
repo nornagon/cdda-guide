@@ -1670,11 +1670,16 @@ export function normalize<T>(xs: (T | T[])[] | undefined): T[][] {
 }
 
 export const countsByCharges = (item: any): boolean => {
-  return (
-    isItemSubtype("AMMO", item) ||
-    isItemSubtype("COMESTIBLE", item) ||
-    item.stackable
-  );
+  if (!item) return false;
+  if (item.stackable) return true;
+  if (isItemSubtype("AMMO", item)) return true;
+  if (isItemSubtype("COMESTIBLE", item)) {
+    const phase =
+      (item as any).phase ??
+      ((item as any).comestible && (item as any).comestible.phase);
+    return typeof phase === "string" ? phase.toLowerCase() !== "solid" : false;
+  }
+  return false;
 };
 
 export function normalizeDamageInstance(

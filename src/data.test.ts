@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { CddaData } from "./data";
+import { CddaData, countsByCharges } from "./data";
 
 test("flattened item group includes container item for distribution", () => {
   const data = new CddaData([
@@ -118,4 +118,13 @@ test("nested", () => {
     { id: "bottle_plastic", count: [2, 2], prob: "0.90", expected: 1.8 },
     { id: "water_clean", count: [2, 7], prob: "0.90", expected: 4.05 },
   ]);
+});
+
+test("countsByCharges matches Cataclysm rules", () => {
+  expect(countsByCharges({ type: "AMMO" })).toBe(true);
+  expect(countsByCharges({ type: "COMESTIBLE", phase: "liquid" })).toBe(true);
+  expect(countsByCharges({ type: "COMESTIBLE", phase: "plasma" })).toBe(true);
+  expect(countsByCharges({ type: "COMESTIBLE" })).toBe(false);
+  expect(countsByCharges({ type: "COMESTIBLE", phase: "solid" })).toBe(false);
+  expect(countsByCharges({ type: "GENERIC", stackable: true })).toBe(true);
 });
