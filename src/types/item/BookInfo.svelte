@@ -19,23 +19,27 @@ function add(recipe_id: string, level: number) {
   );
 }
 for (const recipe of data.byType("recipe")) {
-  if (recipe.result && Array.isArray(recipe.book_learn))
+  if (!recipe.result) continue;
+  if (Array.isArray(recipe.book_learn)) {
     for (const [id, level = 0] of recipe.book_learn)
       if (id === item.id) add(recipe.result, level);
-      else if (recipe.book_learn)
-        for (const [id, obj] of Object.entries(
-          recipe.book_learn as Record<string, any>
-        ))
-          if (id === item.id) add(recipe.result, obj.skill_level ?? 0);
+  } else if (recipe.book_learn) {
+    for (const [id, obj] of Object.entries(
+      recipe.book_learn as Record<string, any>
+    ))
+      if (id === item.id) add(recipe.result, obj.skill_level ?? 0);
+  }
 }
+
+const readSkill = item.read_skill ?? item.skill;
 </script>
 
 <section>
   <h1>{t("Book", { _context, _comment: "Section heading" })}</h1>
   <dl>
-    {#if item.skill}
+    {#if readSkill}
       <dt>{t("Skill", { _context })}</dt>
-      <dd><ThingLink id={item.skill} type="skill" /></dd>
+      <dd><ThingLink id={readSkill} type="skill" /></dd>
       <dt>{t("Required Level", { _context })}</dt>
       <dd>{item.required_level ?? 0}</dd>
       <dt>{t("Maximum Level", { _context })}</dt>
