@@ -271,9 +271,11 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
           <dd>
             <ul class="comma-separated">
               {#each item.variants as va}
-                {@const name = singular(va.name)}
-                {#if name !== singularName(item)}
-                  <li>{singular(va.name)}</li>
+                {#if va.name}
+                  {@const name = singular(va.name)}
+                  {#if name !== singularName(item)}
+                    <li>{name}</li>
+                  {/if}
                 {/if}
               {/each}
             </ul>

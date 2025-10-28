@@ -700,8 +700,8 @@ export type ItemBasicInfo = {
   variant_type?: "gun" | "drug" | "generic";
   variants?: {
     id: string;
-    name: Translation;
-    description: Translation;
+    name?: Translation;
+    description?: Translation;
     symbol?: string;
     color?: string;
     ascii_picture?: string; // id
