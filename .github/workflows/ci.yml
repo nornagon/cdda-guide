@@ -28,8 +28,8 @@ jobs:
 
       - name: Test
         run: |
-          if [ "$GITHUB_EVENT_NAME" != "push" ]; then
-            echo "GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME"
+          echo "GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME"
+          if [ "$GITHUB_EVENT_NAME" == "schedule" ]; then
             yarn test:latest
           else
             yarn test
