@@ -29,6 +29,7 @@ jobs:
       - name: Test
         run: |
           if [ "$GITHUB_EVENT_NAME" != "push" ]; then
+            echo "GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME"
             yarn test:latest
           else
             yarn test
