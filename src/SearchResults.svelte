@@ -112,7 +112,7 @@ $: targets = [...(data?.all() ?? [])]
       itemVariants(x).map((v) => ({
         id: (x as any).id,
         variant_id: v.id,
-        name: singular(v.name),
+        name: v.name ? singular(v.name) : singularName(x),
         type: mapType(x.type),
       }))
     )
