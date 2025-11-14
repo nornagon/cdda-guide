@@ -571,6 +571,16 @@ Anyway?`,
       {#if builds}
         {@const build_number =
           version === "latest" ? builds[0].build_number : version}
+        {@const build = builds.find((b) => b.build_number === build_number)}
+        {@const langs = build?.langs ?? []}
+        {@const validLangs = langs.filter((lang) => {
+          try {
+            getLanguageName(lang);
+            return true;
+          } catch {
+            return false;
+          }
+        })}
         <select
           value={locale || "en"}
           on:change={(e) => {
@@ -581,7 +591,7 @@ Anyway?`,
             location.href = url.toString();
           }}>
           <option value="en">English</option>
-          {#each [...(builds.find((b) => b.build_number === build_number)?.langs ?? [])].sort( (a, b) => a.localeCompare(b) ) as lang}
+          {#each validLangs.sort((a, b) => a.localeCompare(b)) as lang}
             <option value={lang}>{getLanguageName(lang)}</option>
           {/each}
         </select>
