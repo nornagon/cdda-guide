@@ -16,6 +16,7 @@ import {
   type SupportedTypeMapped,
   type Vehicle,
   type Item,
+  type Monster,
   type UseFunction,
   type Bionic,
   type QualityRequirement,
@@ -247,10 +248,32 @@ export function asKilograms(string: string | number): string {
   return `${(g / 1000).toFixed(2)} kg`;
 }
 
+export interface ModInfo {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export const hiddenAttributes = [
+  "__mod",
+  "__modName",
+  "__filename",
+  "__self",
+  "__prevSelf",
+];
+
 export class CddaData {
   _raw: any[];
+  _mods: Record<string, ModInfo>;
+  _rawMods: Record<string, { info: any; data: any[] }>;
+  _modsFetched: boolean;
+
+  _enabledMods: string[] = [];
+
+  _rawAll: any[] = [];
   _byType: Map<string, any[]> = new Map();
   _byTypeById: Map<string, Map<string, any>> = new Map();
+  _byModByType: Map<string, Map<string, any[]>> = new Map();
   _abstractsByType: Map<string, Map<string, any>> = new Map();
   _toolReplacements: Map<string, string[]> | null = null;
   _craftingPseudoItems: Map<string, string> = new Map();
@@ -258,83 +281,265 @@ export class CddaData {
   _flattenCache: Map<any, any> = new Map();
   _nestedMapgensById: Map<string, Mapgen[]> = new Map();
 
+  _monsterBlacklist: any[] = [];
+  _monsterWhitelist: any[] = [];
+  _monsterWhitelistExclusive: any[] = [];
+
   release: any;
   build_number: string | undefined;
 
-  constructor(raw: any[], build_number?: string, release?: any) {
+  constructor(
+    raw: any[],
+    build_number?: string,
+    release?: any,
+    mods?: Record<string, ModInfo>,
+    rawMods?: Record<string, { info: any; data: any[] }>,
+    enabledMods?: string[]
+  ) {
     this.release = release;
     this.build_number = build_number;
     // For some reason O—G has the string "mapgen" as one of its objects.
     this._raw = raw.filter((x) => typeof x === "object");
-    for (const obj of raw) {
-      if (!Object.hasOwnProperty.call(obj, "type")) continue;
-      if (obj.type === "MIGRATION") {
-        for (const id of typeof obj.id === "string" ? [obj.id] : obj.id) {
-          const { replace } = obj;
-          this._migrations.set(id, replace);
-        }
-        continue;
-      }
-      const mappedType = mapType(obj.type);
-      if (!this._byType.has(mappedType)) this._byType.set(mappedType, []);
-      this._byType.get(mappedType)!.push(obj);
-      if (Object.hasOwnProperty.call(obj, "id")) {
-        if (!this._byTypeById.has(mappedType))
-          this._byTypeById.set(mappedType, new Map());
-        if (typeof obj.id === "string")
-          this._byTypeById.get(mappedType)!.set(obj.id, obj);
-        else if (Array.isArray(obj.id))
-          for (const id of obj.id)
-            this._byTypeById.get(mappedType)!.set(id, obj);
+    this._mods = mods ?? {};
+    this._rawMods = rawMods ?? {};
+    this._modsFetched = rawMods != null;
+    this._enabledMods = enabledMods ?? [];
 
-        // TODO: proper alias handling. We want to e.g. be able to collapse them in loot tables.
-        if (Array.isArray(obj.alias))
-          for (const id of obj.alias)
-            this._byTypeById.get(mappedType)!.set(id, obj);
-        else if (typeof obj.alias === "string")
-          this._byTypeById.get(mappedType)!.set(obj.alias, obj);
-      }
-      // recipes are id'd by their result
-      if (
-        (mappedType === "recipe" || mappedType === "uncraft") &&
-        Object.hasOwnProperty.call(obj, "result")
-      ) {
-        if (!this._byTypeById.has(mappedType))
-          this._byTypeById.set(mappedType, new Map());
-        const id =
-          obj.result +
-          (obj.variant && !obj.abstract ? "_" + obj.variant : "") +
-          (obj.id_suffix ? "_" + obj.id_suffix : "");
-        this._byTypeById.get(mappedType)!.set(id, obj);
-      }
-      if (
-        mappedType === "monstergroup" &&
-        Object.hasOwnProperty.call(obj, "name")
-      ) {
-        if (!this._byTypeById.has(mappedType))
-          this._byTypeById.set(mappedType, new Map());
-        const id = obj.name;
-        this._byTypeById.get(mappedType)!.set(id, obj);
-      }
-      if (Object.hasOwnProperty.call(obj, "abstract")) {
-        if (!this._abstractsByType.has(mappedType))
-          this._abstractsByType.set(mappedType, new Map());
-        this._abstractsByType.get(mappedType)!.set(obj.abstract, obj);
-      }
+    this.initData();
+  }
 
-      if (Object.hasOwnProperty.call(obj, "crafting_pseudo_item")) {
-        this._craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id);
-      }
+  initData() {
+    this._rawAll = [];
+    this._byType.clear();
+    this._byTypeById.clear();
+    this._byModByType.clear();
+    this._abstractsByType.clear();
+    this._toolReplacements?.clear();
+    this._craftingPseudoItems.clear();
+    this._migrations.clear();
+    this._flattenCache.clear();
+    this._nestedMapgensById.clear();
+    this._cachedDeathDrops.clear();
+    this._cachedUncraftRecipes?.clear();
+    this._cachedMapgenSpawnItems.clear();
+    this._convertedTopLevelItemGroups.clear();
+    this._flattenItemGroupCache = new WeakMap();
+    this._flatRequirementCache = new WeakMap();
+    this._flatRequirementCacheExpandSubs = new WeakMap();
+    this._flatRequirementCacheOnlyRecoverable = new WeakMap();
+    this._normalizeRequirementsCache.clear();
+    this._itemComponentCache = null;
+    this._constructionComponentCache = null;
+    this.#compatibleItemsIdIndex.clear();
+    this.#compatibleItemsFlagIndex.clear();
+    this.#grownFromIndex.clear();
+    this.#brewedFromIndex.clear();
+    this.#transformedFromIndex.clear();
+    this.#bashFromFurnitureIndex.clear();
+    this.#bashFromTerrainIndex.clear();
+    this.#bashFromVehiclePartIndex.clear();
+    this.#deconstructFromFurnitureIndex.clear();
+    this.#deconstructFromTerrainIndex.clear();
 
-      if (Object.hasOwnProperty.call(obj, "nested_mapgen_id")) {
-        if (!this._nestedMapgensById.has(obj.nested_mapgen_id))
-          this._nestedMapgensById.set(obj.nested_mapgen_id, []);
-        this._nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
+    for (const obj of this._raw) {
+      obj.__mod = "dda";
+      obj.__modName = translate("Dark Days Ahead", false, 1);
+      this.loadObject(obj);
+    }
+
+    for (const mod of this._enabledMods) {
+      if (!(mod in this._rawMods)) continue;
+      for (const obj of this._rawMods[mod].data) {
+        obj.__mod = mod;
+        obj.__modName = translate(this._rawMods[mod].info.name, false, 1);
+        this.loadObject(obj);
       }
     }
+
     this._byTypeById
       .get("item_group")
       ?.set("EMPTY_GROUP", { id: "EMPTY_GROUP", entries: [] });
+  }
+
+  loadObject(obj: any) {
+    this._rawAll.push(obj);
+
+    if (!Object.hasOwnProperty.call(obj, "type")) return;
+    if (obj.type === "MIGRATION") {
+      for (const id of typeof obj.id === "string" ? [obj.id] : obj.id) {
+        this._migrations.set(id, obj.replace);
+      }
+      return;
+    }
+    const mappedType = mapType(obj.type);
+    if (!this._byType.has(mappedType)) this._byType.set(mappedType, []);
+    if (!this._byModByType.has(obj.__mod))
+      this._byModByType.set(obj.__mod, new Map());
+    if (!this._byModByType.get(obj.__mod)!.has(mappedType))
+      this._byModByType.get(obj.__mod)!.set(mappedType, []);
+
+    obj.__self = obj;
+    obj.__prevSelf = null;
+
+    if (obj["copy-from"] && obj["copy-from"] === obj.id) {
+      const oldIndex = this._byType
+        .get(mappedType)!
+        .findIndex((x) => x.id === obj.id);
+      if (oldIndex !== -1) {
+        // update _byType
+        const oldObj = this._byType
+          .get(mappedType)!
+          .splice(oldIndex, 1, obj)[0];
+        obj.__prevSelf = oldObj;
+      }
+    } else {
+      this._byType.get(mappedType)!.push(obj);
+    }
+    // assume a mod won't override its own objects
+    this._byModByType.get(obj.__mod)!.get(mappedType)!.push(obj);
+
+    if (Object.hasOwnProperty.call(obj, "id")) {
+      if (!this._byTypeById.has(mappedType))
+        this._byTypeById.set(mappedType, new Map());
+      if (typeof obj.id === "string")
+        this._byTypeById.get(mappedType)!.set(obj.id, obj);
+      else if (Array.isArray(obj.id))
+        for (const id of obj.id) this._byTypeById.get(mappedType)!.set(id, obj);
+
+      // TODO: proper alias handling. We want to e.g. be able to collapse them in loot tables.
+      if (Array.isArray(obj.alias))
+        for (const id of obj.alias)
+          this._byTypeById.get(mappedType)!.set(id, obj);
+      else if (typeof obj.alias === "string")
+        this._byTypeById.get(mappedType)!.set(obj.alias, obj);
+    }
+    // recipes are id'd by their result
+    if (
+      (mappedType === "recipe" || mappedType === "uncraft") &&
+      Object.hasOwnProperty.call(obj, "result")
+    ) {
+      if (!this._byTypeById.has(mappedType))
+        this._byTypeById.set(mappedType, new Map());
+      const id =
+        obj.result +
+        (obj.variant && !obj.abstract ? "_" + obj.variant : "") +
+        (obj.id_suffix ? "_" + obj.id_suffix : "");
+      this._byTypeById.get(mappedType)!.set(id, obj);
+    }
+    if (
+      mappedType === "monstergroup" &&
+      Object.hasOwnProperty.call(obj, "name")
+    ) {
+      if (!this._byTypeById.has(mappedType))
+        this._byTypeById.set(mappedType, new Map());
+      const id = obj.name;
+      this._byTypeById.get(mappedType)!.set(id, obj);
+    }
+    if (Object.hasOwnProperty.call(obj, "abstract")) {
+      if (!this._abstractsByType.has(mappedType))
+        this._abstractsByType.set(mappedType, new Map());
+      this._abstractsByType.get(mappedType)!.set(obj.abstract, obj);
+    }
+
+    if (Object.hasOwnProperty.call(obj, "crafting_pseudo_item")) {
+      this._craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id);
+    }
+
+    if (Object.hasOwnProperty.call(obj, "nested_mapgen_id")) {
+      if (!this._nestedMapgensById.has(obj.nested_mapgen_id))
+        this._nestedMapgensById.set(obj.nested_mapgen_id, []);
+      this._nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
+    }
+
+    if (obj.type === "MONSTER_BLACKLIST") {
+      this._monsterBlacklist.push(obj);
+    } else if (obj.type === "MONSTER_WHITELIST") {
+      if (obj.mode === "EXCLUSIVE") {
+        this._monsterWhitelistExclusive.push(obj);
+      } else {
+        this._monsterWhitelist.push(obj);
+      }
+    }
+  }
+
+  isMonsterInList(mon: Monster, list: any) {
+    if (Object.hasOwnProperty.call(list, "monsters")) {
+      return list.monsters.includes(mon.id);
+    } else if (Object.hasOwnProperty.call(list, "species")) {
+      if (typeof mon.species === "string") {
+        return list.species.includes(mon.species);
+      } else if (Array.isArray(mon.species)) {
+        return mon.species.some((s) => list.species.includes(s));
+      }
+    } else if (Object.hasOwnProperty.call(list, "categories")) {
+      if (Array.isArray(mon.categories)) {
+        return mon.categories.some((c) => list.categories.includes(c));
+      }
+    }
+    return false;
+  }
+
+  isMonsterBlacklisted(mon: Monster): boolean {
+    return (
+      this._monsterBlacklist.some((obj) => this.isMonsterInList(mon, obj)) ||
+      (this._monsterWhitelistExclusive.length > 0 &&
+        this._monsterWhitelistExclusive.every(
+          (obj) => !this.isMonsterInList(mon, obj)
+        ))
+    );
+  }
+
+  isMonsterWhitelisted(mon: Monster): boolean {
+    return (
+      this._monsterWhitelist.some((obj) => this.isMonsterInList(mon, obj)) ||
+      this._monsterWhitelistExclusive.some((obj) =>
+        this.isMonsterInList(mon, obj)
+      )
+    );
+  }
+
+  get modsFetched() {
+    return this._modsFetched;
+  }
+
+  getRawModData(id: string): any[] {
+    return this._rawMods[id]?.data ?? [];
+  }
+  getModInfo(mod: string): ModInfo | undefined {
+    return this._rawMods[mod]?.info ?? this._mods[mod];
+  }
+
+  get activeMods(): string[] {
+    return Array.from(this._byModByType.keys());
+  }
+
+  activeModObjects(mod: string, type: string) {
+    return this._byModByType.get(mod)?.get(type) ?? [];
+  }
+
+  get availableMods(): { id: string; label: string; description?: string }[] {
+    return Object.entries(this._mods)
+      .filter(([id]) => id !== "dda")
+      .map(([id, info]) => ({
+        id,
+        label: translate(info.name, false, 1),
+        description: info.description
+          ? translate(info.description, false, 1)
+          : undefined,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }
+
+  get enabledMods() {
+    return this._enabledMods;
+  }
+
+  setEnabledMods(enabledMods: string[]) {
+    if (JSON.stringify(this._enabledMods) === JSON.stringify(enabledMods)) {
+      return;
+    }
+    this._enabledMods = enabledMods;
+    this.initData();
   }
 
   byIdMaybe<TypeName extends keyof SupportedTypesWithMapped>(
@@ -346,7 +551,16 @@ export class CddaData {
     if (type === "item" && !byId?.has(id) && this._migrations.has(id))
       return this.byIdMaybe(type, this._migrations.get(id)!);
     const obj = byId?.get(id);
-    if (obj) return this._flatten(obj);
+    if (!obj) return;
+    const flattened = this._flatten(obj);
+    if (
+      type === "monster" &&
+      this.isMonsterBlacklisted(flattened) &&
+      !this.isMonsterWhitelisted(flattened)
+    ) {
+      return;
+    }
+    return flattened;
   }
 
   byId<TypeName extends keyof SupportedTypesWithMapped>(
@@ -362,7 +576,14 @@ export class CddaData {
   byType<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName
   ): SupportedTypesWithMapped[TypeName][] {
-    return this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
+    let list = this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
+    if (type === "monster") {
+      list = list.filter(
+        (mon) =>
+          !this.isMonsterBlacklisted(mon) || this.isMonsterWhitelisted(mon)
+      );
+    }
+    return list;
   }
 
   abstractById<TypeName extends keyof SupportedTypesWithMapped>(
@@ -401,23 +622,31 @@ export class CddaData {
   }
 
   all(): SupportedTypeMapped[] {
-    return this._raw;
+    return this._rawAll;
   }
 
   _flatten<T = any>(_obj: T): T {
     const obj: any = _obj;
     if (this._flattenCache.has(obj)) return this._flattenCache.get(obj);
-    const parent =
-      "copy-from" in obj
-        ? this._byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
-          this._abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"])
-        : null;
-    if ("copy-from" in obj && !parent)
-      console.error(
-        `Missing parent in ${
-          obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)
-        }`
-      );
+
+    let parent: any = null;
+    if (obj.__prevSelf != null) {
+      parent = obj.__prevSelf;
+    } else {
+      parent =
+        "copy-from" in obj
+          ? this._byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
+            this._abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"])
+          : null;
+
+      if ("copy-from" in obj && !parent)
+        console.error(
+          `Missing parent in ${
+            obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)
+          }`
+        );
+    }
+
     if (parent === obj) {
       // Working around bad data upstream, see: https://github.com/CleverRaven/Cataclysm-DDA/pull/53930
       console.warn("Object copied from itself:", obj);
@@ -1017,10 +1246,12 @@ export class CddaData {
               count: countsByCharges(item) ? [1, 1] : nCount,
             });
         } else if ("group" in entry) {
+          const group = this.byIdMaybe("item_group", entry.group);
+          if (!group) continue;
           add(
-            ...this.flattenTopLevelItemGroup(
-              this.byId("item_group", entry.group)
-            ).map((p) => prod(p, nProb, nCount))
+            ...this.flattenTopLevelItemGroup(group).map((p) =>
+              prod(p, nProb, nCount)
+            )
           );
         } else if ("collection" in entry) {
           add(
@@ -1078,10 +1309,12 @@ export class CddaData {
         if ("item" in entry) {
           add({ id: entry.item, prob: nProb, count: nCount });
         } else if ("group" in entry) {
+          const group = this.byIdMaybe("item_group", entry.group);
+          if (!group) continue;
           add(
-            ...this.flattenTopLevelItemGroup(
-              this.byId("item_group", entry.group)
-            ).map((p) => prod(p, nProb, nCount))
+            ...this.flattenTopLevelItemGroup(group).map((p) =>
+              prod(p, nProb, nCount)
+            )
           );
         } else if ("collection" in entry) {
           add(
@@ -1591,6 +1824,11 @@ class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
   ) {}
 
   #_index: Map<string, SupportedTypesWithMapped[T][]> | null = null;
+
+  clear() {
+    this.#_index = null;
+  }
+
   get #index() {
     if (!this.#_index) {
       this.#_index = new Map();
@@ -1846,6 +2084,17 @@ export function breathabilityFromRating(br: BreathabilityRating): number {
   return 0;
 }
 
+export function getAllObjectSources(obj: any): any[] {
+  if (!obj.__self) return [];
+  const sources: any[] = [];
+  sources.push(obj.__self);
+  while (obj.__prevSelf) {
+    sources.push(obj.__prevSelf);
+    obj = obj.__prevSelf;
+  }
+  return sources.reverse();
+}
+
 const fetchJsonWithProgress = (
   url: string,
   progress: (receivedBytes: number, totalBytes: number) => void
@@ -1933,9 +2182,19 @@ const fetchJson = async (
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/all.json`,
+    `${process.env.CDDA_DATA_SOURCE}/data/${version}/all.json`,
     progress
   );
+};
+
+const fetchModsJson = async (
+  version: string,
+  progress: (receivedBytes: number, totalBytes: number) => void
+) => {
+  return fetchJsonWithProgress(
+    `${process.env.CDDA_DATA_SOURCE}/data/${version}/all_mods.json`,
+    progress
+  ) as Promise<Record<string, { info: any; data: any[] }>>;
 };
 
 const fetchLocaleJson = async (
@@ -1944,7 +2203,7 @@ const fetchLocaleJson = async (
   progress: (receivedBytes: number, totalBytes: number) => void
 ) => {
   return fetchJsonWithProgress(
-    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/lang/${locale}.json`,
+    `${process.env.CDDA_DATA_SOURCE}/data/${version}/lang/${locale}.json`,
     progress
   );
 };
@@ -1966,11 +2225,15 @@ let _hasSetVersion = false;
 const { subscribe, set } = writable<CddaData | null>(null);
 export const data = {
   subscribe,
-  async setVersion(version: string, locale: string | null) {
+  async setVersion(
+    version: string,
+    locale: string | null,
+    enabledMods: string[] = []
+  ) {
     if (_hasSetVersion) throw new Error("can only set version once");
     _hasSetVersion = true;
-    let totals = [0, 0, 0];
-    let receiveds = [0, 0, 0];
+    let totals = [0, 0, 0, 0];
+    let receiveds = [0, 0, 0, 0];
     const updateProgress = () => {
       const total = totals.reduce((a, b) => a + b, 0);
       const received = receiveds.reduce((a, b) => a + b, 0);
@@ -2005,6 +2268,16 @@ export const data = {
           )
         ),
     ]);
+    let modsJson: Record<string, { info: any; data: any[] }> | undefined;
+    if (dataJson.mods && enabledMods.length > 0) {
+      modsJson = await retry(() =>
+        fetchModsJson(version, (receivedBytes, totalBytes) => {
+          totals[3] = totalBytes;
+          receiveds[3] = receivedBytes;
+          updateProgress();
+        })
+      );
+    }
     if (locale && localeJson) {
       if (pinyinNameJson) pinyinNameJson[""] = localeJson[""];
       i18n.loadJSON(localeJson);
@@ -2016,8 +2289,15 @@ export const data = {
     const cddaData = new CddaData(
       dataJson.data,
       dataJson.build_number,
-      dataJson.release
+      dataJson.release,
+      dataJson.mods,
+      modsJson,
+      enabledMods
     );
+    console.log(
+      `Loaded data for version ${version} (build ${dataJson.build_number}, release ${dataJson.release})`
+    );
+    if (typeof window !== "undefined") (window as any)._cddaData = cddaData; // for debugging
     set(cddaData);
   },
 };

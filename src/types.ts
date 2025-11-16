@@ -1412,6 +1412,7 @@ export type Monster = {
   dissect?: string; // harvest_id
   bodytype?: string;
   species?: string | string[];
+  categories?: string[];
   speed?: number;
   melee_skill?: integer;
   melee_dice?: integer;
