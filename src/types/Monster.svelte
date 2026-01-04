@@ -487,7 +487,7 @@ let upgrades =
         <dd>
           <ul class="comma-separated">
             {#each item.flags ?? [] as flag}
-              <li><abbr title={mon_flag_descriptions[flag]}>{flag}</abbr></li>
+              <li><ThingLink type="json_flag" id={flag} /></li>
             {/each}
           </ul>
         </dd>
