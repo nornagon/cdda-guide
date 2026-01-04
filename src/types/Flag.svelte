@@ -34,6 +34,9 @@ const bionicWithFlag = data
         f.active_flags?.includes(item.id) ||
         f.inactive_flags?.includes(item.id))
   );
+const monstersWithFlag = data
+  .byType("monster")
+  .filter((f) => f.id && f.flags?.includes(item.id));
 </script>
 
 <h1>{t("Flag", { _comment: "Section heading" })}: {item.id}</h1>
@@ -84,6 +87,15 @@ const bionicWithFlag = data
     <LimitedList items={bionicWithFlag.sort(byName)} let:item>
       <ItemSymbol {item} />
       <ThingLink type="bionic" id={item.id} />
+    </LimitedList>
+  </section>
+{/if}
+{#if monstersWithFlag.length}
+  <section>
+    <h1>{t("Monsters")}</h1>
+    <LimitedList items={monstersWithFlag.sort(byName)} let:item>
+      <ItemSymbol {item} />
+      <ThingLink type="monster" id={item.id} />
     </LimitedList>
   </section>
 {/if}
