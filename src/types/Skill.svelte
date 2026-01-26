@@ -73,6 +73,74 @@ recipesByLevelList.forEach(([, recipes]) => {
   });
 });
 
+function getRecipeLearningInfo(recipe: any, recipeLevel: number): string {
+  const parts = [];
+
+  // Check for autolearn
+  if (recipe.autolearn) {
+    if (Array.isArray(recipe.autolearn)) {
+      // Multiple skills for autolearn - check if it's just current skill at current level
+      if (
+        recipe.autolearn.length === 1 &&
+        recipe.autolearn[0][0] === item.id &&
+        recipe.autolearn[0][1] === recipeLevel
+      ) {
+        parts.push("Autolearn");
+      } else {
+        const autolearns = recipe.autolearn.map(
+          ([skill, level]: [string, number]) => {
+            const skillData = data.byIdMaybe("skill", skill);
+            const skillName = skillData ? singularName(skillData) : skill;
+            return `${skillName} ${level}`;
+          }
+        );
+        parts.push(`Autolearn ${autolearns.join(", ")}`);
+      }
+    } else {
+      // Single skill autolearn based on recipe difficulty
+      if (recipe.skill_used) {
+        const recipeDifficulty = recipe.difficulty ?? 0;
+        // If autolearn skill matches current skill and level matches the group level, just say "Autolearn"
+        if (recipe.skill_used === item.id && recipeDifficulty === recipeLevel) {
+          parts.push("Autolearn");
+        } else {
+          const skillData = data.byIdMaybe("skill", recipe.skill_used);
+          const skillName = skillData
+            ? singularName(skillData)
+            : recipe.skill_used;
+          parts.push(`Autolearn ${skillName} ${recipeDifficulty}`);
+        }
+      }
+    }
+  }
+
+  // Check for book learning
+  const writtenIn = Array.isArray(recipe.book_learn)
+    ? [...recipe.book_learn]
+    : [...Object.entries((recipe.book_learn ?? {}) as Record<string, any>)].map(
+        ([k, v]) => [k, v.skill_level ?? v]
+      );
+
+  if (writtenIn.length > 0) {
+    if (writtenIn.length >= 3) {
+      parts.push(`Written in ${writtenIn.length} books`);
+    } else {
+      const bookNames = writtenIn.map(([bookId, level]) => {
+        const book = data.byIdMaybe("item", bookId);
+        const bookName = book ? singularName(book) : bookId;
+        return level ? `${bookName} (${level})` : bookName;
+      });
+      if (writtenIn.length === 2) {
+        parts.push(`Written in ${bookNames.join(" and ")}`);
+      } else {
+        parts.push(`Written in ${bookNames[0]}`);
+      }
+    }
+  }
+
+  return parts.length > 0 ? ` (${parts.join("; ")})` : "";
+}
+
 const practiceRecipes = data
   .byType("practice")
   .filter((r) => r.skill_used === item.id);
@@ -128,7 +196,11 @@ practiceRecipes.sort(
             <ul>
               {#each recipes as recipe}
                 {#if recipe.result}
-                  <li><ThingLink id={recipe.result} type="item" /></li>
+                  <li>
+                    <ThingLink id={recipe.result} type="item" /><span
+                      style="color: var(--cata-color-gray)"
+                      >{getRecipeLearningInfo(recipe, level)}</span>
+                  </li>
                 {/if}
               {/each}
             </ul>
