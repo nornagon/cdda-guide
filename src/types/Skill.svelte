@@ -52,7 +52,10 @@ const craftingRecipes = data
   .byType("recipe")
   .filter(
     (r) =>
-      r.skill_used === item.id && r.result && data.byIdMaybe("item", r.result)
+      r.skill_used === item.id &&
+      r.result &&
+      data.byIdMaybe("item", r.result) &&
+      !r.never_learn
   );
 
 const recipesByLevel = new Map<number, typeof craftingRecipes>();
