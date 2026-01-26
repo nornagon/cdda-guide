@@ -5,6 +5,7 @@ import { getContext } from "svelte";
 import {
   asKilograms,
   asLiters,
+  byName,
   CddaData,
   i18n,
   normalizeDamageInstance,
@@ -302,11 +303,14 @@ let upgrades =
   item.upgrades && (item.upgrades.into || item.upgrades.into_group)
     ? {
         ...item.upgrades,
-        monsters: item.upgrades.into
+        monsters: (item.upgrades.into
           ? [item.upgrades.into]
           : item.upgrades.into_group
           ? flattenGroup(data.byId("monstergroup", item.upgrades.into_group))
-          : [],
+          : []
+        ).sort((a, b) =>
+          byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+        ),
       }
     : null;
 
@@ -330,6 +334,10 @@ for (const monster of data.byType("monster")) {
     }
   }
 }
+// Sort alphabetically
+upgradesFrom.sort((a, b) =>
+  byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+);
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
