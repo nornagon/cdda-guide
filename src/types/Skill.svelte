@@ -123,13 +123,16 @@ practiceRecipes.sort(
       {#each recipesByLevelList as [level, recipes]}
         <dt style="font-variant: tabular-nums">Level {level}</dt>
         <dd>
-          <ul>
-            {#each recipes as recipe}
-              {#if recipe.result}
-                <li><ThingLink id={recipe.result} type="item" /></li>
-              {/if}
-            {/each}
-          </ul>
+          <details open={recipes.length <= 20}>
+            <summary>{recipes.length} recipes</summary>
+            <ul>
+              {#each recipes as recipe}
+                {#if recipe.result}
+                  <li><ThingLink id={recipe.result} type="item" /></li>
+                {/if}
+              {/each}
+            </ul>
+          </details>
         </dd>
       {/each}
     </dl>
