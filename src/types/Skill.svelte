@@ -48,6 +48,31 @@ const itemsUsingSkill = data
   ) as SupportedTypesWithMapped["GUN"][];
 itemsUsingSkill.sort(byName);
 
+const craftingRecipes = data
+  .byType("recipe")
+  .filter(
+    (r) =>
+      r.skill_used === item.id && r.result && data.byIdMaybe("item", r.result)
+  );
+
+const recipesByLevel = new Map<number, typeof craftingRecipes>();
+for (const recipe of craftingRecipes) {
+  const level = recipe.difficulty ?? 0;
+  if (!recipesByLevel.has(level)) recipesByLevel.set(level, []);
+  recipesByLevel.get(level)!.push(recipe);
+}
+const recipesByLevelList = [...recipesByLevel.entries()].sort(
+  (a, b) => a[0] - b[0]
+);
+recipesByLevelList.forEach(([, recipes]) => {
+  recipes.sort((a, b) => {
+    const itemA = data.byId("item", a.result!);
+    const itemB = data.byId("item", b.result!);
+    if (!itemA || !itemB) return 0; // If either item doesn't exist, consider them equal
+    return singularName(itemA).localeCompare(singularName(itemB));
+  });
+});
+
 const practiceRecipes = data
   .byType("practice")
   .filter((r) => r.skill_used === item.id);
@@ -88,6 +113,26 @@ practiceRecipes.sort(
       <ItemSymbol {item} />
       <ThingLink type="item" id={item.id} />
     </LimitedList>
+  </section>
+{/if}
+
+{#if craftingRecipes.length}
+  <section>
+    <h1>{t("Crafting Recipes", { _context: "Skill" })}</h1>
+    <dl>
+      {#each recipesByLevelList as [level, recipes]}
+        <dt style="font-variant: tabular-nums">Level {level}</dt>
+        <dd>
+          <ul>
+            {#each recipes as recipe}
+              {#if recipe.result}
+                <li><ThingLink id={recipe.result} type="item" /></li>
+              {/if}
+            {/each}
+          </ul>
+        </dd>
+      {/each}
+    </dl>
   </section>
 {/if}
 
