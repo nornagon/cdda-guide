@@ -309,6 +309,27 @@ let upgrades =
           : [],
       }
     : null;
+
+// Find monsters that upgrade to this one
+let upgradesFrom: string[] = [];
+for (const monster of data.byType("monster")) {
+  if (!monster.upgrades || !monster.id) continue;
+
+  // Check if this monster upgrades directly to the current item
+  if (monster.upgrades.into === item.id) {
+    upgradesFrom.push(monster.id);
+  }
+
+  // Check if this monster upgrades to a group that includes the current item
+  if (monster.upgrades.into_group) {
+    const groupMonsters = flattenGroup(
+      data.byId("monstergroup", monster.upgrades.into_group)
+    );
+    if (groupMonsters.includes(item.id)) {
+      upgradesFrom.push(monster.id);
+    }
+  }
+}
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -524,6 +545,16 @@ let upgrades =
               { _context, half_life: upgrades.half_life }
             )}
           {/if}
+        </dd>
+      {/if}
+      {#if upgradesFrom.length > 0}
+        <dt>{t("Upgrades From", { _context })}</dt>
+        <dd>
+          <ul class="comma-separated">
+            {#each upgradesFrom as monId}
+              <li><ThingLink type="monster" id={monId} /></li>
+            {/each}
+          </ul>
         </dd>
       {/if}
     </dl>
