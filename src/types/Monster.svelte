@@ -315,29 +315,71 @@ let upgrades =
     : null;
 
 // Find monsters that upgrade to this one
-let upgradesFrom: string[] = [];
+interface UpgradeFromInfo {
+  monsterId: string;
+  age_grow?: number;
+  half_life?: number;
+}
+
+let upgradesFromRaw: UpgradeFromInfo[] = [];
 for (const monster of data.byType("monster")) {
   if (!monster.upgrades || !monster.id) continue;
 
+  let matches = false;
   // Check if this monster upgrades directly to the current item
   if (monster.upgrades.into === item.id) {
-    upgradesFrom.push(monster.id);
+    matches = true;
   }
 
   // Check if this monster upgrades to a group that includes the current item
-  if (monster.upgrades.into_group) {
+  if (!matches && monster.upgrades.into_group) {
     const groupMonsters = flattenGroup(
       data.byId("monstergroup", monster.upgrades.into_group)
     );
     if (groupMonsters.includes(item.id)) {
-      upgradesFrom.push(monster.id);
+      matches = true;
     }
   }
+
+  if (matches) {
+    upgradesFromRaw.push({
+      monsterId: monster.id,
+      age_grow: monster.upgrades.age_grow,
+      half_life: monster.upgrades.half_life,
+    });
+  }
 }
-// Sort alphabetically
-upgradesFrom.sort((a, b) =>
-  byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
-);
+
+// Group by timing and sort
+const upgradesFromGrouped = new Map<string, string[]>();
+for (const upgrade of upgradesFromRaw) {
+  let timingKey = "";
+  if (upgrade.age_grow) {
+    timingKey = `age_grow:${upgrade.age_grow}`;
+  } else if (upgrade.half_life) {
+    timingKey = `half_life:${upgrade.half_life}`;
+  } else {
+    timingKey = "no_timing";
+  }
+
+  if (!upgradesFromGrouped.has(timingKey)) {
+    upgradesFromGrouped.set(timingKey, []);
+  }
+  upgradesFromGrouped.get(timingKey)!.push(upgrade.monsterId);
+}
+
+// Sort monsters within each group alphabetically
+for (const [_, monsters] of upgradesFromGrouped) {
+  monsters.sort((a, b) =>
+    byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+  );
+}
+
+function getTimingValue(key: string): number {
+  if (key.startsWith("age_grow:")) return parseInt(key.split(":")[1]);
+  if (key.startsWith("half_life:")) return parseInt(key.split(":")[1]);
+  return Number.MAX_SAFE_INTEGER; // no timing comes last
+}
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -555,14 +597,32 @@ upgradesFrom.sort((a, b) =>
           {/if}
         </dd>
       {/if}
-      {#if upgradesFrom.length > 0}
+      {#if upgradesFromGrouped.size > 0}
         <dt>{t("Upgrades From", { _context })}</dt>
         <dd>
-          <ul class="comma-separated">
-            {#each upgradesFrom as monId}
-              <li><ThingLink type="monster" id={monId} /></li>
-            {/each}
-          </ul>
+          {#each [...upgradesFromGrouped.entries()].sort(([a], [b]) => {
+            return getTimingValue(a) - getTimingValue(b);
+          }) as [timingKey, monsterIds], i}
+            {#if i > 0}; {/if}
+            <span class="comma-separated">
+              {#each monsterIds as monId, j}
+                {#if j > 0}, {/if}<ThingLink type="monster" id={monId} />
+              {/each}
+            </span>
+            {#if timingKey.startsWith("age_grow:")}
+              {@const days = parseInt(timingKey.split(":")[1])}
+              {t("in {days} {days, plural, =1 {day} other {days}}", {
+                _context,
+                days,
+              })}
+            {:else if timingKey.startsWith("half_life:")}
+              {@const half_life = parseInt(timingKey.split(":")[1])}
+              {t(
+                "with a half-life of {half_life} {half_life, plural, =1 {day} other {days}}",
+                { _context, half_life }
+              )}
+            {/if}
+          {/each}
         </dd>
       {/if}
     </dl>
