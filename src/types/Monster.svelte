@@ -346,35 +346,64 @@ for (const monster of data.byType("monster")) {
   }
 }
 
-// Group by timing and sort
-const upgradesFromGrouped = new Map<string, string[]>();
+// Group monsters into their group based on upgrade type and timing
+const upgradesFromByHalfLife = new Map<number, string[]>();
+const upgradesFromByAgeGrow = new Map<number, string[]>();
+const upgradesFromNoTiming = [];
 for (const upgrade of upgradesFromRaw) {
-  let timingKey = "";
   if (upgrade.age_grow) {
-    timingKey = `age_grow:${upgrade.age_grow}`;
+    if (!upgradesFromByAgeGrow.has(upgrade.age_grow)) {
+      upgradesFromByAgeGrow.set(upgrade.age_grow, []);
+    }
+    upgradesFromByAgeGrow.get(upgrade.age_grow)!.push(upgrade.id);
   } else if (upgrade.half_life) {
-    timingKey = `half_life:${upgrade.half_life}`;
+    if (!upgradesFromByHalfLife.has(upgrade.half_life)) {
+      upgradesFromByHalfLife.set(upgrade.half_life, []);
+    }
+    upgradesFromByHalfLife.get(upgrade.half_life)!.push(upgrade.id);
   } else {
-    timingKey = "no_timing";
+    upgradesFromNoTiming.push(upgrade.id);
   }
-
-  if (!upgradesFromGrouped.has(timingKey)) {
-    upgradesFromGrouped.set(timingKey, []);
-  }
-  upgradesFromGrouped.get(timingKey)!.push(upgrade.id);
 }
 
-// Sort monsters within each group alphabetically
-for (const [_, monsters] of upgradesFromGrouped) {
-  monsters.sort((a, b) =>
-    byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+// Sort monsters with the same timing alphabetically
+for (const monsterByTime of [upgradesFromByHalfLife, upgradesFromByAgeGrow]) {
+  for (const [_, monsters] of monsterByTime) {
+    monsters.sort((a, b) =>
+      byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+    );
+  }
+}
+upgradesFromNoTiming.sort((a, b) =>
+  byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+);
+
+// Sort each group by timing and insert into one upgradesFromGrouped for display
+const upgradesFromGrouped = new Map<string, string[]>();
+if (upgradesFromByHalfLife.size > 0) {
+  const sortedHalfLifeKeys = Array.from(upgradesFromByHalfLife.keys()).sort(
+    (a, b) => a - b
   );
+  for (const half_life of sortedHalfLifeKeys) {
+    upgradesFromGrouped.set(
+      `half_life:${half_life}`,
+      upgradesFromByHalfLife.get(half_life)!
+    );
+  }
 }
-
-function getTimingValue(key: string): number {
-  if (key.startsWith("age_grow:")) return parseInt(key.split(":")[1]);
-  if (key.startsWith("half_life:")) return parseInt(key.split(":")[1]);
-  return Number.MAX_SAFE_INTEGER; // no timing comes last
+if (upgradesFromByAgeGrow.size > 0) {
+  const sortedAgeGrowKeys = Array.from(upgradesFromByAgeGrow.keys()).sort(
+    (a, b) => a - b
+  );
+  for (const age_grow of sortedAgeGrowKeys) {
+    upgradesFromGrouped.set(
+      `age_grow:${age_grow}`,
+      upgradesFromByAgeGrow.get(age_grow)!
+    );
+  }
+}
+if (upgradesFromNoTiming.length > 0) {
+  upgradesFromGrouped.set("no_timing", upgradesFromNoTiming);
 }
 </script>
 
@@ -596,9 +625,7 @@ function getTimingValue(key: string): number {
       {#if upgradesFromGrouped.size > 0}
         <dt>{t("Upgrades From", { _context })}</dt>
         <dd>
-          {#each [...upgradesFromGrouped.entries()].sort(([a], [b]) => {
-            return getTimingValue(a) - getTimingValue(b);
-          }) as [timingKey, monsterIds], i}
+          {#each [...upgradesFromGrouped.entries()] as [timingKey, monsterIds], i}
             {#if i > 0}; {/if}
             <span class="comma-separated">
               {#each monsterIds as monId, j}
