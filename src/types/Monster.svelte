@@ -321,27 +321,23 @@ interface UpgradeFromInfo {
   half_life?: number;
 }
 
-let upgradesFromRaw: UpgradeFromInfo[] = [];
+function upgradesFrom(other: Monster) {
+  if (!other.id || !other.upgrades) return false;
+  if (other.upgrades.into === item.id) return true;
+
+  if (other.upgrades.into_group) {
+    return flattenGroup(
+      data.byId("monstergroup", other.upgrades.into_group)
+    ).includes(item.id);
+  }
+  return false;
+}
+
+const upgradesFromRaw: UpgradeFromInfo[] = [];
 for (const monster of data.byType("monster")) {
-  if (!monster.upgrades || !monster.id) continue;
+  if (!monster.id || !monster.upgrades) continue;
 
-  let matches = false;
-  // Check if this monster upgrades directly to the current item
-  if (monster.upgrades.into === item.id) {
-    matches = true;
-  }
-
-  // Check if this monster upgrades to a group that includes the current item
-  if (!matches && monster.upgrades.into_group) {
-    const groupMonsters = flattenGroup(
-      data.byId("monstergroup", monster.upgrades.into_group)
-    );
-    if (groupMonsters.includes(item.id)) {
-      matches = true;
-    }
-  }
-
-  if (matches) {
+  if (upgradesFrom(monster)) {
     upgradesFromRaw.push({
       id: monster.id,
       age_grow: monster.upgrades.age_grow,
