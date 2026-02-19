@@ -316,7 +316,7 @@ let upgrades =
 
 // Find monsters that upgrade to this one
 interface UpgradeFromInfo {
-  monsterId: string;
+  id: string;
   age_grow?: number;
   half_life?: number;
 }
@@ -343,7 +343,7 @@ for (const monster of data.byType("monster")) {
 
   if (matches) {
     upgradesFromRaw.push({
-      monsterId: monster.id,
+      id: monster.id,
       age_grow: monster.upgrades.age_grow,
       half_life: monster.upgrades.half_life,
     });
@@ -365,7 +365,7 @@ for (const upgrade of upgradesFromRaw) {
   if (!upgradesFromGrouped.has(timingKey)) {
     upgradesFromGrouped.set(timingKey, []);
   }
-  upgradesFromGrouped.get(timingKey)!.push(upgrade.monsterId);
+  upgradesFromGrouped.get(timingKey)!.push(upgrade.id);
 }
 
 // Sort monsters within each group alphabetically
