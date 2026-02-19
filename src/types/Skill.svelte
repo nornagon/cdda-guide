@@ -194,20 +194,13 @@ practiceRecipes.sort(
       {#each recipesByLevelList as [level, recipes]}
         <dt style="font-variant: tabular-nums">Level {level}</dt>
         <dd>
-          <details open={recipes.length <= 20}>
-            <summary>{recipes.length} recipes</summary>
-            <ul>
-              {#each recipes as recipe}
-                {#if recipe.result}
-                  <li>
-                    <ThingLink id={recipe.result} type="item" /><span
-                      style="color: var(--cata-color-gray)"
-                      >{getRecipeLearningInfo(recipe, level)}</span>
-                  </li>
-                {/if}
-              {/each}
-            </ul>
-          </details>
+          <LimitedList items={recipes} let:item limit={5}>
+            {#if item.result}
+              <ThingLink id={item.result} type="item" /><span
+                style="color: var(--cata-color-gray)"
+                >{getRecipeLearningInfo(item, level)}</span>
+            {/if}
+          </LimitedList>
         </dd>
       {/each}
     </dl>
