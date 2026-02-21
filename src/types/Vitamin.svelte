@@ -4,6 +4,7 @@ import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import {
   CddaData,
+  asHumanReadableDuration,
   normalizeUseAction,
   parseDuration,
   parseMass,
@@ -30,7 +31,14 @@ const mutationCategory = data
   .byType("mutation_category")
   .find((c) => c.vitamin === item.id);
 
-const unitsPerDay = (24 * 60 * 60) / parseDuration(item.rate);
+const rateSec = item.rate != null ? parseDuration(item.rate) : 0;
+const unitsPerDay = rateSec !== 0 ? (24 * 60 * 60) / rateSec : 0;
+const rateAbsDisplay =
+  item.rate != null
+    ? typeof item.rate === "string"
+      ? item.rate.replace(/-/, "")
+      : asHumanReadableDuration(Math.abs(item.rate))
+    : null;
 const containingComestibles = data
   .byType("item")
   .filter(
@@ -44,7 +52,7 @@ const containingComestibles = data
     const pctOrMass = comestible.vitamins!.find((v) => v[0] === item.id)![1];
     const pct: number =
       typeof pctOrMass !== "number"
-        ? item.weight_per_unit
+        ? item.weight_per_unit && unitsPerDay
           ? (parseMass(pctOrMass ?? "0 g") /
               parseMass(item.weight_per_unit) /
               unitsPerDay) *
@@ -125,16 +133,12 @@ const deficiencyNames = item.deficiency
     <dd>{item.min ?? 0}</dd>
     <dt>{t("Max", { _context })}</dt>
     <dd>{item.max ?? 0}</dd>
-    {#if parseDuration(item.rate ?? "0 m") > 0}
+    {#if rateSec > 0}
       <dt>{t("Decay Rate", { _context })}</dt>
-      <dd>–1 / {item.rate ?? "0 m"}</dd>
-    {:else if parseDuration(item.rate ?? "0 m") < 0}
+      <dd>–1 / {rateAbsDisplay}</dd>
+    {:else if rateSec < 0}
       <dt>{t("Generation Rate", { _context })}</dt>
-      <dd>
-        1 / {typeof item.rate === "string"
-          ? item.rate.replace(/-/, "")
-          : -(item.rate ?? 0) ?? "0 m"}
-      </dd>
+      <dd>1 / {rateAbsDisplay}</dd>
     {/if}
     {#if item.decays_into?.length}
       <dt>{t("Decays Into", { _context })}</dt>

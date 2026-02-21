@@ -1087,7 +1087,7 @@ export type Vitamin = {
   excess?: string; // effect_id
   min?: number; // int
   max?: number; // int, default 0
-  rate: string; // duration
+  rate?: duration; // default "0 m"
   vit_type: "vitamin" | "toxin" | "drug" | "counter";
   disease?: [number, number][];
   disease_excess?: [number, number][];
