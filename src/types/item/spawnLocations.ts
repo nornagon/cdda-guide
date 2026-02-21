@@ -1,4 +1,5 @@
 import type { CddaData } from "../../data";
+import { HIDDEN_LOOT_LOCATIONS } from "../../spoilers";
 import type * as raw from "../../types";
 import { multimap } from "./utils";
 
@@ -338,37 +339,6 @@ export function overmapAppearance(
       : `appearance_unk`;
   }
 }
-
-const url = new URL(location.href);
-const showAll = url.searchParams.has("hideNothing");
-// Showing these is a bit spoilery, and also they are visually large, so hide them.
-const hiddenLocations = showAll
-  ? new Set()
-  : new Set([
-      "Necropolis",
-      "Isherwood Farms",
-      "lab_mutagen_6_level",
-      "Lab_SECURITY_1x1x6",
-      "Lab_CARGO_Surface",
-      "hub_01",
-      "aircraft_carrier",
-      "airliner_crashed",
-      "farm_abandoned",
-      "ranch_camp",
-      "exodii_base",
-      "Central Lab",
-      "4x4_microlab_vent_shaft",
-      "lab_subway_vent_shaft",
-      "mil_base",
-      "valhalla_cult",
-      "nuclear power plant",
-      "tutorial",
-      "debug_item_group_test",
-      "gas station bunker",
-      "bunker shop",
-      "physics_lab_LIXA",
-      "office_tower_hiddenlab",
-    ]);
 function lazily<T extends object, U>(f: (x: T) => U): (x: T) => U {
   const cache = new WeakMap<T, U>();
   return (x) => {
@@ -408,7 +378,7 @@ async function computeLootByOMSAppearance(
   const lootByOMSAppearance = new Map<string, { loot: Loot; ids: string[] }>();
   await yieldable(async (relinquish) => {
     for (const [oms_id, loot] of lootByOMS.entries()) {
-      if (hiddenLocations.has(oms_id)) continue;
+      if (HIDDEN_LOOT_LOCATIONS.has(oms_id)) continue;
       const appearance = overmapAppearance(
         data,
         data.byId("overmap_special", oms_id)
