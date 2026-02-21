@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import makeI18n, { Gettext } from "gettext.js";
+import makeI18n, { type Gettext } from "gettext.js";
 
 import {
   type Translation,
