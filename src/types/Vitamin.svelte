@@ -34,11 +34,7 @@ const mutationCategory = data
 const rateSec = item.rate != null ? parseDuration(item.rate) : 0;
 const unitsPerDay = rateSec !== 0 ? (24 * 60 * 60) / rateSec : 0;
 const rateAbsDisplay =
-  item.rate != null
-    ? typeof item.rate === "string"
-      ? item.rate.replace(/-/, "")
-      : asHumanReadableDuration(Math.abs(item.rate))
-    : null;
+  rateSec !== 0 ? asHumanReadableDuration(Math.abs(rateSec)) : null;
 const containingComestibles = data
   .byType("item")
   .filter(
