@@ -1,5 +1,5 @@
 import type { CddaData } from "../../data";
-import { HIDDEN_LOOT_LOCATIONS } from "../../spoilers";
+import { isSpoilerLocation } from "../../spoilers";
 import type * as raw from "../../types";
 import { multimap } from "./utils";
 
@@ -378,7 +378,7 @@ async function computeLootByOMSAppearance(
   const lootByOMSAppearance = new Map<string, { loot: Loot; ids: string[] }>();
   await yieldable(async (relinquish) => {
     for (const [oms_id, loot] of lootByOMS.entries()) {
-      if (HIDDEN_LOOT_LOCATIONS.has(oms_id)) continue;
+      if (isSpoilerLocation(oms_id)) continue;
       const appearance = overmapAppearance(
         data,
         data.byId("overmap_special", oms_id)

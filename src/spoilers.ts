@@ -26,32 +26,33 @@ export function isSpoilerItem(id: string): boolean {
   return false;
 }
 
-export const HIDDEN_LOOT_LOCATIONS: ReadonlySet<string> = new Set(
-  showAll
-    ? []
-    : [
-        "Necropolis",
-        "Isherwood Farms",
-        "lab_mutagen_6_level",
-        "Lab_SECURITY_1x1x6",
-        "Lab_CARGO_Surface",
-        "hub_01",
-        "aircraft_carrier",
-        "airliner_crashed",
-        "farm_abandoned",
-        "ranch_camp",
-        "exodii_base",
-        "Central Lab",
-        "4x4_microlab_vent_shaft",
-        "lab_subway_vent_shaft",
-        "mil_base",
-        "valhalla_cult",
-        "nuclear power plant",
-        "tutorial",
-        "debug_item_group_test",
-        "gas station bunker",
-        "bunker shop",
-        "physics_lab_LIXA",
-        "office_tower_hiddenlab",
-      ]
-);
+const SPOILER_LOCATION_IDS: ReadonlySet<string> = new Set([
+  "Necropolis",
+  "Isherwood Farms",
+  "lab_mutagen_6_level",
+  "Lab_SECURITY_1x1x6",
+  "Lab_CARGO_Surface",
+  "hub_01",
+  "aircraft_carrier",
+  "airliner_crashed",
+  "farm_abandoned",
+  "ranch_camp",
+  "exodii_base",
+  "Central Lab",
+  "4x4_microlab_vent_shaft",
+  "lab_subway_vent_shaft",
+  "mil_base",
+  "valhalla_cult",
+  "nuclear power plant",
+  "tutorial",
+  "debug_item_group_test",
+  "gas station bunker",
+  "bunker shop",
+  "physics_lab_LIXA",
+  "office_tower_hiddenlab",
+]);
+
+export function isSpoilerLocation(id: string): boolean {
+  if (showAll) return false;
+  return SPOILER_LOCATION_IDS.has(id);
+}
