@@ -73,10 +73,15 @@ let qualities = (item.qualities ?? []).map(([id, level]) => ({
   level,
 }));
 
-let chargedQualities = (item.charged_qualities ?? []).map(([id, level]) => ({
-  quality: data.byId("tool_quality", id),
-  level,
-}));
+let chargedQualities = (item.charged_qualities ?? []).map((quality) => {
+  const [id, level] = Array.isArray(quality)
+    ? quality
+    : [quality.id, quality.level];
+  return {
+    quality: data.byId("tool_quality", id),
+    level,
+  };
+});
 
 function isStrings<T>(array: string[] | T[]): array is string[] {
   return Array.isArray(array) && typeof array[0] === "string";
