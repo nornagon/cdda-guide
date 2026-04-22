@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import makeI18n, { Gettext } from "gettext.js";
+import makeI18n, { type Gettext } from "gettext.js";
 
 import {
   type Translation,
@@ -233,7 +233,7 @@ export function asHumanReadableDuration(duration: string | number) {
     ] as [number, string][]
   )
     .filter(([n]) => n)
-    .map((x) => x.join(""))
+    .map((x) => x.join(" "))
     .join(" ");
 }
 
