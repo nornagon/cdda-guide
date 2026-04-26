@@ -525,8 +525,11 @@ export class CddaData {
       } else if (k === "qualities") {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
         for (const [q, l] of ret.relative[k]) {
-          const existing = ret[k].find((x: any) => x[0] === q);
-          existing[1] += l;
+          const existing = ret[k].find((x: any) =>
+            Array.isArray(x) ? x[0] === q : x.id === q
+          );
+          if (Array.isArray(existing)) existing[1] += l;
+          else existing.level = (existing.level ?? 1) + l;
         }
       }
       // TODO: vitamins, mass, volume, time

@@ -139,11 +139,13 @@ vehiclesContainingPart.sort((a, b) =>
       <dt>{t("Qualities", { _context })}</dt>
       <dd>
         <ul class="no-bullets">
-          {#each item.qualities as [quality, level]}
+          {#each item.qualities as quality}
+            {@const id = Array.isArray(quality) ? quality[0] : quality.id}
+            {@const level = Array.isArray(quality) ? quality[1] : quality.level}
             <li>
               Has level <strong
                 >{level ?? 1}
-                <ThingLink type="tool_quality" id={quality} /></strong> quality.
+                <ThingLink type="tool_quality" {id} /></strong> quality.
             </li>
           {/each}
         </ul>

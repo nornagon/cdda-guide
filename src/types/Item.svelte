@@ -20,6 +20,7 @@ import {
   type UseFunction,
   type SupportedTypeMapped,
   type PocketData,
+  type ProvidedQuality,
   isItemSubtype,
 } from "../types";
 import AsciiPicture from "./AsciiPicture.svelte";
@@ -68,15 +69,22 @@ function length(item: ItemBasicInfo) {
   return `${Math.round(Math.cbrt(parseVolume(item.volume ?? "1 ml")))} cm`;
 }
 
-let qualities = (item.qualities ?? []).map(([id, level]) => ({
-  quality: data.byId("tool_quality", id),
-  level,
-}));
+function qualityIdAndLevel(quality: ProvidedQuality): [string, number] {
+  return Array.isArray(quality)
+    ? [quality[0], quality[1]]
+    : [quality.id, quality.level ?? 1];
+}
+
+let qualities = (item.qualities ?? []).map((quality) => {
+  const [id, level] = qualityIdAndLevel(quality);
+  return {
+    quality: data.byId("tool_quality", id),
+    level,
+  };
+});
 
 let chargedQualities = (item.charged_qualities ?? []).map((quality) => {
-  const [id, level] = Array.isArray(quality)
-    ? quality
-    : [quality.id, quality.level];
+  const [id, level] = qualityIdAndLevel(quality);
   return {
     quality: data.byId("tool_quality", id),
     level,

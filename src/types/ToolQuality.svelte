@@ -26,7 +26,7 @@ for (const it of data.byType("item")) {
     (quality) => (Array.isArray(quality) ? quality[0] : quality.id) === item.id
   );
   if (q) {
-    const level = Array.isArray(q) ? q[1] : q.level;
+    const level = Array.isArray(q) ? q[1] : q.level ?? 1;
     if (!toolsWithQualityByLevel.has(level))
       toolsWithQualityByLevel.set(level, []);
     toolsWithQualityByLevel.get(level)!.push(it);
@@ -52,9 +52,11 @@ toolsWithQualityByLevelList.forEach(([, tools]) => {
 const vpartsWithQualityByLevel = new Map<number, VehiclePart[]>();
 for (const it of data.byType("vehicle_part")) {
   if (!it.id) continue;
-  const q = (it.qualities ?? []).find(([id, _level]) => id === item.id);
+  const q = (it.qualities ?? []).find((quality) =>
+    Array.isArray(quality) ? quality[0] === item.id : quality.id === item.id
+  );
   if (q) {
-    const [, level] = q;
+    const level = Array.isArray(q) ? q[1] : q.level ?? 1;
     if (!vpartsWithQualityByLevel.has(level))
       vpartsWithQualityByLevel.set(level, []);
     vpartsWithQualityByLevel.get(level)!.push(it);

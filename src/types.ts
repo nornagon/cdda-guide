@@ -139,6 +139,9 @@ export type QualityRequirement = {
   level?: number; // default: 1
   amount?: number; // default: 1
 };
+export type ProvidedQuality =
+  | [string /* tool_quality_id */, number /* level */]
+  | { id: string; level?: number /* default: 1 */; speed?: number };
 export type ToolComponent =
   | string
   | [string, number]
@@ -657,11 +660,8 @@ export type ItemBasicInfo = {
   color?: string;
   symbol?: string;
   description?: Translation;
-  qualities?: [string, number][];
-  charged_qualities?: (
-    | [string, number]
-    | { id: string; level: number; speed?: number }
-  )[];
+  qualities?: ProvidedQuality[];
+  charged_qualities?: ProvidedQuality[];
   stackable?: boolean;
   volume?: volume;
   weight?: mass;
@@ -1550,7 +1550,7 @@ export type VehiclePart = {
     removal?: VehiclePartRequirements;
   };
   breaks_into?: InlineItemGroup; // collection
-  qualities?: [string, number][];
+  qualities?: ProvidedQuality[];
   pseudo_tools?: {
     id: string;
     hotkey?: string;
