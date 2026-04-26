@@ -5,6 +5,7 @@ import { getContext } from "svelte";
 import {
   asKilograms,
   asLiters,
+  byName,
   CddaData,
   i18n,
   normalizeDamageInstance,
@@ -301,13 +302,108 @@ let upgrades =
   item.upgrades && (item.upgrades.into || item.upgrades.into_group)
     ? {
         ...item.upgrades,
-        monsters: item.upgrades.into
+        monsters: (item.upgrades.into
           ? [item.upgrades.into]
           : item.upgrades.into_group
           ? flattenGroup(data.byId("monstergroup", item.upgrades.into_group))
-          : [],
+          : []
+        ).sort((a, b) =>
+          byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+        ),
       }
     : null;
+
+// Find monsters that upgrade to this one
+interface UpgradeFromInfo {
+  id: string;
+  age_grow?: number;
+  half_life?: number;
+}
+
+function upgradesFrom(other: Monster) {
+  if (!other.id || !other.upgrades) return false;
+  if (other.upgrades.into === item.id) return true;
+
+  if (other.upgrades.into_group) {
+    return flattenGroup(
+      data.byId("monstergroup", other.upgrades.into_group)
+    ).includes(item.id);
+  }
+  return false;
+}
+
+const upgradesFromRaw: UpgradeFromInfo[] = [];
+for (const monster of data.byType("monster")) {
+  if (!monster.id || !monster.upgrades) continue;
+
+  if (upgradesFrom(monster)) {
+    upgradesFromRaw.push({
+      id: monster.id,
+      age_grow: monster.upgrades.age_grow,
+      half_life: monster.upgrades.half_life,
+    });
+  }
+}
+
+// Group monsters into their group based on upgrade type and timing
+const upgradesFromByHalfLife = new Map<number, string[]>();
+const upgradesFromByAgeGrow = new Map<number, string[]>();
+const upgradesFromNoTiming = [];
+for (const upgrade of upgradesFromRaw) {
+  if (upgrade.age_grow) {
+    if (!upgradesFromByAgeGrow.has(upgrade.age_grow)) {
+      upgradesFromByAgeGrow.set(upgrade.age_grow, []);
+    }
+    upgradesFromByAgeGrow.get(upgrade.age_grow)!.push(upgrade.id);
+  } else if (upgrade.half_life) {
+    if (!upgradesFromByHalfLife.has(upgrade.half_life)) {
+      upgradesFromByHalfLife.set(upgrade.half_life, []);
+    }
+    upgradesFromByHalfLife.get(upgrade.half_life)!.push(upgrade.id);
+  } else {
+    upgradesFromNoTiming.push(upgrade.id);
+  }
+}
+
+// Sort monsters with the same timing alphabetically
+for (const monsterByTime of [upgradesFromByHalfLife, upgradesFromByAgeGrow]) {
+  for (const [_, monsters] of monsterByTime) {
+    monsters.sort((a, b) =>
+      byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+    );
+  }
+}
+upgradesFromNoTiming.sort((a, b) =>
+  byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+);
+
+// Sort each group by timing and insert into one upgradesFromGrouped for display
+const upgradesFromGrouped = new Map<string, string[]>();
+if (upgradesFromByHalfLife.size > 0) {
+  const sortedHalfLifeKeys = Array.from(upgradesFromByHalfLife.keys()).sort(
+    (a, b) => a - b
+  );
+  for (const half_life of sortedHalfLifeKeys) {
+    upgradesFromGrouped.set(
+      `half_life:${half_life}`,
+      upgradesFromByHalfLife.get(half_life)!
+    );
+  }
+}
+if (upgradesFromByAgeGrow.size > 0) {
+  const sortedAgeGrowKeys = Array.from(upgradesFromByAgeGrow.keys()).sort(
+    (a, b) => a - b
+  );
+  for (const age_grow of sortedAgeGrowKeys) {
+    upgradesFromGrouped.set(
+      `age_grow:${age_grow}`,
+      upgradesFromByAgeGrow.get(age_grow)!
+    );
+  }
+}
+if (upgradesFromNoTiming.length > 0) {
+  upgradesFromGrouped.set("no_timing", upgradesFromNoTiming);
+}
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -424,6 +520,32 @@ let upgrades =
       {#if item.special_when_hit}
         <dt>{t("When Hit", { _context })}</dt>
         <dd>{item.special_when_hit[0]} ({item.special_when_hit[1]}%)</dd>
+      {/if}
+      {#if upgradesFromGrouped.size > 0}
+        <dt>{t("Upgrades From", { _context })}</dt>
+        <dd>
+          {#each [...upgradesFromGrouped.entries()] as [timingKey, monsterIds], i}
+            {#if i > 0}; {/if}
+            <span class="comma-separated">
+              {#each monsterIds as monId, j}
+                {#if j > 0}, {/if}<ThingLink type="monster" id={monId} />
+              {/each}
+            </span>
+            {#if timingKey.startsWith("age_grow:")}
+              {@const days = parseInt(timingKey.split(":")[1])}
+              {t("in {days} {days, plural, =1 {day} other {days}}", {
+                _context,
+                days,
+              })}
+            {:else if timingKey.startsWith("half_life:")}
+              {@const half_life = parseInt(timingKey.split(":")[1])}
+              {t(
+                "with a half-life of {half_life} {half_life, plural, =1 {day} other {days}}",
+                { _context, half_life }
+              )}
+            {/if}
+          {/each}
+        </dd>
       {/if}
     </dl>
   </section>
