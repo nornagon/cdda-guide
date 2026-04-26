@@ -479,7 +479,7 @@ if (upgradesFromNoTiming.length > 0) {
       <dd>
         <ul class="comma-separated">
           {#each item.flags ?? [] as flag}
-            <li><ThingLink type="json_flag" id={flag} /></li>
+            <li><ThingLink type="monster_flag" id={flag} /></li>
           {/each}
         </ul>
       </dd>
