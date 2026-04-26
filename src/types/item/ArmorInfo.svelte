@@ -35,6 +35,30 @@ function normalizeApdMaterial(m: NonNullable<ArmorPortionData["material"]>[0]) {
 function isStrings<T>(array: string[] | T[]): array is string[] {
   return Array.isArray(array) && typeof array[0] === "string";
 }
+
+function normalizeCovers(covers: ArmorPortionData["covers"]): string[] {
+  return typeof covers === "string" ? [covers] : covers ?? [];
+}
+
+const similarSubPartParents = new Map<string, Set<string>>();
+for (const sub of data.byType("sub_body_part")) {
+  if ("similar_bodypart" in sub && typeof sub.similar_bodypart === "string") {
+    if (!similarSubPartParents.has(sub.similar_bodypart)) {
+      similarSubPartParents.set(sub.similar_bodypart, new Set());
+    }
+    similarSubPartParents.get(sub.similar_bodypart)!.add(sub.parent);
+  }
+}
+
+function subPartMatchesBodyPart(sub: any, bpId: string): boolean {
+  if (sub.parent === bpId) return true;
+  if ("similar_bodypart" in sub && typeof sub.similar_bodypart === "string") {
+    const similar = data.byIdMaybe("sub_body_part", sub.similar_bodypart);
+    if (similar?.parent === bpId) return true;
+  }
+  return similarSubPartParents.get(sub.id)?.has(bpId) ?? false;
+}
+
 const itemMaterials =
   item.material == null
     ? []
@@ -65,7 +89,7 @@ for (const apd of item.armor ?? []) {
       thickness:
         (mat.portion / totalMaterialPortion) * (item.material_thickness ?? 0),
     }));
-  for (const bp_id of uniq(apd.covers ?? [])) {
+  for (const bp_id of uniq(normalizeCovers(apd.covers))) {
     const bp = data.byId("body_part", bp_id);
     const existing = normalizedPortionData.find((apd2) =>
       apd2.covers.includes(bp_id)
@@ -316,7 +340,7 @@ function maxCoverage(bp: BodyPart, apd: ArmorPortionData): number {
       ? apd.specifically_covers.map((x) => data.byId("sub_body_part", x))
       : data.byType("sub_body_part").filter((x) => x.parent === bp.id);
   for (const sub of subCovers) {
-    if (bp.id !== sub.parent) continue;
+    if (!subPartMatchesBodyPart(sub, bp.id)) continue;
     if (sub.secondary) {
       secondaryMaxCoverage += sub.max_coverage ?? 0;
     } else {

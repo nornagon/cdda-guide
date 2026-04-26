@@ -22,11 +22,11 @@ const _context = "Tool Quality";
 let toolsWithQualityByLevel = new Map<number, Item[]>();
 for (const it of data.byType("item")) {
   if (!it.id) continue;
-  const q = (it.qualities ?? [])
-    .concat(it.charged_qualities ?? [])
-    .find(([id, _level]) => id === item.id);
+  const q = [...(it.qualities ?? []), ...(it.charged_qualities ?? [])].find(
+    (quality) => (Array.isArray(quality) ? quality[0] : quality.id) === item.id
+  );
   if (q) {
-    const [, level] = q;
+    const level = Array.isArray(q) ? q[1] : q.level;
     if (!toolsWithQualityByLevel.has(level))
       toolsWithQualityByLevel.set(level, []);
     toolsWithQualityByLevel.get(level)!.push(it);

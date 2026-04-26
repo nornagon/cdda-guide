@@ -36,6 +36,9 @@ import OvermapSpecial from "./types/OvermapSpecial.svelte";
 import ItemAction from "./types/ItemAction.svelte";
 import Technique from "./types/Technique.svelte";
 
+import Spoiler from "./Spoiler.svelte";
+import { isSpoilerItem } from "./spoilers";
+
 export let item: { id: string; type: string };
 
 export let data: CddaData;
@@ -145,7 +148,9 @@ const display = (obj && displays[obj.type]) ?? Unknown;
       {#if /obsolet/.test(obj.__filename)}
         <ObsoletionWarning item={obj} />
       {/if}
-      <svelte:component this={display} item={obj} />
+      <Spoiler spoily={isSpoilerItem(item.id)}>
+        <svelte:component this={display} item={obj} />
+      </Spoiler>
     </ErrorBoundary>
   {/if}
 

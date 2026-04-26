@@ -533,6 +533,7 @@ export type UseFunction =
   | TransformUseFunction
   | DelayedTransformUseFunction
   | ConsumeDrugUseFunction
+  | Mp3UseFunction
   | RepairItemUseFunction
   | HolsterUseFunction
   | AttachMolleUseFunction
@@ -578,13 +579,20 @@ type ItemActionUseFunction = {
 export type TransformUseFunction = {
   type: "transform";
   target: string;
-  menu_text?: string;
+  menu_text?: Translation;
 };
 
 export type DelayedTransformUseFunction = {
   type: "delayed_transform";
   transform_age?: integer; // turns
 } & Omit<TransformUseFunction, "type">;
+
+export type Mp3UseFunction = {
+  type: "mp3";
+  transform: string;
+  message: Translation;
+  activate: boolean;
+};
 
 export type ConsumeDrugUseFunction = {
   type: "consume_drug";
@@ -650,7 +658,10 @@ export type ItemBasicInfo = {
   symbol?: string;
   description?: Translation;
   qualities?: [string, number][];
-  charged_qualities?: [string, number][];
+  charged_qualities?: (
+    | [string, number]
+    | { id: string; level: number; speed?: number }
+  )[];
   stackable?: boolean;
   volume?: volume;
   weight?: mass;
@@ -990,7 +1001,7 @@ export type Furniture = MapDataCommon & {
 export type Proficiency = {
   type: "proficiency";
   id: string;
-  description: string;
+  description: Translation;
   category: string; // proficiency_category_id
   name: Translation;
   can_learn: boolean;
@@ -1087,7 +1098,7 @@ export type Vitamin = {
   excess?: string; // effect_id
   min?: number; // int
   max?: number; // int, default 0
-  rate: string; // duration
+  rate?: duration; // default "0 m"
   vit_type: "vitamin" | "toxin" | "drug" | "counter";
   disease?: [number, number][];
   disease_excess?: [number, number][];
@@ -1670,7 +1681,7 @@ export type SubBodyPart = {
   parent: string;
   secondary?: boolean;
   max_coverage?: integer; // default 0
-  side: 0 | 1 | 2; // left / right / both
+  side: 0 | 1 | 2 | "left" | "right" | "both";
   name_multiple?: Translation;
   opposite?: string; // sub_body_part_id
 };
@@ -1694,7 +1705,7 @@ export type ConstructionGroup = {
 export type OvermapTerrain = {
   type: "overmap_terrain";
   id: string | string[];
-  name: Translation;
+  name?: Translation;
 
   sym?: string; // defaults to \u00a0
   color?: string;
