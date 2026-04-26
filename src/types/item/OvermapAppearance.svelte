@@ -86,7 +86,11 @@ function omtAppearance(
     ? {
         color: omt.color ?? "black",
         sym: rotateSymbol(omt.sym ?? "\u00a0" /* LINE_XOXO_C */, dir),
-        name: singular(omt.name),
+        name: omt.name
+          ? singular(omt.name)
+          : Array.isArray(omt.id)
+          ? omt.id[0]
+          : omt.id,
       }
     : { color: "black", sym: " ", name: "" };
 }

@@ -26,6 +26,7 @@ import {
   getOMSByAppearance,
   overmapAppearance,
 } from "./types/item/spawnLocations";
+import { isSpoilerItem } from "./spoilers";
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -116,7 +117,8 @@ $: targets = [...(data?.all() ?? [])]
         type: mapType(x.type),
       }))
     )
-  );
+  )
+  .filter((x) => !isSpoilerItem(x.id));
 
 export let search: string;
 
