@@ -865,6 +865,13 @@ export type JsonFlag = {
   taste_mod?: number; // default: 0
 };
 
+export type MonsterFlag = {
+  type: "monster_flag";
+  id: string;
+
+  "//"?: string;
+};
+
 export type MapBashInfo = {
   str_min?: number; // default: 0
   str_max?: number; // default: 0
@@ -2105,6 +2112,7 @@ export type SupportedTypes = {
   mapgen: Mapgen;
   martial_art: MartialArt;
   material: Material;
+  monster_flag: MonsterFlag;
   monstergroup: MonsterGroup;
   mutation: Mutation;
   mutation_category: MutationCategory;
