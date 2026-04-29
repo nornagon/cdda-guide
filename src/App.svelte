@@ -9,6 +9,7 @@ import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
 import { t } from "@transifex/native";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import throttle from "lodash/throttle";
+import ModCatalog from "./ModCatalog.svelte";
 
 let item: { type: string; id: string } | null = null;
 
@@ -21,7 +22,7 @@ let builds:
     }[]
   | null = null;
 
-fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
+fetch(`${process.env.CDDA_DATA_SOURCE}/builds.json`)
   .then((d) => d.json())
   .then((b) => {
     builds = b;
@@ -33,7 +34,10 @@ fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
 const url = new URL(location.href);
 const version = url.searchParams.get("v") ?? "latest";
 const locale = url.searchParams.get("lang");
-data.setVersion(version, locale);
+
+let enabledMods: string[] = url.searchParams.get("m")?.split(",") ?? [];
+
+data.setVersion(version, locale, enabledMods);
 
 const tilesets = [
   {
@@ -103,7 +107,19 @@ function decodeQueryParam(p: string) {
   return decodeURIComponent(p.replace(/\+/g, " "));
 }
 
-function load() {
+function setModEnabled(mod: string, enabled: boolean) {
+  if (enabled) {
+    if (!enabledMods.includes(mod)) {
+      enabledMods = [...enabledMods, mod];
+    }
+  } else {
+    if (enabledMods.includes(mod)) {
+      enabledMods = enabledMods.filter((m) => m !== mod);
+    }
+  }
+}
+
+function load(noScroll: boolean = false) {
   const path = location.pathname.slice(import.meta.env.BASE_URL.length - 1);
   let m: RegExpExecArray | null;
   if ((m = /^\/([^\/]+)(?:\/(.+))?$/.exec(path))) {
@@ -115,7 +131,7 @@ function load() {
       item = { type, id: id ? decodeURIComponent(id) : "" };
     }
 
-    window.scrollTo(0, 0);
+    if (!noScroll) window.scrollTo(0, 0);
   } else {
     item = null;
     search = "";
@@ -131,6 +147,30 @@ $: if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
   document.title = `${item.type} - The Hitchhiker's Guide to the Cataclysm`;
 } else {
   document.title = "The Hitchhiker's Guide to the Cataclysm";
+}
+
+$: {
+  const modIds = enabledMods;
+  const url = new URL(location.href);
+  if (modIds.length > 0) {
+    url.searchParams.set("m", modIds.join(","));
+  } else {
+    url.searchParams.delete("m");
+  }
+  if (
+    $data &&
+    $data.availableMods.length > 0 &&
+    !$data.modsFetched &&
+    modIds.length > 0
+  ) {
+    console.log("reloading data for mods", modIds);
+    location.href = url.toString();
+  } else {
+    console.log("setting mods to", modIds);
+    replaceState(null, "", url.toString());
+    $data?.setEnabledMods(modIds);
+    load(true);
+  }
 }
 
 let search: string = "";
@@ -169,13 +209,31 @@ function maybeNavigate(event: MouseEvent) {
   const target = event.target as HTMLElement | null;
   const anchor = target?.closest("a") as HTMLAnchorElement | null;
   if (anchor && anchor.href) {
-    const { origin, pathname } = new URL(anchor.href);
+    const { origin, pathname, search } = new URL(anchor.href);
     if (
       origin === location.origin &&
       pathname.startsWith(import.meta.env.BASE_URL)
     ) {
       event.preventDefault();
-      history.pushState(null, "", pathname + location.search);
+      const newSearchParams = new URLSearchParams(search);
+      const searchParams = new URLSearchParams(location.search);
+      const mod = newSearchParams.get("mod");
+      if (
+        mod &&
+        /^\/([^\/]+)$/.test(pathname.slice(import.meta.env.BASE_URL.length - 1))
+      ) {
+        // Navigating to a catalog, allow the "&mod=" query param to persist.
+        searchParams.set("mod", mod);
+      } else {
+        // Navigating to an item or something else, drop the "&mod=" query param.
+        searchParams.delete("mod");
+      }
+      const newSearch = searchParams.toString();
+      history.pushState(
+        null,
+        "",
+        pathname + (newSearch ? "?" + newSearch : "")
+      );
       load();
     }
   }
@@ -332,13 +390,17 @@ function langHref(lang: string, href: string) {
 <main>
   {#if item}
     {#if $data}
-      {#key item}
-        {#if item.id}
+      {#if item.type === "mods"}
+        <ModCatalog data={$data} {enabledMods} {setModEnabled} />
+      {:else if item.id}
+        {#key [item, enabledMods]}
           <Thing {item} data={$data} />
-        {:else}
+        {/key}
+      {:else}
+        {#key [item.type, enabledMods]}
           <Catalog type={item.type} data={$data} />
-        {/if}
-      {/key}
+        {/key}
+      {/if}
     {:else}
       <span style="color: var(--cata-color-gray)">
         <em>{t("Loading...")}</em>
@@ -353,7 +415,7 @@ function langHref(lang: string, href: string) {
     {/if}
   {:else if search}
     {#if $data}
-      {#key search}
+      {#key [search, enabledMods]}
         <SearchResults data={$data} {search} />
       {/key}
     {:else}
@@ -597,6 +659,28 @@ Anyway?`,
         </select>
       {:else}
         <select disabled><option>{t("Loading...")}</option></select>
+      {/if}
+    </span>
+  </p>
+  <p class="data-options" style="display: flex; align-items: center;">
+    <a href="{import.meta.env.BASE_URL}mods{location.search}">{t("Mods")}</a>:
+    <span style="margin-left: 0.5em">
+      {#if $data && $data.availableMods.length === 0}
+        <em style="color: var(--cata-color-gray)"
+          >{t("Mods data not processed for this version.")}</em>
+      {:else if $data}
+        {#key enabledMods}
+          {#if $data.activeMods.length === 1}
+            <em style="color: var(--cata-color-gray)"
+              >{t("No mods enabled.")}</em>
+          {/if}
+          {#each $data.activeMods.filter((m) => m !== "dda") as mod, i}
+            {#if i > 0}, {/if}{$data.availableMods.find((am) => am.id === mod)
+              ?.label ?? mod}
+          {/each}
+        {/key}
+      {:else}
+        <em style="color: var(--cata-color-gray)">{t("Loading...")}</em>
       {/if}
     </span>
   </p>
