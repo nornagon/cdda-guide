@@ -503,6 +503,7 @@ Anyway?`,
         <a href="/achievement{location.search}">{t("Achievements")}</a> /
         <a href="/conduct{location.search}">{t("Conducts")}</a>
       </li>
+      <li><a href="/skill{location.search}">{t("Skills")}</a></li>
       <li><a href="/proficiency{location.search}">{t("Proficiencies")}</a></li>
     </ul>
 
