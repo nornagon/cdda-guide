@@ -1,7 +1,13 @@
 <script lang="ts">
 import { setContext } from "svelte";
 
-import { byName, CddaData, singularName } from "./data";
+import {
+  byName,
+  CddaData,
+  getAllObjectSources,
+  singularName,
+  translate,
+} from "./data";
 import LimitedList from "./LimitedList.svelte";
 import {
   isItemSubtype,
@@ -25,9 +31,15 @@ export let data: CddaData;
 let typeWithCorrectType = type as keyof SupportedTypesWithMapped;
 setContext("data", data);
 
+const modFilter = new URLSearchParams(location.search).get("mod");
 const things = data
   .byType(type as keyof SupportedTypesWithMapped)
-  .filter((o) => "id" in o && o.id)
+  .filter(
+    (o) =>
+      "id" in o &&
+      o.id &&
+      (!modFilter || getAllObjectSources(o).some((m) => m.__mod === modFilter))
+  )
   .sort(byName);
 
 // Ref https://github.com/CleverRaven/Cataclysm-DDA/blob/658bbe419fb652086fd4d46bf5bbf9e137228464/src/item_factory.cpp#L4774
@@ -87,7 +99,15 @@ function isProficiency(t: SupportedTypeMapped): t is Proficiency {
 }
 </script>
 
-<h1>{type}</h1>
+<h1>
+  {type}
+</h1>
+{#if modFilter}
+  {@const modInfo = data.getModInfo(modFilter)}
+  <h2>
+    {modInfo ? translate(modInfo.name, false, 1) : modFilter}
+  </h2>
+{/if}
 {#each groupsList as [groupName, group]}
   {#if type === "mutation" && groupName && data.byIdMaybe("mutation_category", groupName)}
     <MutationCategory
