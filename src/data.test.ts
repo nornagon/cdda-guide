@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 import { CddaData, countsByCharges } from "./data";
+import type { ArmorSlot } from "./types";
 
 test("flattened item group includes container item for distribution", () => {
   const data = new CddaData([
@@ -76,6 +77,46 @@ test("includes container item specified in item", () => {
       expected: 0.5,
     },
   ]);
+});
+
+test("replace_materials does not mutate inherited armor data", () => {
+  const data = new CddaData([
+    {
+      type: "ITEM",
+      subtypes: ["ARMOR"],
+      abstract: "base_chainmail_vest",
+      material: ["steel"],
+      armor: [
+        {
+          material: [{ type: "steel", covered_by_mat: 100, thickness: 1.2 }],
+          covers: ["torso"],
+          coverage: 100,
+          encumbrance: 14,
+        },
+      ],
+    },
+    {
+      type: "ITEM",
+      subtypes: ["ARMOR"],
+      id: "lc_chainmail_vest",
+      "copy-from": "base_chainmail_vest",
+      replace_materials: { steel: "lc_steel_chain" },
+    },
+    {
+      type: "ITEM",
+      subtypes: ["ARMOR"],
+      id: "qt_chainmail_vest",
+      "copy-from": "base_chainmail_vest",
+      replace_materials: { steel: "qt_steel_chain" },
+    },
+  ]);
+
+  expect(
+    (data.byId("item", "lc_chainmail_vest") as ArmorSlot).armor?.[0].material
+  ).toEqual([{ type: "lc_steel_chain", covered_by_mat: 100, thickness: 1.2 }]);
+  expect(
+    (data.byId("item", "qt_chainmail_vest") as ArmorSlot).armor?.[0].material
+  ).toEqual([{ type: "qt_steel_chain", covered_by_mat: 100, thickness: 1.2 }]);
 });
 
 test("nested", () => {

@@ -26,6 +26,7 @@ import {
   type ComestibleSlot,
   type OvermapSpecial,
   type ArmorSlot,
+  type PartMaterial,
   type BreathabilityRating,
   isItemSubtype,
 } from "./types";
@@ -135,6 +136,10 @@ export const pluralName = (
 
 export const byName = (a: any, b: any) =>
   singularName(a).localeCompare(singularName(b));
+
+function isStringArray<T>(array: string[] | T[]): array is string[] {
+  return typeof array[0] === "string";
+}
 
 export function showProbability(prob: number) {
   const ret = (prob * 100).toFixed(2);
@@ -699,18 +704,24 @@ export class CddaData {
       if ("armor" in ret) {
         const armor = ret.armor as ArmorSlot["armor"];
         if (armor) {
-          for (const apd of armor) {
+          const clonedArmor = JSON.parse(JSON.stringify(armor)) as NonNullable<
+            ArmorSlot["armor"]
+          >;
+          ret.armor = clonedArmor;
+          for (const apd of clonedArmor) {
             if (apd.material) {
-              apd.material = apd.material.map((x) => {
-                if (typeof x === "string") {
+              if (isStringArray<PartMaterial>(apd.material)) {
+                apd.material = apd.material.map((x) => {
                   return ret.replace_materials[x] ?? x;
-                } else {
+                });
+              } else {
+                apd.material = apd.material.map((x) => {
                   if (x.type in ret.replace_materials) {
                     return { ...x, type: ret.replace_materials[x.type] };
                   }
                   return x;
-                }
-              });
+                });
+              }
             }
           }
         }
