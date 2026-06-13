@@ -1,7 +1,14 @@
 <script lang="ts">
 import { t } from "@transifex/native";
 import { getContext } from "svelte";
-import { CddaData, i18n, parseMass, parseVolume, singular } from "../../data";
+import {
+  breathabilityFromRating,
+  CddaData,
+  i18n,
+  parseMass,
+  parseVolume,
+  singular,
+} from "../../data";
 import type {
   ArmorPortionData,
   ArmorSlot,
@@ -428,6 +435,70 @@ function computeMats() {
   return { mats, total: matPortionTotal };
 }
 
+function materialBreathability(mat: PartMaterial): number {
+  return breathabilityFromRating(
+    data.byId("material", mat.type).breathability ?? "IMPERMEABLE"
+  );
+}
+
+function itemBreathability(): number {
+  const mats =
+    itemMaterials.length > 0
+      ? { mats: itemMaterials, total: totalMaterialPortion }
+      : computeMatsFromArmor();
+  const total = mats.total || 1;
+  const breathability = mats.mats.reduce(
+    (sum, mat) => sum + materialBreathability(mat) * mat.portion,
+    0
+  );
+  return Math.trunc(breathability / total);
+}
+
+function computeMatsFromArmor() {
+  let total = 0;
+  const mats = new Map<string, number>();
+  for (const apd of normalizedPortionData) {
+    for (const mat of (apd.material ?? []) as PartMaterial[]) {
+      const portion = (mat.thickness ?? 0) * 100;
+      mats.set(mat.type, (mats.get(mat.type) ?? 0) + portion);
+      total += portion;
+    }
+  }
+  return {
+    mats: [...mats].map(([type, portion]) => ({ type, portion })),
+    total,
+  };
+}
+
+function armorBreathability(apd: ArmorPortionData): number {
+  if (apd.breathability) return breathabilityFromRating(apd.breathability);
+
+  const mats = (apd.material ?? []) as PartMaterial[];
+  if (mats.length === 0) return itemBreathability();
+
+  const sortedMats = [...mats].sort(
+    (a, b) => materialBreathability(a) - materialBreathability(b)
+  );
+  let coverageCounted = 0;
+  let combinedBreathability = 0;
+  for (const mat of sortedMats) {
+    const coverage = mat.covered_by_mat ?? 100;
+    combinedBreathability += Math.max(
+      (coverage - coverageCounted) * materialBreathability(mat),
+      0
+    );
+    coverageCounted = Math.max(coverage, coverageCounted);
+    if (coverageCounted === 100) break;
+  }
+
+  return Math.trunc(combinedBreathability / 100) + (100 - coverageCounted);
+}
+
+const breathabilityValues = [
+  ...new Set(coveredPartGroups.map((cp) => armorBreathability(cp.apd))),
+];
+const showPerPartBreathability = breathabilityValues.length > 1;
+
 function fixApd(
   apd: ArmorPortionData
 ): ArmorPortionData & { material: PartMaterial[] } {
@@ -463,6 +534,10 @@ function fixApd(
     </dd>
     <dt>{t("Warmth", { _context })}</dt>
     <dd>{item.warmth ?? 0}</dd>
+    {#if !showPerPartBreathability}
+      <dt>{t("Breathability", { _context })}</dt>
+      <dd>{breathabilityValues[0] ?? 100}%</dd>
+    {/if}
     {#if item.sided}
       <dt>{t("Sided", { _context })}</dt>
       <dd>{t("Yes")}</dd>
@@ -541,6 +616,10 @@ function fixApd(
               </dl>
             {/if}
           </dd>
+          {#if showPerPartBreathability}
+            <dt>{t("Breathability", { _context })}</dt>
+            <dd>{armorBreathability(cp.apd)}%</dd>
+          {/if}
           <dt>{t("Protection", { _context })}</dt>
           <dd class="protection">
             {#if getEnvResist()}
