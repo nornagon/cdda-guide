@@ -482,7 +482,7 @@ function armorBreathability(apd: ArmorPortionData): number {
   let coverageCounted = 0;
   let combinedBreathability = 0;
   for (const mat of sortedMats) {
-    const coverage = mat.covered_by_mat ?? 100;
+    const coverage = Math.min(Math.max(mat.covered_by_mat ?? 100, 0), 100);
     combinedBreathability += Math.max(
       (coverage - coverageCounted) * materialBreathability(mat),
       0
