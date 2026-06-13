@@ -9,8 +9,27 @@ import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
 import { t } from "@transifex/native";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import throttle from "lodash/throttle";
+import debounce from "lodash/debounce";
+import { onDestroy } from "svelte";
 
 let item: { type: string; id: string } | null = null;
+let search: string = "";
+let renderedSearch = search;
+const updateRenderedSearch = debounce((value: string) => {
+  renderedSearch = value;
+}, 150);
+
+function renderSearchNow() {
+  updateRenderedSearch.cancel();
+  renderedSearch = search;
+}
+
+$: if (search !== renderedSearch) {
+  if (search) updateRenderedSearch(search);
+  else renderSearchNow();
+}
+
+onDestroy(updateRenderedSearch.cancel);
 
 let builds:
   | {
@@ -111,6 +130,7 @@ function load() {
     if (type === "search") {
       item = null;
       search = decodeQueryParam(id ?? "");
+      renderSearchNow();
     } else {
       item = { type, id: id ? decodeURIComponent(id) : "" };
     }
@@ -119,6 +139,7 @@ function load() {
   } else {
     item = null;
     search = "";
+    renderSearchNow();
   }
 }
 
@@ -132,8 +153,6 @@ $: if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
 } else {
   document.title = "The Hitchhiker's Guide to the Cataclysm";
 }
-
-let search: string = "";
 
 load();
 
@@ -353,8 +372,8 @@ function langHref(lang: string, href: string) {
     {/if}
   {:else if search}
     {#if $data}
-      {#key search}
-        <SearchResults data={$data} {search} />
+      {#key renderedSearch}
+        <SearchResults data={$data} search={renderedSearch} />
       {/key}
     {:else}
       <span style="color: var(--cata-color-gray)">
