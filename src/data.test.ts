@@ -119,6 +119,46 @@ test("replace_materials does not mutate inherited armor data", () => {
   ).toEqual([{ type: "qt_steel_chain", covered_by_mat: 100, thickness: 1.2 }]);
 });
 
+test("proportional encumbrance scales inherited armor portion encumbrance", () => {
+  const data = new CddaData([
+    {
+      type: "ITEM",
+      subtypes: ["ARMOR"],
+      abstract: "base_boots",
+      armor: [
+        {
+          covers: ["foot_l", "foot_r"],
+          coverage: 95,
+          encumbrance: 4,
+        },
+        {
+          covers: ["leg_l", "leg_r"],
+          coverage: 20,
+          encumbrance: [1, 3],
+        },
+      ],
+    },
+    {
+      type: "ITEM",
+      subtypes: ["ARMOR"],
+      id: "boots_western",
+      "copy-from": "base_boots",
+      proportional: { encumbrance: 2 },
+    },
+  ]);
+
+  expect((data.byId("item", "boots_western") as ArmorSlot).armor).toMatchObject(
+    [{ encumbrance: 8 }, { encumbrance: [2, 6] }]
+  );
+  expect(
+    (
+      data._flatten(
+        data._abstractsByType.get("item")!.get("base_boots")
+      ) as ArmorSlot
+    ).armor
+  ).toMatchObject([{ encumbrance: 4 }, { encumbrance: [1, 3] }]);
+});
+
 test("nested", () => {
   const data = new CddaData([
     {

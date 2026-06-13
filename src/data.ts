@@ -541,21 +541,16 @@ export class CddaData {
     }
     delete ret.relative;
     for (const k of Object.keys(ret.proportional ?? {})) {
-      if (
-        (isItemSubtype("TOOL", ret) || isItemSubtype("TOOL_ARMOR", ret)) &&
-        "armor" in ret
-      ) {
+      if (k === "encumbrance" && "armor" in ret) {
         ret.armor = JSON.parse(JSON.stringify(ret.armor));
-        if (k === "encumbrance") {
-          for (const apd of ret.armor ?? []) {
-            if (typeof apd.encumbrance === "number") {
-              apd.encumbrance =
-                (apd.encumbrance * (ret as any).proportional[k]) | 0;
-            } else if (Array.isArray(apd.encumbrance)) {
-              apd.encumbrance = apd.encumbrance.map(
-                (x: number) => (x * (ret as any).proportional[k]) | 0
-              ) as [number, number];
-            }
+        for (const apd of ret.armor ?? []) {
+          if (typeof apd.encumbrance === "number") {
+            apd.encumbrance =
+              (apd.encumbrance * (ret as any).proportional[k]) | 0;
+          } else if (Array.isArray(apd.encumbrance)) {
+            apd.encumbrance = apd.encumbrance.map(
+              (x: number) => (x * (ret as any).proportional[k]) | 0
+            ) as [number, number];
           }
         }
       }
