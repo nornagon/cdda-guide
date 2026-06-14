@@ -95,7 +95,7 @@ const specialSymbol = (symbol: string): string => {
 
 const symbolForVehiclePartVariant = (
   partId: string,
-  variant: string
+  variant: string,
 ): string => {
   // TODO: https://github.com/CleverRaven/Cataclysm-DDA/pull/59563
   const vehiclePart =
@@ -215,7 +215,7 @@ const partsCounted = [...partsGrouped.entries()].map(([id, list]) => ({
 partsCounted.sort((a, b) => {
   if (a.count === b.count)
     return singularName(data.byId("vehicle_part", a.id)).localeCompare(
-      singularName(data.byId("vehicle_part", b.id))
+      singularName(data.byId("vehicle_part", b.id)),
     );
   else return b.count - a.count;
 });

@@ -15,7 +15,7 @@ const constructions = data
   .byType("construction")
   .filter((c) => {
     const byproducts = data.flattenItemGroup(
-      data.normalizeItemGroup(c.byproducts, "collection")
+      data.normalizeItemGroup(c.byproducts, "collection"),
     );
     return byproducts.some((d) => d.id === item_id);
   })

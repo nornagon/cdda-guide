@@ -20,7 +20,7 @@ test("flattened item group includes container item for distribution", () => {
       ...x,
       prob: x.prob.toFixed(2),
       expected: x.expected.toFixed(2),
-    }))
+    })),
   ).toEqual([
     { id: "container", count: [1, 1], prob: "0.33", expected: "0.33" },
     { id: "contained_thing", count: [1, 1], prob: "0.33", expected: "0.33" },
@@ -112,10 +112,10 @@ test("replace_materials does not mutate inherited armor data", () => {
   ]);
 
   expect(
-    (data.byId("item", "lc_chainmail_vest") as ArmorSlot).armor?.[0].material
+    (data.byId("item", "lc_chainmail_vest") as ArmorSlot).armor?.[0].material,
   ).toEqual([{ type: "lc_steel_chain", covered_by_mat: 100, thickness: 1.2 }]);
   expect(
-    (data.byId("item", "qt_chainmail_vest") as ArmorSlot).armor?.[0].material
+    (data.byId("item", "qt_chainmail_vest") as ArmorSlot).armor?.[0].material,
   ).toEqual([{ type: "qt_steel_chain", covered_by_mat: 100, thickness: 1.2 }]);
 });
 
@@ -148,14 +148,14 @@ test("proportional encumbrance scales inherited armor portion encumbrance", () =
   ]);
 
   expect((data.byId("item", "boots_western") as ArmorSlot).armor).toMatchObject(
-    [{ encumbrance: 8 }, { encumbrance: [2, 6] }]
+    [{ encumbrance: 8 }, { encumbrance: [2, 6] }],
   );
   expect(
     (
       data._flatten(
-        data._abstractsByType.get("item")!.get("base_boots")
+        data._abstractsByType.get("item")!.get("base_boots"),
       ) as ArmorSlot
-    ).armor
+    ).armor,
   ).toMatchObject([{ encumbrance: 4 }, { encumbrance: [1, 3] }]);
 });
 

@@ -23,12 +23,12 @@ function itemsWithOnlyMaterial(soughtMat: Material): Item[] {
         it.material == null
           ? []
           : typeof it.material === "string"
-          ? [it.material]
-          : Array.isArray(it.material)
-          ? typeof it.material[0] === "string"
-            ? it.material
-            : it.material.map((m) => (typeof m === "string" ? m : m.type))
-          : Object.keys(it.material);
+            ? [it.material]
+            : Array.isArray(it.material)
+              ? typeof it.material[0] === "string"
+                ? it.material
+                : it.material.map((m) => (typeof m === "string" ? m : m.type))
+              : Object.keys(it.material);
       return mat.length === 1 && mat[0] === soughtMat.id;
     });
 }

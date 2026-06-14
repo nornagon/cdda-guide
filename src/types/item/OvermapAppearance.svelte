@@ -10,7 +10,7 @@ export let showZ: number = 0;
 
 const overmaps = [
   ...(overmapSpecial.subtype !== "mutable"
-    ? overmapSpecial.overmaps ?? []
+    ? (overmapSpecial.overmaps ?? [])
     : []),
 ];
 let minX = Infinity,
@@ -38,7 +38,7 @@ function makeAppearanceGrid(z: number) {
       const om = overmapsByPoint.get(`${x}|${y}|${z}`);
       if (om?.overmap) {
         const [, omt_id, dir] = /^(.+?)(?:_(north|south|east|west))?$/.exec(
-          om.overmap
+          om.overmap,
         )!;
         const appearance = omtAppearance(omt_id, dir || "north");
         appearanceRow.push(appearance);
@@ -57,12 +57,12 @@ function rotateSymbol(symbol: string, dir: string) {
     dir === "north"
       ? 0
       : dir === "east"
-      ? 1
-      : dir === "south"
-      ? 2
-      : dir === "west"
-      ? 3
-      : 0;
+        ? 1
+        : dir === "south"
+          ? 2
+          : dir === "west"
+            ? 3
+            : 0;
   if (dirNum === 0) return symbol;
   const rotatable = data
     .byType("rotatable_symbol")
@@ -75,7 +75,7 @@ function rotateSymbol(symbol: string, dir: string) {
 
 function omtAppearance(
   omt_id: string,
-  dir: string = "north"
+  dir: string = "north",
 ): {
   color: string;
   sym: string;
@@ -89,8 +89,8 @@ function omtAppearance(
         name: omt.name
           ? singular(omt.name)
           : Array.isArray(omt.id)
-          ? omt.id[0]
-          : omt.id,
+            ? omt.id[0]
+            : omt.id,
       }
     : { color: "black", sym: " ", name: "" };
 }

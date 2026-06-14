@@ -8,7 +8,7 @@ const _context = "View/Edit on GitHub";
 <pre>{JSON.stringify(
     obj,
     (key, value) => (key === "__filename" ? undefined : value),
-    2
+    2,
   )}</pre>
 {#if obj.__filename}
   <a

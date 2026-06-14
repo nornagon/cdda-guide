@@ -1452,7 +1452,7 @@ export type Monster = {
   fear_triggers?: string[];
   special_when_hit?: [
     "NONE" | "ZAPBACK" | "ACIDSPLASH" | "RETURN_FIRE",
-    integer
+    integer,
   ];
   morale?: number;
   aggression?: number;
@@ -2152,7 +2152,7 @@ export type SupportedTypeMapped =
 type ItemSubtypes = ItemWithOldSubtype["type"];
 export function isItemSubtype<Subtype extends ItemSubtypes>(
   subtype: Subtype,
-  item: Item
+  item: Item,
 ): item is Item & ItemSubtypeToSlot[Subtype] {
   return (
     item.type === subtype ||

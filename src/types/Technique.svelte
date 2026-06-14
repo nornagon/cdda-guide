@@ -28,14 +28,14 @@ const type = i18n.__(
   item.block_counter
     ? "Block Counter"
     : item.dodge_counter
-    ? "Dodge Counter"
-    : item.miss_recovery
-    ? "Miss Recovery"
-    : item.grab_break
-    ? "Grab Break"
-    : item.defensive
-    ? "Defensive"
-    : "Offensive"
+      ? "Dodge Counter"
+      : item.miss_recovery
+        ? "Miss Recovery"
+        : item.grab_break
+          ? "Grab Break"
+          : item.defensive
+            ? "Defensive"
+            : "Offensive",
 );
 
 const extractInfo = (s: string): string =>
@@ -43,15 +43,15 @@ const extractInfo = (s: string): string =>
 const targetRequirements: string[] = [];
 if (item.human_target)
   targetRequirements.push(
-    extractInfo(i18n.__("* Only works on a <info>humanoid</info> target"))
+    extractInfo(i18n.__("* Only works on a <info>humanoid</info> target")),
   );
 if (item.downed_target)
   targetRequirements.push(
-    extractInfo(i18n.__("* Only works on a <info>downed</info> target"))
+    extractInfo(i18n.__("* Only works on a <info>downed</info> target")),
   );
 if (item.stunned_target)
   targetRequirements.push(
-    extractInfo(i18n.__("* Only works on a <info>stunned</info> target"))
+    extractInfo(i18n.__("* Only works on a <info>stunned</info> target")),
   );
 </script>
 
@@ -72,8 +72,11 @@ if (item.stunned_target)
       {item.crit_ok
         ? t("Yes")
         : item.crit_tec
-        ? t("Only", { _context: "Martial Art", _comment: "Activate on Crit?" })
-        : t("No")}
+          ? t("Only", {
+              _context: "Martial Art",
+              _comment: "Activate on Crit?",
+            })
+          : t("No")}
     </dd>
     {#if item.weighting && item.weighting !== 1}
       <dt>{t("Chance to Activate", { _context })}</dt>

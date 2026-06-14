@@ -8,7 +8,7 @@ function parseColorText(text: string): { string: string; color: string }[] {
   let remaining = text;
   while (true) {
     const nextColorTag = remaining.match(
-      /<\/?(info|good|bad|neutral|color|color_[^>]+)>/
+      /<\/?(info|good|bad|neutral|color|color_[^>]+)>/,
     );
     if (nextColorTag && nextColorTag.index != null) {
       if (nextColorTag.index > 0)
@@ -22,7 +22,7 @@ function parseColorText(text: string): { string: string; color: string }[] {
         color.unshift(nextColorTag[1]);
       }
       remaining = remaining.substring(
-        nextColorTag.index + nextColorTag[0].length
+        nextColorTag.index + nextColorTag[0].length,
       );
     } else break;
   }

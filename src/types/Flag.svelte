@@ -32,7 +32,7 @@ const bionicWithFlag = data
       f.id &&
       (f.flags?.includes(item.id) ||
         f.active_flags?.includes(item.id) ||
-        f.inactive_flags?.includes(item.id))
+        f.inactive_flags?.includes(item.id)),
   );
 </script>
 

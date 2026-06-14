@@ -13,7 +13,7 @@ const data = getContext<CddaData>("data");
 const sources = data
   .byType("item")
   .filter(
-    (it) => it.id && "smoking_result" in it && it.smoking_result === item_id
+    (it) => it.id && "smoking_result" in it && it.smoking_result === item_id,
   );
 
 sources.sort(byName);

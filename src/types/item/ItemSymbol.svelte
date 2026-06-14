@@ -17,38 +17,38 @@ let data: CddaData = getContext("data");
 
 $: tile_info = $tileData?.tile_info[0];
 $: tile = typeHasTile(item)
-  ? findTileOrLooksLike($tileData, item) ??
+  ? (findTileOrLooksLike($tileData, item) ??
     fallbackTile(
       $tileData,
       item.type === "vehicle_part" && item.variants
         ? item.variants[0].symbols[0]
         : item.symbol,
-      item.color ?? "white"
-    )
+      item.color ?? "white",
+    ))
   : null;
 $: baseUrl = $tileData?.baseUrl;
 
 const sym =
   item.type === "vehicle_part" && item.variants
     ? item.variants[0].symbols[0]
-    : [item.symbol].flat()[0] ?? " ";
+    : ([item.symbol].flat()[0] ?? " ");
 const symbol = /^LINE_/.test(sym) ? "|" : sym;
 const color = item.color
   ? typeof item.color === "string"
     ? item.color
     : item.color[0]
   : item.bgcolor
-  ? colorFromBgcolor(item.bgcolor)
-  : "white";
+    ? colorFromBgcolor(item.bgcolor)
+    : "white";
 
 function typeHasTile(item: any): boolean {
   return ["item", "monster", "terrain", "furniture", "vehicle_part"].includes(
-    mapType(item.type)
+    mapType(item.type),
   );
 }
 
 function colorFromBgcolor(
-  color: string | [string] | [string, string, string, string]
+  color: string | [string] | [string, string, string, string],
 ): string {
   return typeof color === "string" ? `i_${color}` : colorFromBgcolor(color[0]);
 }
@@ -56,7 +56,7 @@ function colorFromBgcolor(
 function findTileOrLooksLike(
   tileData: any,
   item: any,
-  jumps: number = 10
+  jumps: number = 10,
 ): TileInfo | undefined {
   function resolveId(id: string): string {
     return item.type === "vehicle_part"
@@ -131,7 +131,7 @@ function findTile(tileData: any, id: string): TileInfo | undefined {
     (testId === id ||
       (testId.startsWith(id) &&
         /^_season_(autumn|spring|summer|winter)$/.test(
-          testId.substring(id.length)
+          testId.substring(id.length),
         )));
   for (const chunk of tileData["tiles-new"]) {
     for (const info of chunk.tiles) {
@@ -155,7 +155,7 @@ function findTile(tileData: any, id: string): TileInfo | undefined {
 function fallbackTile(
   tileData: any,
   symbolMaybeArr: string | string[] | undefined,
-  color: string | string[]
+  color: string | string[],
 ): TileInfo | undefined {
   if (!tileData) return;
   const symbol = [symbolMaybeArr].flat()[0];
@@ -228,13 +228,14 @@ function css(obj: Record<string, string>) {
           width: `${tile.bg.width}px`,
           height: `${tile.bg.height}px`,
           "background-image": `url(${`${baseUrl}/${encodeURIComponent(
-            tile.bg.file
+            tile.bg.file,
           )}`})`,
           "background-position": `${-tile.bg.tx * tile.bg.width}px ${
             -tile.bg.ty * tile.bg.height
           }px`,
           transform: `scale(${tile_info.pixelscale}) translate(${tile.bg.offx}px, ${tile.bg.offy}px)`,
-        })} />
+        })}>
+      </div>
     {/if}
     {#if tile.fg != null}
       <div
@@ -243,13 +244,14 @@ function css(obj: Record<string, string>) {
           width: `${tile.fg.width}px`,
           height: `${tile.fg.height}px`,
           "background-image": `url(${`${baseUrl}/${encodeURIComponent(
-            tile.fg.file
+            tile.fg.file,
           )}`})`,
           "background-position": `${-tile.fg.tx * tile.fg.width}px ${
             -tile.fg.ty * tile.fg.height
           }px`,
           transform: `scale(${tile_info.pixelscale}) translate(${tile.fg.offx}px, ${tile.fg.offy}px)`,
-        })} />
+        })}>
+      </div>
     {/if}
   </div>
 {:else}

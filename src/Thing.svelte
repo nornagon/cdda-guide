@@ -1,6 +1,7 @@
 <script lang="ts">
 import { t } from "@transifex/native";
-import { setContext, SvelteComponent } from "svelte";
+import { setContext } from "svelte";
+import type { Component } from "svelte";
 
 import type { CddaData } from "./data";
 import Monster from "./types/Monster.svelte";
@@ -18,7 +19,7 @@ import Fault from "./types/Fault.svelte";
 import Vitamin from "./types/Vitamin.svelte";
 import VehiclePart from "./types/VehiclePart.svelte";
 import MartialArt from "./types/MartialArt.svelte";
-import ErrorBoundary from "./ErrorBoundary.mjs";
+import ErrorBoundary from "./ErrorBoundary.svelte";
 import Mutation from "./types/Mutation.svelte";
 import MutationCategory from "./types/MutationCategory.svelte";
 import MutationType from "./types/MutationType.svelte";
@@ -70,7 +71,7 @@ let obj =
   data.byIdMaybe(item.type as keyof SupportedTypes, item.id) ??
   defaultItem(item.id, item.type);
 
-const displays: Record<string, typeof SvelteComponent> = {
+const displays: Record<string, Component<{ item: any }>> = {
   MONSTER: Monster,
   AMMO: Item,
   GUN: Item,
@@ -132,15 +133,13 @@ const display = (obj && displays[obj.type]) ?? Unknown;
       <h1>{t("Error")}</h1>
       <p>
         {t(
-          "There was a problem displaying this page. Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build."
+          "There was a problem displaying this page. Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build.",
         )}
       </p>
-      <p>
-        <details>
-          <summary>{error.message}</summary>
-          <pre>{error.stack}</pre>
-        </details>
-      </p>
+      <details>
+        <summary>{error.message}</summary>
+        <pre>{error.stack}</pre>
+      </details>
     </section>
   {:else if typeof globalThis !== "undefined" && globalThis.process}
     <!-- running in tests -->

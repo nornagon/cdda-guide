@@ -27,7 +27,7 @@ expect.extend({
           errors
             ?.map((e) => {
               return `${e.instancePath} ${e.message}, but was ${util.inspect(
-                e.data
+                e.data,
               )}`;
             })
             .join("\n")
@@ -49,7 +49,7 @@ if (process.env.WRITE_SCHEMA)
 
 const schemasByType = new Map(
   Object.entries(
-    (typesSchema!.definitions!["SupportedTypes"] as any).properties
+    (typesSchema!.definitions!["SupportedTypes"] as any).properties,
   ).map(([typeName, sch]) => {
     const schemaForType = sch as TJS.Definition;
     return [
@@ -60,10 +60,10 @@ const schemasByType = new Map(
         $schema: typesSchema!.$schema,
       } as TJS.Definition),
     ];
-  })
+  }),
 );
 const data = new CddaData(
-  JSON.parse(fs.readFileSync(__dirname + "/../_test/all.json", "utf8")).data
+  JSON.parse(fs.readFileSync(__dirname + "/../_test/all.json", "utf8")).data,
 );
 const id = (x: any) => {
   if (x.id) return x.id;
