@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "validate": "svelte-check && tsc --noEmit",
     "test": "npm run test:watch -- --run",
-    "test:watch": "node fetch-fixtures.js && npm run lint && npm run validate && vitest --no-file-parallelism src",
+    "test:watch": "node fetch-fixtures.js && npm run lint && npm run validate && vitest --maxWorkers=4 src",
     "test:latest": "node fetch-fixtures.js latest && npm run test",
     "test:dump": "rm -rf _rendered && DUMP_PAGES=1 vitest --no-file-parallelism --run src/all",
     "update-test-data": "node fetch-fixtures.js latest",
