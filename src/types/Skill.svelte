@@ -59,10 +59,17 @@ const craftingRecipes = data
   );
 
 const recipesByLevel = new Map<number, typeof craftingRecipes>();
+const namesByLevel = new Map<number, Set<string>>();
 for (const recipe of craftingRecipes) {
   const level = recipe.difficulty ?? 0;
-  if (!recipesByLevel.has(level)) recipesByLevel.set(level, []);
-  recipesByLevel.get(level)!.push(recipe);
+  if (!recipesByLevel.has(level)) {
+    recipesByLevel.set(level, []);
+    namesByLevel.set(level, new Set());
+  }
+  if (!namesByLevel.get(level)!.has(recipe.result || "")) {
+    recipesByLevel.get(level)!.push(recipe);
+    namesByLevel.get(level)!.add(recipe.result || "");
+  }
 }
 const recipesByLevelList = [...recipesByLevel.entries()].sort(
   (a, b) => a[0] - b[0]
