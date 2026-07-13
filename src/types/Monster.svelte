@@ -5,6 +5,7 @@ import { getContext } from "svelte";
 import {
   asKilograms,
   asLiters,
+  byName,
   CddaData,
   i18n,
   normalizeDamageInstance,
@@ -21,7 +22,6 @@ import type {
 } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
 import SpecialAttack from "./monster/SpecialAttack.svelte";
-import Spoiler from "../Spoiler.svelte";
 import ColorText from "./ColorText.svelte";
 import ItemTable from "./item/ItemTable.svelte";
 
@@ -118,7 +118,7 @@ function damage(mon: Monster) {
   //melee_damage = melee_damage ?? [ { damage_type: "bash", amount: `${melee_dice}d${melee_dice_sides}` } ]
   return (
     `${melee_dice}d${melee_dice_sides} ${singularName(
-      data.byIdMaybe("damage_type", "bash") ?? { id: "bash" }
+      data.byIdMaybe("damage_type", "bash") ?? { id: "bash" },
     )}` +
     du
       .map(
@@ -126,137 +126,12 @@ function damage(mon: Monster) {
           ` + ${u.amount} ${singularName(
             data.byIdMaybe("damage_type", u.damage_type) ?? {
               id: u.damage_type,
-            }
-          )}`
+            },
+          )}`,
       )
       .join("")
   );
 }
-
-// From mtype.h. See also https://github.com/CleverRaven/Cataclysm-DDA/blob/master/doc/JSON_FLAGS.md#monsters
-// prettier-ignore
-const mon_flag_descriptions: Record<string, string> = {
-  SEES: "It can see you (and will run/follow)",
-  HEARS: "It can hear you",
-  GOODHEARING: "Pursues sounds more than most monsters",
-  SMELLS: "It can smell you",
-  KEENNOSE: "Keen sense of smell",
-  STUMBLES: "Stumbles in its movement",
-  WARM: "Warm blooded",
-  NOHEAD: "Headshots not allowed!",
-  HARDTOSHOOT: "It's one size smaller for ranged attacks, no less then creature_size::tiny",
-  GRABS: "Its attacks may grab us!",
-  BASHES: "Bashes down doors",
-  DESTROYS: "Bashes down walls and more",
-  BORES: "Tunnels through just about anything",
-  POISON: "Poisonous to eat",
-  VENOM: "Attack may poison the player",
-  BADVENOM: "Attack may SEVERELY poison the player",
-  PARALYZE: "Attack may paralyze the player with venom",
-  WEBWALK: "Doesn't destroy webs",
-  DIGS: "Digs through the ground",
-  CAN_DIG: "Can dig and walk",
-  FLIES: "Can fly (over water, etc)",
-  AQUATIC: "Confined to water",
-  SWIMS: "Treats water as 50 movement point terrain",
-  ATTACKMON: "Attacks other monsters",
-  ANIMAL: "Is an \"animal\" for purposes of the Animal Empath trait",
-  PLASTIC: "Absorbs physical damage to a great degree",
-  SUNDEATH: "Dies in full sunlight",
-  ELECTRIC: "Shocks unarmed attackers",
-  ACIDPROOF: "Immune to acid",
-  ACIDTRAIL: "Leaves a trail of acid",
-  SHORTACIDTRAIL: "Leaves an intermittent trail of acid",
-  FIREPROOF: "Immune to fire",
-  SLUDGEPROOF: "Ignores the effect of sludge trails",
-  SLUDGETRAIL: "Causes monster to leave a sludge trap trail when moving",
-  COLDPROOF: "Immune to cold damage",
-  FIREY: "Burns stuff and is immune to fire",
-  QUEEN: "When it dies, local populations start to die off too",
-  ELECTRONIC: "e.g. a robot; affected by EMP blasts, and other stuff",
-  FUR: "May produce fur when butchered",
-  LEATHER: "May produce leather when butchered",
-  WOOL: "May produce wool when butchered",
-  BONES: "May produce bones and sinews when butchered; if combined with POISON flag, tainted bones, if combined with HUMAN, human bones",
-  FAT: "May produce fat when butchered; if combined with POISON flag, tainted fat",
-  CONSOLE_DESPAWN: "Despawns when a nearby console is properly hacked",
-  IMMOBILE: "Doesn't move (e.g. turrets)",
-  ID_CARD_DESPAWN: "Despawns when a science ID card is used on a nearby console",
-  RIDEABLE_MECH: "A rideable mech that is immobile until ridden.",
-  MILITARY_MECH: "A rideable mech that was designed for military work.",
-  MECH_RECON_VISION: "This mech gives you IR night-vision.",
-  MECH_DEFENSIVE: "This mech gives you thorough protection.",
-  HIT_AND_RUN: "Flee for several turns after a melee attack",
-  GUILT: "You feel guilty for killing it",
-  PAY_BOT: "You can pay this bot to be your friend for a time",
-  HUMAN: "It's a live human, as long as it's alive",
-  NO_BREATHE: "Creature can't drown and is unharmed by gas, smoke, or poison",
-  FLAMMABLE: "Monster catches fire, burns, and spreads fire to nearby objects",
-  REVIVES: "Monster corpse will revive after a short period of time",
-  CHITIN: "May produce chitin when butchered",
-  VERMIN: "Obsolete flag labeling \"nuisance\" or \"scenery\" monsters, now used to prevent loading the same.",
-  NOGIB: "Creature won't leave gibs / meat chunks when killed with huge damage.",
-  LARVA: "Creature is a larva. Currently used for gib and blood handling.",
-  ARTHROPOD_BLOOD: "Forces monster to bleed hemolymph.",
-  ACID_BLOOD: "Makes monster bleed acid. Fun stuff! Does not automatically dissolve in a pool of acid on death.",
-  BILE_BLOOD: "Makes monster bleed bile.",
-  ABSORBS: "Consumes objects it moves over which gives bonus hp.",
-  ABSORBS_SPLITS: "Consumes objects it moves over which gives bonus hp. If it gets enough bonus HP, it spawns a copy of itself.",
-  CBM_CIV: "May produce a common CBM a power CBM when butchered.",
-  CBM_POWER: "May produce a power CBM when butchered, independent of MF_CBM_wev.",
-  CBM_SCI: "May produce a bionic from bionics_sci when butchered.",
-  CBM_OP: "May produce a bionic from bionics_op when butchered, and the power storage is mk 2.",
-  CBM_TECH: "May produce a bionic from bionics_tech when butchered.",
-  CBM_SUBS: "May produce a bionic from bionics_subs when butchered.",
-  FILTHY: "Any clothing it drops will be filthy.",
-  FISHABLE: "It is fishable.",
-  GROUP_BASH: "Monsters that can pile up against obstacles and add their strength together to break them.",
-  SWARMS: "Monsters that like to group together and form loose packs",
-  GROUP_MORALE: "Monsters that are more courageous when near friends",
-  INTERIOR_AMMO: "Monster contain's its ammo inside itself, no need to load on launch. Prevents ammo from being dropped on disable.",
-  CLIMBS: "Monsters that can climb certain terrain and furniture",
-  PACIFIST: "Monsters that will never use melee attack, useful for having them use grab without attacking the player",
-  PUSH_MON: "Monsters that can push creatures out of their way",
-  PUSH_VEH: "Monsters that can push vehicles out of their way",
-  NIGHT_INVISIBILITY: "Monsters that are invisible in poor light conditions",
-  REVIVES_HEALTHY: "When revived, this monster has full hitpoints and speed",
-  NO_NECRO: "This monster can't be revived by necros. It will still rise on its own.",
-  PATH_AVOID_DANGER: "This monster will path around some dangers instead of through them.",
-  PATH_AVOID_DANGER_1: "This monster will path around some dangers instead of through them.",
-  PATH_AVOID_DANGER_2: "This monster will path around most dangers instead of through them.",
-  PATH_AVOID_FIRE: "This monster will path around heat-related dangers instead of through them.",
-  PATH_AVOID_FALL: "This monster will path around cliffs instead of off of them.",
-  PRIORITIZE_TARGETS: "This monster will prioritize targets depending on their danger levels",
-  NOT_HALLU: "Monsters that will NOT appear when player's producing hallucinations",
-  CATFOOD: "This monster will become friendly when fed cat food.",
-  CATTLEFODDER: "This monster will become friendly when fed cattle fodder.",
-  BIRDFOOD: "This monster will become friendly when fed bird food.",
-  CANPLAY: "This monster can be played with if it's a pet.",
-  PET_MOUNTABLE: "This monster can be mounted and ridden when tamed.",
-  PET_HARNESSABLE: "This monster can be harnessed when tamed.",
-  DOGFOOD: "This monster will become friendly when fed dog food.",
-  MILKABLE: "This monster is milkable.",
-  SHEARABLE: "This monster is shearable.",
-  NO_BREED: "This monster doesn't breed, even though it has breed data",
-  PET_WONT_FOLLOW: "This monster won't follow the player automatically when tamed.",
-  DRIPS_NAPALM: "This monster occasionally drips napalm on move",
-  DRIPS_GASOLINE: "This monster occasionally drips gasoline on move",
-  ELECTRIC_FIELD: "This monster is surrounded by an electrical field that ignites flammable liquids near it",
-  LOUDMOVES: "This monster makes move noises as if ~2 sizes louder, even if flying.",
-  CAN_OPEN_DOORS: "This monster can open doors.",
-  STUN_IMMUNE: "This monster is immune to the stun effect",
-  DROPS_AMMO: "This monster drops ammo. Should not be set for monsters that use pseudo ammo.",
-  INSECTICIDEPROOF: "This monster is immune to insecticide, even though it's made of bug flesh",
-  RANGED_ATTACKER: "This monster has any sort of ranged attack",
-  CORNERED_FIGHTER: "This creature will stop fleeing and fight back if enemies pursue it into melee range.",
-  SMALL_HIDER: "This small monster can hide under or behind furniture such as beds, refrigerators, and underbrush.",
-  CAN_BE_CULLED: "This animal can be culled if it's a pet.",
-  EATS: "This creature has a stomach size (defined in its monster json) which gets filled up when it eats, and digests food over time.",
-  WATER_CAMOUFLAGE: "If in water, stays invisible up to (current Perception, + base Perception if the character has the Spotting proficiency) tiles away, even in broad daylight. Monsters see it from the lower of day vision and night vision ranges. Can also make it harder to see in deep water or across z-levels if it is underwater and the viewer is not.",
-  NOT_HALLUCINATION: "This monster does not appear while the player is hallucinating.",
-  PARALYZE_VENOM: "This monster can apply paralyzing effect for 10 minutes.",
-  HAS_MIND: "Is sapient and capable of reason (mi-go, triffids, cyborgs, etc.).",
-};
 
 // prettier-ignore
 const trigger_descriptions: Record<string, string> = {
@@ -302,13 +177,108 @@ let upgrades =
   item.upgrades && (item.upgrades.into || item.upgrades.into_group)
     ? {
         ...item.upgrades,
-        monsters: item.upgrades.into
+        monsters: (item.upgrades.into
           ? [item.upgrades.into]
           : item.upgrades.into_group
-          ? flattenGroup(data.byId("monstergroup", item.upgrades.into_group))
-          : [],
+            ? flattenGroup(data.byId("monstergroup", item.upgrades.into_group))
+            : []
+        ).sort((a, b) =>
+          byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b)),
+        ),
       }
     : null;
+
+// Find monsters that upgrade to this one
+interface UpgradeFromInfo {
+  id: string;
+  age_grow?: number;
+  half_life?: number;
+}
+
+function upgradesFrom(other: Monster) {
+  if (!other.id || !other.upgrades) return false;
+  if (other.upgrades.into === item.id) return true;
+
+  if (other.upgrades.into_group) {
+    return flattenGroup(
+      data.byId("monstergroup", other.upgrades.into_group),
+    ).includes(item.id);
+  }
+  return false;
+}
+
+const upgradesFromRaw: UpgradeFromInfo[] = [];
+for (const monster of data.byType("monster")) {
+  if (!monster.id || !monster.upgrades) continue;
+
+  if (upgradesFrom(monster)) {
+    upgradesFromRaw.push({
+      id: monster.id,
+      age_grow: monster.upgrades.age_grow,
+      half_life: monster.upgrades.half_life,
+    });
+  }
+}
+
+// Group monsters into their group based on upgrade type and timing
+const upgradesFromByHalfLife = new Map<number, string[]>();
+const upgradesFromByAgeGrow = new Map<number, string[]>();
+const upgradesFromNoTiming = [];
+for (const upgrade of upgradesFromRaw) {
+  if (upgrade.age_grow) {
+    if (!upgradesFromByAgeGrow.has(upgrade.age_grow)) {
+      upgradesFromByAgeGrow.set(upgrade.age_grow, []);
+    }
+    upgradesFromByAgeGrow.get(upgrade.age_grow)!.push(upgrade.id);
+  } else if (upgrade.half_life) {
+    if (!upgradesFromByHalfLife.has(upgrade.half_life)) {
+      upgradesFromByHalfLife.set(upgrade.half_life, []);
+    }
+    upgradesFromByHalfLife.get(upgrade.half_life)!.push(upgrade.id);
+  } else {
+    upgradesFromNoTiming.push(upgrade.id);
+  }
+}
+
+// Sort monsters with the same timing alphabetically
+for (const monsterByTime of [upgradesFromByHalfLife, upgradesFromByAgeGrow]) {
+  for (const [_, monsters] of monsterByTime) {
+    monsters.sort((a, b) =>
+      byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b)),
+    );
+  }
+}
+upgradesFromNoTiming.sort((a, b) =>
+  byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b)),
+);
+
+// Sort each group by timing and insert into one upgradesFromGrouped for display
+const upgradesFromGrouped = new Map<string, string[]>();
+if (upgradesFromByHalfLife.size > 0) {
+  const sortedHalfLifeKeys = Array.from(upgradesFromByHalfLife.keys()).sort(
+    (a, b) => a - b,
+  );
+  for (const half_life of sortedHalfLifeKeys) {
+    upgradesFromGrouped.set(
+      `half_life:${half_life}`,
+      upgradesFromByHalfLife.get(half_life)!,
+    );
+  }
+}
+if (upgradesFromByAgeGrow.size > 0) {
+  const sortedAgeGrowKeys = Array.from(upgradesFromByAgeGrow.keys()).sort(
+    (a, b) => a - b,
+  );
+  for (const age_grow of sortedAgeGrowKeys) {
+    upgradesFromGrouped.set(
+      `age_grow:${age_grow}`,
+      upgradesFromByAgeGrow.get(age_grow)!,
+    );
+  }
+}
+if (upgradesFromNoTiming.length > 0) {
+  upgradesFromGrouped.set("no_timing", upgradesFromNoTiming);
+}
 </script>
 
 <h1><ItemSymbol {item} /> {singularName(item)}</h1>
@@ -348,233 +318,256 @@ let upgrades =
     <p style="color: var(--cata-color-gray)">{singular(item.description)}</p>
   {/if}
 </section>
-<Spoiler spoily={item.id === "mon_dragon_dummy"}>
-  <div class="side-by-side">
-    <section>
-      <h1>{t("Attack", { _context, _comment: "Section heading" })}</h1>
-      <dl>
-        <dt>{t("Speed", { _context })}</dt>
-        <dd>{item.speed ?? 0}</dd>
-        <dt>{t("Melee Skill", { _context })}</dt>
-        <dd>{item.melee_skill ?? 0}</dd>
-        <dt>{t("Damage", { _context })}</dt>
-        <dd>{damage(item)}</dd>
-        {#if item.special_attacks}
-          <dt>{t("Special Attacks", { _context })}</dt>
-          <dd>
-            <ul class="no-bullets">
-              {#each item.special_attacks as special_attack}
-                <li>
-                  {#if Array.isArray(special_attack) && special_attack[0] && data.byIdMaybe("monster_attack", special_attack[0])}
-                    <ThingLink type="monster_attack" id={special_attack[0]} />
-                  {:else}
-                    <SpecialAttack {special_attack} />
-                  {/if}
-                </li>
-              {/each}
-            </ul>
-          </dd>
-        {/if}
-      </dl>
-    </section>
-    <section>
-      <h1>{t("Defense", { _context, _comment: "Section heading" })}</h1>
-      <dl style="flex: 1">
-        <dt>{t("HP", { _context })}</dt>
-        <dd>{item.hp}</dd>
-        {#if item.regenerates}
-          <dt>{t("Regenerates", { _context })}</dt>
-          <dd>{item.regenerates} hp/turn</dd>
-        {/if}
-        <dt>{t("Dodge", { _context })}</dt>
-        <dd>{item.dodge ?? 0}</dd>
-        <dt>{t("Armor", { _context })}</dt>
-        {#if item.armor}
-          <dd>
-            <dl>
-              {#each Object.entries(monsterArmor(item.armor)) as [damageTypeId, value]}
-                {@const damageType = data.byIdMaybe(
-                  "damage_type",
-                  damageTypeId
-                )}
-                {#if value}
-                  <dt>{singularName(damageType ?? { id: damageTypeId })}</dt>
-                  <dd>{value.toFixed(1)}</dd>
-                {/if}
-              {/each}
-            </dl>
-          </dd>
-        {:else}
-          <dd>
-            <dl>
-              <dt>{t("Bash", { _context: "Damage Type" })}</dt>
-              <dd>{item.armor_bash ?? 0}</dd>
-              <dt>{t("Cut", { _context: "Damage Type" })}</dt>
-              <dd>{item.armor_cut ?? 0}</dd>
-              <dt>{t("Stab", { _context: "Damage Type" })}</dt>
-              <dd>
-                {item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}
-              </dd>
-              <dt>{t("Ballistic", { _context: "Damage Type" })}</dt>
-              <dd>{item.armor_bullet ?? 0}</dd>
-              <dt>{t("Acid", { _context: "Damage Type" })}</dt>
-              <dd>
-                {item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}
-              </dd>
-              <dt>{t("Heat", { _context: "Damage Type" })}</dt>
-              <dd>{item.armor_fire ?? 0}</dd>
-            </dl>
-          </dd>
-        {/if}
-        {#if item.special_when_hit}
-          <dt>{t("When Hit", { _context })}</dt>
-          <dd>{item.special_when_hit[0]} ({item.special_when_hit[1]}%)</dd>
-        {/if}
-      </dl>
-    </section>
-  </div>
+<div class="side-by-side">
   <section>
-    <h1>{t("Behavior", { _context, _comment: "Section heading" })}</h1>
+    <h1>{t("Attack", { _context, _comment: "Section heading" })}</h1>
     <dl>
-      <dt
-        title="Monsters with high aggression are more likely to be hostile. Ranges from -100 to 100">
-        {t("Aggression", { _context })}
-      </dt>
-      <dd>{item.aggression ?? 0}</dd>
-      <dt title="Morale at spawn. Monsters with low morale will flee.">
-        {t("Morale", { _context })}
-      </dt>
-      <dd>{item.morale ?? 0}</dd>
-      <dt>{t("Vision Range", { _context })}</dt>
-      <dd>
-        {item.vision_day ?? 40} ({t("day", { _context })}) / {item.vision_night ??
-          1} ({t("night", { _context })})
-      </dd>
-      <dt>{t("Default Faction", { _context })}</dt>
-      <dd>{item.default_faction}</dd>
-      {#if item.anger_triggers?.length}
-        <dt>{t("Anger Triggers", { _context })}</dt>
+      <dt>{t("Speed", { _context })}</dt>
+      <dd>{item.speed ?? 0}</dd>
+      <dt>{t("Melee Skill", { _context })}</dt>
+      <dd>{item.melee_skill ?? 0}</dd>
+      <dt>{t("Damage", { _context })}</dt>
+      <dd>{damage(item)}</dd>
+      {#if item.special_attacks}
+        <dt>{t("Special Attacks", { _context })}</dt>
         <dd>
-          <ul class="comma-separated">
-            {#each item.anger_triggers as t}
-              <li><abbr title={trigger_descriptions[t]}>{t}</abbr></li>
+          <ul class="no-bullets">
+            {#each item.special_attacks as special_attack}
+              <li>
+                {#if Array.isArray(special_attack) && special_attack[0] && data.byIdMaybe("monster_attack", special_attack[0])}
+                  <ThingLink type="monster_attack" id={special_attack[0]} />
+                {:else}
+                  <SpecialAttack {special_attack} />
+                {/if}
+              </li>
             {/each}
           </ul>
-        </dd>
-      {/if}
-      {#if item.placate_triggers?.length}
-        <dt>{t("Placate Triggers", { _context })}</dt>
-        <dd>
-          <ul class="comma-separated">
-            {#each item.placate_triggers as t}
-              <li><abbr title={trigger_descriptions[t]}>{t}</abbr></li>
-            {/each}
-          </ul>
-        </dd>
-      {/if}
-      {#if item.fear_triggers?.length}
-        <dt>{t("Fear Triggers", { _context })}</dt>
-        <dd>
-          <ul class="comma-separated">
-            {#each item.fear_triggers as t}
-              <li><abbr title={trigger_descriptions[t]}>{t}</abbr></li>
-            {/each}
-          </ul>
-        </dd>
-      {/if}
-      {#if item.flags?.length}
-        <dt>{t("Flags")}</dt>
-        <dd>
-          <ul class="comma-separated">
-            {#each item.flags ?? [] as flag}
-              <li><abbr title={mon_flag_descriptions[flag]}>{flag}</abbr></li>
-            {/each}
-          </ul>
-        </dd>
-      {/if}
-      {#if item.death_function}
-        <dt>{t("On Death", { _context })}</dt>
-        <dd>
-          {#if item.death_function.effect?.id && data.byIdMaybe("SPELL", item.death_function.effect.id)}
-            {singularName(data.byId("SPELL", item.death_function.effect.id))} ({singular(
-              data.byId("SPELL", item.death_function.effect.id).description
-            )})
-          {:else}
-            {item.death_function.effect?.id ??
-              item.death_function.corpse_type ??
-              "NORMAL"}
-          {/if}
-        </dd>
-      {/if}
-      {#if upgrades}
-        <dt>{t("Upgrades Into", { _context })}</dt>
-        <dd>
-          <ul class="comma-separated or">
-            <!-- prettier-ignore -->
-            {#each upgrades.monsters as mon}<li><ThingLink type="monster" id={mon} /></li>{/each}
-          </ul>
-          {#if upgrades.age_grow}
-            {t("in {days} {days, plural, =1 {day} other {days}}", {
-              _context,
-              days: upgrades.age_grow,
-            })}
-          {:else if upgrades.half_life}
-            {t(
-              "with a half-life of {half_life} {half_life, plural, =1 {day} other {days}}",
-              { _context, half_life: upgrades.half_life }
-            )}
-          {/if}
         </dd>
       {/if}
     </dl>
   </section>
-  {#if deathDrops.size}
-    <ItemTable loot={deathDrops} heading={t("Drops")} />
-  {/if}
-  {#if harvest && (harvest.entries ?? []).length}
-    <section>
-      <h1>{t("Butchering Results", { _context })}</h1>
-      <ul>
-        {#each harvest.entries as harvest_entry}
-          {#if (harvest_entry.type && data.byIdMaybe("harvest_drop_type", harvest_entry.type)?.group) || harvest_entry.type === "bionic_group"}
-            {#each data.flattenTopLevelItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
-              <li>
-                <ItemSymbol item={data.byId("item", id)} />
-                <ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)
-              </li>
+  <section>
+    <h1>{t("Defense", { _context, _comment: "Section heading" })}</h1>
+    <dl style="flex: 1">
+      <dt>{t("HP", { _context })}</dt>
+      <dd>{item.hp}</dd>
+      {#if item.regenerates}
+        <dt>{t("Regenerates", { _context })}</dt>
+        <dd>{item.regenerates} hp/turn</dd>
+      {/if}
+      <dt>{t("Dodge", { _context })}</dt>
+      <dd>{item.dodge ?? 0}</dd>
+      <dt>{t("Armor", { _context })}</dt>
+      {#if item.armor}
+        <dd>
+          <dl>
+            {#each Object.entries(monsterArmor(item.armor)) as [damageTypeId, value]}
+              {@const damageType = data.byIdMaybe("damage_type", damageTypeId)}
+              {#if value}
+                <dt>{singularName(damageType ?? { id: damageTypeId })}</dt>
+                <dd>{value.toFixed(1)}</dd>
+              {/if}
             {/each}
-          {:else}
+          </dl>
+        </dd>
+      {:else}
+        <dd>
+          <dl>
+            <dt>{t("Bash", { _context: "Damage Type" })}</dt>
+            <dd>{item.armor_bash ?? 0}</dd>
+            <dt>{t("Cut", { _context: "Damage Type" })}</dt>
+            <dd>{item.armor_cut ?? 0}</dd>
+            <dt>{t("Stab", { _context: "Damage Type" })}</dt>
+            <dd>
+              {item.armor_stab ?? Math.floor((item.armor_cut ?? 0) * 0.8)}
+            </dd>
+            <dt>{t("Ballistic", { _context: "Damage Type" })}</dt>
+            <dd>{item.armor_bullet ?? 0}</dd>
+            <dt>{t("Acid", { _context: "Damage Type" })}</dt>
+            <dd>
+              {item.armor_acid ?? Math.floor((item.armor_cut ?? 0) * 0.5)}
+            </dd>
+            <dt>{t("Heat", { _context: "Damage Type" })}</dt>
+            <dd>{item.armor_fire ?? 0}</dd>
+          </dl>
+        </dd>
+      {/if}
+      {#if item.special_when_hit}
+        <dt>{t("When Hit", { _context })}</dt>
+        <dd>{item.special_when_hit[0]} ({item.special_when_hit[1]}%)</dd>
+      {/if}
+      {#if upgradesFromGrouped.size > 0}
+        <dt>{t("Upgrades From", { _context })}</dt>
+        <dd>
+          {#each [...upgradesFromGrouped.entries()] as [timingKey, monsterIds], i}
+            {#if i > 0};
+            {/if}
+            <span class="comma-separated">
+              {#each monsterIds as monId, j}
+                {#if j > 0},
+                {/if}<ThingLink type="monster" id={monId} />
+              {/each}
+            </span>
+            {#if timingKey.startsWith("age_grow:")}
+              {@const days = parseInt(timingKey.split(":")[1])}
+              {t("in {days} {days, plural, =1 {day} other {days}}", {
+                _context,
+                days,
+              })}
+            {:else if timingKey.startsWith("half_life:")}
+              {@const half_life = parseInt(timingKey.split(":")[1])}
+              {t(
+                "with a half-life of {half_life} {half_life, plural, =1 {day} other {days}}",
+                { _context, half_life },
+              )}
+            {/if}
+          {/each}
+        </dd>
+      {/if}
+    </dl>
+  </section>
+</div>
+<section>
+  <h1>{t("Behavior", { _context, _comment: "Section heading" })}</h1>
+  <dl>
+    <dt
+      title="Monsters with high aggression are more likely to be hostile. Ranges from -100 to 100">
+      {t("Aggression", { _context })}
+    </dt>
+    <dd>{item.aggression ?? 0}</dd>
+    <dt title="Morale at spawn. Monsters with low morale will flee.">
+      {t("Morale", { _context })}
+    </dt>
+    <dd>{item.morale ?? 0}</dd>
+    <dt>{t("Vision Range", { _context })}</dt>
+    <dd>
+      {item.vision_day ?? 40} ({t("day", { _context })}) / {item.vision_night ??
+        1} ({t("night", { _context })})
+    </dd>
+    <dt>{t("Default Faction", { _context })}</dt>
+    <dd>{item.default_faction}</dd>
+    {#if item.anger_triggers?.length}
+      <dt>{t("Anger Triggers", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.anger_triggers as t}
+            <li><abbr title={trigger_descriptions[t]}>{t}</abbr></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if item.placate_triggers?.length}
+      <dt>{t("Placate Triggers", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.placate_triggers as t}
+            <li><abbr title={trigger_descriptions[t]}>{t}</abbr></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if item.fear_triggers?.length}
+      <dt>{t("Fear Triggers", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.fear_triggers as t}
+            <li><abbr title={trigger_descriptions[t]}>{t}</abbr></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if item.flags?.length}
+      <dt>{t("Flags")}</dt>
+      <dd>
+        <ul class="comma-separated">
+          {#each item.flags ?? [] as flag}
+            <li><ThingLink type="monster_flag" id={flag} /></li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
+    {#if item.death_function}
+      <dt>{t("On Death", { _context })}</dt>
+      <dd>
+        {#if item.death_function.effect?.id && data.byIdMaybe("SPELL", item.death_function.effect.id)}
+          {singularName(data.byId("SPELL", item.death_function.effect.id))} ({singular(
+            data.byId("SPELL", item.death_function.effect.id).description,
+          )})
+        {:else}
+          {item.death_function.effect?.id ??
+            item.death_function.corpse_type ??
+            "NORMAL"}
+        {/if}
+      </dd>
+    {/if}
+    {#if upgrades}
+      <dt>{t("Upgrades Into", { _context })}</dt>
+      <dd>
+        <ul class="comma-separated or">
+          <!-- prettier-ignore -->
+          {#each upgrades.monsters as mon}<li><ThingLink type="monster" id={mon} /></li>{/each}
+        </ul>
+        {#if upgrades.age_grow}
+          {t("in {days} {days, plural, =1 {day} other {days}}", {
+            _context,
+            days: upgrades.age_grow,
+          })}
+        {:else if upgrades.half_life}
+          {t(
+            "with a half-life of {half_life} {half_life, plural, =1 {day} other {days}}",
+            { _context, half_life: upgrades.half_life },
+          )}
+        {/if}
+      </dd>
+    {/if}
+  </dl>
+</section>
+{#if deathDrops.size}
+  <ItemTable loot={deathDrops} heading={t("Drops")} />
+{/if}
+{#if harvest && (harvest.entries ?? []).length}
+  <section>
+    <h1>{t("Butchering Results", { _context })}</h1>
+    <ul>
+      {#each harvest.entries as harvest_entry}
+        {#if (harvest_entry.type && data.byIdMaybe("harvest_drop_type", harvest_entry.type)?.group) || harvest_entry.type === "bionic_group"}
+          {#each data.flattenTopLevelItemGroup(data.byId("item_group", harvest_entry.drop)) as { id, prob }}
             <li>
-              <ItemSymbol item={data.byId("item", harvest_entry.drop)} />
-              <ThingLink type="item" id={harvest_entry.drop} />
+              <ItemSymbol item={data.byId("item", id)} />
+              <ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)
             </li>
-          {/if}
-        {/each}
-      </ul>
-    </section>
-  {/if}
-  {#if dissect && (dissect.entries ?? []).length}
-    <section>
-      <h1>{t("Dissection Results", { _context })}</h1>
-      <ul>
-        {#each dissect.entries as harvest_entry}
-          {#if (harvest_entry.type && data.byId("harvest_drop_type", harvest_entry.type)?.group) || harvest_entry.type === "bionic_group"}
-            {#each data
-              .flattenTopLevelItemGroup(data.byId("item_group", harvest_entry.drop))
-              .sort((a, b) => b.prob - a.prob) as { id, prob }}
-              <li>
-                <ItemSymbol item={data.byId("item", id)} />
-                <ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)
-              </li>
-            {/each}
-          {:else}
+          {/each}
+        {:else}
+          <li>
+            <ItemSymbol item={data.byId("item", harvest_entry.drop)} />
+            <ThingLink type="item" id={harvest_entry.drop} />
+          </li>
+        {/if}
+      {/each}
+    </ul>
+  </section>
+{/if}
+{#if dissect && (dissect.entries ?? []).length}
+  <section>
+    <h1>{t("Dissection Results", { _context })}</h1>
+    <ul>
+      {#each dissect.entries as harvest_entry}
+        {#if (harvest_entry.type && data.byId("harvest_drop_type", harvest_entry.type)?.group) || harvest_entry.type === "bionic_group"}
+          {#each data
+            .flattenTopLevelItemGroup(data.byId("item_group", harvest_entry.drop))
+            .sort((a, b) => b.prob - a.prob) as { id, prob }}
             <li>
-              <ItemSymbol item={data.byId("item", harvest_entry.drop)} />
-              <ThingLink type="item" id={harvest_entry.drop} />
+              <ItemSymbol item={data.byId("item", id)} />
+              <ThingLink type="item" {id} /> ({(prob * 100).toFixed(2)}%)
             </li>
-          {/if}
-        {/each}
-      </ul>
-    </section>
-  {/if}
-</Spoiler>
+          {/each}
+        {:else}
+          <li>
+            <ItemSymbol item={data.byId("item", harvest_entry.drop)} />
+            <ThingLink type="item" id={harvest_entry.drop} />
+          </li>
+        {/if}
+      {/each}
+    </ul>
+  </section>
+{/if}

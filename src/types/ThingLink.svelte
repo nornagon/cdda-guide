@@ -53,22 +53,22 @@ function isItem(item: SupportedTypeMapped): item is Item {
       {id}
       plural={countIsPlural(count) &&
         !countsByCharges(
-          item
+          item,
         )} />{#if countsByCharges(item)}{" "}({countToString(
-        count
+        count,
       )}){/if}</span>
 {:else}
   {@const nameSource =
     item && variantId && isItem(item) && "variants" in item && item.variants
-      ? item.variants.find((v) => v.id === variantId) ?? item
+      ? (item.variants.find((v) => v.id === variantId) ?? item)
       : item}
   <a href="{import.meta.env.BASE_URL}{type}/{id}{location.search}"
     >{overrideText
       ? overrideText
       : item
-      ? item.type === "addiction_type"
-        ? singular(item.type_name)
-        : (plural ? pluralName : singularName)(nameSource)
-      : id}</a
+        ? item.type === "addiction_type"
+          ? singular(item.type_name)
+          : (plural ? pluralName : singularName)(nameSource)
+        : id}</a
   >{#if item?.type === "mutation"}&nbsp;<MutationColor mutation={item} />{/if}
 {/if}

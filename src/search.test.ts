@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 import { test, expect, afterEach } from "vitest";
 import { cleanup, render } from "@testing-library/svelte";

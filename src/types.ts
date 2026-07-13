@@ -139,6 +139,9 @@ export type QualityRequirement = {
   level?: number; // default: 1
   amount?: number; // default: 1
 };
+export type ProvidedQuality =
+  | [string /* tool_quality_id */, number /* level */]
+  | { id: string; level?: number /* default: 1 */; speed?: number };
 export type ToolComponent =
   | string
   | [string, number]
@@ -533,6 +536,7 @@ export type UseFunction =
   | TransformUseFunction
   | DelayedTransformUseFunction
   | ConsumeDrugUseFunction
+  | Mp3UseFunction
   | RepairItemUseFunction
   | HolsterUseFunction
   | AttachMolleUseFunction
@@ -578,13 +582,20 @@ type ItemActionUseFunction = {
 export type TransformUseFunction = {
   type: "transform";
   target: string;
-  menu_text?: string;
+  menu_text?: Translation;
 };
 
 export type DelayedTransformUseFunction = {
   type: "delayed_transform";
   transform_age?: integer; // turns
 } & Omit<TransformUseFunction, "type">;
+
+export type Mp3UseFunction = {
+  type: "mp3";
+  transform: string;
+  message: Translation;
+  activate: boolean;
+};
 
 export type ConsumeDrugUseFunction = {
   type: "consume_drug";
@@ -649,8 +660,8 @@ export type ItemBasicInfo = {
   color?: string;
   symbol?: string;
   description?: Translation;
-  qualities?: [string, number][];
-  charged_qualities?: [string, number][];
+  qualities?: ProvidedQuality[];
+  charged_qualities?: ProvidedQuality[];
   stackable?: boolean;
   volume?: volume;
   weight?: mass;
@@ -854,6 +865,13 @@ export type JsonFlag = {
   taste_mod?: number; // default: 0
 };
 
+export type MonsterFlag = {
+  type: "monster_flag";
+  id: string;
+
+  "//"?: string;
+};
+
 export type MapBashInfo = {
   str_min?: number; // default: 0
   str_max?: number; // default: 0
@@ -990,7 +1008,7 @@ export type Furniture = MapDataCommon & {
 export type Proficiency = {
   type: "proficiency";
   id: string;
-  description: string;
+  description: Translation;
   category: string; // proficiency_category_id
   name: Translation;
   can_learn: boolean;
@@ -1087,7 +1105,7 @@ export type Vitamin = {
   excess?: string; // effect_id
   min?: number; // int
   max?: number; // int, default 0
-  rate: string; // duration
+  rate?: duration; // default "0 m"
   vit_type: "vitamin" | "toxin" | "drug" | "counter";
   disease?: [number, number][];
   disease_excess?: [number, number][];
@@ -1434,7 +1452,7 @@ export type Monster = {
   fear_triggers?: string[];
   special_when_hit?: [
     "NONE" | "ZAPBACK" | "ACIDSPLASH" | "RETURN_FIRE",
-    integer
+    integer,
   ];
   morale?: number;
   aggression?: number;
@@ -1539,7 +1557,7 @@ export type VehiclePart = {
     removal?: VehiclePartRequirements;
   };
   breaks_into?: InlineItemGroup; // collection
-  qualities?: [string, number][];
+  qualities?: ProvidedQuality[];
   pseudo_tools?: {
     id: string;
     hotkey?: string;
@@ -1670,7 +1688,7 @@ export type SubBodyPart = {
   parent: string;
   secondary?: boolean;
   max_coverage?: integer; // default 0
-  side: 0 | 1 | 2; // left / right / both
+  side: 0 | 1 | 2 | "left" | "right" | "both";
   name_multiple?: Translation;
   opposite?: string; // sub_body_part_id
 };
@@ -1694,7 +1712,7 @@ export type ConstructionGroup = {
 export type OvermapTerrain = {
   type: "overmap_terrain";
   id: string | string[];
-  name: Translation;
+  name?: Translation;
 
   sym?: string; // defaults to \u00a0
   color?: string;
@@ -2094,6 +2112,7 @@ export type SupportedTypes = {
   mapgen: Mapgen;
   martial_art: MartialArt;
   material: Material;
+  monster_flag: MonsterFlag;
   monstergroup: MonsterGroup;
   mutation: Mutation;
   mutation_category: MutationCategory;
@@ -2133,7 +2152,7 @@ export type SupportedTypeMapped =
 type ItemSubtypes = ItemWithOldSubtype["type"];
 export function isItemSubtype<Subtype extends ItemSubtypes>(
   subtype: Subtype,
-  item: Item
+  item: Item,
 ): item is Item & ItemSubtypeToSlot[Subtype] {
   return (
     item.type === subtype ||

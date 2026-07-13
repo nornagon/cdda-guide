@@ -1,6 +1,7 @@
 <script lang="ts">
 import { t } from "@transifex/native";
-import { setContext, SvelteComponent } from "svelte";
+import { setContext } from "svelte";
+import type { Component } from "svelte";
 
 import type { CddaData } from "./data";
 import Monster from "./types/Monster.svelte";
@@ -13,11 +14,12 @@ import Furniture from "./types/Furniture.svelte";
 import Skill from "./types/Skill.svelte";
 import Proficiency from "./types/Proficiency.svelte";
 import Flag from "./types/Flag.svelte";
+import MonsterFlag from "./types/MonsterFlag.svelte";
 import Fault from "./types/Fault.svelte";
 import Vitamin from "./types/Vitamin.svelte";
 import VehiclePart from "./types/VehiclePart.svelte";
 import MartialArt from "./types/MartialArt.svelte";
-import ErrorBoundary from "./ErrorBoundary.mjs";
+import ErrorBoundary from "./ErrorBoundary.svelte";
 import Mutation from "./types/Mutation.svelte";
 import MutationCategory from "./types/MutationCategory.svelte";
 import MutationType from "./types/MutationType.svelte";
@@ -35,6 +37,9 @@ import JsonView from "./JsonView.svelte";
 import OvermapSpecial from "./types/OvermapSpecial.svelte";
 import ItemAction from "./types/ItemAction.svelte";
 import Technique from "./types/Technique.svelte";
+
+import Spoiler from "./Spoiler.svelte";
+import { isSpoilerItem } from "./spoilers";
 
 export let item: { id: string; type: string };
 
@@ -55,7 +60,7 @@ function onError(e: Error) {
 }
 
 function defaultItem(id: string, type: string) {
-  if (type === "json_flag") {
+  if (type === "json_flag" || type === "monster_flag") {
     return { id, type, __filename: "" };
   } else {
     return undefined;
@@ -66,7 +71,7 @@ let obj =
   data.byIdMaybe(item.type as keyof SupportedTypes, item.id) ??
   defaultItem(item.id, item.type);
 
-const displays: Record<string, typeof SvelteComponent> = {
+const displays: Record<string, Component<{ item: any }>> = {
   MONSTER: Monster,
   AMMO: Item,
   GUN: Item,
@@ -93,6 +98,7 @@ const displays: Record<string, typeof SvelteComponent> = {
   skill: Skill,
   proficiency: Proficiency,
   json_flag: Flag,
+  monster_flag: MonsterFlag,
   fault: Fault,
   vitamin: Vitamin,
   vehicle_part: VehiclePart,
@@ -127,15 +133,13 @@ const display = (obj && displays[obj.type]) ?? Unknown;
       <h1>{t("Error")}</h1>
       <p>
         {t(
-          "There was a problem displaying this page. Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build."
+          "There was a problem displaying this page. Not all versions of Cataclysm are supported by the Guide currently. Try selecting a different build.",
         )}
       </p>
-      <p>
-        <details>
-          <summary>{error.message}</summary>
-          <pre>{error.stack}</pre>
-        </details>
-      </p>
+      <details>
+        <summary>{error.message}</summary>
+        <pre>{error.stack}</pre>
+      </details>
     </section>
   {:else if typeof globalThis !== "undefined" && globalThis.process}
     <!-- running in tests -->
@@ -145,7 +149,9 @@ const display = (obj && displays[obj.type]) ?? Unknown;
       {#if /obsolet/.test(obj.__filename)}
         <ObsoletionWarning item={obj} />
       {/if}
-      <svelte:component this={display} item={obj} />
+      <Spoiler spoily={isSpoilerItem(item.id)}>
+        <svelte:component this={display} item={obj} />
+      </Spoiler>
     </ErrorBoundary>
   {/if}
 

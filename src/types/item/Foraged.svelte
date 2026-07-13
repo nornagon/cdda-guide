@@ -22,7 +22,7 @@ const forageGroups = {
 const forageable = Object.entries(forageGroups)
   .map(([season, group_id]) => {
     const flattened = data.flattenTopLevelItemGroup(
-      data.byId("item_group", group_id)
+      data.byId("item_group", group_id),
     );
     // TODO: probability is a bit messy here.
     return [season, flattened.find((f) => f.id === item_id)?.prob] as const;

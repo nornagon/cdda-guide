@@ -26,6 +26,7 @@ import {
   getOMSByAppearance,
   overmapAppearance,
 } from "./types/item/spawnLocations";
+import { isSpoilerItem } from "./spoilers";
 
 const SEARCHABLE_TYPES = new Set<keyof SupportedTypesWithMapped>([
   "item",
@@ -69,7 +70,7 @@ function searchableName(data: CddaData, item: SupportedTypeMapped) {
           .map((omEntry) => {
             const normalizedId = omEntry.overmap!.replace(
               /_(north|south|east|west)$/,
-              ""
+              "",
             );
             const om = data.byIdMaybe("overmap_terrain", normalizedId);
             return om ? singularName(om) : normalizedId;
@@ -98,7 +99,7 @@ $: targets = [...(data?.all() ?? [])]
     (x) =>
       "id" in x &&
       typeof x.id === "string" &&
-      SEARCHABLE_TYPES.has(mapType(x.type))
+      SEARCHABLE_TYPES.has(mapType(x.type)),
   )
   .filter((x) => (x.type === "mutation" ? !/Fake\d$/.test(x.id) : true))
   .flatMap((x) =>
@@ -114,9 +115,10 @@ $: targets = [...(data?.all() ?? [])]
         variant_id: v.id,
         name: v.name ? singular(v.name) : singularName(x),
         type: mapType(x.type),
-      }))
-    )
-  );
+      })),
+    ),
+  )
+  .filter((x) => !isSpoilerItem(x.id));
 
 export let search: string;
 
@@ -169,7 +171,7 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
       ret.push(
         getOMSByAppearance(data)
           .get(appearance)!
-          .map((id) => data.byId("overmap_special", id))
+          .map((id) => data.byId("overmap_special", id)),
       );
       seenAppearances.add(appearance);
     }
