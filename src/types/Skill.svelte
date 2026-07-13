@@ -55,7 +55,7 @@ const craftingRecipes = data
       r.skill_used === item.id &&
       r.result &&
       data.byIdMaybe("item", r.result) &&
-      !r.never_learn
+      !r.never_learn,
   );
 
 const recipesByLevel = new Map<number, typeof craftingRecipes>();
@@ -72,7 +72,7 @@ for (const recipe of craftingRecipes) {
   }
 }
 const recipesByLevelList = [...recipesByLevel.entries()].sort(
-  (a, b) => a[0] - b[0]
+  (a, b) => a[0] - b[0],
 );
 recipesByLevelList.forEach(([, recipes]) => {
   recipes.sort((a, b) => {
