@@ -48,7 +48,7 @@ function weightedAverage(
   existingWeight: number,
   newValue: number | undefined,
   newWeight: number,
-  fallback = 0
+  fallback = 0,
 ): number {
   const totalWeight = existingWeight + newWeight;
   if (totalWeight === 0) return existingValue ?? newValue ?? fallback;
@@ -136,14 +136,14 @@ for (const apd of item.armor ?? []) {
         existing.material_thickness ?? item.material_thickness,
         existingScale,
         apd.material_thickness ?? item.material_thickness,
-        scale
+        scale,
       );
       existing.environmental_protection =
         weightedAverage(
           existing.environmental_protection ?? item.environmental_protection,
           existingScale,
           apd.environmental_protection ?? item.environmental_protection,
-          scale
+          scale,
         ) | 0;
       existing.environmental_protection_with_filter =
         weightedAverage(
@@ -152,7 +152,7 @@ for (const apd of item.armor ?? []) {
           existingScale,
           apd.environmental_protection_with_filter ??
             item.environmental_protection_with_filter,
-          scale
+          scale,
         ) | 0;
 
       existing.layers = existing.layers ?? [];
@@ -174,7 +174,7 @@ for (const apd of item.armor ?? []) {
             existingMat.thickness,
             maxCoverageMats,
             newMat.thickness,
-            maxCoverageNew
+            maxCoverageNew,
           );
         } else {
           const maxCoverageNew = maxCoverage(bp, apd);
