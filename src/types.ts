@@ -924,12 +924,20 @@ export type ActivityDataCommon = {
   sound?: Translation;
 };
 
+export type ExamineActor =
+  | { type: "appliance_convert" }
+  | { type: "cardreader" }
+  | { type: "effect_on_condition" }
+  | { type: "mortar" };
+
+export type ExamineAction = string | ExamineActor;
+
 export type MapDataCommon = {
   color?: string | [string] | [string, string, string, string];
   bgcolor?: string | [string] | [string, string, string, string];
   symbol: string | [string] | [string, string, string, string]; // TODO: can be 1-char or LINE_XOXO
   description: Translation;
-  // examine_action
+  examine_action?: ExamineAction | ExamineAction[];
   harvest_by_season?: {
     seasons: string[];
     id: string;
@@ -952,11 +960,6 @@ export type Terrain = MapDataCommon & {
   deconstruct?: MapDeconstructInfo;
 
   transforms_into?: string;
-
-  examine_action?:
-    | string
-    | { type: "cardreader" }
-    | { type: "effect_on_condition" };
 
   oxytorch?: ActivityDataCommon & { result: string };
   boltcut?: ActivityDataCommon & { result: string };
