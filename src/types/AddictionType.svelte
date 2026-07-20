@@ -18,7 +18,7 @@ const itemsWithAddictionType = data
     (i) =>
       i.id &&
       "addiction_type" in i &&
-      normalizeAddictionTypes(i).some((a) => a.addiction === item.id)
+      normalizeAddictionTypes(i).some((a) => a.addiction === item.id),
   )
   .sort(byName);
 </script>

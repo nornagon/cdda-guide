@@ -27,7 +27,7 @@ const harvestedFrom = (data.byType("terrain") as (Terrain | Furniture)[])
           return e.drop === item_id;
         }
       });
-    })
+    }),
   );
 
 harvestedFrom.sort(byName);

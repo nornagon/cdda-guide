@@ -63,7 +63,7 @@ const recipes = getRecipeIndex(data)[item_id] ?? [];
 recipes.sort(
   (a, b) =>
     ((a.never_learn ?? false) as unknown as number) -
-    ((b.never_learn ?? false) as unknown as number)
+    ((b.never_learn ?? false) as unknown as number),
 );
 
 const byproducts = getByproductsIndex(data)[item_id] ?? [];

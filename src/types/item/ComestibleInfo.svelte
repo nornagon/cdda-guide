@@ -61,19 +61,20 @@ const data = getContext<CddaData>("data");
             {@const massPerUnit = v.weight_per_unit
               ? parseMass(v.weight_per_unit)
               : null}
-            {@const unitsPerDay = (24 * 60 * 60) / parseDuration(v.rate)}
+            {@const rateSec = parseDuration(v.rate ?? 0)}
+            {@const unitsPerDay = rateSec !== 0 ? (24 * 60 * 60) / rateSec : 0}
             {@const mass =
               typeof rdapct === "string"
                 ? parseMass(rdapct)
                 : massPerUnit
-                ? (rdapct / 100) * unitsPerDay * massPerUnit
-                : null}
+                  ? (rdapct / 100) * unitsPerDay * massPerUnit
+                  : null}
             {@const rda =
               typeof rdapct === "number"
                 ? rdapct
-                : mass && massPerUnit
-                ? (mass / massPerUnit / unitsPerDay) * 100
-                : null}
+                : mass && massPerUnit && unitsPerDay
+                  ? (mass / massPerUnit / unitsPerDay) * 100
+                  : null}
             <dt>
               <ThingLink id={vitamin} type="vitamin" />
             </dt>

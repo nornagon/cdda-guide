@@ -1,7 +1,14 @@
 <script lang="ts">
 import { t } from "@transifex/native";
 import { getContext } from "svelte";
-import { CddaData, i18n, parseMass, parseVolume, singular } from "../../data";
+import {
+  breathabilityFromRating,
+  CddaData,
+  i18n,
+  parseMass,
+  parseVolume,
+  singular,
+} from "../../data";
 import type {
   ArmorPortionData,
   ArmorSlot,
@@ -21,7 +28,7 @@ const _context = "Item Armor Info";
 
 function addRange(
   x: number | [number, number],
-  y: number | [number, number]
+  y: number | [number, number],
 ): [number, number] {
   const [xlo, xhi] = typeof x === "number" ? [x, x] : x;
   const [ylo, yhi] = typeof y === "number" ? [y, y] : y;
@@ -35,19 +42,59 @@ function normalizeApdMaterial(m: NonNullable<ArmorPortionData["material"]>[0]) {
 function isStrings<T>(array: string[] | T[]): array is string[] {
   return Array.isArray(array) && typeof array[0] === "string";
 }
+
+function weightedAverage(
+  existingValue: number | undefined,
+  existingWeight: number,
+  newValue: number | undefined,
+  newWeight: number,
+  fallback = 0,
+): number {
+  const totalWeight = existingWeight + newWeight;
+  if (totalWeight === 0) return existingValue ?? newValue ?? fallback;
+  return (
+    ((existingValue ?? fallback) * existingWeight +
+      (newValue ?? fallback) * newWeight) /
+    totalWeight
+  );
+}
+
+function normalizeCovers(covers: ArmorPortionData["covers"]): string[] {
+  return typeof covers === "string" ? [covers] : (covers ?? []);
+}
+
+const similarSubPartParents = new Map<string, Set<string>>();
+for (const sub of data.byType("sub_body_part")) {
+  if ("similar_bodypart" in sub && typeof sub.similar_bodypart === "string") {
+    if (!similarSubPartParents.has(sub.similar_bodypart)) {
+      similarSubPartParents.set(sub.similar_bodypart, new Set());
+    }
+    similarSubPartParents.get(sub.similar_bodypart)!.add(sub.parent);
+  }
+}
+
+function subPartMatchesBodyPart(sub: any, bpId: string): boolean {
+  if (sub.parent === bpId) return true;
+  if ("similar_bodypart" in sub && typeof sub.similar_bodypart === "string") {
+    const similar = data.byIdMaybe("sub_body_part", sub.similar_bodypart);
+    if (similar?.parent === bpId) return true;
+  }
+  return similarSubPartParents.get(sub.id)?.has(bpId) ?? false;
+}
+
 const itemMaterials =
   item.material == null
     ? []
     : typeof item.material === "string"
-    ? [{ type: item.material, portion: 1 }]
-    : Array.isArray(item.material)
-    ? isStrings(item.material)
-      ? item.material.map((s) => ({ type: s, portion: 1 }))
-      : item.material.map((s) => ({ portion: 1, ...s }))
-    : Object.entries(item.material).map(([type, portion]) => ({
-        type,
-        portion: portion as number,
-      }));
+      ? [{ type: item.material, portion: 1 }]
+      : Array.isArray(item.material)
+        ? isStrings(item.material)
+          ? item.material.map((s) => ({ type: s, portion: 1 }))
+          : item.material.map((s) => ({ portion: 1, ...s }))
+        : Object.entries(item.material).map(([type, portion]) => ({
+            type,
+            portion: portion as number,
+          }));
 const totalMaterialPortion = itemMaterials.reduce((m, o) => m + o.portion, 0);
 
 const normalizedPortionData: (ArmorPortionData & {
@@ -65,15 +112,15 @@ for (const apd of item.armor ?? []) {
       thickness:
         (mat.portion / totalMaterialPortion) * (item.material_thickness ?? 0),
     }));
-  for (const bp_id of uniq(apd.covers ?? [])) {
+  for (const bp_id of uniq(normalizeCovers(apd.covers))) {
     const bp = data.byId("body_part", bp_id);
     const existing = normalizedPortionData.find((apd2) =>
-      apd2.covers.includes(bp_id)
+      apd2.covers.includes(bp_id),
     );
     if (existing) {
       existing.encumbrance = addRange(
         existing.encumbrance ?? 0,
-        apd.encumbrance ?? 0
+        apd.encumbrance ?? 0,
       );
       const scale = maxCoverage(bp, apd) / 100;
       const existingScale = maxCoverage(bp, existing) / 100;
@@ -85,38 +132,35 @@ for (const apd of item.armor ?? []) {
       existing.cover_vitals =
         (existing.cover_vitals ?? 0) + (apd.cover_vitals ?? 0);
 
-      existing.material_thickness =
-        ((apd.material_thickness ?? item.material_thickness ?? 0) * scale +
-          (existing.material_thickness ?? item.material_thickness ?? 0) *
-            existingScale) /
-        (scale + existingScale);
+      existing.material_thickness = weightedAverage(
+        existing.material_thickness ?? item.material_thickness,
+        existingScale,
+        apd.material_thickness ?? item.material_thickness,
+        scale,
+      );
       existing.environmental_protection =
-        (((apd.environmental_protection ?? item.environmental_protection ?? 0) *
-          scale +
-          (existing.environmental_protection ??
-            item.environmental_protection ??
-            0) *
-            existingScale) /
-          (scale + existingScale)) |
-        0;
+        weightedAverage(
+          existing.environmental_protection ?? item.environmental_protection,
+          existingScale,
+          apd.environmental_protection ?? item.environmental_protection,
+          scale,
+        ) | 0;
       existing.environmental_protection_with_filter =
-        (((apd.environmental_protection_with_filter ??
-          item.environmental_protection_with_filter ??
-          0) *
-          scale +
-          (existing.environmental_protection_with_filter ??
-            item.environmental_protection_with_filter ??
-            0) *
-            existingScale) /
-          (scale + existingScale)) |
-        0;
+        weightedAverage(
+          existing.environmental_protection_with_filter ??
+            item.environmental_protection_with_filter,
+          existingScale,
+          apd.environmental_protection_with_filter ??
+            item.environmental_protection_with_filter,
+          scale,
+        ) | 0;
 
       existing.layers = existing.layers ?? [];
       for (const layer of apd.layers ?? [])
         if (!existing.layers.includes(layer)) existing.layers.push(layer);
       for (const newMat of mats) {
         const existingMat = (existing.material! as PartMaterial[]).find(
-          (s) => s.type === newMat.type
+          (s) => s.type === newMat.type,
         );
         if (existingMat) {
           const maxCoverageNew = maxCoverage(bp, apd);
@@ -126,14 +170,16 @@ for (const apd of item.armor ?? []) {
               ((newMat.covered_by_mat ?? 100) * maxCoverageNew) / 100) |
             0;
 
-          existingMat.thickness =
-            (maxCoverageNew * (newMat.thickness ?? 0) +
-              maxCoverageMats * (existingMat.thickness ?? 0)) /
-            (maxCoverageMats + maxCoverageNew);
+          existingMat.thickness = weightedAverage(
+            existingMat.thickness,
+            maxCoverageMats,
+            newMat.thickness,
+            maxCoverageNew,
+          );
         } else {
           const maxCoverageNew = maxCoverage(bp, apd);
           const modifiedMat = JSON.parse(
-            JSON.stringify(newMat)
+            JSON.stringify(newMat),
           ) as PartMaterial;
           modifiedMat.covered_by_mat =
             ((newMat.covered_by_mat ?? 100) * maxCoverageNew) / 100;
@@ -167,8 +213,9 @@ for (const apd of item.armor ?? []) {
 }
 for (const apd of normalizedPortionData) {
   for (const mat of (apd.material ?? []) as PartMaterial[]) {
-    mat.covered_by_mat =
-      (((mat.covered_by_mat ?? 100) / (apd.coverage ?? 0)) * 100) | 0;
+    mat.covered_by_mat = apd.coverage
+      ? (((mat.covered_by_mat ?? 100) / apd.coverage) * 100) | 0
+      : 100;
   }
 }
 
@@ -214,14 +261,14 @@ const allCoveredPartIds = [
 
 const grouped = groupBy(allCoveredPartIds, (bp_id) => {
   const { covers, ...apdModuloCovers } = normalizedPortionData.find((x) =>
-    x.covers.includes(bp_id)
+    x.covers.includes(bp_id),
   )!; // we know there is exactly 1
   return [JSON.stringify(apdModuloCovers)];
 });
 
 const coveredPartGroups = [...grouped.values()].map((bp_ids) => {
   const apdCoveringBp = normalizedPortionData.find((x) =>
-    x.covers.includes(bp_ids[0])
+    x.covers.includes(bp_ids[0]),
   )!;
   return {
     bp_ids,
@@ -242,11 +289,11 @@ function calcEncumbrance(apd: ArmorPortionData, weight: number, bpId: string) {
   const massToEncumbrance = data.byId("body_part", bpId).encumbrance_per_weight;
   if (!massToEncumbrance) return 0;
   const parsedMassToEncumbrance = massToEncumbrance.map(
-    ({ weight, encumbrance }) => ({ weight: parseMass(weight), encumbrance })
+    ({ weight, encumbrance }) => ({ weight: parseMass(weight), encumbrance }),
   );
   parsedMassToEncumbrance.sort((a, b) => a.weight - b.weight);
   const postIndex = parsedMassToEncumbrance.findIndex(
-    ({ weight: w }) => w > weight
+    ({ weight: w }) => w > weight,
   );
   const preIndex = postIndex - 1;
   const pre = parsedMassToEncumbrance[preIndex];
@@ -280,12 +327,12 @@ const computeMaxEncumber = (apd: ArmorPortionData, enc: number): number => {
             !o.rigid
               ? parseVolume(o.max_contains_volume ?? 0) *
                   (o.volume_encumber_modifier ?? 1)
-              : 0
+              : 0,
           ),
-        0
+        0,
       ) ?? 0) *
         (apd.volume_encumber_modifier ?? 1)) /
-        250
+        250,
     )
   );
 };
@@ -294,7 +341,7 @@ const encumbrance = (cp: (typeof coveredPartGroups)[0]): [number, number] => {
     let encumber = calcEncumbrance(
       cp.apd,
       parseMass(item.weight ?? 1),
-      cp.bp_ids[0]
+      cp.bp_ids[0],
     );
     if (item.flags?.includes("VARSIZE"))
       encumber = Math.min(encumber * 2, encumber + 10);
@@ -302,7 +349,7 @@ const encumbrance = (cp: (typeof coveredPartGroups)[0]): [number, number] => {
   }
   return typeof cp.apd.encumbrance === "number"
     ? [cp.apd.encumbrance, computeMaxEncumber(cp.apd, cp.apd.encumbrance)]
-    : cp.apd.encumbrance ?? [0, 0];
+    : (cp.apd.encumbrance ?? [0, 0]);
 };
 const fitsEncumbrance = (enc: number) =>
   Math.max(Math.floor(enc / 2), enc - 10);
@@ -316,7 +363,7 @@ function maxCoverage(bp: BodyPart, apd: ArmorPortionData): number {
       ? apd.specifically_covers.map((x) => data.byId("sub_body_part", x))
       : data.byType("sub_body_part").filter((x) => x.parent === bp.id);
   for (const sub of subCovers) {
-    if (bp.id !== sub.parent) continue;
+    if (!subPartMatchesBodyPart(sub, bp.id)) continue;
     if (sub.secondary) {
       secondaryMaxCoverage += sub.max_coverage ?? 0;
     } else {
@@ -338,7 +385,7 @@ function getEnvResist() {
     normalizedPortionData.reduce(
       (m, o) =>
         m + (o.environmental_protection ?? item.environmental_protection ?? 0),
-      0
+      0,
     ) / normalizedPortionData.length;
   return avgEnvResist;
 }
@@ -404,8 +451,72 @@ function computeMats() {
   return { mats, total: matPortionTotal };
 }
 
+function materialBreathability(mat: PartMaterial): number {
+  return breathabilityFromRating(
+    data.byId("material", mat.type).breathability ?? "IMPERMEABLE",
+  );
+}
+
+function itemBreathability(): number {
+  const mats =
+    itemMaterials.length > 0
+      ? { mats: itemMaterials, total: totalMaterialPortion }
+      : computeMatsFromArmor();
+  const total = mats.total || 1;
+  const breathability = mats.mats.reduce(
+    (sum, mat) => sum + materialBreathability(mat) * mat.portion,
+    0,
+  );
+  return Math.trunc(breathability / total);
+}
+
+function computeMatsFromArmor() {
+  let total = 0;
+  const mats = new Map<string, number>();
+  for (const apd of normalizedPortionData) {
+    for (const mat of (apd.material ?? []) as PartMaterial[]) {
+      const portion = (mat.thickness ?? 0) * 100;
+      mats.set(mat.type, (mats.get(mat.type) ?? 0) + portion);
+      total += portion;
+    }
+  }
+  return {
+    mats: [...mats].map(([type, portion]) => ({ type, portion })),
+    total,
+  };
+}
+
+function armorBreathability(apd: ArmorPortionData): number {
+  if (apd.breathability) return breathabilityFromRating(apd.breathability);
+
+  const mats = (apd.material ?? []) as PartMaterial[];
+  if (mats.length === 0) return itemBreathability();
+
+  const sortedMats = [...mats].sort(
+    (a, b) => materialBreathability(a) - materialBreathability(b),
+  );
+  let coverageCounted = 0;
+  let combinedBreathability = 0;
+  for (const mat of sortedMats) {
+    const coverage = Math.min(Math.max(mat.covered_by_mat ?? 100, 0), 100);
+    combinedBreathability += Math.max(
+      (coverage - coverageCounted) * materialBreathability(mat),
+      0,
+    );
+    coverageCounted = Math.max(coverage, coverageCounted);
+    if (coverageCounted === 100) break;
+  }
+
+  return Math.trunc(combinedBreathability / 100) + (100 - coverageCounted);
+}
+
+const breathabilityValues = [
+  ...new Set(coveredPartGroups.map((cp) => armorBreathability(cp.apd))),
+];
+const showPerPartBreathability = breathabilityValues.length > 1;
+
 function fixApd(
-  apd: ArmorPortionData
+  apd: ArmorPortionData,
 ): ArmorPortionData & { material: PartMaterial[] } {
   return apd as any;
 }
@@ -439,6 +550,10 @@ function fixApd(
     </dd>
     <dt>{t("Warmth", { _context })}</dt>
     <dd>{item.warmth ?? 0}</dd>
+    {#if !showPerPartBreathability}
+      <dt>{t("Breathability", { _context })}</dt>
+      <dd>{breathabilityValues[0] ?? 100}%</dd>
+    {/if}
     {#if item.sided}
       <dt>{t("Sided", { _context })}</dt>
       <dd>{t("Yes")}</dd>
@@ -517,6 +632,10 @@ function fixApd(
               </dl>
             {/if}
           </dd>
+          {#if showPerPartBreathability}
+            <dt>{t("Breathability", { _context })}</dt>
+            <dd>{armorBreathability(cp.apd)}%</dd>
+          {/if}
           <dt>{t("Protection", { _context })}</dt>
           <dd class="protection">
             {#if getEnvResist()}
@@ -532,7 +651,7 @@ function fixApd(
             <table style="text-align: center;">
               <tbody>
                 <tr>
-                  <td />
+                  <td></td>
                   {#each apd.material as mat}
                     <td
                       style="writing-mode: vertical-rl; text-align: right; vertical-align: middle;"

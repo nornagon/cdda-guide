@@ -52,10 +52,10 @@ const breaksIntoGroup: ItemGroupData | null =
   typeof item.breaks_into === "string"
     ? data.convertTopLevelItemGroup(data.byId("item_group", item.breaks_into))
     : Array.isArray(item.breaks_into)
-    ? { subtype: "collection", entries: item.breaks_into }
-    : item.breaks_into
-    ? item.breaks_into
-    : null;
+      ? { subtype: "collection", entries: item.breaks_into }
+      : item.breaks_into
+        ? item.breaks_into
+        : null;
 const breaksIntoGroupFlattened =
   breaksIntoGroup && data.flattenItemGroup(breaksIntoGroup);
 
@@ -65,16 +65,16 @@ const vehiclesContainingPart = data.byType("vehicle").filter(
     v.parts.some((part) => {
       const parts = part.part
         ? [{ part: part.part, fuel: part.fuel }]
-        : part.parts?.map((part) =>
-            typeof part === "string" ? { part } : part
-          ) ?? [];
+        : (part.parts?.map((part) =>
+            typeof part === "string" ? { part } : part,
+          ) ?? []);
       return parts.some(
-        (p) => getVehiclePartIdAndVariant(data, p.part)[0] === item.id
+        (p) => getVehiclePartIdAndVariant(data, p.part)[0] === item.id,
       );
-    })
+    }),
 );
 vehiclesContainingPart.sort((a, b) =>
-  singularName(a).localeCompare(singularName(b))
+  singularName(a).localeCompare(singularName(b)),
 );
 </script>
 
@@ -83,8 +83,8 @@ vehiclesContainingPart.sort((a, b) =>
   {item.name
     ? singularName(item)
     : item.item
-    ? singularName(data.byId("item", item.item))
-    : item.id}
+      ? singularName(data.byId("item", item.item))
+      : item.id}
 </h1>
 
 <section>
@@ -96,7 +96,7 @@ vehiclesContainingPart.sort((a, b) =>
     <dd>
       {item.flags?.includes("APPLIANCE")
         ? "structure"
-        : item.location ?? "none"}
+        : (item.location ?? "none")}
     </dd>
     <dt>{t("Weight")}</dt>
     <dd>{asKilograms(data.byId("item", item.item).weight ?? 0)}</dd>
@@ -139,11 +139,13 @@ vehiclesContainingPart.sort((a, b) =>
       <dt>{t("Qualities", { _context })}</dt>
       <dd>
         <ul class="no-bullets">
-          {#each item.qualities as [quality, level]}
+          {#each item.qualities as quality}
+            {@const id = Array.isArray(quality) ? quality[0] : quality.id}
+            {@const level = Array.isArray(quality) ? quality[1] : quality.level}
             <li>
               Has level <strong
                 >{level ?? 1}
-                <ThingLink type="tool_quality" id={quality} /></strong> quality.
+                <ThingLink type="tool_quality" {id} /></strong> quality.
             </li>
           {/each}
         </ul>
@@ -226,7 +228,7 @@ vehiclesContainingPart.sort((a, b) =>
 
   <p style="color: var(--cata-color-gray)">
     {singular(
-      item.description ?? data.byId("item", item.item).description ?? ""
+      item.description ?? data.byId("item", item.item).description ?? "",
     )}
   </p>
 </section>
@@ -276,7 +278,7 @@ vehiclesContainingPart.sort((a, b) =>
           asMinutes(
             `${
               parseDuration(item.requirements?.install?.time ?? "1 hour") / 2
-            } s`
+            } s`,
           )}
       </dd>
       {#if item.requirements?.removal}
@@ -306,7 +308,7 @@ vehiclesContainingPart.sort((a, b) =>
     </dl>
     <p style="color: var(--cata-color-gray); font-style: italic">
       {t(
-        "Repair time and requirements are lower for parts that are less damaged."
+        "Repair time and requirements are lower for parts that are less damaged.",
       )}
     </p>
   </section>

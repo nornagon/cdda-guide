@@ -25,8 +25,8 @@ const constructions = [
   .map((id) => data.byId("construction", id))
   .sort((a, b) =>
     singularName(data.byId("construction_group", a.group)).localeCompare(
-      singularName(data.byId("construction_group", b.group))
-    )
+      singularName(data.byId("construction_group", b.group)),
+    ),
   );
 const toolConstructions = [
   ...(constructionComponents.byTool.get(item_id) ?? new Set()),
@@ -34,8 +34,8 @@ const toolConstructions = [
   .map((id) => data.byId("construction", id))
   .sort((a, b) =>
     singularName(data.byId("construction_group", a.group)).localeCompare(
-      singularName(data.byId("construction_group", b.group))
-    )
+      singularName(data.byId("construction_group", b.group)),
+    ),
   );
 
 const providedByVparts = data
@@ -46,13 +46,13 @@ const providedByFurniture = data
   .filter((f) => f.id && f.crafting_pseudo_item === item_id);
 const results = [...recipes].sort((a, b) =>
   singularName(data.byId("item", a)).localeCompare(
-    singularName(data.byId("item", b))
-  )
+    singularName(data.byId("item", b)),
+  ),
 );
 const toolResults = [...toolRecipes].sort((a, b) =>
   singularName(data.byId("item", a)).localeCompare(
-    singularName(data.byId("item", b))
-  )
+    singularName(data.byId("item", b)),
+  ),
 );
 </script>
 

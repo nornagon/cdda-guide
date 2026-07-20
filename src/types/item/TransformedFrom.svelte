@@ -22,7 +22,7 @@ const data = getContext<CddaData>("data");
 const transformedFrom = data.transformedFrom(item_id);
 const getTransformAction = (item: Item) =>
   normalizeUseAction(item.use_action).find(
-    (a) => "target" in a && a.target === item_id
+    (a) => "target" in a && a.target === item_id,
   ) as TransformUseFunction | DelayedTransformUseFunction;
 </script>
 
@@ -35,7 +35,7 @@ const getTransformAction = (item: Item) =>
       <ThingLink
         type="item"
         id={item.id} />{#if ua.type === "delayed_transform" && ua.transform_age}{" "}({asHumanReadableDuration(
-          ua.transform_age * 100
+          ua.transform_age * 100,
         )}){/if}
     </LimitedList>
   </section>

@@ -4,6 +4,7 @@ import { t } from "@transifex/native";
 import { getContext } from "svelte";
 import {
   CddaData,
+  asHumanReadableDuration,
   normalizeUseAction,
   parseDuration,
   parseMass,
@@ -30,21 +31,24 @@ const mutationCategory = data
   .byType("mutation_category")
   .find((c) => c.vitamin === item.id);
 
-const unitsPerDay = (24 * 60 * 60) / parseDuration(item.rate);
+const rateSec = item.rate != null ? parseDuration(item.rate) : 0;
+const unitsPerDay = rateSec !== 0 ? (24 * 60 * 60) / rateSec : 0;
+const rateAbsDisplay =
+  rateSec !== 0 ? asHumanReadableDuration(Math.abs(rateSec)) : null;
 const containingComestibles = data
   .byType("item")
   .filter(
     (t) =>
       isItemSubtype("COMESTIBLE", t) &&
       t.id &&
-      (t.vitamins ?? []).some((v) => v[0] === item.id)
+      (t.vitamins ?? []).some((v) => v[0] === item.id),
   )
   .map((c) => {
     const comestible = c as SupportedTypes["COMESTIBLE"];
     const pctOrMass = comestible.vitamins!.find((v) => v[0] === item.id)![1];
     const pct: number =
       typeof pctOrMass !== "number"
-        ? item.weight_per_unit
+        ? item.weight_per_unit && unitsPerDay
           ? (parseMass(pctOrMass ?? "0 g") /
               parseMass(item.weight_per_unit) /
               unitsPerDay) *
@@ -62,8 +66,8 @@ const containingDrugs = data
     normalizeUseAction(t.use_action).some(
       (u) =>
         u.type === "consume_drug" &&
-        (u.vitamins ?? []).some((v) => v[0] === item.id)
-    )
+        (u.vitamins ?? []).some((v) => v[0] === item.id),
+    ),
   )
   .map((c) => {
     return {
@@ -79,14 +83,14 @@ const containing = containingComestibles.concat(containingDrugs);
 containing.sort((a, b) =>
   b.pct - a.pct === 0
     ? singularName(a.comestible).localeCompare(singularName(b.comestible))
-    : b.pct - a.pct
+    : b.pct - a.pct,
 );
 
 const excessNames = item.excess
-  ? data.byId("effect_type", item.excess).name ?? []
+  ? (data.byId("effect_type", item.excess).name ?? [])
   : [];
 const deficiencyNames = item.deficiency
-  ? data.byId("effect_type", item.deficiency).name ?? []
+  ? (data.byId("effect_type", item.deficiency).name ?? [])
   : [];
 </script>
 
@@ -125,16 +129,12 @@ const deficiencyNames = item.deficiency
     <dd>{item.min ?? 0}</dd>
     <dt>{t("Max", { _context })}</dt>
     <dd>{item.max ?? 0}</dd>
-    {#if parseDuration(item.rate ?? "0 m") > 0}
+    {#if rateSec > 0}
       <dt>{t("Decay Rate", { _context })}</dt>
-      <dd>–1 / {item.rate ?? "0 m"}</dd>
-    {:else if parseDuration(item.rate ?? "0 m") < 0}
+      <dd>–1 / {rateAbsDisplay}</dd>
+    {:else if rateSec < 0}
       <dt>{t("Generation Rate", { _context })}</dt>
-      <dd>
-        1 / {typeof item.rate === "string"
-          ? item.rate.replace(/-/, "")
-          : -(item.rate ?? 0) ?? "0 m"}
-      </dd>
+      <dd>1 / {rateAbsDisplay}</dd>
     {/if}
     {#if item.decays_into?.length}
       <dt>{t("Decays Into", { _context })}</dt>
@@ -154,7 +154,7 @@ const deficiencyNames = item.deficiency
     <h1>{t("Comestibles", { _context })}</h1>
     <LimitedList items={containing} let:item={other}>
       <ThingLink id={other.comestible.id} type="item" /> ({other.pct.toFixed(
-        2
+        2,
       )}{item.vit_type === "counter" || item.vit_type === "drug"
         ? " U"
         : "% RDA"})

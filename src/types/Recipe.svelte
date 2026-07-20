@@ -2,7 +2,13 @@
 import { t } from "@transifex/native";
 import JsonView from "../JsonView.svelte";
 import { getContext } from "svelte";
-import { CddaData, i18n, singular, singularName } from "../data";
+import {
+  CddaData,
+  asHumanReadableDuration,
+  i18n,
+  singular,
+  singularName,
+} from "../data";
 
 import type { Recipe } from "../types";
 import RequirementData from "./item/RequirementData.svelte";
@@ -16,7 +22,7 @@ const data = getContext<CddaData>("data");
 const _context = "Recipe";
 
 function normalizeSkillsRequired(
-  skills_required: [string, number] | [string, number][] | undefined
+  skills_required: [string, number] | [string, number][] | undefined,
 ): [string, number][] {
   if (skills_required === undefined) return [];
   if (skills_required.length === 0) return [];
@@ -30,7 +36,7 @@ let skillsRequired = normalizeSkillsRequired(recipe.skills_required);
 const writtenIn = Array.isArray(recipe.book_learn)
   ? [...recipe.book_learn]
   : [...Object.entries((recipe.book_learn ?? {}) as Record<string, any>)].map(
-      ([k, v]) => [k, v.skill_level]
+      ([k, v]) => [k, v.skill_level],
     );
 writtenIn.sort((a, b) => (a[1] ?? 0) - (b[1] ?? 0));
 
@@ -75,6 +81,41 @@ function activityLevelName(level: number) {
 
   return i18n.pgettext("activity description", activity_descriptions[idx]);
 }
+
+const LOGISTIC_TEMPLATE = "%1$d%% at >%2$d units";
+const LINEAR_TEMPLATE = "%1$s per unit";
+const LINEAR_WITH_MAX_TEMPLATE = "%1$s per unit to %2$d units";
+
+const translateTemplate = (
+  template: string,
+  ...values: (string | number)[]
+): string => i18n.gettext(template, ...values).replace(/\$[ds]/g, "");
+
+function formatBatchTimeSavings(
+  factors: Recipe["batch_time_factors"],
+): string | null {
+  if (!factors) return null;
+  if (Array.isArray(factors)) {
+    const [percent, batch] = factors;
+    if (percent == null || batch == null) return null;
+    return translateTemplate(LOGISTIC_TEMPLATE, percent, batch);
+  }
+  if (factors.mode === "logistic") {
+    return translateTemplate(LOGISTIC_TEMPLATE, factors.percent, factors.at);
+  }
+  if (factors.mode === "linear") {
+    const setup =
+      typeof factors.setup === "number"
+        ? asHumanReadableDuration(factors.setup)
+        : factors.setup;
+    return factors.max != null
+      ? translateTemplate(LINEAR_WITH_MAX_TEMPLATE, setup, factors.max)
+      : translateTemplate(LINEAR_TEMPLATE, setup);
+  }
+  return null;
+}
+
+const batchTimeSavings = formatBatchTimeSavings(recipe.batch_time_factors);
 </script>
 
 <section class="recipe">
@@ -86,20 +127,18 @@ function activityLevelName(level: number) {
         _comment: "Section heading",
       })}{:else}{t("Craft", { _context, _comment: "Section heading" })}{/if}
   </h1>
-  <p>
-    {#if recipe.never_learn}
-      <section class="warning">
-        ⚠️ {t(
-          "This recipe is not learnable. It may be used by NPCs or for debugging purposes.",
-          {
-            _context,
-            _comment:
-              "This is a basecamp recipe or other utility recipe that isn't directly usable by the player.",
-          }
-        )}
-      </section>
-    {/if}
-  </p>
+  {#if recipe.never_learn}
+    <section class="warning">
+      ⚠️ {t(
+        "This recipe is not learnable. It may be used by NPCs or for debugging purposes.",
+        {
+          _context,
+          _comment:
+            "This is a basecamp recipe or other utility recipe that isn't directly usable by the player.",
+        },
+      )}
+    </section>
+  {/if}
   <dl>
     {#if (showResult || recipe.variant) && recipe.result}
       <dt>{t("Result", { _context })}</dt>
@@ -163,7 +202,7 @@ function activityLevelName(level: number) {
               prof.learning_time_multiplier !== 1
                 ? `${prof.learning_time_multiplier}× ${t(
                     "learning speed",
-                    ctx
+                    ctx,
                   )}`
                 : null,
             ].filter((x) => x)}
@@ -186,17 +225,14 @@ function activityLevelName(level: number) {
     <dd>
       {t(
         activityLevelName(
-          activityLevels[recipe.activity_level ?? "MODERATE_EXERCISE"]
-        )
+          activityLevels[recipe.activity_level ?? "MODERATE_EXERCISE"],
+        ),
       )}
     </dd>
     <dt>{t("Batch Time Savings", { _context })}</dt>
     <dd>
-      {#if recipe.batch_time_factors}
-        {recipe.batch_time_factors[0]}% at >{recipe.batch_time_factors[1]} unit{recipe
-          .batch_time_factors[1] === 1
-          ? ""
-          : "s"}
+      {#if batchTimeSavings}
+        {batchTimeSavings}
       {:else}
         <em>{t("none")}</em>
       {/if}

@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/browser";
 import "@fontsource/unifont";
 // import { registerSW } from "virtual:pwa-register";
 import { tx } from "@transifex/native";
+import { mount } from "svelte";
 
 tx.init({
   token: "1/1d8c1f9e14b4c21d70dd3f6fccdd0ab16b691105",
@@ -24,7 +25,7 @@ if (location.hash) {
   history.replaceState(
     null,
     "",
-    import.meta.env.BASE_URL + location.hash.slice(2) + location.search
+    import.meta.env.BASE_URL + location.hash.slice(2) + location.search,
   );
 }
 
@@ -36,7 +37,7 @@ if (locale) {
   start();
 }
 function start() {
-  new App({
+  mount(App, {
     target: document.body,
   });
 }

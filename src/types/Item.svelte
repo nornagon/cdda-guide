@@ -20,6 +20,7 @@ import {
   type UseFunction,
   type SupportedTypeMapped,
   type PocketData,
+  type ProvidedQuality,
   isItemSubtype,
 } from "../types";
 import AsciiPicture from "./AsciiPicture.svelte";
@@ -68,15 +69,27 @@ function length(item: ItemBasicInfo) {
   return `${Math.round(Math.cbrt(parseVolume(item.volume ?? "1 ml")))} cm`;
 }
 
-let qualities = (item.qualities ?? []).map(([id, level]) => ({
-  quality: data.byId("tool_quality", id),
-  level,
-}));
+function qualityIdAndLevel(quality: ProvidedQuality): [string, number] {
+  return Array.isArray(quality)
+    ? [quality[0], quality[1]]
+    : [quality.id, quality.level ?? 1];
+}
 
-let chargedQualities = (item.charged_qualities ?? []).map(([id, level]) => ({
-  quality: data.byId("tool_quality", id),
-  level,
-}));
+let qualities = (item.qualities ?? []).map((quality) => {
+  const [id, level] = qualityIdAndLevel(quality);
+  return {
+    quality: data.byId("tool_quality", id),
+    level,
+  };
+});
+
+let chargedQualities = (item.charged_qualities ?? []).map((quality) => {
+  const [id, level] = qualityIdAndLevel(quality);
+  return {
+    quality: data.byId("tool_quality", id),
+    level,
+  };
+});
 
 function isStrings<T>(array: string[] | T[]): array is string[] {
   return Array.isArray(array) && typeof array[0] === "string";
@@ -85,19 +98,22 @@ const materials =
   item.material == null
     ? []
     : typeof item.material === "string"
-    ? [{ type: item.material, portion: 1 }]
-    : Array.isArray(item.material)
-    ? isStrings(item.material)
-      ? item.material.map((s) => ({ type: s, portion: 1 }))
-      : item.material.map((s) => ({ type: s.type, portion: s.portion ?? 1 }))
-    : Object.entries(item.material).map(([type, portion]) => ({
-        type,
-        portion: portion as number,
-      }));
+      ? [{ type: item.material, portion: 1 }]
+      : Array.isArray(item.material)
+        ? isStrings(item.material)
+          ? item.material.map((s) => ({ type: s, portion: 1 }))
+          : item.material.map((s) => ({
+              type: s.type,
+              portion: s.portion ?? 1,
+            }))
+        : Object.entries(item.material).map(([type, portion]) => ({
+            type,
+            portion: portion as number,
+          }));
 const totalMaterialPortion = materials.reduce((m, o) => m + o.portion, 0);
 const primaryMaterial = materials.reduce(
   (m, o) => (!m || o.portion > m.portion ? o : m),
-  null as { type: string; portion: number } | null
+  null as { type: string; portion: number } | null,
 );
 let flags = [item.flags ?? []]
   .flat()
@@ -106,10 +122,10 @@ let faults = (item.faults ?? []).flatMap((f) =>
   typeof f === "string"
     ? [data.byId("fault", f)]
     : "fault" in f
-    ? [data.byId("fault", f.fault)]
-    : data
-        .byId("fault_group", f.fault_group)
-        .group.map((f) => data.byId("fault", f.fault))
+      ? [data.byId("fault", f.fault)]
+      : data
+          .byId("fault_group", f.fault_group)
+          .group.map((f) => data.byId("fault", f.fault)),
 );
 
 const defaultPocketData = {
@@ -138,7 +154,7 @@ let magazine_compatible = pockets
         type: "json_flag" as keyof SupportedTypesWithMapped,
         id,
       })) ??
-      []
+      [],
   );
 
 function maxCharges(ammo_id: string) {
@@ -152,7 +168,7 @@ function maxCharges(ammo_id: string) {
 let ammo = pockets.flatMap((pocket) =>
   pocket.pocket_type === "MAGAZINE"
     ? Object.keys(pocket.ammo_restriction ?? {})
-    : []
+    : [],
 );
 
 function deepEquals(a: any, b: any) {
@@ -217,7 +233,7 @@ const fuelForVPs = data
   .byType("vehicle_part")
   .filter(
     (vp) =>
-      vp.id && (vp.fuel_options?.includes(item.id) || vp.fuel_type === item.id)
+      vp.id && (vp.fuel_options?.includes(item.id) || vp.fuel_type === item.id),
   );
 const fuelForBionics = primaryMaterial?.type
   ? data
@@ -225,7 +241,7 @@ const fuelForBionics = primaryMaterial?.type
       .filter((b) => b.id && b.fuel_options?.includes(primaryMaterial?.type))
   : [];
 const fuelForItems = (fuelForVPs.sort(byName) as SupportedTypeMapped[]).concat(
-  fuelForBionics.sort(byName)
+  fuelForBionics.sort(byName),
 );
 
 const usedToRepair = data.byType("fault").filter((f) => {
@@ -234,12 +250,12 @@ const usedToRepair = data.byType("fault").filter((f) => {
     const requirement = data.normalizeRequirementUsing(requirements);
     const components = data.flattenRequirement(
       requirement.components,
-      (r) => r.components
+      (r) => r.components,
     );
     return { mending_method: mm, components, requirement };
   });
   return mendingMethods.some((mm) =>
-    mm.components.some((c) => c.some((i) => i.id === item.id))
+    mm.components.some((c) => c.some((i) => i.id === item.id)),
   );
 });
 
@@ -271,9 +287,11 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
           <dd>
             <ul class="comma-separated">
               {#each item.variants as va}
-                {@const name = singular(va.name)}
-                {#if name !== singularName(item)}
-                  <li>{singular(va.name)}</li>
+                {#if va.name}
+                  {@const name = singular(va.name)}
+                  {#if name !== singularName(item)}
+                    <li>{name}</li>
+                  {/if}
                 {/if}
               {/each}
             </ul>
@@ -306,7 +324,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
           <dt>{t("Ammo", { _context })}</dt>
           <dd>
             <ul class="no-bullets">
-              {#each ammo.map( (id) => ({ id, max_charges: maxCharges(id) }) ) as { id: ammo_id, max_charges }}
+              {#each ammo.map( (id) => ({ id, max_charges: maxCharges(id) }), ) as { id: ammo_id, max_charges }}
                 <li>
                   {max_charges}
                   {isItemSubtype("GUN", item)
@@ -389,7 +407,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
                       .gettext(
                         "Level <info>%1$d %2$s</info> quality",
                         "{level}",
-                        "{quality}"
+                        "{quality}",
                       )
                       .replace(/\$[ds]|<\/?info[^>]*>/g, "")}
                     slot0="level"
@@ -413,7 +431,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
                       .gettext(
                         "Level <info>%1$d %2$s</info> quality",
                         "{level}",
-                        "{quality}"
+                        "{quality}",
                       )
                       .replace(/\$[ds]|<\/?info[^>]*>/g, "")}
                     slot0="level"
@@ -502,7 +520,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
 
         {#if item.nanofab_template_group}
           {@const items = data.flattenTopLevelItemGroup(
-            data.byId("item_group", item.nanofab_template_group)
+            data.byId("item_group", item.nanofab_template_group),
           )}
           <dt>{t("Possible Recipes", { _context })}</dt>
           <dd>
@@ -573,7 +591,7 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
         <ul class="comma-separated">
           {#each [item.seed_data.fruit]
             .concat(item.seed_data.byproducts ?? [])
-            .concat(item.seed_data.seeds ?? true ? [item.id] : [])
+            .concat((item.seed_data.seeds ?? true) ? [item.id] : [])
             .filter((x) => x !== "null") as id}
             <li><ThingLink type="item" {id} /></li>
           {/each}

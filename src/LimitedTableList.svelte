@@ -15,8 +15,8 @@ const isTesting =
 let realLimit = isTesting
   ? Infinity
   : items.length <= limit + grace
-  ? limit + grace
-  : limit;
+    ? limit + grace
+    : limit;
 </script>
 
 <table>

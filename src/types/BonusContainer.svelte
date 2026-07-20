@@ -75,7 +75,7 @@ export let item: BonusContainer;
           {i18n.__(stringFromAffectedStat(bon.stat))}:
           {#if bon["scaling-stat"]}
             {bon.scale < 0 ? "" : "+"}{(bon.scale * 100).toFixed(0)}% of {i18n.__(
-              stringFromScalingStat(bon["scaling-stat"])
+              stringFromScalingStat(bon["scaling-stat"]),
             )}
           {:else}
             {bon.scale < 0 ? "" : "+"}{bon.scale}

@@ -14,12 +14,12 @@ const data = getContext<CddaData>("data");
 const damage = Array.isArray(item.damage)
   ? item.damage[0]
   : item.damage && "values" in item.damage
-  ? item.damage.values[0]
-  : (item.damage as DamageUnit) ?? {
-      amount: 0,
-      damage_type: "bullet",
-      armor_penetration: 0,
-    };
+    ? item.damage.values[0]
+    : ((item.damage as DamageUnit) ?? {
+        amount: 0,
+        damage_type: "bullet",
+        armor_penetration: 0,
+      });
 
 function computeLoudness(item: AmmoSlot): number {
   // https://github.com/CleverRaven/Cataclysm-DDA/blob/5612551d1e4e4babfe4ae0dab81f8d8b49991783/src/item_factory.cpp#L264-L271
@@ -42,7 +42,7 @@ function computeLoudness(item: AmmoSlot): number {
         {damage.amount ?? 0} ({singularName(
           data.byIdMaybe("damage_type", damage.damage_type) ?? {
             id: damage.damage_type,
-          }
+          },
         )})
       </dd>
       <dt>{t("Armor Penetration", { _context })}</dt>

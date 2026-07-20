@@ -38,7 +38,7 @@ const things = data
     (o) =>
       "id" in o &&
       o.id &&
-      (!modFilter || getAllObjectSources(o).some((m) => m.__mod === modFilter))
+      (!modFilter || getAllObjectSources(o).some((m) => m.__mod === modFilter)),
   )
   .sort(byName);
 
@@ -83,7 +83,7 @@ const groupingFn =
 
 const groups = groupBy(
   things,
-  groupingFn as (t: SupportedTypeMapped) => string[]
+  groupingFn as (t: SupportedTypeMapped) => string[],
 );
 const groupsList = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
 

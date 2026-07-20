@@ -36,7 +36,7 @@ let { tools, qualities } =
                   quality.amount ?? 1,
                   quality.amount ?? 1,
                   "{tool_quality}",
-                  quality.level
+                  quality.level,
                 )
                 .replace(/\$./g, "")}
               slot0="tool_quality">
@@ -52,7 +52,7 @@ let { tools, qualities } =
               {#if data.craftingPseudoItem(toolId)}
                 <a
                   href="/furniture/{data.craftingPseudoItem(
-                    toolId
+                    toolId,
                   )}{location.search}"
                   >{singularName(data.byId("item", toolId))}</a>
               {:else}
@@ -68,7 +68,7 @@ let { tools, qualities } =
                     "%1$s (%2$d charges)",
                     count,
                     "{item}",
-                    count
+                    count,
                   )
                   .replace(/\$./g, "")}
                 slot0="item">
@@ -77,7 +77,7 @@ let { tools, qualities } =
                     <a
                       href="{import.meta.env
                         .BASE_URL}furniture/{data.craftingPseudoItem(
-                        toolId
+                        toolId,
                       )}{location.search}"
                       >{singularName(data.byId("item", toolId))}</a>
                   {:else}

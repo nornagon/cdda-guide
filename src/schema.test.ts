@@ -27,7 +27,7 @@ expect.extend({
           errors
             ?.map((e) => {
               return `${e.instancePath} ${e.message}, but was ${util.inspect(
-                e.data
+                e.data,
               )}`;
             })
             .join("\n")
@@ -44,10 +44,12 @@ const program = TJS.createGenerator({
 
 const ajv = new Ajv({ allowUnionTypes: true, verbose: true });
 const typesSchema = program.createSchema("SupportedTypes");
-fs.writeFileSync("schema.json", JSON.stringify(typesSchema, null, 2));
+if (process.env.WRITE_SCHEMA)
+  fs.writeFileSync("schema.json", JSON.stringify(typesSchema, null, 2));
+
 const schemasByType = new Map(
   Object.entries(
-    (typesSchema!.definitions!["SupportedTypes"] as any).properties
+    (typesSchema!.definitions!["SupportedTypes"] as any).properties,
   ).map(([typeName, sch]) => {
     const schemaForType = sch as TJS.Definition;
     return [
@@ -58,10 +60,10 @@ const schemasByType = new Map(
         $schema: typesSchema!.$schema,
       } as TJS.Definition),
     ];
-  })
+  }),
 );
 const data = new CddaData(
-  JSON.parse(fs.readFileSync(__dirname + "/../_test/all.json", "utf8")).data
+  JSON.parse(fs.readFileSync(__dirname + "/../_test/all.json", "utf8")).data,
 );
 const id = (x: any) => {
   if (x.id) return x.id;

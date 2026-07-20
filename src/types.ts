@@ -139,6 +139,9 @@ export type QualityRequirement = {
   level?: number; // default: 1
   amount?: number; // default: 1
 };
+export type ProvidedQuality =
+  | [string /* tool_quality_id */, number /* level */]
+  | { id: string; level?: number /* default: 1 */; speed?: number };
 export type ToolComponent =
   | string
   | [string, number]
@@ -154,6 +157,19 @@ export type RequirementData = {
   qualities?: (QualityRequirement | QualityRequirement[])[];
   tools?: (ToolComponent | ToolComponent[])[];
 };
+
+export type BatchTimeFactors =
+  | [number /* percent */, number /* batch size */]
+  | {
+      mode: "linear";
+      setup: duration;
+      max?: number;
+    }
+  | {
+      mode: "logistic";
+      percent: number;
+      at: number;
+    };
 
 export type Recipe = {
   result?: string;
@@ -172,7 +188,7 @@ export type Recipe = {
   container?: string /* item_id, implies contained */;
   sealed?: boolean;
 
-  batch_time_factors?: [number /* int */, number /* int */]; // [rscale (percentage), rsize]
+  batch_time_factors?: BatchTimeFactors;
 
   charges?: number; // int, no default
   result_mult?: number; // int, default: 1
@@ -297,6 +313,7 @@ export type BookSlot = {
   time?: number /* mins */ | string /* duration */;
 
   skill?: string; // skill_id
+  read_skill?: string; // skill_id
   martial_art?: string; // matype_id
   chapters?: number; // default: 0
   proficiencies?: BookProficiencyBonus[];
@@ -519,6 +536,7 @@ export type UseFunction =
   | TransformUseFunction
   | DelayedTransformUseFunction
   | ConsumeDrugUseFunction
+  | Mp3UseFunction
   | RepairItemUseFunction
   | HolsterUseFunction
   | AttachMolleUseFunction
@@ -564,13 +582,20 @@ type ItemActionUseFunction = {
 export type TransformUseFunction = {
   type: "transform";
   target: string;
-  menu_text?: string;
+  menu_text?: Translation;
 };
 
 export type DelayedTransformUseFunction = {
   type: "delayed_transform";
   transform_age?: integer; // turns
 } & Omit<TransformUseFunction, "type">;
+
+export type Mp3UseFunction = {
+  type: "mp3";
+  transform: string;
+  message: Translation;
+  activate: boolean;
+};
 
 export type ConsumeDrugUseFunction = {
   type: "consume_drug";
@@ -635,8 +660,8 @@ export type ItemBasicInfo = {
   color?: string;
   symbol?: string;
   description?: Translation;
-  qualities?: [string, number][];
-  charged_qualities?: [string, number][];
+  qualities?: ProvidedQuality[];
+  charged_qualities?: ProvidedQuality[];
   stackable?: boolean;
   volume?: volume;
   weight?: mass;
@@ -687,8 +712,8 @@ export type ItemBasicInfo = {
   variant_type?: "gun" | "drug" | "generic";
   variants?: {
     id: string;
-    name: Translation;
-    description: Translation;
+    name?: Translation;
+    description?: Translation;
     symbol?: string;
     color?: string;
     ascii_picture?: string; // id
@@ -840,6 +865,13 @@ export type JsonFlag = {
   taste_mod?: number; // default: 0
 };
 
+export type MonsterFlag = {
+  type: "monster_flag";
+  id: string;
+
+  "//"?: string;
+};
+
 export type MapBashInfo = {
   str_min?: number; // default: 0
   str_max?: number; // default: 0
@@ -892,12 +924,20 @@ export type ActivityDataCommon = {
   sound?: Translation;
 };
 
+export type ExamineActor =
+  | { type: "appliance_convert" }
+  | { type: "cardreader" }
+  | { type: "effect_on_condition" }
+  | { type: "mortar" };
+
+export type ExamineAction = string | ExamineActor;
+
 export type MapDataCommon = {
   color?: string | [string] | [string, string, string, string];
   bgcolor?: string | [string] | [string, string, string, string];
   symbol: string | [string] | [string, string, string, string]; // TODO: can be 1-char or LINE_XOXO
   description: Translation;
-  // examine_action
+  examine_action?: ExamineAction | ExamineAction[];
   harvest_by_season?: {
     seasons: string[];
     id: string;
@@ -920,11 +960,6 @@ export type Terrain = MapDataCommon & {
   deconstruct?: MapDeconstructInfo;
 
   transforms_into?: string;
-
-  examine_action?:
-    | string
-    | { type: "cardreader" }
-    | { type: "effect_on_condition" };
 
   oxytorch?: ActivityDataCommon & { result: string };
   boltcut?: ActivityDataCommon & { result: string };
@@ -976,7 +1011,7 @@ export type Furniture = MapDataCommon & {
 export type Proficiency = {
   type: "proficiency";
   id: string;
-  description: string;
+  description: Translation;
   category: string; // proficiency_category_id
   name: Translation;
   can_learn: boolean;
@@ -1073,7 +1108,7 @@ export type Vitamin = {
   excess?: string; // effect_id
   min?: number; // int
   max?: number; // int, default 0
-  rate: string; // duration
+  rate?: duration; // default "0 m"
   vit_type: "vitamin" | "toxin" | "drug" | "counter";
   disease?: [number, number][];
   disease_excess?: [number, number][];
@@ -1421,7 +1456,7 @@ export type Monster = {
   fear_triggers?: string[];
   special_when_hit?: [
     "NONE" | "ZAPBACK" | "ACIDSPLASH" | "RETURN_FIRE",
-    integer
+    integer,
   ];
   morale?: number;
   aggression?: number;
@@ -1526,7 +1561,7 @@ export type VehiclePart = {
     removal?: VehiclePartRequirements;
   };
   breaks_into?: InlineItemGroup; // collection
-  qualities?: [string, number][];
+  qualities?: ProvidedQuality[];
   pseudo_tools?: {
     id: string;
     hotkey?: string;
@@ -1657,7 +1692,7 @@ export type SubBodyPart = {
   parent: string;
   secondary?: boolean;
   max_coverage?: integer; // default 0
-  side: 0 | 1 | 2; // left / right / both
+  side: 0 | 1 | 2 | "left" | "right" | "both";
   name_multiple?: Translation;
   opposite?: string; // sub_body_part_id
 };
@@ -1681,7 +1716,7 @@ export type ConstructionGroup = {
 export type OvermapTerrain = {
   type: "overmap_terrain";
   id: string | string[];
-  name: Translation;
+  name?: Translation;
 
   sym?: string; // defaults to \u00a0
   color?: string;
@@ -2081,6 +2116,7 @@ export type SupportedTypes = {
   mapgen: Mapgen;
   martial_art: MartialArt;
   material: Material;
+  monster_flag: MonsterFlag;
   monstergroup: MonsterGroup;
   mutation: Mutation;
   mutation_category: MutationCategory;
@@ -2120,7 +2156,7 @@ export type SupportedTypeMapped =
 type ItemSubtypes = ItemWithOldSubtype["type"];
 export function isItemSubtype<Subtype extends ItemSubtypes>(
   subtype: Subtype,
-  item: Item
+  item: Item,
 ): item is Item & ItemSubtypeToSlot[Subtype] {
   return (
     item.type === subtype ||

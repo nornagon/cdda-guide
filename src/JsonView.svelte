@@ -17,7 +17,7 @@ const urlEdit = `https://github.dev/CleverRaven/Cataclysm-DDA/blob/${
 <pre>{JSON.stringify(
     obj,
     (key, value) => (hiddenAttributes.includes(key) ? undefined : value),
-    2
+    2,
   )}</pre>
 {#each getAllObjectSources(obj) as o}
   <details>
@@ -34,7 +34,7 @@ const urlEdit = `https://github.dev/CleverRaven/Cataclysm-DDA/blob/${
     <pre>{JSON.stringify(
         o,
         (key, value) => (hiddenAttributes.includes(key) ? undefined : value),
-        2
+        2,
       )}</pre>
   </details>
 {/each}

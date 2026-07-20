@@ -19,7 +19,7 @@ const mons = new Map(
     const dd = deathDrops.get(item_id);
     if (dd) return [[mon.id, { prob: dd.prob, expected: dd.expected }]];
     return [];
-  })
+  }),
 );
 
 const itemsFromHarvest = (h: Harvest): string[] =>
@@ -28,7 +28,7 @@ const itemsFromHarvest = (h: Harvest): string[] =>
       ? data
           .flattenTopLevelItemGroup(data.byId("item_group", e.drop))
           .map((x) => x.id)
-      : [e.drop]
+      : [e.drop],
   ) ?? [];
 
 const harvests = data
