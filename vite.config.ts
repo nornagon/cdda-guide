@@ -17,6 +17,8 @@ export default defineConfig({
     EnvironmentPlugin({
       GITHUB_SHA: null,
       SENTRY_DSN: null,
+      CDDA_DATA_SOURCE:
+        "https://raw.githubusercontent.com/nornagon/cdda-data/main",
     }),
     svelte(),
     svelteTesting(),
