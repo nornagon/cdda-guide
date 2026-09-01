@@ -73,7 +73,7 @@ const constructions = data
   <dl>
     <dt>{t("Move Cost", { _context })}</dt>
     <dd>{item.move_cost ?? 100}</dd>
-    <dt>{t("Coverage", { _context })}</dt>
+    <dt>{t("Concealment", { _context })}</dt>
     <dd>{item.coverage ?? 0}%</dd>
     {#if item.transforms_into}
       <dt>{t("Transforms Into", { _context })}</dt>
