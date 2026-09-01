@@ -74,7 +74,7 @@ harvestBySeasonList.sort(
     </dd>
     <dt>{t("Strength Required to Drag", { _context })}</dt>
     <dd>{item.required_str >= 0 ? item.required_str : "not movable"}</dd>
-    <dt>{t("Coverage", { _context })}</dt>
+    <dt>{t("Concealment", { _context })}</dt>
     <dd>{item.coverage ?? 0}%</dd>
     {#if item.comfort}
       <dt>{t("Comfort", { _context })}</dt>
