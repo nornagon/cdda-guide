@@ -273,6 +273,13 @@ export interface ModInfo {
 
 type RawModData = Record<string, { info: any; data: any[] }>;
 
+function modInteractionTarget(obj: any): string | undefined {
+  if (typeof obj?.__filename !== "string") return undefined;
+  return /(?:^|[\\/])mod_interactions[\\/]([^\\/]+)[\\/]/.exec(
+    obj.__filename,
+  )?.[1];
+}
+
 // Monster blacklists and whitelists are anonymous load-time directives, not
 // named game objects. They have no id and intentionally aren't in
 // SupportedTypes, whose members are schema-checked as addressable objects.
@@ -342,16 +349,30 @@ export class CddaData {
         __mod: "dda",
         __modName: "Dark Days Ahead",
       }));
-    const modObjects = enabledMods.flatMap((mod) => {
+    const enabledModSet = new Set(["dda", ...enabledMods]);
+    const modObjects: any[] = [];
+    const modInteractionObjects: any[] = [];
+    for (const mod of enabledMods) {
       const modData = this.#rawMods[mod];
-      if (!modData) return [];
-      return modData.data.map((obj) => ({
-        ...obj,
-        __mod: mod,
-        __modName: modData.info.name,
-      }));
-    });
-    this.#raw = [...baseObjects, ...modObjects];
+      if (!modData) continue;
+      for (const obj of modData.data) {
+        const interactionTarget = modInteractionTarget(obj);
+        const decorated = {
+          ...obj,
+          __mod: mod,
+          __modName: modData.info.name,
+        };
+        if (interactionTarget) {
+          // The game loads mod interactions in a second pass, and only when
+          // both the owning mod and the interaction target are active.
+          if (enabledModSet.has(interactionTarget))
+            modInteractionObjects.push(decorated);
+        } else {
+          modObjects.push(decorated);
+        }
+      }
+    }
+    this.#raw = [...baseObjects, ...modObjects, ...modInteractionObjects];
     for (const obj of this.#raw) this.#loadObject(obj);
     this.#byTypeById
       .get("item_group")
@@ -371,18 +392,18 @@ export class CddaData {
 
     obj.__self = obj;
     obj.__prevSelf = null;
-    if (obj["copy-from"] && obj["copy-from"] === obj.id) {
-      const oldIndex = this.#byType
-        .get(mappedType)!
-        .findIndex((x) => x.id === obj.id);
-      if (oldIndex !== -1) {
-        const oldObj = this.#byType
-          .get(mappedType)!
-          .splice(oldIndex, 1, obj)[0];
-        obj.__prevSelf = oldObj;
-      } else {
-        this.#byType.get(mappedType)!.push(obj);
-      }
+    const previousSelf =
+      obj["copy-from"] === obj.id && typeof obj.id === "string"
+        ? this.#byTypeById.get(mappedType)?.get(obj.id)
+        : obj["copy-from"] === obj.abstract && typeof obj.abstract === "string"
+          ? this.#abstractsByType.get(mappedType)?.get(obj.abstract)
+          : undefined;
+    if (previousSelf) {
+      const oldIndex = this.#byType.get(mappedType)!.indexOf(previousSelf);
+      if (oldIndex !== -1)
+        this.#byType.get(mappedType)!.splice(oldIndex, 1, obj);
+      else this.#byType.get(mappedType)!.push(obj);
+      obj.__prevSelf = previousSelf;
     } else {
       this.#byType.get(mappedType)!.push(obj);
     }
@@ -590,11 +611,15 @@ export class CddaData {
     if (this.#flattenCache.has(obj)) return this.#flattenCache.get(obj);
     let parent: any = obj.__prevSelf;
     if (!parent) {
-      parent =
-        "copy-from" in obj
-          ? (this.#byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
-            this.#abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"]))
-          : null;
+      if ("copy-from" in obj) {
+        const mappedType = mapType(obj.type);
+        const byIdParent = this.#byTypeById
+          .get(mappedType)
+          ?.get(obj["copy-from"]);
+        parent =
+          (byIdParent === obj ? undefined : byIdParent) ??
+          this.#abstractsByType.get(mappedType)?.get(obj["copy-from"]);
+      }
       if ("copy-from" in obj && !parent)
         console.error(
           `Missing parent in ${

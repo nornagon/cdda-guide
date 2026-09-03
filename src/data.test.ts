@@ -81,6 +81,93 @@ test("monster whitelist criteria are combined like Cataclysm", () => {
   ).toEqual(["dda", "Tamable_Wildlife"]);
 });
 
+test("mod interactions load after regular data and only with their target", () => {
+  const base = [{ type: "GENERIC", id: "shared", name: "Base" }];
+  const rawMods = {
+    owner: {
+      info: { name: "Owner" },
+      data: [
+        {
+          type: "GENERIC",
+          id: "shared",
+          "copy-from": "shared",
+          name: "Interaction",
+          __filename:
+            "data/mods/owner/mod_interactions/counterpart/items.json#L1-L7",
+        },
+        {
+          type: "GENERIC",
+          id: "shared",
+          "copy-from": "shared",
+          name: "Owner",
+          __filename: "data/mods/owner/items.json#L1-L6",
+        },
+      ],
+    },
+    counterpart: {
+      info: { name: "Counterpart" },
+      data: [],
+    },
+  };
+
+  const ownerOnly = new CddaData(
+    base,
+    undefined,
+    undefined,
+    undefined,
+    rawMods,
+    ["owner"],
+  );
+  const ownerItem = ownerOnly.byId("item", "shared");
+  expect(singular((ownerItem as any).name)).toBe("Owner");
+  expect(getAllObjectSources(ownerItem).map((source) => source.__mod)).toEqual([
+    "dda",
+    "owner",
+  ]);
+
+  const withCounterpart = new CddaData(
+    base,
+    undefined,
+    undefined,
+    undefined,
+    rawMods,
+    ["owner", "counterpart"],
+  );
+  const interactionItem = withCounterpart.byId("item", "shared");
+  expect(singular((interactionItem as any).name)).toBe("Interaction");
+  expect(
+    getAllObjectSources(interactionItem).map((source) => source.__mod),
+  ).toEqual(["dda", "owner", "owner"]);
+});
+
+test("same-name abstract overrides and concrete objects preserve inheritance", () => {
+  const data = new CddaData([
+    {
+      type: "GENERIC",
+      abstract: "base_item",
+      name: "Base item",
+      flags: ["BASE"],
+    },
+    {
+      type: "GENERIC",
+      abstract: "base_item",
+      "copy-from": "base_item",
+      extend: { flags: ["ABSTRACT_OVERRIDE"] },
+    },
+    {
+      type: "GENERIC",
+      id: "base_item",
+      "copy-from": "base_item",
+      extend: { flags: ["CONCRETE"] },
+    },
+  ]);
+
+  expect(data.byId("item", "base_item")).toMatchObject({
+    name: "Base item",
+    flags: ["BASE", "ABSTRACT_OVERRIDE", "CONCRETE"],
+  });
+});
+
 test("flattened item group includes container item for collection", () => {
   const data = new CddaData([
     {
