@@ -5,6 +5,7 @@ import * as fs from "fs";
 import path from "path";
 
 import { CddaData, mapType } from "./data";
+import type { SupportedTypeMapped } from "./types";
 
 import Thing from "./Thing.svelte";
 import {
@@ -47,10 +48,12 @@ export function makeRenderTests(chunkIdx: number, numChunks: number) {
     "technique",
   ];
 
-  const all = data._raw
+  const all = data
+    .all()
     .filter(
-      (x) =>
-        x.id &&
+      (x): x is SupportedTypeMapped & { id: string } =>
+        "id" in x &&
+        Boolean(x.id) &&
         types.includes(mapType(x.type)) &&
         (!process.env.TEST_ONLY ||
           process.env.TEST_ONLY === `${mapType(x.type)}/${x.id}`),

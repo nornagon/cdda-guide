@@ -5,6 +5,7 @@ import {
   collection,
   getFurnitureForMapgen,
   getLootForMapgen,
+  lootByOMSAppearance,
   parseItemGroup,
   parsePalette,
   repeatChance,
@@ -427,6 +428,109 @@ describe("loot", () => {
     //   4x 0.5 = 2
     expect(loot.get("item_b")!.expected.toFixed(2)).toEqual("2.00");
   });
+
+  it("scopes cached loot to the enabled-mod snapshot", async () => {
+    const raw = [
+      {
+        type: "mapgen",
+        method: "json",
+        om_terrain: "test_ter",
+        object: {
+          fill_ter: "t_floor",
+          rows: [],
+          place_loot: [{ group: "test_group", x: 0, y: 0 }],
+        },
+      } as Mapgen,
+      {
+        type: "item_group",
+        id: "test_group",
+        subtype: "collection",
+        items: ["base_item"],
+      } as ItemGroupData,
+      {
+        type: "overmap_terrain",
+        id: "test_ter",
+        name: "test terrain",
+        sym: "T",
+        color: "green",
+      },
+      {
+        type: "overmap_special",
+        id: "test_special",
+        overmaps: [{ point: [0, 0, 0], overmap: "test_ter" }],
+      },
+    ];
+    const rawMods = {
+      test_mod: {
+        info: { name: "Test Mod" },
+        data: [
+          {
+            type: "item_group",
+            id: "test_group",
+            "copy-from": "test_group",
+            subtype: "collection",
+            items: ["mod_item"],
+          },
+        ],
+      },
+    };
+    const baseData = new CddaData(
+      raw,
+      undefined,
+      undefined,
+      undefined,
+      rawMods,
+    );
+    const modData = new CddaData(
+      raw,
+      undefined,
+      undefined,
+      undefined,
+      rawMods,
+      ["test_mod"],
+    );
+
+    expect([
+      ...getLootForMapgen(baseData, baseData.byType("mapgen")[0]).keys(),
+    ]).toEqual(["base_item"]);
+    expect([
+      ...[...(await lootByOMSAppearance(baseData))][0][1].loot.keys(),
+    ]).toEqual(["base_item"]);
+    expect([
+      ...getLootForMapgen(modData, modData.byType("mapgen")[0]).keys(),
+    ]).toEqual(["mod_item"]);
+    expect([
+      ...[...(await lootByOMSAppearance(modData))][0][1].loot.keys(),
+    ]).toEqual(["mod_item"]);
+  });
+});
+
+it("mapgen caches are scoped to a CddaData instance", () => {
+  const mapgen = {
+    type: "mapgen",
+    method: "json",
+    om_terrain: "test_terrain",
+    object: {
+      place_loot: [{ group: "test_group", x: 0, y: 0 }],
+    },
+  } as Mapgen;
+  const withItem = (item: string) =>
+    new CddaData([
+      mapgen,
+      {
+        type: "item_group",
+        id: "test_group",
+        subtype: "collection",
+        items: [item],
+      } as ItemGroupData,
+    ]);
+
+  expect([...getLootForMapgen(withItem("first"), mapgen).keys()]).toEqual([
+    "first",
+  ]);
+  expect([...getLootForMapgen(withItem("second"), mapgen).keys()]).toEqual([
+    "second",
+  ]);
 });
 
 describe("nested mapgen", () => {

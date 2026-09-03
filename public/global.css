@@ -54,6 +54,42 @@ input:disabled {
 	color: #ccc;
 }
 
+label.checkbox {
+	display: inline-block;
+}
+label.checkbox > input[type="checkbox"] {
+	appearance: none;
+	width: 1em;
+	height: 1em;
+	margin: 0;
+	margin-right: 0.4em;
+	border-radius: 3px;
+	vertical-align: middle;
+	position: relative;
+}
+label.checkbox > input[type="checkbox"]:checked {
+	background-color: var(--cata-color-green);
+	border-color: var(--cata-color-green);
+}
+label.checkbox > input[type="checkbox"]:checked::after {
+	content: '\2713';
+	display: block;
+	text-align: center;
+	color: var(--cata-color-light_green);
+	font-weight: bold;
+	width: 100%;
+	left: 0;
+	position: absolute;
+	top: 0;
+	font-size: 75%;
+}
+label.checkbox > input[type="checkbox"]:focus {
+	border-color: var(--cata-color-green);
+}
+label.checkbox > input[type="checkbox"]:checked:focus {
+	border-color: var(--cata-color-light_green);
+}
+
 button {
 	color: #333;
 	background-color: #f4f4f4;

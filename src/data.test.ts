@@ -1,5 +1,10 @@
 import { expect, test } from "vitest";
-import { CddaData, countsByCharges, singular } from "./data";
+import {
+  CddaData,
+  countsByCharges,
+  getAllObjectSources,
+  singular,
+} from "./data";
 import type { ArmorSlot } from "./types";
 
 test("flattened item group includes container item for distribution", () => {
@@ -26,6 +31,54 @@ test("flattened item group includes container item for distribution", () => {
     { id: "contained_thing", count: [1, 1], prob: "0.33", expected: "0.33" },
     { id: "other_thing", count: [1, 1], prob: "0.67", expected: "0.67" },
   ]);
+});
+
+test("monster whitelist criteria are combined like Cataclysm", () => {
+  const data = new CddaData(
+    [
+      {
+        type: "MONSTER",
+        id: "mon_deer",
+        name: "deer",
+        categories: ["WILDLIFE"],
+        species: ["MAMMAL"],
+      },
+    ],
+    undefined,
+    undefined,
+    undefined,
+    {
+      aftershock_exoplanet: {
+        info: { name: "Aftershock: Exoplanet" },
+        data: [
+          {
+            type: "MONSTER_WHITELIST",
+            mode: "EXCLUSIVE",
+            categories: ["WILDLIFE", "MUTANT"],
+            species: ["MOXIE", "ROBOT"],
+          },
+        ],
+      },
+      Tamable_Wildlife: {
+        info: { name: "Tamable Wildlife" },
+        data: [
+          {
+            type: "MONSTER",
+            id: "mon_deer",
+            "copy-from": "mon_deer",
+            extend: { flags: ["PET_MOUNTABLE"] },
+          },
+        ],
+      },
+    },
+    ["aftershock_exoplanet", "Tamable_Wildlife"],
+  );
+
+  const monsters = data.byType("monster");
+  expect(monsters.map((monster) => monster.id)).toEqual(["mon_deer"]);
+  expect(
+    getAllObjectSources(monsters[0]).map((source) => source.__mod),
+  ).toEqual(["dda", "Tamable_Wildlife"]);
 });
 
 test("flattened item group includes container item for collection", () => {
@@ -151,11 +204,7 @@ test("proportional encumbrance scales inherited armor portion encumbrance", () =
     [{ encumbrance: 8 }, { encumbrance: [2, 6] }],
   );
   expect(
-    (
-      data._flatten(
-        data._abstractsByType.get("item")!.get("base_boots"),
-      ) as ArmorSlot
-    ).armor,
+    (data.abstractById("item", "base_boots") as ArmorSlot).armor,
   ).toMatchObject([{ encumbrance: 4 }, { encumbrance: [1, 3] }]);
 });
 

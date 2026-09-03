@@ -1,16 +1,26 @@
 <script lang="ts">
 import Thing from "./Thing.svelte";
-import { CddaData, data, loadProgress, mapType, singularName } from "./data";
+import {
+  CddaData,
+  data,
+  loadProgress,
+  mapType,
+  singular,
+  singularName,
+} from "./data";
 import { tileData } from "./tile-data";
 import SearchResults from "./SearchResults.svelte";
 import Catalog from "./Catalog.svelte";
 import dontPanic from "./assets/dont_panic.png";
 import InterpolatedTranslation from "./InterpolatedTranslation.svelte";
-import { t } from "@transifex/native";
+import { t, tx } from "@transifex/native";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "./types";
 import throttle from "lodash/throttle";
 import debounce from "lodash/debounce";
 import { onDestroy } from "svelte";
+import ModCatalog from "./ModCatalog.svelte";
+import Mod from "./types/Mod.svelte";
+import { resolveModDependencies } from "./mods";
 
 let item: { type: string; id: string } | null = null;
 let search: string = "";
@@ -49,10 +59,12 @@ fetch("https://raw.githubusercontent.com/nornagon/cdda-data/main/builds.json")
     console.error(e);
   });
 
-const url = new URL(location.href);
-const version = url.searchParams.get("v") ?? "latest";
-const locale = url.searchParams.get("lang");
-data.setVersion(version, locale);
+let version: string;
+let locale: string | null;
+let enabledMods: string[] = [];
+let renderedLocale = new URL(location.href).searchParams.get("lang") ?? "en";
+let localeLoadId = 0;
+let localeUpdate = Promise.resolve();
 
 const tilesets = [
   {
@@ -122,7 +134,89 @@ function decodeQueryParam(p: string) {
   return decodeURIComponent(p.replace(/\+/g, " "));
 }
 
-function load() {
+async function updateUiLocale(nextLocale: string | null) {
+  const thisLoadId = ++localeLoadId;
+  const nextRenderedLocale = nextLocale ?? "en";
+  localeUpdate = localeUpdate
+    .catch(() => undefined)
+    .then(() => tx.setCurrentLocale(nextLocale ?? ""))
+    .then(() => undefined);
+  try {
+    await localeUpdate;
+  } catch (e) {
+    console.error(e);
+  }
+  if (thisLoadId === localeLoadId) renderedLocale = nextRenderedLocale;
+}
+
+function modsFromUrl(url: URL): string[] {
+  return url.searchParams.get("m")?.split(",").filter(Boolean) ?? [];
+}
+
+function loadDataOptionsFromLocation(updateLocale = true) {
+  const url = new URL(location.href);
+  const nextVersion = url.searchParams.get("v") ?? "latest";
+  const nextLocale = url.searchParams.get("lang");
+  const nextEnabledMods = modsFromUrl(url);
+  const versionOrLocaleChanged =
+    nextVersion !== version || nextLocale !== locale;
+  const modsChanged =
+    JSON.stringify(nextEnabledMods) !== JSON.stringify(enabledMods);
+  const localeChanged = nextLocale !== locale;
+  version = nextVersion;
+  locale = nextLocale;
+  enabledMods = nextEnabledMods;
+  if (versionOrLocaleChanged) {
+    const path = location.pathname.slice(import.meta.env.BASE_URL.length - 1);
+    void data.setVersion(
+      version,
+      locale,
+      enabledMods,
+      enabledMods.length > 0 || /^\/mod\/.+/.test(path),
+    );
+  } else if (modsChanged) {
+    void data.setEnabledMods(enabledMods);
+  }
+  if (updateLocale && localeChanged) void updateUiLocale(locale);
+}
+
+function setDataOptions(nextVersion: string, nextLocale: string | null) {
+  const url = new URL(location.href);
+  if (nextVersion === "latest") url.searchParams.delete("v");
+  else url.searchParams.set("v", nextVersion);
+  if (nextLocale === null) url.searchParams.delete("lang");
+  else url.searchParams.set("lang", nextLocale);
+  history.pushState(null, "", url);
+  currentHref = location.href;
+  loadDataOptionsFromLocation();
+}
+
+function setModEnabled(mod: string, enabled: boolean) {
+  let nextEnabledMods = enabledMods;
+  if (enabled) {
+    const dependencies = resolveModDependencies(mod, (id) =>
+      $data?.getModInfo(id),
+    );
+    const additions = [...dependencies, mod].filter(
+      (id) => !enabledMods.includes(id),
+    );
+    if (additions.length) nextEnabledMods = [...enabledMods, ...additions];
+  } else {
+    if (enabledMods.includes(mod)) {
+      nextEnabledMods = enabledMods.filter((m) => m !== mod);
+    }
+  }
+  if (nextEnabledMods === enabledMods) return;
+  enabledMods = nextEnabledMods;
+  const url = new URL(location.href);
+  if (enabledMods.length > 0) url.searchParams.set("m", enabledMods.join(","));
+  else url.searchParams.delete("m");
+  replaceState(null, "", url.toString());
+  currentHref = url.toString();
+  void data.setEnabledMods(enabledMods);
+}
+
+function load(noScroll: boolean = false) {
   const path = location.pathname.slice(import.meta.env.BASE_URL.length - 1);
   let m: RegExpExecArray | null;
   if ((m = /^\/([^\/]+)(?:\/(.+))?$/.exec(path))) {
@@ -135,7 +229,7 @@ function load() {
       item = { type, id: id ? decodeURIComponent(id) : "" };
     }
 
-    window.scrollTo(0, 0);
+    if (!noScroll) window.scrollTo(0, 0);
   } else {
     item = null;
     search = "";
@@ -143,7 +237,18 @@ function load() {
   }
 }
 
-$: if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
+$: if (item?.type === "mod" && $data) {
+  const modId = item.id;
+  const mod = modId
+    ? $data.availableMods.find((candidate) => candidate.id === modId)
+    : undefined;
+  document.title = `${mod ? singular(mod.label) : t("Mods")} - The Hitchhiker's Guide to the Cataclysm`;
+} else if (
+  item &&
+  item.id &&
+  $data &&
+  $data.byIdMaybe(item.type as any, item.id)
+) {
   const it = $data.byId(item.type as any, item.id);
   document.title = `${singularName(
     it,
@@ -154,7 +259,12 @@ $: if (item && item.id && $data && $data.byIdMaybe(item.type as any, item.id)) {
   document.title = "The Hitchhiker's Guide to the Cataclysm";
 }
 
+$: if (item?.type === "mod" && item.id && $data && !$data.hasFetchedMods) {
+  data.fetchMods();
+}
+
 load();
+loadDataOptionsFromLocation(false);
 
 // Throttle replaceState to avoid browser warnings.
 // |throttle| isn't defined when running tests for some reason.
@@ -201,6 +311,7 @@ function maybeNavigate(event: MouseEvent) {
 }
 
 window.addEventListener("popstate", () => {
+  loadDataOptionsFromLocation();
   load();
 });
 
@@ -268,15 +379,7 @@ const randomableItemTypes = new Set<keyof SupportedTypesWithMapped>([
   "conduct",
   "proficiency",
 ]);
-async function getRandomPage() {
-  const d = await new Promise<CddaData>((resolve) => {
-    const unsubscribe = data.subscribe((v) => {
-      if (v) {
-        resolve(v);
-        setTimeout(() => unsubscribe());
-      }
-    });
-  });
+function getRandomPage(d: CddaData) {
   const items = d
     .all()
     .filter(
@@ -286,14 +389,17 @@ async function getRandomPage() {
 }
 
 let randomPage: string | null = null;
-function newRandomPage() {
-  getRandomPage().then((r) => {
-    randomPage = `${import.meta.env.BASE_URL}${mapType(r.type)}/${r.id}${
-      location.search
-    }`;
-  });
+function newRandomPage(d: CddaData | null) {
+  if (!d) {
+    randomPage = null;
+    return;
+  }
+  const r = getRandomPage(d);
+  randomPage = `${import.meta.env.BASE_URL}${mapType(r.type)}/${r.id}${
+    location.search
+  }`;
 }
-newRandomPage();
+$: newRandomPage($data);
 
 // This is one character behind the actual search value, because
 // of the throttle, but eh, it's good enough.
@@ -336,27 +442,37 @@ function langHref(lang: string, href: string) {
       </strong>
     </div>
     <div class="search">
-      <input
-        style="margin: 0; width: 100%"
-        placeholder={t("Search...", {
-          _comment: "Placeholder text in the search box",
-        })}
-        type="search"
-        bind:value={search}
-        on:input={clearItem}
-        id="search" />
+      {#key renderedLocale}
+        <input
+          style="margin: 0; width: 100%"
+          placeholder={t("Search...", {
+            _comment: "Placeholder text in the search box",
+          })}
+          type="search"
+          bind:value={search}
+          on:input={clearItem}
+          id="search" />
+      {/key}
     </div>
   </nav>
 </header>
 <main>
   {#if item}
     {#if $data}
-      {#key item}
-        {#if item.id}
-          <Thing {item} data={$data} />
-        {:else}
-          <Catalog type={item.type} data={$data} />
-        {/if}
+      {#key $data}
+        {#key item}
+          {#if item.type === "mod"}
+            {#if item.id}
+              <Mod data={$data} {enabledMods} {setModEnabled} modId={item.id} />
+            {:else}
+              <ModCatalog data={$data} />
+            {/if}
+          {:else if item.id}
+            <Thing {item} data={$data} />
+          {:else}
+            <Catalog type={item.type} data={$data} />
+          {/if}
+        {/key}
       {/key}
     {:else}
       <span style="color: var(--cata-color-gray)">
@@ -372,8 +488,10 @@ function langHref(lang: string, href: string) {
     {/if}
   {:else if search}
     {#if $data}
-      {#key renderedSearch}
-        <SearchResults data={$data} search={renderedSearch} />
+      {#key $data}
+        {#key renderedSearch}
+          <SearchResults data={$data} search={renderedSearch} />
+        {/key}
       {/key}
     {:else}
       <span style="color: var(--cata-color-gray)">
@@ -388,237 +506,273 @@ function langHref(lang: string, href: string) {
       </span>
     {/if}
   {:else}
-    <img
-      src={dontPanic}
-      height="200"
-      width="343"
-      style="float:right"
-      alt="The words 'Don't Panic' in big friendly letters" />
-    <p>
-      <InterpolatedTranslation
-        str={t(
-          `The {hhg} is a guide to the zombie survival roguelike game {link_cdda}. You can
+    {#key renderedLocale}
+      <img
+        src={dontPanic}
+        height="200"
+        width="343"
+        style="float:right"
+        alt="The words 'Don't Panic' in big friendly letters" />
+      <p>
+        <InterpolatedTranslation
+          str={t(
+            `The {hhg} is a guide to the zombie survival roguelike game {link_cdda}. You can
 search for things in the game, like items (e.g. a {link_flashlight}), furniture
 (e.g. a {link_table}), or monsters (e.g. a {link_zombie}), and find useful
 information about them. The data in the Guide comes directly from the JSON
 files in the game itself.`,
-          {
-            hhg: "{hhg}",
-            link_cdda: "{link_cdda}",
-            link_flashlight: "{link_flashlight}",
-            link_table: "{link_table}",
-            link_zombie: "{link_zombie}",
-          },
-        )}
-        slot0="hhg"
-        slot1="link_cdda"
-        slot2="link_flashlight"
-        slot3="link_table"
-        slot4="link_zombie">
-        <strong slot="0">Hitchhiker's Guide to the Cataclysm</strong>
-        <a slot="1" href="https://cataclysmdda.org/"
-          >Cataclysm: Dark Days Ahead</a>
-        <a
-          slot="2"
-          href="{import.meta.env.BASE_URL}item/flashlight{location.search}"
-          >{t("flashlight", { _comment: "Item name" })}</a>
-        <a
-          slot="3"
-          href="{import.meta.env.BASE_URL}furniture/f_table{location.search}"
-          >{t("table", { _comment: "Furniture" })}</a>
-        <a
-          slot="4"
-          href="{import.meta.env.BASE_URL}monster/mon_zombie{location.search}"
-          >{t("zombie", { _comment: "Monster name" })}</a>
-      </InterpolatedTranslation>
-    </p>
-    <p>
-      {t(`The Guide stores all its data locally and is offline-capable, so you can
+            {
+              hhg: "{hhg}",
+              link_cdda: "{link_cdda}",
+              link_flashlight: "{link_flashlight}",
+              link_table: "{link_table}",
+              link_zombie: "{link_zombie}",
+            },
+          )}
+          slot0="hhg"
+          slot1="link_cdda"
+          slot2="link_flashlight"
+          slot3="link_table"
+          slot4="link_zombie">
+          <strong slot="0">Hitchhiker's Guide to the Cataclysm</strong>
+          <a slot="1" href="https://cataclysmdda.org/"
+            >Cataclysm: Dark Days Ahead</a>
+          <a
+            slot="2"
+            href="{import.meta.env.BASE_URL}item/flashlight{location.search}"
+            >{t("flashlight", { _comment: "Item name" })}</a>
+          <a
+            slot="3"
+            href="{import.meta.env.BASE_URL}furniture/f_table{location.search}"
+            >{t("table", { _comment: "Furniture" })}</a>
+          <a
+            slot="4"
+            href="{import.meta.env.BASE_URL}monster/mon_zombie{location.search}"
+            >{t("zombie", { _comment: "Monster name" })}</a>
+        </InterpolatedTranslation>
+      </p>
+      <p>
+        {t(`The Guide stores all its data locally and is offline-capable, so you can
 take it with you wherever you go. There's nothing to do to make the Guide
 work offline, just visit the page and it will work even without internet
 access, as long as you've visited it once before.`)}
-      {#if deferredPrompt}
-        <InterpolatedTranslation
-          str={t(
-            `It's also {installable_button}, so you can pop it out of your browser and use it like a regular app.`,
-            { installable_button: "{installable_button}" },
-          )}
-          slot0="installable_button">
-          <button
-            slot="0"
-            class="disclosure"
-            on:click={(e) => {
-              e.preventDefault();
-              deferredPrompt.prompt();
-            }}
-            >{t("installable", {
-              _context: "Front page",
-              _comment: "Meaning, install the Hitchhiker's Guide app itself.",
-            })}</button>
-        </InterpolatedTranslation>
-      {/if}
-    </p>
-    <p style="font-style: italic; color: var(--cata-color-gray)">
-      {t(
-        `More popular than the Celestial Home Care Omnibus, better selling than
+        {#if deferredPrompt}
+          <InterpolatedTranslation
+            str={t(
+              `It's also {installable_button}, so you can pop it out of your browser and use it like a regular app.`,
+              { installable_button: "{installable_button}" },
+            )}
+            slot0="installable_button">
+            <button
+              slot="0"
+              class="disclosure"
+              on:click={(e) => {
+                e.preventDefault();
+                deferredPrompt.prompt();
+              }}
+              >{t("installable", {
+                _context: "Front page",
+                _comment: "Meaning, install the Hitchhiker's Guide app itself.",
+              })}</button>
+          </InterpolatedTranslation>
+        {/if}
+      </p>
+      <p style="font-style: italic; color: var(--cata-color-gray)">
+        {t(
+          `More popular than the Celestial Home Care Omnibus, better selling than
 Fifty-three More Things to do in Zero Gravity, and more controversial than
 Oolon Colluphid's trilogy of philosophical blockbusters Where God Went
 Wrong, Some More of God's Greatest Mistakes and Who is this God Person
 Anyway?`,
-        {
-          _comment:
-            "This is a quote from the Hitchhiker's Guide to the Galaxy, by Douglas Adams",
-        },
-      )}
-    </p>
-    <p>
-      <InterpolatedTranslation
-        str={t(
-          `The Guide is developed on {link_github} by {link_nornagon}. If you notice any problems, please {link_file_an_issue}!`,
           {
-            link_github: "{link_github}",
-            link_nornagon: "{link_nornagon}",
-            link_file_an_issue: "{link_file_an_issue}",
+            _comment:
+              "This is a quote from the Hitchhiker's Guide to the Galaxy, by Douglas Adams",
           },
         )}
-        slot0="link_github"
-        slot1="link_nornagon"
-        slot2="link_file_an_issue">
-        <a slot="0" href="https://github.com/nornagon/cdda-guide">GitHub</a>
-        <a slot="1" href="https://www.nornagon.net">nornagon</a>
-        <a slot="2" href="https://github.com/nornagon/cdda-guide/issues"
-          >{t("file an issue")}</a>
-      </InterpolatedTranslation>
-    </p>
-
-    {#if locale}
-      <p style="font-weight: bold">
+      </p>
+      <p>
         <InterpolatedTranslation
           str={t(
-            `You can help translate the Guide into your language on {link_transifex}.`,
-            { link_transifex: "{link_transifex}" },
+            `The Guide is developed on {link_github} by {link_nornagon}. If you notice any problems, please {link_file_an_issue}!`,
+            {
+              link_github: "{link_github}",
+              link_nornagon: "{link_nornagon}",
+              link_file_an_issue: "{link_file_an_issue}",
+            },
           )}
-          slot0="link_transifex">
-          <a
-            slot="0"
-            href="https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/"
-            >Transifex</a>
+          slot0="link_github"
+          slot1="link_nornagon"
+          slot2="link_file_an_issue">
+          <a slot="0" href="https://github.com/nornagon/cdda-guide">GitHub</a>
+          <a slot="1" href="https://www.nornagon.net">nornagon</a>
+          <a slot="2" href="https://github.com/nornagon/cdda-guide/issues"
+            >{t("file an issue")}</a>
         </InterpolatedTranslation>
       </p>
-    {/if}
 
-    <h2>{t("Catalogs")}</h2>
-    <ul>
-      <li><a href="/item{location.search}">{t("Items")}</a></li>
-      <li><a href="/monster{location.search}">{t("Monsters")}</a></li>
-      <li><a href="/furniture{location.search}">{t("Furniture")}</a></li>
-      <li><a href="/terrain{location.search}">{t("Terrain")}</a></li>
-      <li><a href="/vehicle_part{location.search}">{t("Vehicle Parts")}</a></li>
-      <li><a href="/tool_quality{location.search}">{t("Qualities")}</a></li>
-      <li><a href="/mutation{location.search}">{t("Mutations")}</a></li>
-      <li><a href="/martial_art{location.search}">{t("Martial Arts")}</a></li>
-      <li><a href="/json_flag{location.search}">{t("Flags")}</a></li>
-      <li>
-        <a href="/achievement{location.search}">{t("Achievements")}</a> /
-        <a href="/conduct{location.search}">{t("Conducts")}</a>
-      </li>
-      <li><a href="/proficiency{location.search}">{t("Proficiencies")}</a></li>
-    </ul>
+      {#if locale}
+        <p style="font-weight: bold">
+          <InterpolatedTranslation
+            str={t(
+              `You can help translate the Guide into your language on {link_transifex}.`,
+              { link_transifex: "{link_transifex}" },
+            )}
+            slot0="link_transifex">
+            <a
+              slot="0"
+              href="https://www.transifex.com/nornagon/the-hitchhikers-guide-to-the-cataclysm/"
+              >Transifex</a>
+          </InterpolatedTranslation>
+        </p>
+      {/if}
 
-    <InterpolatedTranslation
-      str={t(`Or visit a {link_random_page}.`, {
-        link_random_page: "{link_random_page}",
-      })}
-      slot0="link_random_page">
-      <a slot="0" href={randomPage} on:click={() => setTimeout(newRandomPage)}
-        >{t("random page")}</a>
-    </InterpolatedTranslation>
+      <h2>{t("Catalogs")}</h2>
+      <ul>
+        <li><a href="/item{location.search}">{t("Items")}</a></li>
+        <li><a href="/monster{location.search}">{t("Monsters")}</a></li>
+        <li><a href="/furniture{location.search}">{t("Furniture")}</a></li>
+        <li><a href="/terrain{location.search}">{t("Terrain")}</a></li>
+        <li>
+          <a href="/vehicle_part{location.search}">{t("Vehicle Parts")}</a>
+        </li>
+        <li><a href="/tool_quality{location.search}">{t("Qualities")}</a></li>
+        <li><a href="/mutation{location.search}">{t("Mutations")}</a></li>
+        <li><a href="/martial_art{location.search}">{t("Martial Arts")}</a></li>
+        <li><a href="/json_flag{location.search}">{t("Flags")}</a></li>
+        <li>
+          <a href="/achievement{location.search}">{t("Achievements")}</a> /
+          <a href="/conduct{location.search}">{t("Conducts")}</a>
+        </li>
+        <li>
+          <a href="/proficiency{location.search}">{t("Proficiencies")}</a>
+        </li>
+        <li><a href="/mod{location.search}">{t("Mods")}</a></li>
+      </ul>
+
+      <InterpolatedTranslation
+        str={t(`Or visit a {link_random_page}.`, {
+          link_random_page: "{link_random_page}",
+        })}
+        slot0="link_random_page">
+        <a
+          slot="0"
+          href={randomPage}
+          on:click={() => setTimeout(() => newRandomPage($data))}
+          >{t("random page")}</a>
+      </InterpolatedTranslation>
+    {/key}
   {/if}
 
-  <p class="data-options">
-    {t("Version:")}
-    {#if $data || builds}
-      {#if builds}
+  {#key renderedLocale}
+    <p class="data-options">
+      {t("Version:")}
+      {#if $data || builds}
+        {#if builds}
+          <!-- svelte-ignore a11y-no-onchange -->
+          <select
+            value={$data?.build_number ??
+              (version === "latest" ? builds[0].build_number : version)}
+            on:change={(e) => {
+              const buildNumber = e.currentTarget.value;
+              setDataOptions(
+                buildNumber === builds?.[0].build_number
+                  ? "latest"
+                  : buildNumber,
+                locale,
+              );
+            }}>
+            <optgroup label="Stable">
+              {#each builds.filter((b) => !b.prerelease) as build}
+                <option value={build.build_number}>{build.build_number}</option>
+              {/each}
+            </optgroup>
+            <optgroup label="Experimental">
+              {#each builds.filter((b) => b.prerelease) as build, i}
+                <option value={build.build_number}
+                  >{build.build_number}{#if i === 0}&nbsp;(latest){/if}</option>
+              {/each}
+            </optgroup>
+          </select>
+        {:else if $data}
+          <select disabled>
+            <option>{$data.build_number}</option>
+          </select>
+        {/if}
+      {:else}
+        <em style="color: var(--cata-color-gray)">({t("Loading...")})</em>
+      {/if}
+      <span style="white-space: nowrap">
+        {t("Tileset:")}
         <!-- svelte-ignore a11y-no-onchange -->
         <select
-          value={$data?.build_number ??
-            (version === "latest" ? builds[0].build_number : version)}
+          value={tilesetUrlTemplate}
           on:change={(e) => {
-            const url = new URL(location.href);
-            const buildNumber = e.currentTarget.value;
-            if (buildNumber === builds?.[0].build_number)
-              url.searchParams.delete("v");
-            else url.searchParams.set("v", buildNumber);
-            location.href = url.toString();
+            tilesetUrlTemplate = e.currentTarget.value;
           }}>
-          <optgroup label="Stable">
-            {#each builds.filter((b) => !b.prerelease) as build}
-              <option value={build.build_number}>{build.build_number}</option>
-            {/each}
-          </optgroup>
-          <optgroup label="Experimental">
-            {#each builds.filter((b) => b.prerelease) as build, i}
-              <option value={build.build_number}
-                >{build.build_number}{#if i === 0}&nbsp;(latest){/if}</option>
-            {/each}
-          </optgroup>
-        </select>
-      {:else if $data}
-        <select disabled>
-          <option>{$data.build_number}</option>
-        </select>
-      {/if}
-    {:else}
-      <em style="color: var(--cata-color-gray)">({t("Loading...")})</em>
-    {/if}
-    <span style="white-space: nowrap">
-      {t("Tileset:")}
-      <!-- svelte-ignore a11y-no-onchange -->
-      <select
-        value={tilesetUrlTemplate}
-        on:change={(e) => {
-          tilesetUrlTemplate = e.currentTarget.value;
-        }}>
-        <option value="">None (ASCII)</option>
-        {#each tilesets as { name, url }}
-          <option value={url}>{name}</option>
-        {/each}
-      </select>
-    </span>
-    <span style="white-space: nowrap">
-      {t("Language:")}
-      {#if builds}
-        {@const build_number =
-          version === "latest" ? builds[0].build_number : version}
-        {@const build = builds.find((b) => b.build_number === build_number)}
-        {@const langs = build?.langs ?? []}
-        {@const validLangs = langs.filter((lang) => {
-          try {
-            getLanguageName(lang);
-            return true;
-          } catch {
-            return false;
-          }
-        })}
-        <select
-          value={locale || "en"}
-          on:change={(e) => {
-            const url = new URL(location.href);
-            const lang = e.currentTarget.value;
-            if (lang === "en") url.searchParams.delete("lang");
-            else url.searchParams.set("lang", lang);
-            location.href = url.toString();
-          }}>
-          <option value="en">English</option>
-          {#each validLangs.sort((a, b) => a.localeCompare(b)) as lang}
-            <option value={lang}>{getLanguageName(lang)}</option>
+          <option value="">None (ASCII)</option>
+          {#each tilesets as { name, url }}
+            <option value={url}>{name}</option>
           {/each}
         </select>
-      {:else}
-        <select disabled><option>{t("Loading...")}</option></select>
-      {/if}
-    </span>
-  </p>
+      </span>
+      <span style="white-space: nowrap">
+        {t("Language:")}
+        {#if builds}
+          {@const build_number =
+            version === "latest" ? builds[0].build_number : version}
+          {@const build = builds.find((b) => b.build_number === build_number)}
+          {@const langs = build?.langs ?? []}
+          {@const validLangs = langs.filter((lang) => {
+            try {
+              getLanguageName(lang);
+              return true;
+            } catch {
+              return false;
+            }
+          })}
+          <select
+            value={locale || "en"}
+            on:change={(e) => {
+              const lang = e.currentTarget.value;
+              setDataOptions(version, lang === "en" ? null : lang);
+            }}>
+            <option value="en">English</option>
+            {#each validLangs.sort((a, b) => a.localeCompare(b)) as lang}
+              <option value={lang}>{getLanguageName(lang)}</option>
+            {/each}
+          </select>
+        {:else}
+          <select disabled><option>{t("Loading...")}</option></select>
+        {/if}
+      </span>
+    </p>
+    {#if enabledMods.length > 0}
+      <p class="data-options" style="display: flex; align-items: center;">
+        <a href="{import.meta.env.BASE_URL}mod{location.search}">{t("Mods")}</a
+        >:
+        <span style="margin-left: 0.5em">
+          {#if $data && $data.availableMods.length === 0}
+            <em style="color: var(--cata-color-gray)"
+              >{t("Mods data not processed for this version.")}</em>
+          {:else if $data}
+            {#key enabledMods}
+              {#each enabledMods as mod, i}
+                {@const modLabel = $data.availableMods.find(
+                  (availableMod) => availableMod.id === mod,
+                )?.label}
+                {#if i > 0}{", "}{/if}<a
+                  href="{import.meta.env.BASE_URL}mod/{encodeURIComponent(
+                    mod,
+                  )}{location.search}">{modLabel ? singular(modLabel) : mod}</a>
+              {/each}
+            {/key}
+          {:else}
+            <em style="color: var(--cata-color-gray)">{t("Loading...")}</em>
+          {/if}
+        </span>
+      </p>
+    {/if}
+  {/key}
 </main>
 
 <style>

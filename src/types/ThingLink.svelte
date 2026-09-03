@@ -13,6 +13,7 @@ import type {
   SupportedTypeMapped,
   SupportedTypesWithMapped,
 } from "../types";
+import ModTag from "../ModTag.svelte";
 import MutationColor from "./MutationColor.svelte";
 
 export let type: keyof SupportedTypesWithMapped;
@@ -37,6 +38,7 @@ function countIsPlural(count: number | [number, number]): boolean {
 const data = getContext<CddaData>("data");
 
 let item = data.byIdMaybe(type, id);
+const sourceItem = item;
 if (item?.type === "vehicle_part" && !item.name && item.item)
   item = data.byId("item", item.item);
 
@@ -70,5 +72,6 @@ function isItem(item: SupportedTypeMapped): item is Item {
           ? singular(item.type_name)
           : (plural ? pluralName : singularName)(nameSource)
         : id}</a
-  >{#if item?.type === "mutation"}&nbsp;<MutationColor mutation={item} />{/if}
+  >{#if item?.type === "mutation"}&nbsp;<MutationColor
+      mutation={item} />{/if}{#if sourceItem}<ModTag item={sourceItem} />{/if}
 {/if}

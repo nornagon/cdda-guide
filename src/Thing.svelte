@@ -37,6 +37,7 @@ import JsonView from "./JsonView.svelte";
 import OvermapSpecial from "./types/OvermapSpecial.svelte";
 import ItemAction from "./types/ItemAction.svelte";
 import Technique from "./types/Technique.svelte";
+import ModTag from "./ModTag.svelte";
 
 import Spoiler from "./Spoiler.svelte";
 import { isSpoilerItem } from "./spoilers";
@@ -143,16 +144,22 @@ const display = (obj && displays[obj.type]) ?? Unknown;
     </section>
   {:else if typeof globalThis !== "undefined" && globalThis.process}
     <!-- running in tests -->
-    <svelte:component this={display} item={obj} />
+    <div>
+      <svelte:component this={display} item={obj} />
+      <ModTag item={obj} attachToPageTitle={true} />
+    </div>
   {:else}
-    <ErrorBoundary {onError}>
-      {#if /obsolet/.test(obj.__filename)}
-        <ObsoletionWarning item={obj} />
-      {/if}
-      <Spoiler spoily={isSpoilerItem(item.id)}>
-        <svelte:component this={display} item={obj} />
-      </Spoiler>
-    </ErrorBoundary>
+    <div>
+      <ErrorBoundary {onError}>
+        {#if /obsolet/.test(obj.__filename)}
+          <ObsoletionWarning item={obj} />
+        {/if}
+        <Spoiler spoily={isSpoilerItem(item.id)}>
+          <svelte:component this={display} item={obj} />
+        </Spoiler>
+      </ErrorBoundary>
+      <ModTag item={obj} attachToPageTitle={true} />
+    </div>
   {/if}
 
   <details>

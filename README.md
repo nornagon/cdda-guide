@@ -20,6 +20,7 @@ The Hitchhiker's Guide to the Cataclysm is maintained by [**@nornagon**](https:/
 - [**@pizzasgood**](https://github.com/pizzasgood)
 - [**@GuardianDll**](https://github.com/GuardianDll)
 - [**@Hyperseeker**](https://github.com/Hyperseeker)
+- [**@esphas**](https://github.com/esphas)
 
 Further, thanks to everyone who files bugs and feature requests in the issue tracker. You all help make the Guide what it is!
 

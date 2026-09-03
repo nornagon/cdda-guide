@@ -40,3 +40,32 @@ test("search with no results shows 'no results'", () => {
   expect(container.textContent).not.toMatch(/undefined|NaN|object Object/);
   expect(container.textContent).toMatch(/No results/);
 });
+
+test("search results show the mods that edited an object", () => {
+  const moddedData = new CddaData(
+    [{ type: "MONSTER", id: "stegosaurus", name: "stegosaurus", symbol: "D" }],
+    undefined,
+    undefined,
+    undefined,
+    {
+      DinoMod: {
+        info: { name: "DinoMod" },
+        data: [
+          {
+            type: "MONSTER",
+            id: "stegosaurus",
+            "copy-from": "stegosaurus",
+          },
+        ],
+      },
+    },
+    ["DinoMod"],
+  );
+
+  const { getByText } = render(SearchResults, {
+    data: moddedData,
+    search: "stego",
+  });
+
+  expect(getByText("DinoMod")).toBeTruthy();
+});

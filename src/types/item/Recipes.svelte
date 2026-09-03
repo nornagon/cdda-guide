@@ -1,8 +1,10 @@
 <script context="module" lang="ts">
 import type { Recipe as RecipeType } from "../../types";
-// Lazily compute the recipe index.
-let recipeIndex: Record<string, RecipeType[]>;
-export function getRecipeIndex(data: CddaData) {
+
+// Lazily compute the recipe index for each loaded data snapshot.
+const recipeIndexes = new WeakMap<CddaData, Record<string, RecipeType[]>>();
+function getRecipeIndex(data: CddaData) {
+  let recipeIndex = recipeIndexes.get(data);
   if (!recipeIndex) {
     recipeIndex = {};
     for (const recipe of data.byType("recipe")) {
@@ -13,13 +15,15 @@ export function getRecipeIndex(data: CddaData) {
         recipeIndex[recipe.result].push(recipe);
       }
     }
+    recipeIndexes.set(data, recipeIndex);
   }
   return recipeIndex;
 }
 
 // And the byproducts index.
-let byproductsIndex: Record<string, RecipeType[]>;
-export function getByproductsIndex(data: CddaData) {
+const byproductsIndexes = new WeakMap<CddaData, Record<string, RecipeType[]>>();
+function getByproductsIndex(data: CddaData) {
+  let byproductsIndex = byproductsIndexes.get(data);
   if (!byproductsIndex) {
     byproductsIndex = {};
     for (const recipe of data.byType("recipe")) {
@@ -40,6 +44,7 @@ export function getByproductsIndex(data: CddaData) {
         return singularName(aResult).localeCompare(singularName(bResult));
       });
     }
+    byproductsIndexes.set(data, byproductsIndex);
   }
   return byproductsIndex;
 }
