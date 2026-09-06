@@ -1,24 +1,24 @@
-import { render, cleanup, act } from "@testing-library/svelte";
-import { screen } from "@testing-library/dom";
-import { expect, test, afterEach } from "vitest";
-import * as fs from "fs";
-import path from "path";
+import { render, cleanup } from "@testing-library/svelte";
+import { tick } from "svelte";
+import { expect, test, afterEach, inject } from "vitest";
+import { commands } from "vitest/browser";
 
 import { CddaData, mapType } from "./data";
 import type { SupportedTypeMapped } from "./types";
 
 import Thing from "./Thing.svelte";
-import {
-  furnitureByOMSAppearance,
-  lootByOMSAppearance,
-  terrainByOMSAppearance,
-} from "./types/item/spawnLocations";
+declare module "vitest" {
+  export interface ProvidedContext {
+    testOnly: string;
+    dumpPages: boolean;
+  }
+}
 
-export function makeRenderTests(chunkIdx: number, numChunks: number) {
-  const json = JSON.parse(
-    fs.readFileSync(__dirname + "/../_test/all.json", "utf8"),
-  );
-  let data: CddaData = new CddaData(json.data);
+export async function makeRenderTests(chunkIdx: number, numChunks: number) {
+  const json = await (await fetch("/_test/all.json")).json();
+  const data = new CddaData(json.data);
+  const testOnly = inject("testOnly");
+  const dumpPages = inject("dumpPages");
   const types = [
     "item",
     "furniture",
@@ -55,45 +55,42 @@ export function makeRenderTests(chunkIdx: number, numChunks: number) {
         "id" in x &&
         Boolean(x.id) &&
         types.includes(mapType(x.type)) &&
-        (!process.env.TEST_ONLY ||
-          process.env.TEST_ONLY === `${mapType(x.type)}/${x.id}`),
+        (!testOnly || testOnly === `${mapType(x.type)}/${x.id}`),
     )
     .map((x) => [mapType(x.type), x.id]);
 
   afterEach(cleanup);
 
-  test.each(all.filter((_, i) => i % numChunks === chunkIdx))(
+  test.each(all.filter((_, i) => testOnly || i % numChunks === chunkIdx))(
     "render %s %s",
     {
-      // The first test sometimes times out on CI with the default 5sec timeout.
-      timeout: 20000,
+      // The first item page builds the shared location indexes.
+      timeout: 60000,
     },
     async (type, id) => {
-      // Prefill the loot tables, so we don't have to mess with waiting for async load...
-      await lootByOMSAppearance(data);
-      await furnitureByOMSAppearance(data);
-      await terrainByOMSAppearance(data);
-
       // This lets LimitedList always render expanded.
       (globalThis as any).__isTesting__ = true;
       const { container } = render(Thing, { item: { type, id }, data });
-      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-      expect(screen.queryByTestId("loading-indicator")).toBe(null);
+      // Let Svelte show pending await blocks, then wait for the page to finish loading.
+      await tick();
+      await expect
+        .poll(
+          () => container.querySelector('[data-testid="loading-indicator"]'),
+          { timeout: 30000 },
+        )
+        .toBeNull();
 
-      if (process.env.DUMP_PAGES) {
-        const filename = path.resolve(
-          process.cwd(),
-          "_rendered",
-          type,
-          id + "",
+      if (dumpPages) {
+        await commands.writeFile(
+          `_rendered/${type}/${id}`,
+          dumpElement(container),
         );
-        const dumpStr = dumpElement(container);
-        fs.mkdirSync(path.dirname(filename), { recursive: true });
-        fs.writeFileSync(filename, dumpStr);
       }
 
       const { textContent } = container;
-      expect(textContent).not.toMatch(/undefined|NaN|object Object/);
+      expect(textContent).not.toMatch(
+        /undefined|NaN|object Object|There was a problem displaying this page/,
+      );
     },
   );
 }

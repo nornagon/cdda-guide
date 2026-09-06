@@ -26,6 +26,9 @@ jobs:
       - name: Fetch Dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Install test browser
+        run: yarn playwright install --with-deps --only-shell chromium
+
       - name: Test
         run: |
           echo "GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME"
