@@ -31,15 +31,13 @@ export let item: Monster;
 
 let data = getContext<CddaData>("data");
 
+// Derived types (stab, acid) are already filled in by CddaData.flatten, the
+// same way the game does it when finalizing monster types.
 function monsterArmor(armor: Resistances): Record<string, number> {
   if (armor) {
     const ret: Record<string, number> = {};
     for (const damageType of data.allDamageTypes()) {
-      let value = armor[damageType.id];
-      if (!value && damageType.derived_from) {
-        const [derived_from, multiplier] = damageType.derived_from;
-        value = armor[derived_from] * multiplier;
-      }
+      const value = armor[damageType.id];
       if (value) ret[damageType.id] = value;
     }
     return ret;

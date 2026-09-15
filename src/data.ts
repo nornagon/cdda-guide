@@ -10,7 +10,9 @@ import {
   type Mapgen,
   type PaletteData,
   type DamageInstance,
+  type DamageType,
   type DamageUnit,
+  type Resistances,
   type RequirementData,
   type SupportedTypesWithMapped,
   type SupportedTypeMapped,
@@ -298,6 +300,7 @@ export const hiddenAttributes = [
   "__filename",
   "__self",
   "__prevSelf",
+  "__rawArmor",
 ];
 
 /**
@@ -606,6 +609,39 @@ export class CddaData {
     return this.#raw;
   }
 
+  // Mirrors MonsterGenerator::finalize_mtypes (monstergenerator.cpp). A
+  // copy-from child starts from its parent's armor as written in JSON (the
+  // game copies the parent before finalization), so that raw map is carried
+  // down on __rawArmor. Derived types (stab, acid) are filled in from it, and
+  // only the innermost definition's proportional/relative armor applies:
+  // mtype::load resets both on every load.
+  #finalizeMonsterArmor(obj: any, ret: any) {
+    const raw: Resistances | undefined = obj.armor ?? ret.__rawArmor;
+    if (raw) ret.__rawArmor = raw;
+    // The game ignores these unless they are objects.
+    const proportional =
+      typeof obj.proportional?.armor === "object"
+        ? obj.proportional.armor
+        : null;
+    const relative =
+      typeof obj.relative?.armor === "object" ? obj.relative.armor : null;
+    if (!raw && !relative && !proportional) return;
+    const damageTypes = this.byType("damage_type");
+    if (damageTypes.length === 0) return;
+    const armor = expandResistances(raw ?? {}, damageTypes, 0, true);
+    if (proportional) {
+      const p = expandResistances(proportional, damageTypes, 1, false);
+      for (const dt of damageTypes) armor[dt.id] *= p[dt.id];
+    }
+    if (relative) {
+      const r = expandResistances(relative, damageTypes, 0, false);
+      for (const dt of damageTypes) armor[dt.id] += r[dt.id];
+    }
+    ret.armor = Object.fromEntries(
+      Object.entries(armor).filter(([, v]) => v !== 0),
+    );
+  }
+
   flatten<T = any>(_obj: T): T {
     const obj: any = _obj;
     if (this.#flattenCache.has(obj)) return this.#flattenCache.get(obj);
@@ -634,8 +670,13 @@ export class CddaData {
       return obj;
     }
     if (!parent) {
-      this.#flattenCache.set(obj, obj);
-      return obj;
+      let ret = obj;
+      if (obj.type === "MONSTER" && obj.armor) {
+        ret = { ...obj };
+        this.#finalizeMonsterArmor(obj, ret);
+      }
+      this.#flattenCache.set(obj, ret);
+      return ret;
     }
     const { abstract, ...parentProps } = this.flatten(parent);
     const ret = { ...parentProps, ...obj };
@@ -650,8 +691,11 @@ export class CddaData {
     if (obj.type === "vehicle" && parentProps.parts && obj.parts) {
       ret.parts = [...parentProps.parts, ...obj.parts];
     }
+    if (ret.type === "MONSTER") this.#finalizeMonsterArmor(obj, ret);
     for (const k of Object.keys(ret.relative ?? {})) {
-      if (typeof ret.relative[k] === "number") {
+      if (k === "armor" && ret.type === "MONSTER") {
+        // handled by #finalizeMonsterArmor
+      } else if (typeof ret.relative[k] === "number") {
         if (k === "melee_damage") {
           const di = normalizeDamageInstance(
             JSON.parse(JSON.stringify(ret.melee_damage)),
@@ -659,7 +703,7 @@ export class CddaData {
           for (const du of di) du.amount = (du.amount ?? 0) + ret.relative[k];
           ret.melee_damage = di;
         } else {
-          ret[k] = (ret[k] ?? 0) + ret.relative[k];
+          ret[k] = (ret[k] ?? numericDefault(ret, k)) + ret.relative[k];
         }
       } else if ((k === "damage" || k === "ranged_damage") && ret[k]) {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
@@ -673,19 +717,7 @@ export class CddaData {
               ? ret[k]
               : null;
           if (modified) {
-            modified.amount = (modified.amount ?? 0) + (rdu.amount ?? 0);
-            modified.armor_penetration =
-              (modified.armor_penetration ?? 0) + (rdu.armor_penetration ?? 0);
-            modified.armor_multiplier =
-              (modified.armor_multiplier ?? 0) + (rdu.armor_multiplier ?? 0);
-            modified.damage_multiplier =
-              (modified.damage_multiplier ?? 0) + (rdu.damage_multiplier ?? 0);
-            modified.constant_armor_multiplier =
-              (modified.constant_armor_multiplier ?? 0) +
-              (rdu.constant_armor_multiplier ?? 0);
-            modified.constant_damage_multiplier =
-              (modified.constant_damage_multiplier ?? 0) +
-              (rdu.constant_damage_multiplier ?? 0);
+            addRelativeDamageUnit(modified, rdu);
           }
         }
       } else if (k === "melee_damage" && ret.type === "MONSTER" && ret[k]) {
@@ -698,28 +730,13 @@ export class CddaData {
             (du) => du.damage_type === rdu.damage_type,
           );
           if (modified) {
-            modified.amount = (modified.amount ?? 0) + (rdu.amount ?? 0);
-            modified.armor_penetration =
-              (modified.armor_penetration ?? 0) + (rdu.armor_penetration ?? 0);
-            modified.armor_multiplier =
-              (modified.armor_multiplier ?? 0) + (rdu.armor_multiplier ?? 0);
-            modified.damage_multiplier =
-              (modified.damage_multiplier ?? 0) + (rdu.damage_multiplier ?? 0);
-            modified.constant_armor_multiplier =
-              (modified.constant_armor_multiplier ?? 0) +
-              (rdu.constant_armor_multiplier ?? 0);
-            modified.constant_damage_multiplier =
-              (modified.constant_damage_multiplier ?? 0) +
-              (rdu.constant_damage_multiplier ?? 0);
+            addRelativeDamageUnit(modified, rdu);
           } else {
             meleeDamage.push(JSON.parse(JSON.stringify(rdu)));
           }
         }
         ret[k] = meleeDamage;
-      } else if (
-        (k === "melee_damage" || (k === "armor" && ret.type === "MONSTER")) &&
-        ret[k]
-      ) {
+      } else if (k === "melee_damage" && ret[k]) {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
         for (const k2 of Object.keys(ret.relative[k])) {
           if (
@@ -758,8 +775,13 @@ export class CddaData {
           }
         }
       }
-      if (typeof ret.proportional[k] === "number" && k in ret) {
-        if (k === "attack_cost" && !(k in ret)) ret[k] = 100;
+      if (k === "armor" && ret.type === "MONSTER") {
+        // handled by #finalizeMonsterArmor
+      } else if (
+        typeof ret.proportional[k] === "number" &&
+        (k in ret || (ret.type === "MONSTER" && k in MONSTER_NUMERIC_DEFAULTS))
+      ) {
+        if (!(k in ret)) ret[k] = MONSTER_NUMERIC_DEFAULTS[k];
         if (typeof ret[k] === "string") {
           const m = /^\s*(\d+)\s*(.+)$/.exec(ret[k]);
           if (m) {
@@ -791,19 +813,7 @@ export class CddaData {
               ? ret.damage
               : null;
           if (modified) {
-            modified.amount = (modified.amount ?? 0) * (pdu.amount ?? 1);
-            modified.armor_penetration =
-              (modified.armor_penetration ?? 0) * (pdu.armor_penetration ?? 1);
-            modified.armor_multiplier =
-              (modified.armor_multiplier ?? 0) * (pdu.armor_multiplier ?? 1);
-            modified.damage_multiplier =
-              (modified.damage_multiplier ?? 0) * (pdu.damage_multiplier ?? 1);
-            modified.constant_armor_multiplier =
-              (modified.constant_armor_multiplier ?? 0) *
-              (pdu.constant_armor_multiplier ?? 1);
-            modified.constant_damage_multiplier =
-              (modified.constant_damage_multiplier ?? 0) *
-              (pdu.constant_damage_multiplier ?? 1);
+            multiplyProportionalDamageUnit(modified, pdu);
           }
         }
       } else if (k === "melee_damage" && ret.type === "MONSTER" && ret[k]) {
@@ -816,26 +826,11 @@ export class CddaData {
             (du) => du.damage_type === pdu.damage_type,
           );
           if (modified) {
-            modified.amount = (modified.amount ?? 0) * (pdu.amount ?? 1);
-            modified.armor_penetration =
-              (modified.armor_penetration ?? 0) * (pdu.armor_penetration ?? 1);
-            modified.armor_multiplier =
-              (modified.armor_multiplier ?? 0) * (pdu.armor_multiplier ?? 1);
-            modified.damage_multiplier =
-              (modified.damage_multiplier ?? 0) * (pdu.damage_multiplier ?? 1);
-            modified.constant_armor_multiplier =
-              (modified.constant_armor_multiplier ?? 0) *
-              (pdu.constant_armor_multiplier ?? 1);
-            modified.constant_damage_multiplier =
-              (modified.constant_damage_multiplier ?? 0) *
-              (pdu.constant_damage_multiplier ?? 1);
+            multiplyProportionalDamageUnit(modified, pdu);
           }
         }
         ret[k] = meleeDamage;
-      } else if (
-        (k === "melee_damage" || (k === "armor" && ret.type === "MONSTER")) &&
-        ret[k]
-      ) {
+      } else if (k === "melee_damage" && ret[k]) {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
         for (const k2 of Object.keys(ret.proportional[k])) {
           ret[k][k2] *= ret.proportional[k][k2];
@@ -1953,6 +1948,84 @@ export const countsByCharges = (item: any): boolean => {
   }
   return false;
 };
+
+const DAMAGE_UNIT_MULTIPLIERS = [
+  "armor_multiplier",
+  "damage_multiplier",
+  "constant_armor_multiplier",
+  "constant_damage_multiplier",
+] as const;
+
+// Mirrors damage_unit::operator+= (damage.cpp): amounts add, while a
+// multiplier left at its default of 1 in the relative entry means "no change".
+// The game's operator+= never touches constant_armor_multiplier.
+function addRelativeDamageUnit(base: DamageUnit, relative: DamageUnit) {
+  base.amount = (base.amount ?? 0) + (relative.amount ?? 0);
+  base.armor_penetration =
+    (base.armor_penetration ?? 0) + (relative.armor_penetration ?? 0);
+  for (const m of DAMAGE_UNIT_MULTIPLIERS) {
+    if (m === "constant_armor_multiplier") continue;
+    const r = relative[m] ?? 1;
+    if (r !== 1) base[m] = (base[m] ?? 1) + r;
+  }
+}
+
+// Mirrors damage_instance::handle_proportional (damage.cpp).
+function multiplyProportionalDamageUnit(
+  base: DamageUnit,
+  proportional: DamageUnit,
+) {
+  base.amount = (base.amount ?? 0) * (proportional.amount ?? 1);
+  base.armor_penetration =
+    (base.armor_penetration ?? 0) * (proportional.armor_penetration ?? 1);
+  for (const m of DAMAGE_UNIT_MULTIPLIERS) {
+    const p = proportional[m] ?? 1;
+    if (p !== 1) base[m] = (base[m] ?? 1) * p;
+  }
+}
+
+// Mirrors finalize_damage_map (damage.cpp): fill in every damage type,
+// optionally deriving e.g. stab from cut for types that aren't given.
+function expandResistances(
+  map: Record<string, number>,
+  damageTypes: DamageType[],
+  defaultValue: number,
+  derive: boolean,
+): Resistances {
+  const all = map.all ?? defaultValue;
+  const physical = map.physical ?? all;
+  const nonPhysical = map.non_physical ?? all;
+  const ret: Resistances = {};
+  const toDerive: DamageType[] = [];
+  for (const dt of damageTypes) {
+    if (dt.id in map) ret[dt.id] = map[dt.id];
+    else if (derive && dt.derived_from) toDerive.push(dt);
+    else ret[dt.id] = dt.physical ? physical : nonPhysical;
+  }
+  for (const dt of toDerive) {
+    const [from, mult] = dt.derived_from!;
+    ret[dt.id] =
+      from in ret ? ret[from] * mult : dt.physical ? physical : nonPhysical;
+  }
+  return ret;
+}
+
+// Non-zero defaults the game applies to numeric monster fields
+// (monstergenerator.cpp, mtype::load). Needed so that relative/proportional
+// on a field no ancestor set starts from the game's default, not from 0.
+const MONSTER_NUMERIC_DEFAULTS: Record<string, number> = {
+  vision_day: 40,
+  vision_night: 1,
+  attack_cost: 100,
+  bleed_rate: 100,
+  absorb_ml_per_hp: 250,
+  split_move_cost: 200,
+  absorb_move_cost_min: 1,
+};
+
+function numericDefault(obj: { type?: string }, key: string): number {
+  return obj.type === "MONSTER" ? (MONSTER_NUMERIC_DEFAULTS[key] ?? 0) : 0;
+}
 
 export function normalizeDamageInstance(
   damageInstance: DamageInstance,
