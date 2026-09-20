@@ -51,9 +51,8 @@ jobs:
 
       - name: Deploy 🚀
         if: github.event_name == 'push'
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v4
         with:
           accountId: 38542b72de6483a07c984652797f04e1
-          projectName: cdda-guide
-          directory: dist
+          command: pages deploy dist --project-name=cdda-guide
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
