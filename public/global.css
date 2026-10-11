@@ -1,3 +1,7 @@
+:root {
+	color-scheme: dark;
+}
+
 html, body {
 	position: relative;
 	width: 100%;
