@@ -656,6 +656,7 @@ export type MessageUseFunction = {
 
 export type ItemBasicInfo = {
   id: string;
+  name: Translation;
   category?: string; // item_category_id
   color?: string;
   symbol?: string;
