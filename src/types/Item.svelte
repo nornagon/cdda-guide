@@ -4,6 +4,7 @@ import LimitedList from "../LimitedList.svelte";
 import { getContext } from "svelte";
 
 import {
+  applyVariantToItem,
   asKilograms,
   asLiters,
   buildSearch,
@@ -62,7 +63,10 @@ import InterpolatedTranslation from "../InterpolatedTranslation.svelte";
 import SmokedFrom from "./item/SmokedFrom.svelte";
 
 export let item: Item;
+export let variantId: string | undefined = undefined;
 let data: CddaData = getContext("data");
+
+$: effectiveItem = applyVariantToItem(item, variantId);
 
 const _context = "Item Basic Info";
 
@@ -225,8 +229,9 @@ const usage: UseFunction[] = normalizeUseAction(item.use_action).map((s) => {
   return s;
 });
 
-const ascii_picture =
-  item.ascii_picture && data.byId("ascii_art", item.ascii_picture);
+$: ascii_picture =
+  effectiveItem.ascii_picture &&
+  data.byId("ascii_art", effectiveItem.ascii_picture);
 
 const byName = (a: any, b: any) =>
   singularName(a).localeCompare(singularName(b));
@@ -538,10 +543,10 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
           </dd>
         {/if}
       </dl>
-      {#if item.description}
+      {#if effectiveItem.description}
         <p
           style="color: var(--cata-color-gray); margin-bottom: 0; white-space: pre-wrap;">
-          <ColorText text={singular(item.description)} fgOnly={true} />
+          <ColorText text={singular(effectiveItem.description)} fgOnly={true} />
         </p>
       {/if}
     </div>

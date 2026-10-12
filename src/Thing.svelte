@@ -42,7 +42,7 @@ import ModTag from "./ModTag.svelte";
 import Spoiler from "./Spoiler.svelte";
 import { isSpoilerItem } from "./spoilers";
 
-export let item: { id: string; type: string };
+export let item: { id: string; type: string; variant?: string };
 
 export let data: CddaData;
 setContext("data", data);
@@ -145,7 +145,10 @@ const display = (obj && displays[obj.type]) ?? Unknown;
   {:else if typeof globalThis !== "undefined" && globalThis.process}
     <!-- running in tests -->
     <div>
-      <svelte:component this={display} item={obj} />
+      <svelte:component
+        this={display}
+        item={obj}
+        {...item.variant ? { variantId: item.variant } : {}} />
       <ModTag item={obj} attachToPageTitle={true} />
     </div>
   {:else}
@@ -155,7 +158,10 @@ const display = (obj && displays[obj.type]) ?? Unknown;
           <ObsoletionWarning item={obj} />
         {/if}
         <Spoiler spoily={isSpoilerItem(item.id)}>
-          <svelte:component this={display} item={obj} />
+          <svelte:component
+            this={display}
+            item={obj}
+            {...item.variant ? { variantId: item.variant } : {}} />
         </Spoiler>
       </ErrorBoundary>
       <ModTag item={obj} attachToPageTitle={true} />
