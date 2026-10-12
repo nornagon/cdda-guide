@@ -43,6 +43,7 @@ import GunInfo from "./item/GunInfo.svelte";
 import HarvestedFrom from "./item/HarvestedFrom.svelte";
 import MilledFrom from "./item/MilledFrom.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import { showProbability } from "./item/utils";
 import MagazineInfo from "./item/MagazineInfo.svelte";
 import MeleeInfo from "./item/MeleeInfo.svelte";
 import Recipes from "./item/Recipes.svelte";
