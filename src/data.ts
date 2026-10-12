@@ -150,12 +150,6 @@ function isStringArray<T>(array: string[] | T[]): array is string[] {
   return typeof array[0] === "string";
 }
 
-export function showProbability(prob: number) {
-  const ret = (prob * 100).toFixed(2);
-  if (ret === "0.00") return "< 0.01%";
-  return ret + "%";
-}
-
 // Returns ml
 export function parseVolume(string: string | number): number {
   if (typeof string === "undefined") return 0;

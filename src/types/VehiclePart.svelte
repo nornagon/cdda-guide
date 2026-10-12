@@ -9,7 +9,6 @@ import {
   CddaData,
   getVehiclePartIdAndVariant,
   parseDuration,
-  showProbability,
   singular,
   singularName,
 } from "../data";
@@ -17,6 +16,7 @@ import LimitedList from "../LimitedList.svelte";
 
 import type { ItemGroupData, VehiclePart } from "../types";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import { showProbability } from "./item/utils";
 import RequirementData from "./item/RequirementData.svelte";
 import ThingLink from "./ThingLink.svelte";
 
