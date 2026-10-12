@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from "svelte";
 import {
+  applyVariantToItem,
   buildSearch,
   CddaData,
   countsByCharges,
@@ -62,8 +63,8 @@ function isItem(item: SupportedTypeMapped): item is Item {
       )}){/if}</span>
 {:else}
   {@const nameSource =
-    item && variantId && isItem(item) && "variants" in item && item.variants
-      ? (item.variants.find((v) => v.id === variantId) ?? item)
+    item && variantId && isItem(item)
+      ? applyVariantToItem(item, variantId)
       : item}
   <a href="{import.meta.env.BASE_URL}{type}/{id}{buildSearch(variantId)}"
     >{overrideText

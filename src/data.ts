@@ -123,6 +123,30 @@ export function translate(
 export const singular = (name: Translation): string =>
   translate(name, false, 1);
 
+export function applyVariantToItem<T extends Item>(
+  item: T,
+  variantId: string | undefined,
+): T {
+  if (!variantId || !item.variants) return item;
+  const variant = item.variants.find((v) => v.id === variantId);
+  if (!variant) return item;
+  const variantizedItem = { ...item };
+  if (variant.name != null) variantizedItem.name = variant.name;
+  if (variant.description != null) {
+    variantizedItem.description =
+      variant.append && variantizedItem.description != null
+        ? singular(variantizedItem.description) +
+          "  " +
+          singular(variant.description)
+        : variant.description;
+  }
+  if (variant.symbol != null) variantizedItem.symbol = variant.symbol;
+  if (variant.color != null) variantizedItem.color = variant.color;
+  if (variant.ascii_picture != null)
+    variantizedItem.ascii_picture = variant.ascii_picture;
+  return variantizedItem;
+}
+
 export function buildSearch(variantId?: string): string {
   const params = new URLSearchParams(location.search);
   params.delete("variant");
