@@ -1,4 +1,5 @@
 <script lang="ts">
+import { setContext } from "svelte";
 import Thing from "./Thing.svelte";
 import {
   CddaData,
@@ -265,6 +266,12 @@ $: if (item?.type === "mod" && item.id && $data && !$data.hasFetchedMods) {
 
 load();
 loadDataOptionsFromLocation(false);
+
+function navigateTo(url: string) {
+  history.pushState(null, "", url);
+  load();
+}
+setContext("navigate", navigateTo);
 
 // Throttle replaceState to avoid browser warnings.
 // |throttle| isn't defined when running tests for some reason.
