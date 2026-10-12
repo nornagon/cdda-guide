@@ -12,12 +12,13 @@ export let item: {
   type: string;
   variants?: any;
 };
+export let variantId: string | undefined = undefined;
 
 let data: CddaData = getContext("data");
 
 $: tile_info = $tileData?.tile_info[0];
 $: tile = typeHasTile(item)
-  ? (findTileOrLooksLike($tileData, item) ??
+  ? (findTileOrLooksLike($tileData, item, variantId) ??
     fallbackTile(
       $tileData,
       item.type === "vehicle_part" && item.variants
@@ -57,6 +58,7 @@ function colorFromBgcolor(
 function findTileOrLooksLike(
   tileData: any,
   item: any,
+  variantId: string | undefined,
   jumps: number = 10,
 ): TileInfo | undefined {
   function resolveId(id: string): string {
@@ -65,6 +67,13 @@ function findTileOrLooksLike(
         ? `vp_${id}_${item.variants[0].id}`
         : `vp_${id}`
       : id;
+  }
+  if (variantId && mapType(item.type) === "item") {
+    const variantTile = findTile(
+      tileData,
+      `${item.id ?? item.abstract}_var_${variantId}`,
+    );
+    if (variantTile) return variantTile;
   }
   const idTile = findTile(tileData, resolveId(item.id ?? item.abstract));
   if (idTile) return idTile;
@@ -76,7 +85,8 @@ function findTileOrLooksLike(
     const parent =
       data.byIdMaybe(mapType(item.type), looksLikeId) ??
       data.abstractById(mapType(item.type), looksLikeId);
-    if (parent) return findTileOrLooksLike(tileData, parent, jumps - 1);
+    if (parent)
+      return findTileOrLooksLike(tileData, parent, undefined, jumps - 1);
   }
 }
 
