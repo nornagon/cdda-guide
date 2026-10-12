@@ -27,6 +27,7 @@ $: tile = typeHasTile(item)
     ))
   : null;
 $: baseUrl = $tileData?.baseUrl;
+$: layers = [tile?.bg, tile?.fg].filter((layer) => !!layer);
 
 const sym =
   item.type === "vehicle_part" && item.variants
@@ -203,71 +204,52 @@ function fallbackTile(
     } else return -1;
   }
 }
-
-// Simple CSS helper to fight Prettier, which wants to mangle inline CSS strings.
-function css(obj: Record<string, string>) {
-  let result = "";
-  for (const [k, v] of Object.entries(obj)) {
-    result += `${k}: ${v};`;
-  }
-  return result;
-}
 </script>
 
-{#if tile}
+{#if layers.length}
   <div
-    style={css({
-      width: `${tile_info.width * tile_info.pixelscale}px`,
-      height: `${tile_info.height * tile_info.pixelscale}px`,
-    })}
-    class="tile-icon">
-    {#if tile.bg != null}
+    class="tile-icon"
+    style="
+      zoom: {tile_info.pixelscale};
+      --cell-width: {tile_info.width}px;
+      --cell-height: {tile_info.height}px;
+    ">
+    {#each layers as layer}
       <div
-        class="icon-layer bg"
-        style={css({
-          width: `${tile.bg.width}px`,
-          height: `${tile.bg.height}px`,
-          "background-image": `url(${`${baseUrl}/${encodeURIComponent(
-            tile.bg.file,
-          )}`})`,
-          "background-position": `${-tile.bg.tx * tile.bg.width}px ${
-            -tile.bg.ty * tile.bg.height
-          }px`,
-          transform: `scale(${tile_info.pixelscale}) translate(${tile.bg.offx}px, ${tile.bg.offy}px)`,
-        })}>
+        class="layer"
+        style="
+          --width: {layer.width}px;
+          --height: {layer.height}px;
+          --column: {layer.tx};
+          --row: {layer.ty};
+          background-image: url({baseUrl}/{encodeURIComponent(layer.file)});
+        ">
       </div>
-    {/if}
-    {#if tile.fg != null}
-      <div
-        class="icon-layer fg"
-        style={css({
-          width: `${tile.fg.width}px`,
-          height: `${tile.fg.height}px`,
-          "background-image": `url(${`${baseUrl}/${encodeURIComponent(
-            tile.fg.file,
-          )}`})`,
-          "background-position": `${-tile.fg.tx * tile.fg.width}px ${
-            -tile.fg.ty * tile.fg.height
-          }px`,
-          transform: `scale(${tile_info.pixelscale}) translate(${tile.fg.offx}px, ${tile.fg.offy}px)`,
-        })}>
-      </div>
-    {/if}
+    {/each}
   </div>
 {:else}
   <span style="font-family: monospace;" class="c_{color}">{symbol}</span>
 {/if}
 
 <style>
+/* The box is at least one tileset cell. The layers share one grid area, which
+   sits in the center of the box. */
 .tile-icon {
+  display: inline-grid;
+  place-content: center;
   vertical-align: middle;
-  display: inline-block;
-  position: relative;
+  min-width: var(--cell-width);
+  min-height: var(--cell-height);
+  image-rendering: pixelated;
 }
 
-.icon-layer {
-  position: absolute;
-  transform-origin: top left;
-  image-rendering: pixelated;
+/* Tilesets anchor larger layers to the bottom center of the cell. */
+.layer {
+  grid-area: 1 / 1;
+  place-self: end center;
+  width: var(--width);
+  height: var(--height);
+  background-position: calc(-1 * var(--column) * var(--width))
+    calc(-1 * var(--row) * var(--height));
 }
 </style>
