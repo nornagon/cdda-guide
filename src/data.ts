@@ -123,6 +123,14 @@ export function translate(
 export const singular = (name: Translation): string =>
   translate(name, false, 1);
 
+export function buildSearch(variantId?: string): string {
+  const params = new URLSearchParams(location.search);
+  params.delete("variant");
+  if (variantId) params.set("variant", variantId);
+  const s = params.toString();
+  return s ? "?" + s : "";
+}
+
 export const plural = (name: Translation, n: number = 2): string =>
   translate(name, true, n);
 

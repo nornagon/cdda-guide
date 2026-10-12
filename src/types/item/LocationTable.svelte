@@ -1,6 +1,6 @@
 <script lang="ts">
 import { getContext } from "svelte";
-import { CddaData, omsName } from "../../data";
+import { buildSearch, CddaData, omsName } from "../../data";
 import type { ItemChance, Loot } from "./spawnLocations";
 import { showNumber, showProbability } from "./utils";
 import type { OvermapSpecial } from "../../types";
@@ -64,7 +64,7 @@ function filterLocations(
             <OvermapAppearance overmapSpecial={loc.overmap_special} />
           </td>
           <td>
-            <a href="/overmap_special/{loc.ids[0]}{location.search}"
+            <a href="/overmap_special/{loc.ids[0]}{buildSearch()}"
               >{omsName(data, loc.overmap_special)}</a>
             {#if loc.ids.length > 1}
               {t("({n} variants)", { n: loc.ids.length })}

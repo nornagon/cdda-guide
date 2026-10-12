@@ -6,6 +6,7 @@ import { getContext } from "svelte";
 import {
   asKilograms,
   asLiters,
+  buildSearch,
   CddaData,
   normalizeUseAction,
   parseVolume,
