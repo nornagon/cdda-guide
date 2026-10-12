@@ -25,6 +25,7 @@ import {
   type ItemGroupData,
   type MapgenValue,
   type ItemBasicInfo,
+  type ItemVariant,
   type ComestibleSlot,
   type OvermapSpecial,
   type ArmorSlot,
@@ -145,6 +146,13 @@ export function applyVariantToItem<T extends Item>(
   if (variant.ascii_picture != null)
     variantizedItem.ascii_picture = variant.ascii_picture;
   return variantizedItem;
+}
+
+export function getVariantSpawnShares(variants: ItemVariant[]): number[] {
+  const weights = variants.map((variant) => variant.weight ?? 1);
+  const total = weights.reduce((left, right) => left + right, 0);
+
+  return weights.map((weight) => (total === 0 ? 0 : weight / total));
 }
 
 export function buildSearch(variantId?: string): string {

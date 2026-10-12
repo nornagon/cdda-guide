@@ -13,6 +13,7 @@ import {
   parseVolume,
   singular,
   singularName,
+  getVariantSpawnShares,
   i18n,
 } from "../data";
 import {
@@ -67,6 +68,12 @@ export let variantId: string | undefined = undefined;
 let data: CddaData = getContext("data");
 
 $: effectiveItem = applyVariantToItem(item, variantId);
+
+const navigate = getContext<(url: string) => void>("navigate");
+
+// check support for rich `<select>`
+const isRichSelectSupported =
+  typeof CSS !== "undefined" && CSS.supports("appearance", "base-select");
 
 const _context = "Item Basic Info";
 
@@ -283,7 +290,49 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
 }
 </script>
 
-<h1><ItemSymbol {item} /> {singularName(item)}</h1>
+<h1>
+  <ItemSymbol item={effectiveItem} {variantId} />
+  {singularName(effectiveItem)}
+</h1>
+{#if item.variants?.length}
+  {@const shares = getVariantSpawnShares(item.variants)}
+  <p>
+    <label>
+      {t("Variant", { _context })}
+      <select
+        class:rich={isRichSelectSupported}
+        on:change={(e) =>
+          navigate(
+            `${import.meta.env.BASE_URL}item/${item.id}${buildSearch(
+              e.currentTarget.value || undefined,
+            )}`,
+          )}>
+        {#if isRichSelectSupported}
+          <!-- Prefill rich `<select>`'s trigger with current effective item to avoid empty value by default -->
+          <button>
+            <ItemSymbol item={effectiveItem} {variantId} />
+            {singularName(effectiveItem)}
+          </button>
+        {/if}
+        <option value="" selected={!variantId}>
+          {#if isRichSelectSupported}<ItemSymbol {item} />{/if}
+          {singularName(item)}
+        </option>
+        <optgroup label={t("Variants", { _context })}>
+          {#each item.variants as variant, index}
+            {@const variantItem = applyVariantToItem(item, variant.id)}
+            <option value={variant.id} selected={variant.id === variantId}>
+              {#if isRichSelectSupported}
+                <ItemSymbol item={variantItem} variantId={variant.id} />
+              {/if}
+              {singularName(variantItem)} ({showProbability(shares[index])})
+            </option>
+          {/each}
+        </optgroup>
+      </select>
+    </label>
+  </p>
+{/if}
 <section>
   <h1>{t("General", { _context })}</h1>
   <div class="side-by-side no-margin">
@@ -758,5 +807,37 @@ function normalizeStackVolume(item: Item): (string | number) | undefined {
 <style>
 .hide-header-if-no-sections > h2:last-child {
   display: none;
+}
+
+select.rich,
+select.rich::picker(select) {
+  appearance: base-select;
+}
+
+select.rich {
+  vertical-align: middle;
+  align-items: center;
+}
+
+select.rich option {
+  padding-inline: 0.4em;
+}
+
+select.rich optgroup option {
+  padding-inline-start: 1.4em;
+}
+
+select.rich option::checkmark {
+  order: 1;
+  margin-inline-start: auto;
+}
+
+/* Undo the light global button style. */
+select.rich > button {
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 </style>
