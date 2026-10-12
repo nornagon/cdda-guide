@@ -2,6 +2,7 @@
 import { setContext } from "svelte";
 import Thing from "./Thing.svelte";
 import {
+  applyVariantToItem,
   buildSearch,
   CddaData,
   data,
@@ -253,7 +254,10 @@ $: if (item?.type === "mod" && $data) {
   $data &&
   $data.byIdMaybe(item.type as any, item.id)
 ) {
-  const it = $data.byId(item.type as any, item.id);
+  const it =
+    item.type === "item"
+      ? applyVariantToItem($data.byId("item", item.id), item.variant)
+      : $data.byId(item.type as any, item.id);
   document.title = `${singularName(
     it,
   )} - The Hitchhiker's Guide to the Cataclysm`;
