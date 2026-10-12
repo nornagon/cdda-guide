@@ -60,7 +60,7 @@ type SearchTarget = {
 };
 let targets: SearchTarget[];
 function searchableName(data: CddaData, item: SupportedTypeMapped) {
-  item = data._flatten(item);
+  item = data.flatten(item);
   if (item?.type === "overmap_special" || item?.type === "city_building") {
     if (item.subtype === "mutable") return item.id;
     else
@@ -70,7 +70,7 @@ function searchableName(data: CddaData, item: SupportedTypeMapped) {
           .map((omEntry) => {
             const normalizedId = omEntry.overmap!.replace(
               /_(north|south|east|west)$/,
-              ""
+              "",
             );
             const om = data.byIdMaybe("overmap_terrain", normalizedId);
             return om ? singularName(om) : normalizedId;
@@ -99,9 +99,16 @@ $: targets = [...(data?.all() ?? [])]
     (x) =>
       "id" in x &&
       typeof x.id === "string" &&
-      SEARCHABLE_TYPES.has(mapType(x.type))
+      SEARCHABLE_TYPES.has(mapType(x.type)),
   )
   .filter((x) => (x.type === "mutation" ? !/Fake\d$/.test(x.id) : true))
+  .filter((x) => {
+    if (x.type !== "MONSTER") return true;
+    const mon = data.byIdMaybe("monster", x.id);
+    return (
+      mon && (!data.isMonsterBlacklisted(mon) || data.isMonsterWhitelisted(mon))
+    );
+  })
   .flatMap((x) =>
     [
       {
@@ -115,8 +122,8 @@ $: targets = [...(data?.all() ?? [])]
         variant_id: v.id,
         name: v.name ? singular(v.name) : singularName(x),
         type: mapType(x.type),
-      }))
-    )
+      })),
+    ),
   )
   .filter((x) => !isSpoilerItem(x.id));
 
@@ -171,7 +178,7 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
       ret.push(
         getOMSByAppearance(data)
           .get(appearance)!
-          .map((id) => data.byId("overmap_special", id))
+          .map((id) => data.byId("overmap_special", id)),
       );
       seenAppearances.add(appearance);
     }
@@ -200,7 +207,7 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
     {:else}
       <h1>{type.replace(/_/g, " ")}</h1>
       <LimitedList items={results} let:item={result} limit={50}>
-        {@const item = data._flatten(result.item)}
+        {@const item = data.flatten(result.item)}
         <ItemSymbol {item} />
         <ThingLink
           type={mapType(result.item.type)}

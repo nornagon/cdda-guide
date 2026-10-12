@@ -27,7 +27,7 @@ expect.extend({
           errors
             ?.map((e) => {
               return `${e.instancePath} ${e.message}, but was ${util.inspect(
-                e.data
+                e.data,
               )}`;
             })
             .join("\n")
@@ -49,7 +49,7 @@ if (process.env.WRITE_SCHEMA)
 
 const schemasByType = new Map(
   Object.entries(
-    (typesSchema!.definitions!["SupportedTypes"] as any).properties
+    (typesSchema!.definitions!["SupportedTypes"] as any).properties,
   ).map(([typeName, sch]) => {
     const schemaForType = sch as TJS.Definition;
     return [
@@ -60,10 +60,10 @@ const schemasByType = new Map(
         $schema: typesSchema!.$schema,
       } as TJS.Definition),
     ];
-  })
+  }),
 );
 const data = new CddaData(
-  JSON.parse(fs.readFileSync(__dirname + "/../_test/all.json", "utf8")).data
+  JSON.parse(fs.readFileSync(__dirname + "/../_test/all.json", "utf8")).data,
 );
 const id = (x: any) => {
   if (x.id) return x.id;
@@ -71,13 +71,16 @@ const id = (x: any) => {
   if (x.om_terrain) return JSON.stringify(x.om_terrain);
 };
 
-const all = data._raw
+const all = data
+  .all()
   .filter((x) => id(x))
   .filter((x) => schemasByType.has(x.type))
-  .map((x, i) => [x.type, id(x) ?? i, data._flatten(x)]);
+  .map((x, i) => [x.type, id(x) ?? i, data.flatten(x)]);
 
 const skipped = new Set<string>([
   JSON.stringify("ch_sheet_metal_small"), // broken "using"
+  // Invalid weighted chunks entry introduced by CDDA commit 08592f5cf3.
+  JSON.stringify(JSON.stringify(["microlab_generic_edge"])),
 ]);
 
 test.each(all)("schema matches %s %s", (type, id, obj) => {

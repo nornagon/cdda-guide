@@ -25,8 +25,8 @@ const providers = data
         i.type === "__item_action__"
           ? i.id === item.id
           : (i.type === "repair_item" && i.item_action_type === item.id) ||
-            i.type === item.id
-      )
+            i.type === item.id,
+      ),
   );
 providers.sort(byName);
 

@@ -15,8 +15,8 @@ export let heading: string =
   type === "furniture"
     ? t("Furniture", { _context: "Loot Table" })
     : type === "terrain"
-    ? t("Terrain", { _context: "Loot Table" })
-    : t("Loot", { _context: "Loot Table" });
+      ? t("Terrain", { _context: "Loot Table" })
+      : t("Loot", { _context: "Loot Table" });
 
 function stripType(x: any): any {
   return x;
@@ -37,7 +37,7 @@ const data = getContext<CddaData>("data");
     {@const sortedLoot = [...loot.entries()].sort((a, b) =>
       (b[1].prob * 100).toFixed(2) === (a[1].prob * 100).toFixed(2)
         ? b[1].expected - a[1].expected
-        : b[1].prob - a[1].prob
+        : b[1].prob - a[1].prob,
     )}
     <section>
       <LimitedTableList items={sortedLoot}>

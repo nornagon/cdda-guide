@@ -58,7 +58,7 @@ for (const { seasons, id } of item.harvest_by_season ?? []) {
 const seasonOrder = ["winter", "spring", "summer", "autumn"];
 const harvestBySeasonList = [...harvestBySeason.entries()];
 harvestBySeasonList.sort(
-  (a, b) => seasonOrder.indexOf(a[0]) - seasonOrder.indexOf(b[0])
+  (a, b) => seasonOrder.indexOf(a[0]) - seasonOrder.indexOf(b[0]),
 );
 </script>
 
@@ -74,7 +74,7 @@ harvestBySeasonList.sort(
     </dd>
     <dt>{t("Strength Required to Drag", { _context })}</dt>
     <dd>{item.required_str >= 0 ? item.required_str : "not movable"}</dd>
-    <dt>{t("Coverage", { _context })}</dt>
+    <dt>{t("Concealment", { _context })}</dt>
     <dd>{item.coverage ?? 0}%</dd>
     {#if item.comfort}
       <dt>{t("Comfort", { _context })}</dt>
@@ -175,7 +175,7 @@ harvestBySeasonList.sort(
                         <li>
                           <ItemSymbol item={data.byId("item", id)} />
                           <ThingLink type="item" {id} /> ({(prob * 100).toFixed(
-                            2
+                            2,
                           )}%)
                         </li>
                       {/each}

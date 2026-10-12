@@ -23,10 +23,10 @@ let toolsWithQualityByLevel = new Map<number, Item[]>();
 for (const it of data.byType("item")) {
   if (!it.id) continue;
   const q = [...(it.qualities ?? []), ...(it.charged_qualities ?? [])].find(
-    (quality) => (Array.isArray(quality) ? quality[0] : quality.id) === item.id
+    (quality) => (Array.isArray(quality) ? quality[0] : quality.id) === item.id,
   );
   if (q) {
-    const level = Array.isArray(q) ? q[1] : q.level ?? 1;
+    const level = Array.isArray(q) ? q[1] : (q.level ?? 1);
     if (!toolsWithQualityByLevel.has(level))
       toolsWithQualityByLevel.set(level, []);
     toolsWithQualityByLevel.get(level)!.push(it);
@@ -43,7 +43,7 @@ for (const it of data.byType("item")) {
   }
 }
 const toolsWithQualityByLevelList = [...toolsWithQualityByLevel.entries()].sort(
-  (a, b) => a[0] - b[0]
+  (a, b) => a[0] - b[0],
 );
 toolsWithQualityByLevelList.forEach(([, tools]) => {
   tools.sort(byName);
@@ -53,10 +53,10 @@ const vpartsWithQualityByLevel = new Map<number, VehiclePart[]>();
 for (const it of data.byType("vehicle_part")) {
   if (!it.id) continue;
   const q = (it.qualities ?? []).find((quality) =>
-    Array.isArray(quality) ? quality[0] === item.id : quality.id === item.id
+    Array.isArray(quality) ? quality[0] === item.id : quality.id === item.id,
   );
   if (q) {
-    const level = Array.isArray(q) ? q[1] : q.level ?? 1;
+    const level = Array.isArray(q) ? q[1] : (q.level ?? 1);
     if (!vpartsWithQualityByLevel.has(level))
       vpartsWithQualityByLevel.set(level, []);
     vpartsWithQualityByLevel.get(level)!.push(it);
@@ -94,13 +94,13 @@ for (const [level, set] of recipesUsingQualitySet)
     level,
     [...set].sort((a, b) =>
       singularName(data.byId("item", a)).localeCompare(
-        singularName(data.byId("item", b))
-      )
-    )
+        singularName(data.byId("item", b)),
+      ),
+    ),
   );
 
 const recipesUsingQualityList = [...recipesUsingQuality.entries()].sort(
-  (a, b) => a[0] - b[0]
+  (a, b) => a[0] - b[0],
 );
 
 const constructionsUsingQualityByLevel = new Map<number, Construction[]>();
@@ -122,8 +122,8 @@ const constructionsUsingQualityByLevelList = [
 constructionsUsingQualityByLevelList.forEach(([, constructions]) => {
   constructions.sort((a, b) =>
     singularName(data.byId("construction_group", a.group)).localeCompare(
-      singularName(data.byId("construction_group", b.group))
-    )
+      singularName(data.byId("construction_group", b.group)),
+    ),
   );
 });
 </script>

@@ -22,7 +22,7 @@ for (const line of picture.picture) {
         color.unshift(nextColorTag[1].substring(1));
       }
       remaining = remaining.substring(
-        nextColorTag.index + nextColorTag[0].length
+        nextColorTag.index + nextColorTag[0].length,
       );
     } else break;
   }

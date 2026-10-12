@@ -31,12 +31,12 @@ let itemsWithMaterial = data
       i.material == null
         ? []
         : typeof i.material === "string"
-        ? [i.material]
-        : Array.isArray(i.material)
-        ? isStrings(i.material)
-          ? i.material
-          : i.material.map((m) => m.type)
-        : Object.keys(i.material);
+          ? [i.material]
+          : Array.isArray(i.material)
+            ? isStrings(i.material)
+              ? i.material
+              : i.material.map((m) => m.type)
+            : Object.keys(i.material);
     return i.id && normalizedMaterial.some((m) => m === item.id);
   })
   .sort(byName);

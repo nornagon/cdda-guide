@@ -10,7 +10,7 @@ let data = getContext<CddaData>("data");
 export let proficiencies: Proficiency[];
 const allPrereqs = (p: Proficiency) => p.required_proficiencies ?? [];
 let sortedMutations = topologicalSortComponentsByRank(proficiencies, (m) =>
-  allPrereqs(m).map((x) => data.byId("proficiency", x))
+  allPrereqs(m).map((x) => data.byId("proficiency", x)),
 ).sort((a, b) => singularName(a[0][0]).localeCompare(singularName(b[0][0])));
 </script>
 
@@ -20,7 +20,8 @@ let sortedMutations = topologicalSortComponentsByRank(proficiencies, (m) =>
       {#each rank as mg, i}
         {#if i > 0}&nbsp;→{/if}
         {#each mg as m, i}
-          {#if i > 0}, {/if}
+          {#if i > 0},
+          {/if}
           <ThingLink id={m.id} type="proficiency" />
         {/each}
       {/each}

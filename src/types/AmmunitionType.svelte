@@ -19,7 +19,7 @@ const compatible = data
   .byType("item")
   .filter(
     (x): x is Item & ItemSubtypeToSlot["AMMO"] =>
-      !!x.id && isItemSubtype("AMMO", x) && x.ammo_type === item.id
+      !!x.id && isItemSubtype("AMMO", x) && x.ammo_type === item.id,
   );
 compatible.sort(byName);
 
@@ -31,14 +31,14 @@ const usesAmmoType = (w: Item, t: AmmunitionType): boolean => {
     (pocket) =>
       pocket.pocket_type === "MAGAZINE" &&
       pocket.ammo_restriction &&
-      Object.prototype.hasOwnProperty.call(pocket.ammo_restriction, t.id)
+      Object.prototype.hasOwnProperty.call(pocket.ammo_restriction, t.id),
   );
 };
 
 const usedBy = data.byType("item").filter((w) => w.id && usesAmmoType(w, item));
 function composeSort<T>(
   fa: (a: T, b: T) => number,
-  fb: (a: T, b: T) => number
+  fb: (a: T, b: T) => number,
 ) {
   return (a: T, b: T) => {
     const r = fa(a, b);

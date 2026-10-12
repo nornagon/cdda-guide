@@ -19,27 +19,27 @@ const recipesUsingProficiency = [
       .byType("recipe")
       .filter((recipe) =>
         (recipe.proficiencies ?? []).some(
-          (prof) => prof.proficiency === item.id
-        )
+          (prof) => prof.proficiency === item.id,
+        ),
       )
       .map((recipe) => recipe.result)
-      .filter((x): x is string => !!x)
+      .filter((x): x is string => !!x),
   ),
 ].sort((a, b) =>
   singularName(data.byId("item", a)).localeCompare(
-    singularName(data.byId("item", b))
-  )
+    singularName(data.byId("item", b)),
+  ),
 );
 
 const practiceRecipesUsingProficiency = data
   .byType("practice")
   .filter((recipe) =>
-    (recipe.proficiencies ?? []).some((prof) => prof.proficiency === item.id)
+    (recipe.proficiencies ?? []).some((prof) => prof.proficiency === item.id),
   )
   .sort(
     (a, b) =>
       (a.practice_data?.min_difficulty ?? 0) -
-      (b.practice_data?.min_difficulty ?? 0)
+      (b.practice_data?.min_difficulty ?? 0),
   );
 
 const proficienciesRequiring = data
@@ -47,7 +47,7 @@ const proficienciesRequiring = data
   .filter(
     (prof) =>
       prof.id &&
-      (prof.required_proficiencies ?? []).some((prof) => prof === item.id)
+      (prof.required_proficiencies ?? []).some((prof) => prof === item.id),
   );
 </script>
 

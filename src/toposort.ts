@@ -32,10 +32,10 @@ export function topologicalSort<T>(xs: T[], outgoingEdges: (n: T) => T[]) {
 // component separately, grouping by rank.
 export function topologicalSortComponentsByRank<T>(
   xs: T[],
-  outgoingEdges: (n: T) => T[]
+  outgoingEdges: (n: T) => T[],
 ): T[][][] {
   return connectedComponents(xs, outgoingEdges).map((cc) =>
-    topologicalSortByRank(cc, outgoingEdges)
+    topologicalSortByRank(cc, outgoingEdges),
   );
 }
 
@@ -43,7 +43,7 @@ export function topologicalSortComponentsByRank<T>(
 // edges from a node to a node with a higher rank.
 function topologicalSortByRank<T>(
   xs: T[],
-  outgoingEdges: (n: T) => T[]
+  outgoingEdges: (n: T) => T[],
 ): T[][] {
   const ranks = new Map<T, number>();
   const rank = (x: T): number => {
@@ -65,13 +65,13 @@ function topologicalSortByRank<T>(
 
 function filteredOutgoingEdges<T>(
   xs: T[],
-  outgoingEdgesFn: (n: T) => T[]
+  outgoingEdgesFn: (n: T) => T[],
 ): (n: T) => T[] {
   return (n: T) => outgoingEdgesFn(n).filter((x) => xs.includes(x));
 }
 function undirectedEdges<T>(
   xs: T[],
-  outgoingEdgesFn: (n: T) => T[]
+  outgoingEdgesFn: (n: T) => T[],
 ): (n: T) => T[] {
   const outgoingEdges = filteredOutgoingEdges(xs, outgoingEdgesFn);
   const edges = new Map<T, Set<T>>();

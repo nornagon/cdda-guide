@@ -31,15 +31,13 @@ export let item: Monster;
 
 let data = getContext<CddaData>("data");
 
+// Derived types (stab, acid) are already filled in by CddaData.flatten, the
+// same way the game does it when finalizing monster types.
 function monsterArmor(armor: Resistances): Record<string, number> {
   if (armor) {
     const ret: Record<string, number> = {};
     for (const damageType of data.allDamageTypes()) {
-      let value = armor[damageType.id];
-      if (!value && damageType.derived_from) {
-        const [derived_from, multiplier] = damageType.derived_from;
-        value = armor[derived_from] * multiplier;
-      }
+      const value = armor[damageType.id];
       if (value) ret[damageType.id] = value;
     }
     return ret;
@@ -118,7 +116,7 @@ function damage(mon: Monster) {
   //melee_damage = melee_damage ?? [ { damage_type: "bash", amount: `${melee_dice}d${melee_dice_sides}` } ]
   return (
     `${melee_dice}d${melee_dice_sides} ${singularName(
-      data.byIdMaybe("damage_type", "bash") ?? { id: "bash" }
+      data.byIdMaybe("damage_type", "bash") ?? { id: "bash" },
     )}` +
     du
       .map(
@@ -126,8 +124,8 @@ function damage(mon: Monster) {
           ` + ${u.amount} ${singularName(
             data.byIdMaybe("damage_type", u.damage_type) ?? {
               id: u.damage_type,
-            }
-          )}`
+            },
+          )}`,
       )
       .join("")
   );
@@ -180,10 +178,10 @@ let upgrades =
         monsters: (item.upgrades.into
           ? [item.upgrades.into]
           : item.upgrades.into_group
-          ? flattenGroup(data.byId("monstergroup", item.upgrades.into_group))
-          : []
+            ? flattenGroup(data.byId("monstergroup", item.upgrades.into_group))
+            : []
         ).sort((a, b) =>
-          byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+          byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b)),
         ),
       }
     : null;
@@ -201,7 +199,7 @@ function upgradesFrom(other: Monster) {
 
   if (other.upgrades.into_group) {
     return flattenGroup(
-      data.byId("monstergroup", other.upgrades.into_group)
+      data.byId("monstergroup", other.upgrades.into_group),
     ).includes(item.id);
   }
   return false;
@@ -244,35 +242,35 @@ for (const upgrade of upgradesFromRaw) {
 for (const monsterByTime of [upgradesFromByHalfLife, upgradesFromByAgeGrow]) {
   for (const [_, monsters] of monsterByTime) {
     monsters.sort((a, b) =>
-      byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+      byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b)),
     );
   }
 }
 upgradesFromNoTiming.sort((a, b) =>
-  byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b))
+  byName(data.byIdMaybe("monster", a), data.byIdMaybe("monster", b)),
 );
 
 // Sort each group by timing and insert into one upgradesFromGrouped for display
 const upgradesFromGrouped = new Map<string, string[]>();
 if (upgradesFromByHalfLife.size > 0) {
   const sortedHalfLifeKeys = Array.from(upgradesFromByHalfLife.keys()).sort(
-    (a, b) => a - b
+    (a, b) => a - b,
   );
   for (const half_life of sortedHalfLifeKeys) {
     upgradesFromGrouped.set(
       `half_life:${half_life}`,
-      upgradesFromByHalfLife.get(half_life)!
+      upgradesFromByHalfLife.get(half_life)!,
     );
   }
 }
 if (upgradesFromByAgeGrow.size > 0) {
   const sortedAgeGrowKeys = Array.from(upgradesFromByAgeGrow.keys()).sort(
-    (a, b) => a - b
+    (a, b) => a - b,
   );
   for (const age_grow of sortedAgeGrowKeys) {
     upgradesFromGrouped.set(
       `age_grow:${age_grow}`,
-      upgradesFromByAgeGrow.get(age_grow)!
+      upgradesFromByAgeGrow.get(age_grow)!,
     );
   }
 }
@@ -400,10 +398,12 @@ if (upgradesFromNoTiming.length > 0) {
         <dt>{t("Upgrades From", { _context })}</dt>
         <dd>
           {#each [...upgradesFromGrouped.entries()] as [timingKey, monsterIds], i}
-            {#if i > 0}; {/if}
+            {#if i > 0};
+            {/if}
             <span class="comma-separated">
               {#each monsterIds as monId, j}
-                {#if j > 0}, {/if}<ThingLink type="monster" id={monId} />
+                {#if j > 0},
+                {/if}<ThingLink type="monster" id={monId} />
               {/each}
             </span>
             {#if timingKey.startsWith("age_grow:")}
@@ -416,7 +416,7 @@ if (upgradesFromNoTiming.length > 0) {
               {@const half_life = parseInt(timingKey.split(":")[1])}
               {t(
                 "with a half-life of {half_life} {half_life, plural, =1 {day} other {days}}",
-                { _context, half_life }
+                { _context, half_life },
               )}
             {/if}
           {/each}
@@ -489,7 +489,7 @@ if (upgradesFromNoTiming.length > 0) {
       <dd>
         {#if item.death_function.effect?.id && data.byIdMaybe("SPELL", item.death_function.effect.id)}
           {singularName(data.byId("SPELL", item.death_function.effect.id))} ({singular(
-            data.byId("SPELL", item.death_function.effect.id).description
+            data.byId("SPELL", item.death_function.effect.id).description,
           )})
         {:else}
           {item.death_function.effect?.id ??
@@ -513,7 +513,7 @@ if (upgradesFromNoTiming.length > 0) {
         {:else if upgrades.half_life}
           {t(
             "with a half-life of {half_life} {half_life, plural, =1 {day} other {days}}",
-            { _context, half_life: upgrades.half_life }
+            { _context, half_life: upgrades.half_life },
           )}
         {/if}
       </dd>

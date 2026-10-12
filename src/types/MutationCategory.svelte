@@ -19,10 +19,10 @@ const mutationsInCategory = data
   .filter((m) => (m.category ?? []).includes(item.id))
   .sort(byName);
 const preThreshold = mutationsInCategory.filter(
-  (t) => !t.threshreq || t.threshreq.length === 0
+  (t) => !t.threshreq || t.threshreq.length === 0,
 );
 const postThreshold = mutationsInCategory.filter(
-  (t) => !(!t.threshreq || t.threshreq.length === 0)
+  (t) => !(!t.threshreq || t.threshreq.length === 0),
 );
 </script>
 

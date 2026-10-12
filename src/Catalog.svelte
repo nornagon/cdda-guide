@@ -71,7 +71,7 @@ const groupingFn =
 
 const groups = groupBy(
   things,
-  groupingFn as (t: SupportedTypeMapped) => string[]
+  groupingFn as (t: SupportedTypeMapped) => string[],
 );
 const groupsList = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
 

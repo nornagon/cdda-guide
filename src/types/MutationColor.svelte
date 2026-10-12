@@ -7,12 +7,12 @@ let displayColor =
   mutation.threshold || mutation.profession
     ? "white"
     : mutation.mixed_effect
-    ? "light_magenta"
-    : mutation.points > 0
-    ? "light_green"
-    : mutation.points < 0
-    ? "light_red"
-    : "yellow";
+      ? "light_magenta"
+      : mutation.points > 0
+        ? "light_green"
+        : mutation.points < 0
+          ? "light_red"
+          : "yellow";
 </script>
 
 <span style={`color: var(--cata-color-${displayColor})`}

@@ -13,6 +13,7 @@ import type {
   SupportedTypeMapped,
   SupportedTypesWithMapped,
 } from "../types";
+import ModTag from "../ModTag.svelte";
 import MutationColor from "./MutationColor.svelte";
 
 export let type: keyof SupportedTypesWithMapped;
@@ -37,6 +38,7 @@ function countIsPlural(count: number | [number, number]): boolean {
 const data = getContext<CddaData>("data");
 
 let item = data.byIdMaybe(type, id);
+const sourceItem = item;
 if (item?.type === "vehicle_part" && !item.name && item.item)
   item = data.byId("item", item.item);
 
@@ -53,22 +55,23 @@ function isItem(item: SupportedTypeMapped): item is Item {
       {id}
       plural={countIsPlural(count) &&
         !countsByCharges(
-          item
+          item,
         )} />{#if countsByCharges(item)}{" "}({countToString(
-        count
+        count,
       )}){/if}</span>
 {:else}
   {@const nameSource =
     item && variantId && isItem(item) && "variants" in item && item.variants
-      ? item.variants.find((v) => v.id === variantId) ?? item
+      ? (item.variants.find((v) => v.id === variantId) ?? item)
       : item}
   <a href="{import.meta.env.BASE_URL}{type}/{id}{location.search}"
     >{overrideText
       ? overrideText
       : item
-      ? item.type === "addiction_type"
-        ? singular(item.type_name)
-        : (plural ? pluralName : singularName)(nameSource)
-      : id}</a
-  >{#if item?.type === "mutation"}&nbsp;<MutationColor mutation={item} />{/if}
+        ? item.type === "addiction_type"
+          ? singular(item.type_name)
+          : (plural ? pluralName : singularName)(nameSource)
+        : id}</a
+  >{#if item?.type === "mutation"}&nbsp;<MutationColor
+      mutation={item} />{/if}{#if sourceItem}<ModTag item={sourceItem} />{/if}
 {/if}

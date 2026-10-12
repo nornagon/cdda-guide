@@ -15,14 +15,14 @@ const data = getContext<CddaData>("data");
 const ranged_damage = Array.isArray(item.ranged_damage)
   ? item.ranged_damage[0]
   : typeof item.ranged_damage === "number"
-  ? item.ranged_damage
-  : item.ranged_damage && "values" in item.ranged_damage
-  ? item.ranged_damage.values[0]
-  : (item.ranged_damage as DamageUnit) ?? {
-      amount: 0,
-      damage_type: "bullet",
-      armor_penetration: 0,
-    };
+    ? item.ranged_damage
+    : item.ranged_damage && "values" in item.ranged_damage
+      ? item.ranged_damage.values[0]
+      : ((item.ranged_damage as DamageUnit) ?? {
+          amount: 0,
+          damage_type: "bullet",
+          armor_penetration: 0,
+        });
 </script>
 
 <section>
@@ -39,7 +39,7 @@ const ranged_damage = Array.isArray(item.ranged_damage)
       {ranged_damage.amount ?? 0} ({singularName(
         data.byIdMaybe("damage_type", ranged_damage.damage_type) ?? {
           id: ranged_damage.damage_type,
-        }
+        },
       )})
     </dd>
     <dt>{t("Armor Penetration", { _context })}</dt>
@@ -55,7 +55,7 @@ const ranged_damage = Array.isArray(item.ranged_damage)
     <dd>
       {(item.flags ?? []).includes("DISABLE_SIGHTS")
         ? 90
-        : item.sight_dispersion ?? 30}
+        : (item.sight_dispersion ?? 30)}
     </dd>
     <dt>{t("Base Recoil", { _context })}</dt>
     <dd>{item.recoil ?? 0}</dd>

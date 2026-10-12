@@ -27,8 +27,8 @@ for (const id of allCraftableThings) {
 }
 const uncraftableFrom = [...uncraftableFromSet].sort((a, b) =>
   singularName(data.byId("item", a)).localeCompare(
-    singularName(data.byId("item", b))
-  )
+    singularName(data.byId("item", b)),
+  ),
 );
 </script>
 

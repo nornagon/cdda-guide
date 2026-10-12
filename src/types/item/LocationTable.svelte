@@ -16,7 +16,7 @@ const data = getContext<CddaData>("data");
 
 function filterLocations(
   lootByAppearance: Map<string, { loot: Loot; ids: string[] }>,
-  id: string
+  id: string,
 ): { overmap_special: OvermapSpecial; ids: string[]; chance: ItemChance }[] {
   const spawnLocations: {
     overmap_special: OvermapSpecial;
@@ -33,7 +33,7 @@ function filterLocations(
   spawnLocations.sort((a, b) =>
     (b.chance.prob * 100).toFixed(2) === (a.chance.prob * 100).toFixed(2)
       ? b.chance.expected - a.chance.expected
-      : b.chance.prob - a.chance.prob
+      : b.chance.prob - a.chance.prob,
   );
   return spawnLocations;
 }

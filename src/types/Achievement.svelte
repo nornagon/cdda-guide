@@ -14,13 +14,13 @@ const _context = "Achievement";
 const unlocks = data
   .byType("achievement")
   .filter(
-    (x) => x.id !== item.id && [x.hidden_by ?? []].flat().includes(item.id)
+    (x) => x.id !== item.id && [x.hidden_by ?? []].flat().includes(item.id),
   );
 </script>
 
 <h1>
   {item.type === "achievement" ? "Achievement" : "Conduct"}: {singularName(
-    item
+    item,
   )}
 </h1>
 

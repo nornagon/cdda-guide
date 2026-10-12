@@ -54,13 +54,13 @@ const computeToHit = ({
 const to_hit: number =
   typeof item.to_hit === "object"
     ? computeToHit(item.to_hit)
-    : item.to_hit ?? -2;
+    : (item.to_hit ?? -2);
 
 function attackTime(item: Item) {
   return Math.floor(
     65 +
       (Math.floor(parseVolume(item.volume ?? "1 ml") / 62.5) +
-        Math.floor(parseMass(item.weight ?? 0) / 60))
+        Math.floor(parseMass(item.weight ?? 0) / 60)),
   );
 }
 
@@ -91,7 +91,7 @@ const piercing =
               <li>
                 <strong><ThingLink type="technique" id={technique.id} /></strong
                 >{#if technique.description}: {singular(
-                    technique.description
+                    technique.description,
                   )}{/if}
               </li>
             {/each}
@@ -109,7 +109,7 @@ const piercing =
       {#each Object.entries(item.melee_damage) as [damageType, damage]}
         <dt>
           {singularName(
-            data.byIdMaybe("damage_type", damageType) ?? { id: damageType }
+            data.byIdMaybe("damage_type", damageType) ?? { id: damageType },
           )}
         </dt>
         <dd>{damage}</dd>
@@ -126,7 +126,7 @@ const piercing =
               <li>
                 <strong><ThingLink type="technique" id={technique.id} /></strong
                 >{#if technique.description}: {singular(
-                    technique.description
+                    technique.description,
                   )}{/if}
               </li>
             {/each}

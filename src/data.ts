@@ -10,7 +10,9 @@ import {
   type Mapgen,
   type PaletteData,
   type DamageInstance,
+  type DamageType,
   type DamageUnit,
+  type Resistances,
   type RequirementData,
   type SupportedTypesWithMapped,
   type SupportedTypeMapped,
@@ -26,7 +28,9 @@ import {
   type ComestibleSlot,
   type OvermapSpecial,
   type ArmorSlot,
+  type PartMaterial,
   type BreathabilityRating,
+  type Monster,
   isItemSubtype,
 } from "./types";
 import type { Loot } from "./types/item/spawnLocations";
@@ -54,7 +58,7 @@ const typeMappings = new Map<string, keyof SupportedTypesWithMapped>([
 ]);
 
 export const mapType = (
-  type: keyof SupportedTypesWithMapped
+  type: keyof SupportedTypesWithMapped,
 ): keyof SupportedTypesWithMapped => typeMappings.get(type) ?? type;
 
 export let i18n: Gettext = makeI18n();
@@ -91,22 +95,28 @@ function getMsgIdPlural(t: Translation): string {
   return typeof t === "string"
     ? t + "s"
     : "str_sp" in t
-    ? t.str_sp
-    : "str_pl" in t && t.str_pl
-    ? t.str_pl
-    : t.str + "s";
+      ? t.str_sp
+      : "str_pl" in t && t.str_pl
+        ? t.str_pl
+        : t.str + "s";
 }
+
+const gettextPlaceholderArgs = Array.from(
+  { length: 20 },
+  (_, i) => `%${i + 1}`,
+);
 
 export function translate(
   t: Translation,
   needsPlural: boolean,
   n: number,
-  domain?: string
+  domain?: string,
 ): string {
   const sg = getMsgId(t);
   const pl = needsPlural ? getMsgIdPlural(t) : "";
   return (
-    i18n.dcnpgettext(domain, undefined, sg, pl, n) || (n === 1 ? sg : pl ?? sg)
+    i18n.dcnpgettext(domain, undefined, sg, pl, n, ...gettextPlaceholderArgs) ||
+    (n === 1 ? sg : (pl ?? sg))
   );
 }
 
@@ -122,7 +132,7 @@ export const singularName = (obj: any, domain?: string): string =>
 export const pluralName = (
   obj: any,
   n: number = 2,
-  domain?: string
+  domain?: string,
 ): string => {
   const name: Translation = obj?.name?.male ?? obj?.name;
   if (name == null) return obj?.id ?? obj?.abstract;
@@ -135,6 +145,10 @@ export const pluralName = (
 
 export const byName = (a: any, b: any) =>
   singularName(a).localeCompare(singularName(b));
+
+function isStringArray<T>(array: string[] | T[]): array is string[] {
+  return typeof array[0] === "string";
+}
 
 export function showProbability(prob: number) {
   const ret = (prob * 100).toFixed(2);
@@ -169,7 +183,7 @@ export function parseMass(string: string | number): number {
   let val = 0;
   const re = new RegExp(
     `(\\d+)\\s+(${Object.keys(massUnitMultiplier).join("|")})`,
-    "g"
+    "g",
   );
   while ((m = re.exec(string))) {
     const [_, num, unit] = m;
@@ -247,111 +261,295 @@ export function asKilograms(string: string | number): string {
   return `${(g / 1000).toFixed(2)} kg`;
 }
 
+export interface ModInfo {
+  type?: "MOD_INFO";
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  authors?: string[];
+  maintainers?: string[];
+  dependencies?: string[];
+  conflicts?: string[];
+}
+
+type RawModData = Record<string, { info: any; data: any[] }>;
+
+function modInteractionTarget(obj: any): string | undefined {
+  if (typeof obj?.__filename !== "string") return undefined;
+  return /(?:^|[\\/])mod_interactions[\\/]([^\\/]+)[\\/]/.exec(
+    obj.__filename,
+  )?.[1];
+}
+
+// Monster blacklists and whitelists are anonymous load-time directives, not
+// named game objects. They have no id and intentionally aren't in
+// SupportedTypes, whose members are schema-checked as addressable objects.
+type MonsterListDirective = {
+  monsters?: string[];
+  species?: string[];
+  categories?: string[];
+} & (
+  | { type: "MONSTER_BLACKLIST" }
+  | { type: "MONSTER_WHITELIST"; mode?: "EXCLUSIVE" }
+);
+
+export const hiddenAttributes = [
+  "__mod",
+  "__modName",
+  "__filename",
+  "__self",
+  "__prevSelf",
+  "__rawArmor",
+];
+
+/**
+ * An immutable view of one loaded game-data snapshot.
+ *
+ * Methods may populate internal caches, but the data visible through this
+ * class does not change after construction. To load another version or data
+ * configuration, construct and publish another CddaData instance.
+ */
 export class CddaData {
-  _raw: any[];
-  _byType: Map<string, any[]> = new Map();
-  _byTypeById: Map<string, Map<string, any>> = new Map();
-  _abstractsByType: Map<string, Map<string, any>> = new Map();
-  _toolReplacements: Map<string, string[]> | null = null;
-  _craftingPseudoItems: Map<string, string> = new Map();
-  _migrations: Map<string, string> = new Map();
-  _flattenCache: Map<any, any> = new Map();
-  _nestedMapgensById: Map<string, Mapgen[]> = new Map();
+  readonly #raw: any[];
+  readonly #mods: Record<string, ModInfo>;
+  readonly #rawMods: RawModData;
+  readonly #hasFetchedMods: boolean;
+  #byType: Map<string, any[]> = new Map();
+  #byTypeById: Map<string, Map<string, any>> = new Map();
+  #abstractsByType: Map<string, Map<string, any>> = new Map();
+  #toolReplacements: Map<string, string[]> | null = null;
+  #craftingPseudoItems: Map<string, string> = new Map();
+  #migrations: Map<string, string> = new Map();
+  #flattenCache: Map<any, any> = new Map();
+  #nestedMapgensById: Map<string, Mapgen[]> = new Map();
 
-  release: any;
-  build_number: string | undefined;
+  #monsterBlacklist: MonsterListDirective[] = [];
+  #monsterWhitelist: MonsterListDirective[] = [];
+  #monsterWhitelistExclusive: MonsterListDirective[] = [];
 
-  constructor(raw: any[], build_number?: string, release?: any) {
+  readonly release: any;
+  readonly build_number: string | undefined;
+
+  constructor(
+    raw: any[],
+    build_number?: string,
+    release?: any,
+    mods: Record<string, ModInfo> = {},
+    rawMods?: RawModData,
+    enabledMods: string[] = [],
+  ) {
     this.release = release;
     this.build_number = build_number;
+    this.#mods = mods;
+    this.#rawMods = rawMods ?? {};
+    this.#hasFetchedMods = rawMods != null;
     // For some reason O—G has the string "mapgen" as one of its objects.
-    this._raw = raw.filter((x) => typeof x === "object");
-    for (const obj of raw) {
-      if (!Object.hasOwnProperty.call(obj, "type")) continue;
-      if (obj.type === "MIGRATION") {
-        for (const id of typeof obj.id === "string" ? [obj.id] : obj.id) {
-          const { replace } = obj;
-          this._migrations.set(id, replace);
+    const baseObjects = raw
+      .filter((x) => typeof x === "object")
+      .map((obj) => ({
+        ...obj,
+        __mod: "dda",
+        __modName: "Dark Days Ahead",
+      }));
+    const enabledModSet = new Set(["dda", ...enabledMods]);
+    const modObjects: any[] = [];
+    const modInteractionObjects: any[] = [];
+    for (const mod of enabledMods) {
+      const modData = this.#rawMods[mod];
+      if (!modData) continue;
+      for (const obj of modData.data) {
+        const interactionTarget = modInteractionTarget(obj);
+        const decorated = {
+          ...obj,
+          __mod: mod,
+          __modName: modData.info.name,
+        };
+        if (interactionTarget) {
+          // The game loads mod interactions in a second pass, and only when
+          // both the owning mod and the interaction target are active.
+          if (enabledModSet.has(interactionTarget))
+            modInteractionObjects.push(decorated);
+        } else {
+          modObjects.push(decorated);
         }
-        continue;
-      }
-      const mappedType = mapType(obj.type);
-      if (!this._byType.has(mappedType)) this._byType.set(mappedType, []);
-      this._byType.get(mappedType)!.push(obj);
-      if (Object.hasOwnProperty.call(obj, "id")) {
-        if (!this._byTypeById.has(mappedType))
-          this._byTypeById.set(mappedType, new Map());
-        if (typeof obj.id === "string")
-          this._byTypeById.get(mappedType)!.set(obj.id, obj);
-        else if (Array.isArray(obj.id))
-          for (const id of obj.id)
-            this._byTypeById.get(mappedType)!.set(id, obj);
-
-        // TODO: proper alias handling. We want to e.g. be able to collapse them in loot tables.
-        if (Array.isArray(obj.alias))
-          for (const id of obj.alias)
-            this._byTypeById.get(mappedType)!.set(id, obj);
-        else if (typeof obj.alias === "string")
-          this._byTypeById.get(mappedType)!.set(obj.alias, obj);
-      }
-      // recipes are id'd by their result
-      if (
-        (mappedType === "recipe" || mappedType === "uncraft") &&
-        Object.hasOwnProperty.call(obj, "result")
-      ) {
-        if (!this._byTypeById.has(mappedType))
-          this._byTypeById.set(mappedType, new Map());
-        const id =
-          obj.result +
-          (obj.variant && !obj.abstract ? "_" + obj.variant : "") +
-          (obj.id_suffix ? "_" + obj.id_suffix : "");
-        this._byTypeById.get(mappedType)!.set(id, obj);
-      }
-      if (
-        mappedType === "monstergroup" &&
-        Object.hasOwnProperty.call(obj, "name")
-      ) {
-        if (!this._byTypeById.has(mappedType))
-          this._byTypeById.set(mappedType, new Map());
-        const id = obj.name;
-        this._byTypeById.get(mappedType)!.set(id, obj);
-      }
-      if (Object.hasOwnProperty.call(obj, "abstract")) {
-        if (!this._abstractsByType.has(mappedType))
-          this._abstractsByType.set(mappedType, new Map());
-        this._abstractsByType.get(mappedType)!.set(obj.abstract, obj);
-      }
-
-      if (Object.hasOwnProperty.call(obj, "crafting_pseudo_item")) {
-        this._craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id);
-      }
-
-      if (Object.hasOwnProperty.call(obj, "nested_mapgen_id")) {
-        if (!this._nestedMapgensById.has(obj.nested_mapgen_id))
-          this._nestedMapgensById.set(obj.nested_mapgen_id, []);
-        this._nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
       }
     }
-    this._byTypeById
+    this.#raw = [...baseObjects, ...modObjects, ...modInteractionObjects];
+    for (const obj of this.#raw) this.#loadObject(obj);
+    this.#byTypeById
       .get("item_group")
       ?.set("EMPTY_GROUP", { id: "EMPTY_GROUP", entries: [] });
   }
 
+  #loadObject(obj: any) {
+    if (!Object.hasOwnProperty.call(obj, "type")) return;
+    if (obj.type === "MIGRATION") {
+      for (const id of typeof obj.id === "string" ? [obj.id] : obj.id) {
+        this.#migrations.set(id, obj.replace);
+      }
+      return;
+    }
+    const mappedType = mapType(obj.type);
+    if (!this.#byType.has(mappedType)) this.#byType.set(mappedType, []);
+
+    obj.__self = obj;
+    obj.__prevSelf = null;
+    const previousSelf =
+      obj["copy-from"] === obj.id && typeof obj.id === "string"
+        ? this.#byTypeById.get(mappedType)?.get(obj.id)
+        : obj["copy-from"] === obj.abstract && typeof obj.abstract === "string"
+          ? this.#abstractsByType.get(mappedType)?.get(obj.abstract)
+          : undefined;
+    if (previousSelf) {
+      const oldIndex = this.#byType.get(mappedType)!.indexOf(previousSelf);
+      if (oldIndex !== -1)
+        this.#byType.get(mappedType)!.splice(oldIndex, 1, obj);
+      else this.#byType.get(mappedType)!.push(obj);
+      obj.__prevSelf = previousSelf;
+    } else {
+      this.#byType.get(mappedType)!.push(obj);
+    }
+
+    if (Object.hasOwnProperty.call(obj, "id")) {
+      if (!this.#byTypeById.has(mappedType))
+        this.#byTypeById.set(mappedType, new Map());
+      if (typeof obj.id === "string")
+        this.#byTypeById.get(mappedType)!.set(obj.id, obj);
+      else if (Array.isArray(obj.id))
+        for (const id of obj.id) this.#byTypeById.get(mappedType)!.set(id, obj);
+
+      // TODO: proper alias handling. We want to e.g. be able to collapse them in loot tables.
+      if (Array.isArray(obj.alias))
+        for (const id of obj.alias)
+          this.#byTypeById.get(mappedType)!.set(id, obj);
+      else if (typeof obj.alias === "string")
+        this.#byTypeById.get(mappedType)!.set(obj.alias, obj);
+    }
+    // recipes are id'd by their result
+    if (
+      (mappedType === "recipe" || mappedType === "uncraft") &&
+      Object.hasOwnProperty.call(obj, "result")
+    ) {
+      if (!this.#byTypeById.has(mappedType))
+        this.#byTypeById.set(mappedType, new Map());
+      const id =
+        obj.result +
+        (obj.variant && !obj.abstract ? "_" + obj.variant : "") +
+        (obj.id_suffix ? "_" + obj.id_suffix : "");
+      this.#byTypeById.get(mappedType)!.set(id, obj);
+    }
+    if (
+      mappedType === "monstergroup" &&
+      Object.hasOwnProperty.call(obj, "name")
+    ) {
+      if (!this.#byTypeById.has(mappedType))
+        this.#byTypeById.set(mappedType, new Map());
+      this.#byTypeById.get(mappedType)!.set(obj.name, obj);
+    }
+    if (Object.hasOwnProperty.call(obj, "abstract")) {
+      if (!this.#abstractsByType.has(mappedType))
+        this.#abstractsByType.set(mappedType, new Map());
+      this.#abstractsByType.get(mappedType)!.set(obj.abstract, obj);
+    }
+    if (Object.hasOwnProperty.call(obj, "crafting_pseudo_item"))
+      this.#craftingPseudoItems.set(obj.crafting_pseudo_item, obj.id);
+    if (Object.hasOwnProperty.call(obj, "nested_mapgen_id")) {
+      if (!this.#nestedMapgensById.has(obj.nested_mapgen_id))
+        this.#nestedMapgensById.set(obj.nested_mapgen_id, []);
+      this.#nestedMapgensById.get(obj.nested_mapgen_id)!.push(obj);
+    }
+    if (obj.type === "MONSTER_BLACKLIST") {
+      this.#monsterBlacklist.push(obj);
+    } else if (obj.type === "MONSTER_WHITELIST") {
+      if (obj.mode === "EXCLUSIVE") this.#monsterWhitelistExclusive.push(obj);
+      else this.#monsterWhitelist.push(obj);
+    }
+  }
+
+  #isMonsterInList(mon: Monster, list: MonsterListDirective) {
+    const species =
+      typeof mon.species === "string" ? [mon.species] : (mon.species ?? []);
+    return (
+      list.monsters?.includes(mon.id) ||
+      species.some((s) => list.species?.includes(s)) ||
+      mon.categories?.some((c) => list.categories?.includes(c)) ||
+      false
+    );
+  }
+
+  isMonsterBlacklisted(mon: Monster): boolean {
+    return (
+      this.#monsterBlacklist.some((obj) => this.#isMonsterInList(mon, obj)) ||
+      (this.#monsterWhitelistExclusive.length > 0 &&
+        this.#monsterWhitelistExclusive.every(
+          (obj) => !this.#isMonsterInList(mon, obj),
+        ))
+    );
+  }
+
+  isMonsterWhitelisted(mon: Monster): boolean {
+    return (
+      this.#monsterWhitelist.some((obj) => this.#isMonsterInList(mon, obj)) ||
+      this.#monsterWhitelistExclusive.some((obj) =>
+        this.#isMonsterInList(mon, obj),
+      )
+    );
+  }
+
+  get hasFetchedMods() {
+    return this.#hasFetchedMods;
+  }
+
+  getRawModData(id: string): any[] {
+    return this.#rawMods[id]?.data ?? [];
+  }
+
+  getModInfo(mod: string): ModInfo | undefined {
+    return this.#rawMods[mod]?.info ?? this.#mods[mod];
+  }
+
+  get availableMods(): {
+    id: string;
+    label: string;
+    description?: string;
+    category?: string;
+  }[] {
+    return Object.entries(this.#mods)
+      .filter(([id]) => id !== "dda")
+      .map(([id, info]) => ({
+        id,
+        label: info.name,
+        description: info.description,
+        category: info.category,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }
+
   byIdMaybe<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
-    id: string
+    id: string,
   ): (SupportedTypesWithMapped[TypeName] & { __filename: string }) | undefined {
     if (typeof id !== "string") throw new Error("Requested non-string id");
-    const byId = this._byTypeById.get(type);
-    if (type === "item" && !byId?.has(id) && this._migrations.has(id))
-      return this.byIdMaybe(type, this._migrations.get(id)!);
+    const byId = this.#byTypeById.get(type);
+    if (type === "item" && !byId?.has(id) && this.#migrations.has(id))
+      return this.byIdMaybe(type, this.#migrations.get(id)!);
     const obj = byId?.get(id);
-    if (obj) return this._flatten(obj);
+    if (!obj) return;
+    const flattened = this.flatten(obj);
+    if (
+      type === "monster" &&
+      this.isMonsterBlacklisted(flattened) &&
+      !this.isMonsterWhitelisted(flattened)
+    ) {
+      return;
+    }
+    return flattened;
   }
 
   byId<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
-    id: string
+    id: string,
   ): SupportedTypesWithMapped[TypeName] & { __filename: string } {
     const ret = this.byIdMaybe(type, id);
     if (!ret)
@@ -360,80 +558,132 @@ export class CddaData {
   }
 
   byType<TypeName extends keyof SupportedTypesWithMapped>(
-    type: TypeName
+    type: TypeName,
   ): SupportedTypesWithMapped[TypeName][] {
-    return this._byType.get(type)?.map((x) => this._flatten(x)) ?? [];
+    let list = this.#byType.get(type)?.map((x) => this.flatten(x)) ?? [];
+    if (type === "monster") {
+      list = list.filter(
+        (mon) =>
+          !this.isMonsterBlacklisted(mon) || this.isMonsterWhitelisted(mon),
+      );
+    }
+    return list;
   }
 
   abstractById<TypeName extends keyof SupportedTypesWithMapped>(
     type: TypeName,
-    id: string
+    id: string,
   ): object | undefined /* abstracts don't have ids, for instance */ {
     if (typeof id !== "string") throw new Error("Requested non-string id");
-    const obj = this._abstractsByType.get(type)?.get(id);
-    if (obj) return this._flatten(obj);
+    const obj = this.#abstractsByType.get(type)?.get(id);
+    if (obj) return this.flatten(obj);
   }
 
   replacementTools(type: string): string[] {
-    if (!this._toolReplacements) {
-      this._toolReplacements = new Map();
+    if (!this.#toolReplacements) {
+      this.#toolReplacements = new Map();
       for (const obj of this.byType("item")) {
         if (
           isItemSubtype("TOOL", obj) &&
           Object.hasOwnProperty.call(obj, "sub") &&
           obj.sub
         ) {
-          if (!this._toolReplacements.has(obj.sub))
-            this._toolReplacements.set(obj.sub, []);
-          this._toolReplacements.get(obj.sub)!.push(obj.id);
+          if (!this.#toolReplacements.has(obj.sub))
+            this.#toolReplacements.set(obj.sub, []);
+          this.#toolReplacements.get(obj.sub)!.push(obj.id);
         }
       }
     }
-    return this._toolReplacements.get(type) ?? [];
+    return this.#toolReplacements.get(type) ?? [];
   }
 
   craftingPseudoItem(id: string): string | undefined {
-    return this._craftingPseudoItems.get(id);
+    return this.#craftingPseudoItems.get(id);
   }
 
   nestedMapgensById(id: string): Mapgen[] | undefined {
-    return this._nestedMapgensById.get(id);
+    return this.#nestedMapgensById.get(id);
   }
 
-  all(): SupportedTypeMapped[] {
-    return this._raw;
+  all(): readonly SupportedTypeMapped[] {
+    return this.#raw;
   }
 
-  _flatten<T = any>(_obj: T): T {
-    const obj: any = _obj;
-    if (this._flattenCache.has(obj)) return this._flattenCache.get(obj);
-    const parent =
-      "copy-from" in obj
-        ? this._byTypeById.get(mapType(obj.type))?.get(obj["copy-from"]) ??
-          this._abstractsByType.get(mapType(obj.type))?.get(obj["copy-from"])
+  // Mirrors MonsterGenerator::finalize_mtypes (monstergenerator.cpp). A
+  // copy-from child starts from its parent's armor as written in JSON (the
+  // game copies the parent before finalization), so that raw map is carried
+  // down on __rawArmor. Derived types (stab, acid) are filled in from it, and
+  // only the innermost definition's proportional/relative armor applies:
+  // mtype::load resets both on every load.
+  #finalizeMonsterArmor(obj: any, ret: any) {
+    const raw: Resistances | undefined = obj.armor ?? ret.__rawArmor;
+    if (raw) ret.__rawArmor = raw;
+    // The game ignores these unless they are objects.
+    const proportional =
+      typeof obj.proportional?.armor === "object"
+        ? obj.proportional.armor
         : null;
-    if ("copy-from" in obj && !parent)
-      console.error(
-        `Missing parent in ${
-          obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)
-        }`
-      );
+    const relative =
+      typeof obj.relative?.armor === "object" ? obj.relative.armor : null;
+    if (!raw && !relative && !proportional) return;
+    const damageTypes = this.byType("damage_type");
+    if (damageTypes.length === 0) return;
+    const armor = expandResistances(raw ?? {}, damageTypes, 0, true);
+    if (proportional) {
+      const p = expandResistances(proportional, damageTypes, 1, false);
+      for (const dt of damageTypes) armor[dt.id] *= p[dt.id];
+    }
+    if (relative) {
+      const r = expandResistances(relative, damageTypes, 0, false);
+      for (const dt of damageTypes) armor[dt.id] += r[dt.id];
+    }
+    ret.armor = Object.fromEntries(
+      Object.entries(armor).filter(([, v]) => v !== 0),
+    );
+  }
+
+  flatten<T = any>(_obj: T): T {
+    const obj: any = _obj;
+    if (this.#flattenCache.has(obj)) return this.#flattenCache.get(obj);
+    let parent: any = obj.__prevSelf;
+    if (!parent) {
+      if ("copy-from" in obj) {
+        const mappedType = mapType(obj.type);
+        const byIdParent = this.#byTypeById
+          .get(mappedType)
+          ?.get(obj["copy-from"]);
+        parent =
+          (byIdParent === obj ? undefined : byIdParent) ??
+          this.#abstractsByType.get(mappedType)?.get(obj["copy-from"]);
+      }
+      if ("copy-from" in obj && !parent)
+        console.error(
+          `Missing parent in ${
+            obj.id ?? obj.abstract ?? obj.result ?? JSON.stringify(obj)
+          }`,
+        );
+    }
     if (parent === obj) {
       // Working around bad data upstream, see: https://github.com/CleverRaven/Cataclysm-DDA/pull/53930
       console.warn("Object copied from itself:", obj);
-      this._flattenCache.set(obj, obj);
+      this.#flattenCache.set(obj, obj);
       return obj;
     }
     if (!parent) {
-      this._flattenCache.set(obj, obj);
-      return obj;
+      let ret = obj;
+      if (obj.type === "MONSTER" && obj.armor) {
+        ret = { ...obj };
+        this.#finalizeMonsterArmor(obj, ret);
+      }
+      this.#flattenCache.set(obj, ret);
+      return ret;
     }
-    const { abstract, ...parentProps } = this._flatten(parent);
+    const { abstract, ...parentProps } = this.flatten(parent);
     const ret = { ...parentProps, ...obj };
     if (parentProps.vitamins && obj.vitamins) {
       ret.vitamins = [
         ...parentProps.vitamins.filter(
-          (x: any) => !obj.vitamins.some((y: any) => y[0] === x[0])
+          (x: any) => !obj.vitamins.some((y: any) => y[0] === x[0]),
         ),
         ...obj.vitamins,
       ];
@@ -441,16 +691,19 @@ export class CddaData {
     if (obj.type === "vehicle" && parentProps.parts && obj.parts) {
       ret.parts = [...parentProps.parts, ...obj.parts];
     }
+    if (ret.type === "MONSTER") this.#finalizeMonsterArmor(obj, ret);
     for (const k of Object.keys(ret.relative ?? {})) {
-      if (typeof ret.relative[k] === "number") {
+      if (k === "armor" && ret.type === "MONSTER") {
+        // handled by #finalizeMonsterArmor
+      } else if (typeof ret.relative[k] === "number") {
         if (k === "melee_damage") {
           const di = normalizeDamageInstance(
-            JSON.parse(JSON.stringify(ret.melee_damage))
+            JSON.parse(JSON.stringify(ret.melee_damage)),
           );
           for (const du of di) du.amount = (du.amount ?? 0) + ret.relative[k];
           ret.melee_damage = di;
         } else {
-          ret[k] = (ret[k] ?? 0) + ret.relative[k];
+          ret[k] = (ret[k] ?? numericDefault(ret, k)) + ret.relative[k];
         }
       } else if ((k === "damage" || k === "ranged_damage") && ret[k]) {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
@@ -458,59 +711,32 @@ export class CddaData {
         for (const rdu of relativeDamage) {
           const modified: DamageUnit = Array.isArray(ret[k])
             ? ret[k].find(
-                (du: DamageUnit) => du.damage_type === rdu.damage_type
+                (du: DamageUnit) => du.damage_type === rdu.damage_type,
               )
             : ret[k].damage_type === rdu.damage_type
-            ? ret[k]
-            : null;
+              ? ret[k]
+              : null;
           if (modified) {
-            modified.amount = (modified.amount ?? 0) + (rdu.amount ?? 0);
-            modified.armor_penetration =
-              (modified.armor_penetration ?? 0) + (rdu.armor_penetration ?? 0);
-            modified.armor_multiplier =
-              (modified.armor_multiplier ?? 0) + (rdu.armor_multiplier ?? 0);
-            modified.damage_multiplier =
-              (modified.damage_multiplier ?? 0) + (rdu.damage_multiplier ?? 0);
-            modified.constant_armor_multiplier =
-              (modified.constant_armor_multiplier ?? 0) +
-              (rdu.constant_armor_multiplier ?? 0);
-            modified.constant_damage_multiplier =
-              (modified.constant_damage_multiplier ?? 0) +
-              (rdu.constant_damage_multiplier ?? 0);
+            addRelativeDamageUnit(modified, rdu);
           }
         }
       } else if (k === "melee_damage" && ret.type === "MONSTER" && ret[k]) {
         const meleeDamage = normalizeDamageInstance(
-          JSON.parse(JSON.stringify(ret[k]))
+          JSON.parse(JSON.stringify(ret[k])),
         );
         const relativeDamage = normalizeDamageInstance(ret.relative[k]);
         for (const rdu of relativeDamage) {
           const modified = meleeDamage.find(
-            (du) => du.damage_type === rdu.damage_type
+            (du) => du.damage_type === rdu.damage_type,
           );
           if (modified) {
-            modified.amount = (modified.amount ?? 0) + (rdu.amount ?? 0);
-            modified.armor_penetration =
-              (modified.armor_penetration ?? 0) + (rdu.armor_penetration ?? 0);
-            modified.armor_multiplier =
-              (modified.armor_multiplier ?? 0) + (rdu.armor_multiplier ?? 0);
-            modified.damage_multiplier =
-              (modified.damage_multiplier ?? 0) + (rdu.damage_multiplier ?? 0);
-            modified.constant_armor_multiplier =
-              (modified.constant_armor_multiplier ?? 0) +
-              (rdu.constant_armor_multiplier ?? 0);
-            modified.constant_damage_multiplier =
-              (modified.constant_damage_multiplier ?? 0) +
-              (rdu.constant_damage_multiplier ?? 0);
+            addRelativeDamageUnit(modified, rdu);
           } else {
             meleeDamage.push(JSON.parse(JSON.stringify(rdu)));
           }
         }
         ret[k] = meleeDamage;
-      } else if (
-        (k === "melee_damage" || (k === "armor" && ret.type === "MONSTER")) &&
-        ret[k]
-      ) {
+      } else if (k === "melee_damage" && ret[k]) {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
         for (const k2 of Object.keys(ret.relative[k])) {
           if (
@@ -526,7 +752,7 @@ export class CddaData {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
         for (const [q, l] of ret.relative[k]) {
           const existing = ret[k].find((x: any) =>
-            Array.isArray(x) ? x[0] === q : x.id === q
+            Array.isArray(x) ? x[0] === q : x.id === q,
           );
           if (Array.isArray(existing)) existing[1] += l;
           else existing.level = (existing.level ?? 1) + l;
@@ -536,26 +762,26 @@ export class CddaData {
     }
     delete ret.relative;
     for (const k of Object.keys(ret.proportional ?? {})) {
-      if (
-        (isItemSubtype("TOOL", ret) || isItemSubtype("TOOL_ARMOR", ret)) &&
-        "armor" in ret
-      ) {
+      if (k === "encumbrance" && "armor" in ret) {
         ret.armor = JSON.parse(JSON.stringify(ret.armor));
-        if (k === "encumbrance") {
-          for (const apd of ret.armor ?? []) {
-            if (typeof apd.encumbrance === "number") {
-              apd.encumbrance =
-                (apd.encumbrance * (ret as any).proportional[k]) | 0;
-            } else if (Array.isArray(apd.encumbrance)) {
-              apd.encumbrance = apd.encumbrance.map(
-                (x: number) => (x * (ret as any).proportional[k]) | 0
-              ) as [number, number];
-            }
+        for (const apd of ret.armor ?? []) {
+          if (typeof apd.encumbrance === "number") {
+            apd.encumbrance =
+              (apd.encumbrance * (ret as any).proportional[k]) | 0;
+          } else if (Array.isArray(apd.encumbrance)) {
+            apd.encumbrance = apd.encumbrance.map(
+              (x: number) => (x * (ret as any).proportional[k]) | 0,
+            ) as [number, number];
           }
         }
       }
-      if (typeof ret.proportional[k] === "number" && k in ret) {
-        if (k === "attack_cost" && !(k in ret)) ret[k] = 100;
+      if (k === "armor" && ret.type === "MONSTER") {
+        // handled by #finalizeMonsterArmor
+      } else if (
+        typeof ret.proportional[k] === "number" &&
+        (k in ret || (ret.type === "MONSTER" && k in MONSTER_NUMERIC_DEFAULTS))
+      ) {
+        if (!(k in ret)) ret[k] = MONSTER_NUMERIC_DEFAULTS[k];
         if (typeof ret[k] === "string") {
           const m = /^\s*(\d+)\s*(.+)$/.exec(ret[k]);
           if (m) {
@@ -576,62 +802,35 @@ export class CddaData {
       } else if (k === "damage" && ret[k]) {
         ret.damage = JSON.parse(JSON.stringify(ret.damage));
         const proportionalDamage = normalizeDamageInstance(
-          ret.proportional.damage
+          ret.proportional.damage,
         );
         for (const pdu of proportionalDamage) {
           const modified: DamageUnit = Array.isArray(ret.damage)
             ? ret.damage.find(
-                (du: DamageUnit) => du.damage_type === pdu.damage_type
+                (du: DamageUnit) => du.damage_type === pdu.damage_type,
               )
             : ret.damage.damage_type === pdu.damage_type
-            ? ret.damage
-            : null;
+              ? ret.damage
+              : null;
           if (modified) {
-            modified.amount = (modified.amount ?? 0) * (pdu.amount ?? 1);
-            modified.armor_penetration =
-              (modified.armor_penetration ?? 0) * (pdu.armor_penetration ?? 1);
-            modified.armor_multiplier =
-              (modified.armor_multiplier ?? 0) * (pdu.armor_multiplier ?? 1);
-            modified.damage_multiplier =
-              (modified.damage_multiplier ?? 0) * (pdu.damage_multiplier ?? 1);
-            modified.constant_armor_multiplier =
-              (modified.constant_armor_multiplier ?? 0) *
-              (pdu.constant_armor_multiplier ?? 1);
-            modified.constant_damage_multiplier =
-              (modified.constant_damage_multiplier ?? 0) *
-              (pdu.constant_damage_multiplier ?? 1);
+            multiplyProportionalDamageUnit(modified, pdu);
           }
         }
       } else if (k === "melee_damage" && ret.type === "MONSTER" && ret[k]) {
         const meleeDamage = normalizeDamageInstance(
-          JSON.parse(JSON.stringify(ret[k]))
+          JSON.parse(JSON.stringify(ret[k])),
         );
         const proportionalDamage = normalizeDamageInstance(ret.proportional[k]);
         for (const pdu of proportionalDamage) {
           const modified = meleeDamage.find(
-            (du) => du.damage_type === pdu.damage_type
+            (du) => du.damage_type === pdu.damage_type,
           );
           if (modified) {
-            modified.amount = (modified.amount ?? 0) * (pdu.amount ?? 1);
-            modified.armor_penetration =
-              (modified.armor_penetration ?? 0) * (pdu.armor_penetration ?? 1);
-            modified.armor_multiplier =
-              (modified.armor_multiplier ?? 0) * (pdu.armor_multiplier ?? 1);
-            modified.damage_multiplier =
-              (modified.damage_multiplier ?? 0) * (pdu.damage_multiplier ?? 1);
-            modified.constant_armor_multiplier =
-              (modified.constant_armor_multiplier ?? 0) *
-              (pdu.constant_armor_multiplier ?? 1);
-            modified.constant_damage_multiplier =
-              (modified.constant_damage_multiplier ?? 0) *
-              (pdu.constant_damage_multiplier ?? 1);
+            multiplyProportionalDamageUnit(modified, pdu);
           }
         }
         ret[k] = meleeDamage;
-      } else if (
-        (k === "melee_damage" || (k === "armor" && ret.type === "MONSTER")) &&
-        ret[k]
-      ) {
+      } else if (k === "melee_damage" && ret[k]) {
         ret[k] = JSON.parse(JSON.stringify(ret[k]));
         for (const k2 of Object.keys(ret.proportional[k])) {
           ret[k][k2] *= ret.proportional[k][k2];
@@ -646,7 +845,7 @@ export class CddaData {
         if (k === "flags")
           // Unique
           ret[k] = (ret[k] ?? []).concat(
-            ret.extend[k].filter((x: any) => !ret[k]?.includes(x))
+            ret.extend[k].filter((x: any) => !ret[k]?.includes(x)),
           );
         else ret[k] = (ret[k] ?? []).concat(ret.extend[k]);
       }
@@ -663,7 +862,7 @@ export class CddaData {
             x.length === y.length &&
             x.every((j, i) => isEqual(j, y[i])));
         ret[k] = (ret[k] ?? []).filter(
-          (x: any) => !ret.delete[k].some((y: any) => isEqual(y, x))
+          (x: any) => !ret.delete[k].some((y: any) => isEqual(y, x)),
         );
       }
     }
@@ -691,7 +890,7 @@ export class CddaData {
             Object.entries(mats).map(([k, v]) => [
               ret.replace_materials[k] ?? k,
               v,
-            ])
+            ]),
           );
         }
         // TODO: update weight
@@ -699,62 +898,68 @@ export class CddaData {
       if ("armor" in ret) {
         const armor = ret.armor as ArmorSlot["armor"];
         if (armor) {
-          for (const apd of armor) {
+          const clonedArmor = JSON.parse(JSON.stringify(armor)) as NonNullable<
+            ArmorSlot["armor"]
+          >;
+          ret.armor = clonedArmor;
+          for (const apd of clonedArmor) {
             if (apd.material) {
-              apd.material = apd.material.map((x) => {
-                if (typeof x === "string") {
+              if (isStringArray<PartMaterial>(apd.material)) {
+                apd.material = apd.material.map((x) => {
                   return ret.replace_materials[x] ?? x;
-                } else {
+                });
+              } else {
+                apd.material = apd.material.map((x) => {
                   if (x.type in ret.replace_materials) {
                     return { ...x, type: ret.replace_materials[x.type] };
                   }
                   return x;
-                }
-              });
+                });
+              }
             }
           }
         }
       }
     }
-    this._flattenCache.set(obj, ret);
+    this.#flattenCache.set(obj, ret);
     return ret;
   }
 
-  _cachedDeathDrops: Map<string, Loot> = new Map();
+  #cachedDeathDrops: Map<string, Loot> = new Map();
   flatDeathDrops(mon_id: string): Loot {
-    if (this._cachedDeathDrops.has(mon_id))
-      return this._cachedDeathDrops.get(mon_id)!;
+    if (this.#cachedDeathDrops.has(mon_id))
+      return this.#cachedDeathDrops.get(mon_id)!;
     const mon = this.byId("monster", mon_id);
     const ret = mon.death_drops
       ? this.flattenItemGroupLoot(
           this.normalizeItemGroup(mon.death_drops, "distribution") ?? {
             subtype: "collection",
             entries: [],
-          }
+          },
         )
       : new Map();
-    this._cachedDeathDrops.set(mon_id, ret);
+    this.#cachedDeathDrops.set(mon_id, ret);
     return ret;
   }
 
-  _cachedUncraftRecipes: Map<string, Recipe> | null = null;
+  #cachedUncraftRecipes: Map<string, Recipe> | null = null;
   uncraftRecipe(item_id: string): Recipe | undefined {
-    if (!this._cachedUncraftRecipes) {
-      this._cachedUncraftRecipes = new Map();
+    if (!this.#cachedUncraftRecipes) {
+      this.#cachedUncraftRecipes = new Map();
       for (const recipe of this.byType("recipe"))
         if (recipe.result && recipe.reversible)
-          this._cachedUncraftRecipes.set(recipe.result, recipe);
+          this.#cachedUncraftRecipes.set(recipe.result, recipe);
       for (const recipe of this.byType("uncraft"))
         if (recipe.result)
-          this._cachedUncraftRecipes.set(recipe.result, recipe);
+          this.#cachedUncraftRecipes.set(recipe.result, recipe);
     }
-    return this._cachedUncraftRecipes.get(item_id);
+    return this.#cachedUncraftRecipes.get(item_id);
   }
 
-  _cachedMapgenSpawnItems = new Map<Mapgen, string[]>();
+  #cachedMapgenSpawnItems = new Map<Mapgen, string[]>();
   mapgenSpawnItems(mapgen: Mapgen): string[] {
-    if (this._cachedMapgenSpawnItems.has(mapgen))
-      return this._cachedMapgenSpawnItems.get(mapgen)!;
+    if (this.#cachedMapgenSpawnItems.has(mapgen))
+      return this.#cachedMapgenSpawnItems.get(mapgen)!;
     const palette = new Map<string, Set<string>>();
     const add = (c: string, item_id: MapgenValue) => {
       if (typeof item_id === "string") {
@@ -771,8 +976,8 @@ export class CddaData {
         typeof v === "string"
           ? this.convertTopLevelItemGroup(this.byId("item_group", v))
           : Array.isArray(v)
-          ? { subtype: "collection" as const, entries: v }
-          : v;
+            ? { subtype: "collection" as const, entries: v }
+            : v;
       if (group) {
         for (const { id } of this.flattenItemGroup(group)) add(c, id);
       } else {
@@ -830,8 +1035,8 @@ export class CddaData {
         typeof v.item === "string"
           ? this.convertTopLevelItemGroup(this.byId("item_group", v.item))
           : Array.isArray(v.item)
-          ? { subtype: "collection" as const, entries: v.item }
-          : v.item;
+            ? { subtype: "collection" as const, entries: v.item }
+            : v.item;
       if (group) {
         for (const { id } of this.flattenItemGroup(group)) ret.add(id);
       } else {
@@ -846,7 +1051,7 @@ export class CddaData {
       if (v.item) ret.add(v.item);
       if (v.group)
         for (const { id } of this.flattenTopLevelItemGroup(
-          this.byId("item_group", v.group)
+          this.byId("item_group", v.group),
         ))
           ret.add(id);
     }
@@ -855,13 +1060,13 @@ export class CddaData {
       if (typeof v.item === "string") ret.add(v.item);
 
     const r = [...ret];
-    this._cachedMapgenSpawnItems.set(mapgen, r);
+    this.#cachedMapgenSpawnItems.set(mapgen, r);
     return r;
   }
 
   // Top-level item groups can have the "old" subtype (which is the default if
   // no other subtype is specified).
-  _convertedTopLevelItemGroups = new Map<ItemGroup, ItemGroupData>();
+  #convertedTopLevelItemGroups = new Map<ItemGroup, ItemGroupData>();
   convertTopLevelItemGroup(group: ItemGroup): ItemGroupData {
     if (group.subtype === "distribution" || group.subtype === "collection") {
       return group;
@@ -870,8 +1075,8 @@ export class CddaData {
       !group.subtype ||
       group.subtype === "old"
     ) {
-      if (this._convertedTopLevelItemGroups.has(group))
-        return this._convertedTopLevelItemGroups.get(group)!;
+      if (this.#convertedTopLevelItemGroups.has(group))
+        return this.#convertedTopLevelItemGroups.get(group)!;
       // Convert old-style item groups to new-style
       const normalizedEntries: ItemGroupEntry[] = [];
       for (const item of group.items ?? [])
@@ -888,7 +1093,7 @@ export class CddaData {
         subtype: "distribution",
         entries: normalizedEntries,
       };
-      this._convertedTopLevelItemGroups.set(group, ret);
+      this.#convertedTopLevelItemGroups.set(group, ret);
       return ret;
     } else throw new Error("unknown item group subtype: " + group.subtype);
   }
@@ -898,7 +1103,7 @@ export class CddaData {
   }
 
   // This is a WeakMap because flattenItemGroup is sometimes called with temporary objects
-  _flattenItemGroupCache = new WeakMap<
+  #flattenItemGroupCache = new WeakMap<
     ItemGroupData,
     { id: string; prob: number; expected: number; count: [number, number] }[]
   >();
@@ -907,10 +1112,10 @@ export class CddaData {
    * is spawned, it will be spawned between |count[0]| and |count[1]| times.
    */
   flattenItemGroup(
-    group: ItemGroupData
+    group: ItemGroupData,
   ): { id: string; prob: number; expected: number; count: [number, number] }[] {
-    if (this._flattenItemGroupCache.has(group))
-      return this._flattenItemGroupCache.get(group)!;
+    if (this.#flattenItemGroupCache.has(group))
+      return this.#flattenItemGroupCache.get(group)!;
     const retMap = new Map<
       string,
       { prob: number; expected: number; count: [number, number] }
@@ -1000,13 +1205,13 @@ export class CddaData {
       )
         normalizedEntries.push(g);
     normalizedEntries = normalizedEntries.filter(
-      (e) => !("event" in e) || !e.event
+      (e) => !("event" in e) || !e.event,
     );
 
     function prod(
       p: { id: string; prob: number; count: [number, number] },
       prob: number,
-      count: [number, number]
+      count: [number, number],
     ): { id: string; prob: number; count: [number, number] } {
       return {
         id: p.id,
@@ -1060,8 +1265,8 @@ export class CddaData {
             for (const id of [ids].flat())
               add(
                 ...this.flattenTopLevelItemGroup(
-                  this.byId("item_group", id)
-                ).map((p) => prod(p, nProb, nCount))
+                  this.byId("item_group", id),
+                ).map((p) => prod(p, nProb, nCount)),
               );
         }
         if ("item" in entry) {
@@ -1076,22 +1281,22 @@ export class CddaData {
         } else if ("group" in entry) {
           add(
             ...this.flattenTopLevelItemGroup(
-              this.byId("item_group", entry.group)
-            ).map((p) => prod(p, nProb, nCount))
+              this.byId("item_group", entry.group),
+            ).map((p) => prod(p, nProb, nCount)),
           );
         } else if ("collection" in entry) {
           add(
             ...this.flattenItemGroup({
               subtype: "collection",
               entries: entry.collection,
-            }).map((p) => prod(p, nProb, nCount))
+            }).map((p) => prod(p, nProb, nCount)),
           );
         } else if ("distribution" in entry) {
           add(
             ...this.flattenItemGroup({
               subtype: "distribution",
               entries: entry.distribution,
-            }).map((p) => prod(p, nProb, nCount))
+            }).map((p) => prod(p, nProb, nCount)),
           );
         } else {
           console.warn(`unknown item group entry: ${JSON.stringify(entry)}`);
@@ -1128,8 +1333,8 @@ export class CddaData {
             for (const id of [ids].flat())
               add(
                 ...this.flattenTopLevelItemGroup(
-                  this.byId("item_group", id)
-                ).map((p) => prod(p, nProb, nCount))
+                  this.byId("item_group", id),
+                ).map((p) => prod(p, nProb, nCount)),
               );
         }
         if ("item" in entry) {
@@ -1137,22 +1342,22 @@ export class CddaData {
         } else if ("group" in entry) {
           add(
             ...this.flattenTopLevelItemGroup(
-              this.byId("item_group", entry.group)
-            ).map((p) => prod(p, nProb, nCount))
+              this.byId("item_group", entry.group),
+            ).map((p) => prod(p, nProb, nCount)),
           );
         } else if ("collection" in entry) {
           add(
             ...this.flattenItemGroup({
               subtype: "collection",
               entries: entry.collection,
-            }).map((p) => prod(p, nProb, nCount))
+            }).map((p) => prod(p, nProb, nCount)),
           );
         } else if ("distribution" in entry) {
           add(
             ...this.flattenItemGroup({
               subtype: "distribution",
               entries: entry.distribution,
-            }).map((p) => prod(p, nProb, nCount))
+            }).map((p) => prod(p, nProb, nCount)),
           );
         } else {
           console.warn(`unknown item group entry: ${JSON.stringify(entry)}`);
@@ -1161,7 +1366,7 @@ export class CddaData {
     }
 
     const r = [...retMap.entries()].map(([id, v]) => ({ id, ...v }));
-    this._flattenItemGroupCache.set(group, r);
+    this.#flattenItemGroupCache.set(group, r);
     return r;
   }
 
@@ -1170,44 +1375,44 @@ export class CddaData {
       this.flattenItemGroup(group).map(({ id, prob, expected }) => [
         id,
         { prob, expected },
-      ])
+      ]),
     );
   }
 
-  _flatRequirementCache = new WeakMap<any, { id: string; count: number }[][]>();
-  _flatRequirementCacheExpandSubs = new WeakMap<
+  #flatRequirementCache = new WeakMap<any, { id: string; count: number }[][]>();
+  #flatRequirementCacheExpandSubs = new WeakMap<
     any,
     { id: string; count: number }[][]
   >();
-  _flatRequirementCacheOnlyRecoverable = new WeakMap<
+  #flatRequirementCacheOnlyRecoverable = new WeakMap<
     any,
     { id: string; count: number }[][]
   >();
-  _flatRequirementCacheForOpts(opts?: {
+  #flatRequirementCacheForOpts(opts?: {
     expandSubstitutes?: boolean;
     onlyRecoverable?: boolean;
   }): WeakMap<any, { id: string; count: number }[][]> {
     if (opts?.expandSubstitutes && opts?.onlyRecoverable)
       throw new Error(
-        "didn't expect to see expandSubstitutes && onlyRecoverable"
+        "didn't expect to see expandSubstitutes && onlyRecoverable",
       );
-    if (opts?.expandSubstitutes) return this._flatRequirementCacheExpandSubs;
-    if (opts?.onlyRecoverable) return this._flatRequirementCacheOnlyRecoverable;
-    return this._flatRequirementCache;
+    if (opts?.expandSubstitutes) return this.#flatRequirementCacheExpandSubs;
+    if (opts?.onlyRecoverable) return this.#flatRequirementCacheOnlyRecoverable;
+    return this.#flatRequirementCache;
   }
   flattenRequirement<T>(
     required: (T | T[])[],
     get: (x: Requirement) => (T | T[])[] | undefined,
-    opts?: { expandSubstitutes?: boolean; onlyRecoverable?: boolean }
+    opts?: { expandSubstitutes?: boolean; onlyRecoverable?: boolean },
   ): { id: string; count: number }[][] {
-    const cache = this._flatRequirementCacheForOpts(opts);
+    const cache = this.#flatRequirementCacheForOpts(opts);
     if (cache.has(required)) return cache.get(required)!;
     const {
       expandSubstitutes: doExpandSubstitutes = false,
       onlyRecoverable = false,
     } = opts ?? {};
     const maybeExpandSubstitutes: (
-      x: { id: string; count: number }[]
+      x: { id: string; count: number }[],
     ) => { id: string; count: number }[] = doExpandSubstitutes
       ? (x) => x.flatMap((y) => expandSubstitutes(this, y))
       : (x) => x;
@@ -1218,39 +1423,41 @@ export class CddaData {
             this,
             x,
             (q) => normalize(get(q) ?? []),
-            onlyRecoverable
-          )
-        )
+            onlyRecoverable,
+          ),
+        ),
       )
       .map((x) =>
         onlyRecoverable
           ? x.filter(
               (c) =>
-                !(this.byId("item", c.id).flags ?? []).includes("UNRECOVERABLE")
+                !(this.byId("item", c.id).flags ?? []).includes(
+                  "UNRECOVERABLE",
+                ),
             )
-          : x
+          : x,
       )
       .filter((x) => x.length);
     cache.set(required, ret);
     return ret;
   }
 
-  _normalizeRequirementsCache = new Map<
+  #normalizeRequirementsCache = new Map<
     RequirementData & { using?: Recipe["using"] },
     ReturnType<typeof this.normalizeRequirementsForDisassembly>
   >();
   normalizeRequirementsForDisassembly(
-    requirement: RequirementData & { using?: Recipe["using"] }
+    requirement: RequirementData & { using?: Recipe["using"] },
   ): {
     tools: [string, number][][];
     qualities: QualityRequirement[][];
     components: [string, number][][];
   } {
-    if (this._normalizeRequirementsCache.has(requirement))
-      return this._normalizeRequirementsCache.get(requirement)!;
+    if (this.#normalizeRequirementsCache.has(requirement))
+      return this.#normalizeRequirementsCache.get(requirement)!;
     const { tools, qualities, components } = this.normalizeRequirements(
       requirement,
-      { onlyRecoverable: true }
+      { onlyRecoverable: true },
     );
     let removeFire = false;
     const newQualities: typeof qualities = [];
@@ -1309,15 +1516,15 @@ export class CddaData {
 
     const finalQualities = filteredQualities.concat(
       newQualities.filter(
-        (q) => !filteredQualities.some((q2) => q2[0].id === q[0].id)
-      )
+        (q) => !filteredQualities.some((q2) => q2[0].id === q[0].id),
+      ),
     );
 
     const filteredComponents = components
       .map((c) =>
         c.filter(
-          (c) => !this.byId("item", c[0])?.flags?.includes("UNRECOVERABLE")
-        )
+          (c) => !this.byId("item", c[0])?.flags?.includes("UNRECOVERABLE"),
+        ),
       )
       .filter((c) => c.length);
 
@@ -1327,14 +1534,14 @@ export class CddaData {
       components: filteredComponents,
     };
 
-    this._normalizeRequirementsCache.set(requirement, ret);
+    this.#normalizeRequirementsCache.set(requirement, ret);
 
     return ret;
   }
 
   normalizeRequirementUsing(
     requirements: (readonly [RequirementData, number])[],
-    opts?: { onlyRecoverable?: boolean }
+    opts?: { onlyRecoverable?: boolean },
   ): {
     components: [string, number][][];
     qualities: QualityRequirement[][];
@@ -1343,17 +1550,17 @@ export class CddaData {
     const tools = requirements.flatMap(([req, count]) =>
       this.flattenRequirement(req.tools ?? [], (x) => x.tools, {
         expandSubstitutes: true,
-      }).map((x) => x.map((x) => [x.id, x.count * count] as [string, number]))
+      }).map((x) => x.map((x) => [x.id, x.count * count] as [string, number])),
     );
     const qualities = requirements.flatMap(([req, _count]) =>
-      (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x]))
+      (req.qualities ?? []).map((x) => (Array.isArray(x) ? x : [x])),
     );
     const components = requirements.flatMap(([req, count]) =>
       this.flattenRequirement(
         req.components ?? [],
         (x) => x.components,
-        opts
-      ).map((x) => x.map((x) => [x.id, x.count * count] as [string, number]))
+        opts,
+      ).map((x) => x.map((x) => [x.id, x.count * count] as [string, number])),
     );
     return { tools, qualities, components };
   }
@@ -1362,7 +1569,7 @@ export class CddaData {
     list?:
       | string
       | RequirementData
-      | ([string | RequirementData, number, ...string[]] | RequirementData)[]
+      | ([string | RequirementData, number, ...string[]] | RequirementData)[],
   ): [RequirementData, number][] {
     if (!list) return [];
     const arr = Array.isArray(list) ? list : [list];
@@ -1378,7 +1585,7 @@ export class CddaData {
 
   normalizeRequirements(
     requirement: RequirementData & { using?: Recipe["using"] },
-    opts?: { onlyRecoverable?: boolean }
+    opts?: { onlyRecoverable?: boolean },
   ) {
     const requirements = this.resolveRequirementList(requirement.using).concat([
       [requirement, 1],
@@ -1387,12 +1594,12 @@ export class CddaData {
     return this.normalizeRequirementUsing(requirements, opts);
   }
 
-  _itemComponentCache: {
+  #itemComponentCache: {
     byTool: Map<string, Set<string>>;
     byComponent: Map<string, Set<string>>;
   } | null = null;
   getItemComponents() {
-    if (this._itemComponentCache) return this._itemComponentCache;
+    if (this.#itemComponentCache) return this.#itemComponentCache;
     const itemsByTool = new Map<string, Set<string>>();
     const itemsByComponent = new Map<string, Set<string>>();
 
@@ -1403,7 +1610,7 @@ export class CddaData {
         [recipe, 1] as [RequirementData, number],
       ]);
       const tools = requirements.flatMap(([req]) =>
-        this.flattenRequirement(req.tools ?? [], (x) => x.tools)
+        this.flattenRequirement(req.tools ?? [], (x) => x.tools),
       );
       for (const toolOptions of tools)
         for (const tool of toolOptions) {
@@ -1411,7 +1618,10 @@ export class CddaData {
           itemsByTool.get(tool.id)!.add(recipe.result);
         }
       const components = requirements.flatMap(([req]) =>
-        this.flattenRequirement(req.components ?? [], (x) => x.components ?? [])
+        this.flattenRequirement(
+          req.components ?? [],
+          (x) => x.components ?? [],
+        ),
       );
       for (const componentOptions of components)
         for (const component of componentOptions) {
@@ -1420,20 +1630,20 @@ export class CddaData {
           itemsByComponent.get(component.id)!.add(recipe.result);
         }
     });
-    this._itemComponentCache = {
+    this.#itemComponentCache = {
       byTool: itemsByTool,
       byComponent: itemsByComponent,
     };
-    return this._itemComponentCache;
+    return this.#itemComponentCache;
   }
 
-  _constructionComponentCache: {
+  #constructionComponentCache: {
     byTool: Map<string, Set<string>>;
     byComponent: Map<string, Set<string>>;
   } | null = null;
   getConstructionComponents() {
-    if (this._constructionComponentCache)
-      return this._constructionComponentCache;
+    if (this.#constructionComponentCache)
+      return this.#constructionComponentCache;
     const constructionsByComponent = new Map<string, Set<string>>();
     const constructionsByTool = new Map<string, Set<string>>();
     for (const c of this.byType("construction")) {
@@ -1451,16 +1661,16 @@ export class CddaData {
           constructionsByTool.get(tool)!.add(c.id);
         }
     }
-    this._constructionComponentCache = {
+    this.#constructionComponentCache = {
       byTool: constructionsByTool,
       byComponent: constructionsByComponent,
     };
-    return this._constructionComponentCache;
+    return this.#constructionComponentCache;
   }
 
   normalizeItemGroup(
     g: undefined | string | ItemGroupData | ItemGroupEntry[],
-    subtype: "collection" | "distribution"
+    subtype: "collection" | "distribution",
   ): ItemGroupData {
     if (g) {
       if (typeof g === "string") {
@@ -1477,7 +1687,7 @@ export class CddaData {
   itemForBionic(bionic: Bionic): Item | undefined {
     return (
       this.byType("item").find(
-        (i) => "bionic_id" in i && i.id && i.bionic_id === bionic.id
+        (i) => "bionic_id" in i && i.id && i.bionic_id === bionic.id,
       ) ?? this.byIdMaybe("item", bionic.id)
     );
   }
@@ -1525,7 +1735,7 @@ export class CddaData {
 
   #brewedFromIndex = new ReverseIndex(this, "item", (x) => {
     function normalize(
-      results: undefined | string[] | Record<string, number>
+      results: undefined | string[] | Record<string, number>,
     ): string[] {
       if (!results) return [];
       if (Array.isArray(results)) return results;
@@ -1539,8 +1749,8 @@ export class CddaData {
 
   #transformedFromIndex = new ReverseIndex(this, "item", (x) =>
     normalizeUseAction(x.use_action).flatMap((a) =>
-      "target" in a ? [a.target] : []
-    )
+      "target" in a ? [a.target] : [],
+    ),
   );
   transformedFrom(item_id: string) {
     return this.#transformedFromIndex.lookup(item_id);
@@ -1582,10 +1792,10 @@ export class CddaData {
       typeof vp.breaks_into === "string"
         ? this.convertTopLevelItemGroup(this.byId("item_group", vp.breaks_into))
         : Array.isArray(vp.breaks_into)
-        ? { subtype: "collection", entries: vp.breaks_into }
-        : vp.breaks_into
-        ? vp.breaks_into
-        : null;
+          ? { subtype: "collection", entries: vp.breaks_into }
+          : vp.breaks_into
+            ? vp.breaks_into
+            : null;
     const breaksIntoGroupFlattened =
       breaksIntoGroup && this.flattenItemGroup(breaksIntoGroup);
     return breaksIntoGroupFlattened?.map((x) => x.id) ?? [];
@@ -1633,7 +1843,7 @@ export class CddaData {
       | "bionic_info"
       | "pet_prot_info"
       | "melee_combat_info"
-      | "ablative_info" = "protection_info"
+      | "ablative_info" = "protection_info",
   ) {
     return this.byType("damage_info_order")
       .sort((a, b) => (a[sort_key]?.order ?? -1) - (b[sort_key]?.order ?? -1))
@@ -1644,7 +1854,7 @@ class ReverseIndex<T extends keyof SupportedTypesWithMapped> {
   constructor(
     private data: CddaData,
     private objType: T,
-    private fn: (x: SupportedTypesWithMapped[T]) => string[]
+    private fn: (x: SupportedTypesWithMapped[T]) => string[],
   ) {}
 
   #_index: Map<string, SupportedTypesWithMapped[T][]> | null = null;
@@ -1671,7 +1881,7 @@ function flattenChoices<T>(
   data: CddaData,
   choices: T[],
   get: (x: Requirement) => T[][],
-  onlyRecoverable: boolean = false
+  onlyRecoverable: boolean = false,
 ): { id: string; count: number }[] {
   const flatChoices: { id: string; count: number }[] = [];
   for (const choice of choices) {
@@ -1687,7 +1897,7 @@ function flattenChoices<T>(
             : (id as Requirement);
         if (otherRequirement.type !== "requirement") {
           console.error(
-            `Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`
+            `Expected a requirement, got ${otherRequirement.type} (id=${otherRequirement.id})`,
           );
         }
         const otherRequirementTools = get(otherRequirement) ?? [];
@@ -1698,8 +1908,8 @@ function flattenChoices<T>(
               data,
               otherRequirementChoices,
               get,
-              onlyRecoverable
-            ).map((x) => ({ ...x, count: x.count * count }))
+              onlyRecoverable,
+            ).map((x) => ({ ...x, count: x.count * count })),
           );
         }
       } else {
@@ -1716,7 +1926,7 @@ function flattenChoices<T>(
 
 function expandSubstitutes(
   data: CddaData,
-  r: { id: string; count: number }
+  r: { id: string; count: number },
 ): { id: string; count: number }[] {
   const replacements = data.replacementTools(r.id);
   return [r, ...replacements.map((o) => ({ id: o, count: r.count }))];
@@ -1739,8 +1949,86 @@ export const countsByCharges = (item: any): boolean => {
   return false;
 };
 
+const DAMAGE_UNIT_MULTIPLIERS = [
+  "armor_multiplier",
+  "damage_multiplier",
+  "constant_armor_multiplier",
+  "constant_damage_multiplier",
+] as const;
+
+// Mirrors damage_unit::operator+= (damage.cpp): amounts add, while a
+// multiplier left at its default of 1 in the relative entry means "no change".
+// The game's operator+= never touches constant_armor_multiplier.
+function addRelativeDamageUnit(base: DamageUnit, relative: DamageUnit) {
+  base.amount = (base.amount ?? 0) + (relative.amount ?? 0);
+  base.armor_penetration =
+    (base.armor_penetration ?? 0) + (relative.armor_penetration ?? 0);
+  for (const m of DAMAGE_UNIT_MULTIPLIERS) {
+    if (m === "constant_armor_multiplier") continue;
+    const r = relative[m] ?? 1;
+    if (r !== 1) base[m] = (base[m] ?? 1) + r;
+  }
+}
+
+// Mirrors damage_instance::handle_proportional (damage.cpp).
+function multiplyProportionalDamageUnit(
+  base: DamageUnit,
+  proportional: DamageUnit,
+) {
+  base.amount = (base.amount ?? 0) * (proportional.amount ?? 1);
+  base.armor_penetration =
+    (base.armor_penetration ?? 0) * (proportional.armor_penetration ?? 1);
+  for (const m of DAMAGE_UNIT_MULTIPLIERS) {
+    const p = proportional[m] ?? 1;
+    if (p !== 1) base[m] = (base[m] ?? 1) * p;
+  }
+}
+
+// Mirrors finalize_damage_map (damage.cpp): fill in every damage type,
+// optionally deriving e.g. stab from cut for types that aren't given.
+function expandResistances(
+  map: Record<string, number>,
+  damageTypes: DamageType[],
+  defaultValue: number,
+  derive: boolean,
+): Resistances {
+  const all = map.all ?? defaultValue;
+  const physical = map.physical ?? all;
+  const nonPhysical = map.non_physical ?? all;
+  const ret: Resistances = {};
+  const toDerive: DamageType[] = [];
+  for (const dt of damageTypes) {
+    if (dt.id in map) ret[dt.id] = map[dt.id];
+    else if (derive && dt.derived_from) toDerive.push(dt);
+    else ret[dt.id] = dt.physical ? physical : nonPhysical;
+  }
+  for (const dt of toDerive) {
+    const [from, mult] = dt.derived_from!;
+    ret[dt.id] =
+      from in ret ? ret[from] * mult : dt.physical ? physical : nonPhysical;
+  }
+  return ret;
+}
+
+// Non-zero defaults the game applies to numeric monster fields
+// (monstergenerator.cpp, mtype::load). Needed so that relative/proportional
+// on a field no ancestor set starts from the game's default, not from 0.
+const MONSTER_NUMERIC_DEFAULTS: Record<string, number> = {
+  vision_day: 40,
+  vision_night: 1,
+  attack_cost: 100,
+  bleed_rate: 100,
+  absorb_ml_per_hp: 250,
+  split_move_cost: 200,
+  absorb_move_cost_min: 1,
+};
+
+function numericDefault(obj: { type?: string }, key: string): number {
+  return obj.type === "MONSTER" ? (MONSTER_NUMERIC_DEFAULTS[key] ?? 0) : 0;
+}
+
 export function normalizeDamageInstance(
-  damageInstance: DamageInstance
+  damageInstance: DamageInstance,
 ): DamageUnit[] {
   if (Array.isArray(damageInstance)) return damageInstance;
   else if ("values" in damageInstance) return damageInstance.values;
@@ -1748,7 +2036,7 @@ export function normalizeDamageInstance(
 }
 
 export function normalizeAddictionTypes(
-  comestible: ComestibleSlot
+  comestible: ComestibleSlot,
 ): { addiction: string; potential: number }[] {
   const addictionType = comestible.addiction_type;
   if (typeof addictionType === "string") {
@@ -1762,7 +2050,7 @@ export function normalizeAddictionTypes(
     return addictionType.map((a) =>
       typeof a === "string"
         ? { addiction: a, potential: comestible.addiction_potential ?? 0 }
-        : a
+        : a,
     );
   } else {
     return [];
@@ -1816,7 +2104,7 @@ const vpartVariants = [
 
 export const getVehiclePartIdAndVariant = (
   data: CddaData,
-  compositePartId: string
+  compositePartId: string,
 ): [string, string] => {
   if (data.byIdMaybe("vehicle_part", compositePartId))
     return [compositePartId, ""];
@@ -1835,10 +2123,10 @@ export const getVehiclePartIdAndVariant = (
   return [compositePartId, ""];
 };
 
-const _itemGroupFromVehicleCache = new Map<Vehicle, ItemGroupData>();
+const itemGroupFromVehicleCache = new Map<Vehicle, ItemGroupData>();
 export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroupData {
-  if (_itemGroupFromVehicleCache.has(vehicle))
-    return _itemGroupFromVehicleCache.get(vehicle)!;
+  if (itemGroupFromVehicleCache.has(vehicle))
+    return itemGroupFromVehicleCache.get(vehicle)!;
   const ret: ItemGroupData = {
     subtype: "collection",
     entries: (vehicle.items ?? []).map((it) => {
@@ -1864,7 +2152,7 @@ export function itemGroupFromVehicle(vehicle: Vehicle): ItemGroupData {
     }),
   };
 
-  _itemGroupFromVehicleCache.set(vehicle, ret);
+  itemGroupFromVehicleCache.set(vehicle, ret);
   return ret;
 }
 
@@ -1903,17 +2191,31 @@ export function breathabilityFromRating(br: BreathabilityRating): number {
   return 0;
 }
 
+export function getAllObjectSources(obj: any): any[] {
+  if (!obj.__self) return [];
+  const sources = [obj.__self];
+  while (obj.__prevSelf) {
+    sources.push(obj.__prevSelf);
+    obj = obj.__prevSelf;
+  }
+  return sources.reverse();
+}
+
 const fetchJsonWithProgress = (
   url: string,
-  progress: (receivedBytes: number, totalBytes: number) => void
+  progress: (receivedBytes: number, totalBytes: number) => void,
+  signal: AbortSignal,
 ): Promise<any> => {
   // GoogleBot has a 15MB limit on the size of the response, so we need to
   // serve it double-gzipped JSON.
   if (/latest/.test(url) && /googlebot/i.test(navigator.userAgent))
-    return fetchGzippedJsonForGoogleBot(url);
+    return fetchGzippedJsonForGoogleBot(url, signal);
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.onload = (e) => {
+    const cleanup = () => signal.removeEventListener("abort", abort);
+    const abort = () => xhr.abort();
+    xhr.onload = () => {
+      cleanup();
       if (xhr.response) resolve(xhr.response);
       else reject(`Unknown error fetching JSON from ${url}`);
     };
@@ -1921,20 +2223,30 @@ const fetchJsonWithProgress = (
       if (e.lengthComputable) progress(e.loaded, e.total);
     };
     xhr.onerror = () => {
+      cleanup();
       reject(`Error ${xhr.status} (${xhr.statusText}) fetching ${url}`);
     };
     xhr.onabort = () => {
-      reject(`Aborted while fetching ${url}`);
+      cleanup();
+      reject(signal.reason ?? new DOMException("Aborted", "AbortError"));
     };
+    if (signal.aborted) {
+      reject(signal.reason ?? new DOMException("Aborted", "AbortError"));
+      return;
+    }
+    signal.addEventListener("abort", abort, { once: true });
     xhr.open("GET", url);
     xhr.responseType = "json";
     xhr.send();
   });
 };
 
-async function fetchGzippedJsonForGoogleBot(url: string): Promise<any> {
+async function fetchGzippedJsonForGoogleBot(
+  url: string,
+  signal: AbortSignal,
+): Promise<any> {
   const gzUrl = url.replace(/latest/, "latest.gz");
-  const res = await fetch(gzUrl, { mode: "cors" });
+  const res = await fetch(gzUrl, { mode: "cors", signal });
   if (!res.ok)
     throw new Error(`Error ${res.status} (${res.statusText}) fetching ${url}`);
   if (!res.body)
@@ -1942,7 +2254,7 @@ async function fetchGzippedJsonForGoogleBot(url: string): Promise<any> {
 
   // Use DecompressionStream to decompress the gzipped response
   const decompressionStream = new (globalThis as any).DecompressionStream(
-    "gzip"
+    "gzip",
   );
   const decompressedStream: ReadableStream<ArrayBuffer> =
     res.body.pipeThrough(decompressionStream);
@@ -1954,7 +2266,7 @@ async function fetchGzippedJsonForGoogleBot(url: string): Promise<any> {
 // Sigh, the fetch spec has a bug: https://github.com/whatwg/fetch/issues/1358
 const fetchJsonWithIncorrectProgress = async (
   url: string,
-  progress: (receivedBytes: number, totalBytes: number) => void
+  progress: (receivedBytes: number, totalBytes: number) => void,
 ) => {
   const res = await fetch(url, { mode: "cors" });
   if (!res.ok)
@@ -1987,30 +2299,50 @@ const fetchJsonWithIncorrectProgress = async (
 
 const fetchJson = async (
   version: string,
-  progress: (receivedBytes: number, totalBytes: number) => void
+  progress: (receivedBytes: number, totalBytes: number) => void,
+  signal: AbortSignal,
 ) => {
   return fetchJsonWithProgress(
     `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/all.json`,
-    progress
+    progress,
+    signal,
+  );
+};
+
+const fetchModsJson = async (
+  version: string,
+  progress: (receivedBytes: number, totalBytes: number) => void,
+  signal: AbortSignal,
+): Promise<RawModData> => {
+  return fetchJsonWithProgress(
+    `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/all_mods.json`,
+    progress,
+    signal,
   );
 };
 
 const fetchLocaleJson = async (
   version: string,
   locale: string,
-  progress: (receivedBytes: number, totalBytes: number) => void
+  progress: (receivedBytes: number, totalBytes: number) => void,
+  signal: AbortSignal,
 ) => {
   return fetchJsonWithProgress(
     `https://raw.githubusercontent.com/nornagon/cdda-data/main/data/${version}/lang/${locale}.json`,
-    progress
+    progress,
+    signal,
   );
 };
 
-async function retry<T>(promiseGenerator: () => Promise<T>) {
-  while (true) {
+async function retry<T>(
+  promiseGenerator: () => Promise<T>,
+  shouldContinue: () => boolean = () => true,
+): Promise<T | undefined> {
+  while (shouldContinue()) {
     try {
       return await promiseGenerator();
     } catch (e) {
+      if (!shouldContinue()) return;
       console.error(e);
       await new Promise((r) => setTimeout(r, 2000));
     }
@@ -2019,70 +2351,200 @@ async function retry<T>(promiseGenerator: () => Promise<T>) {
 
 const loadProgressStore = writable<[number, number] | null>(null);
 export const loadProgress = { subscribe: loadProgressStore.subscribe };
-let _hasSetVersion = false;
-const { subscribe, set } = writable<CddaData | null>(null);
-export const data = {
-  subscribe,
-  async setVersion(version: string, locale: string | null) {
-    if (_hasSetVersion) throw new Error("can only set version once");
-    _hasSetVersion = true;
-    let totals = [0, 0, 0];
-    let receiveds = [0, 0, 0];
-    const updateProgress = () => {
-      const total = totals.reduce((a, b) => a + b, 0);
-      const received = receiveds.reduce((a, b) => a + b, 0);
-      loadProgressStore.set([received, total]);
-    };
-    const [dataJson, localeJson, pinyinNameJson] = await Promise.all([
-      retry(() =>
-        fetchJson(version, (receivedBytes, totalBytes) => {
-          totals[0] = totalBytes;
-          receiveds[0] = receivedBytes;
-          updateProgress();
-        })
-      ),
-      locale &&
-        retry(() =>
-          fetchLocaleJson(version, locale, (receivedBytes, totalBytes) => {
-            totals[1] = totalBytes;
-            receiveds[1] = receivedBytes;
-            updateProgress();
-          })
-        ),
-      locale?.startsWith("zh_") &&
-        retry(() =>
-          fetchLocaleJson(
-            version,
-            locale + "_pinyin",
-            (receivedBytes, totalBytes) => {
-              totals[2] = totalBytes;
-              receiveds[2] = receivedBytes;
-              updateProgress();
-            }
-          )
-        ),
-    ]);
-    if (locale && localeJson) {
-      if (pinyinNameJson) pinyinNameJson[""] = localeJson[""];
-      i18n.loadJSON(localeJson);
-      i18n.setLocale(locale);
-      if (pinyinNameJson) {
-        i18n.loadJSON(pinyinNameJson, "pinyin");
-      }
-    }
-    const cddaData = new CddaData(
-      dataJson.data,
-      dataJson.build_number,
-      dataJson.release
-    );
-    set(cddaData);
-  },
+type DataFile = {
+  data: any[];
+  build_number?: string;
+  release?: any;
+  mods?: Record<string, ModInfo>;
 };
+
+type DataStoreOptions = {
+  fetchData?: typeof fetchJson;
+  fetchLocale?: typeof fetchLocaleJson;
+  fetchModData?: typeof fetchModsJson;
+};
+
+export function createDataStore({
+  fetchData = fetchJson,
+  fetchLocale = fetchLocaleJson,
+  fetchModData = fetchModsJson,
+}: DataStoreOptions = {}) {
+  const { subscribe, set } = writable<CddaData | null>(null);
+  let loadController: AbortController | null = null;
+  let modsController: AbortController | null = null;
+  let loaded:
+    | { version: string; file: DataFile; rawMods?: RawModData }
+    | undefined;
+  let enabledMods: string[] = [];
+
+  const publish = () => {
+    if (!loaded) return;
+    const { file, rawMods } = loaded;
+    const cddaData = new CddaData(
+      file.data,
+      file.build_number,
+      file.release,
+      file.mods,
+      rawMods,
+      enabledMods,
+    );
+    if (typeof window !== "undefined") (window as any)._cddaData = cddaData;
+    set(cddaData);
+    return cddaData;
+  };
+
+  const fetchAllMods = async () => {
+    if (!loaded?.file.mods || loaded.rawMods) return;
+    if (modsController) return;
+    modsController = new AbortController();
+    const controller = modsController;
+    const { signal } = controller;
+    const mods = await retry(
+      () =>
+        fetchModData(
+          loaded!.version,
+          (receivedBytes, totalBytes) => {
+            if (!signal.aborted)
+              loadProgressStore.set([receivedBytes, totalBytes]);
+          },
+          signal,
+        ),
+      () => !signal.aborted,
+    );
+    if (signal.aborted || !mods) return;
+    loaded = { ...loaded, rawMods: mods };
+    const result = publish();
+    loadProgressStore.set(null);
+    if (modsController === controller) modsController = null;
+    return result;
+  };
+
+  return {
+    subscribe,
+    fetchMods: fetchAllMods,
+    async setEnabledMods(nextEnabledMods: string[]) {
+      enabledMods = [...nextEnabledMods];
+      if (enabledMods.length > 0 && loaded?.file.mods && !loaded.rawMods) {
+        return fetchAllMods();
+      }
+      return publish();
+    },
+    async setVersion(
+      version: string,
+      locale: string | null,
+      nextEnabledMods: string[] = [],
+      shouldFetchMods = nextEnabledMods.length > 0,
+    ) {
+      loadController?.abort();
+      modsController?.abort();
+      modsController = null;
+      loadController = new AbortController();
+      const { signal } = loadController;
+      enabledMods = [...nextEnabledMods];
+      loaded = undefined;
+      set(null);
+      loadProgressStore.set(null);
+
+      let totals = [0, 0, 0, 0];
+      let receiveds = [0, 0, 0, 0];
+      const updateProgress = () => {
+        if (signal.aborted) return;
+        const total = totals.reduce((a, b) => a + b, 0);
+        const received = receiveds.reduce((a, b) => a + b, 0);
+        loadProgressStore.set([received, total]);
+      };
+      const [dataJson, localeJson, pinyinNameJson] = await Promise.all([
+        retry(
+          () =>
+            fetchData(
+              version,
+              (receivedBytes, totalBytes) => {
+                totals[0] = totalBytes;
+                receiveds[0] = receivedBytes;
+                updateProgress();
+              },
+              signal,
+            ),
+          () => !signal.aborted,
+        ),
+        locale &&
+          retry(
+            () =>
+              fetchLocale(
+                version,
+                locale,
+                (receivedBytes, totalBytes) => {
+                  totals[1] = totalBytes;
+                  receiveds[1] = receivedBytes;
+                  updateProgress();
+                },
+                signal,
+              ),
+            () => !signal.aborted,
+          ),
+        locale?.startsWith("zh_") &&
+          retry(
+            () =>
+              fetchLocale(
+                version,
+                locale + "_pinyin",
+                (receivedBytes, totalBytes) => {
+                  totals[2] = totalBytes;
+                  receiveds[2] = receivedBytes;
+                  updateProgress();
+                },
+                signal,
+              ),
+            () => !signal.aborted,
+          ),
+      ]);
+
+      if (signal.aborted) return;
+
+      const nextI18n = makeI18n();
+      if (locale && localeJson) {
+        if (pinyinNameJson) pinyinNameJson[""] = localeJson[""];
+        nextI18n.loadJSON(localeJson);
+        nextI18n.setLocale(locale);
+        if (pinyinNameJson) {
+          nextI18n.loadJSON(pinyinNameJson, "pinyin");
+        }
+      }
+      i18n = nextI18n;
+
+      const file = dataJson as DataFile;
+      let rawMods: RawModData | undefined;
+      if (file.mods && shouldFetchMods) {
+        rawMods = await retry(
+          () =>
+            fetchModData(
+              version,
+              (receivedBytes, totalBytes) => {
+                totals[3] = totalBytes;
+                receiveds[3] = receivedBytes;
+                updateProgress();
+              },
+              signal,
+            ),
+          () => !signal.aborted,
+        );
+      }
+      if (signal.aborted) return;
+      loaded = { version, file, rawMods };
+      const cddaData = publish();
+      loadProgressStore.set(null);
+      loadController = null;
+      return cddaData;
+    },
+  };
+}
+
+export const data = createDataStore();
 
 export function omsName(data: CddaData, oms: OvermapSpecial): string {
   if (oms.subtype === "mutable") return oms.id;
   const ground_level_omts = (oms.overmaps ?? []).filter(
-    (p) => p.point[2] === 0
+    (p) => p.point[2] === 0,
   );
   let minX = Infinity,
     minY = Infinity;
@@ -2095,7 +2557,7 @@ export function omsName(data: CddaData, oms: OvermapSpecial): string {
     if (
       !data.byIdMaybe(
         "overmap_terrain",
-        omt.overmap.replace(/_(north|south|east|west)$/, "")
+        omt.overmap.replace(/_(north|south|east|west)$/, ""),
       )
     )
       continue;
@@ -2111,7 +2573,7 @@ export function omsName(data: CddaData, oms: OvermapSpecial): string {
   if (centerOmt?.overmap) {
     const omt = data.byId(
       "overmap_terrain",
-      centerOmt.overmap.replace(/_(north|south|east|west)$/, "")
+      centerOmt.overmap.replace(/_(north|south|east|west)$/, ""),
     );
     if (omt) {
       return singularName(omt);
