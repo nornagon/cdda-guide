@@ -1455,7 +1455,7 @@ export type Monster = {
   placate_triggers?: string[];
   fear_triggers?: string[];
   special_when_hit?: [
-    "NONE" | "ZAPBACK" | "ACIDSPLASH" | "RETURN_FIRE",
+    "NONE" | "ZAPBACK" | "ACIDSPLASH" | "RETURN_FIRE" | "SHOT_RICOCHET",
     integer,
   ];
   morale?: number;
