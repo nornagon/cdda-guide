@@ -3,16 +3,11 @@ import { t } from "@transifex/native";
 
 import { getContext } from "svelte";
 
-import {
-  CddaData,
-  i18n,
-  showProbability,
-  singular,
-  singularName,
-} from "../data";
+import { CddaData, i18n, singular, singularName } from "../data";
 import type { Terrain } from "../types";
 import Construction from "./Construction.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import { showProbability } from "./item/utils";
 import TerFurnActivity from "./TerFurnActivity.svelte";
 import ThingLink from "./ThingLink.svelte";
 import TerrainSpawnedIn from "./item/TerrainSpawnedIn.svelte";

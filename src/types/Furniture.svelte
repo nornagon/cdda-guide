@@ -5,6 +5,7 @@ import ThingLink from "./ThingLink.svelte";
 import { getContext } from "svelte";
 import Construction from "./Construction.svelte";
 import ItemSymbol from "./item/ItemSymbol.svelte";
+import { showProbability } from "./item/utils";
 import { t } from "@transifex/native";
 import TerFurnActivity from "./TerFurnActivity.svelte";
 import FurnitureSpawnedIn from "./item/FurnitureSpawnedIn.svelte";
@@ -34,12 +35,6 @@ const bash = item.bash?.items
           : item.bash.items,
     })
   : [];
-
-function showProbability(prob: number) {
-  const ret = (prob * 100).toFixed(2);
-  if (ret === "0.00") return "< 0.01%";
-  return ret + "%";
-}
 
 const constructions = data
   .byType("construction")

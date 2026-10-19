@@ -1,4 +1,5 @@
 export function showProbability(prob: number) {
+  if (prob === 0) return "0%";
   return showNumber(prob * 100) + "%";
 }
 
