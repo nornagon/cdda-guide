@@ -654,8 +654,23 @@ export type MessageUseFunction = {
   message: Translation;
 };
 
+export type ItemVariant = {
+  id: string;
+  // required in 0.I, optional in experimental
+  name?: Translation;
+  // required in 0.I, optional in experimental
+  description?: Translation;
+  symbol?: string;
+  color?: string;
+  ascii_picture?: string; // ascii_art_id
+  weight?: integer; // default 1
+  append?: boolean;
+  expand_snippets?: boolean;
+};
+
 export type ItemBasicInfo = {
   id: string;
+  name: Translation;
   category?: string; // item_category_id
   color?: string;
   symbol?: string;
@@ -710,16 +725,7 @@ export type ItemBasicInfo = {
     | UseFunction
     | (string | UseFunction | [string] | [string, number])[];
   variant_type?: "gun" | "drug" | "generic";
-  variants?: {
-    id: string;
-    name?: Translation;
-    description?: Translation;
-    symbol?: string;
-    color?: string;
-    ascii_picture?: string; // id
-    weight?: integer;
-    append?: boolean;
-  }[];
+  variants?: ItemVariant[];
   brewable?: {
     brew_results: string[] | Record<string, number>; // item_id
     brew_time?: duration;
