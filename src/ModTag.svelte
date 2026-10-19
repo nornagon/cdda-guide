@@ -1,5 +1,5 @@
 <script lang="ts">
-import { getAllObjectSources, singular } from "./data";
+import { buildSearch, getAllObjectSources, singular } from "./data";
 
 export let item: any;
 export let attachToPageTitle = false;
@@ -50,7 +50,7 @@ $: display = modSources(item);
         title={d.name}
         href="{import.meta.env.BASE_URL}mod/{encodeURIComponent(
           d.id,
-        )}{location.search}">{d.name}</a>
+        )}{buildSearch()}">{d.name}</a>
     {/each}
   </span>
 {/if}

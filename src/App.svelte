@@ -1,6 +1,9 @@
 <script lang="ts">
+import { setContext } from "svelte";
 import Thing from "./Thing.svelte";
 import {
+  applyVariantToItem,
+  buildSearch,
   CddaData,
   data,
   loadProgress,
@@ -22,7 +25,7 @@ import ModCatalog from "./ModCatalog.svelte";
 import Mod from "./types/Mod.svelte";
 import { resolveModDependencies } from "./mods";
 
-let item: { type: string; id: string } | null = null;
+let item: { type: string; id: string; variant?: string } | null = null;
 let search: string = "";
 let renderedSearch = search;
 const updateRenderedSearch = debounce((value: string) => {
@@ -226,7 +229,9 @@ function load(noScroll: boolean = false) {
       search = decodeQueryParam(id ?? "");
       renderSearchNow();
     } else {
-      item = { type, id: id ? decodeURIComponent(id) : "" };
+      const variant =
+        new URLSearchParams(location.search).get("variant") ?? undefined;
+      item = { type, id: id ? decodeURIComponent(id) : "", variant };
     }
 
     if (!noScroll) window.scrollTo(0, 0);
@@ -249,7 +254,10 @@ $: if (item?.type === "mod" && $data) {
   $data &&
   $data.byIdMaybe(item.type as any, item.id)
 ) {
-  const it = $data.byId(item.type as any, item.id);
+  const it =
+    item.type === "item"
+      ? applyVariantToItem($data.byId("item", item.id), item.variant)
+      : $data.byId(item.type as any, item.id);
   document.title = `${singularName(
     it,
   )} - The Hitchhiker's Guide to the Cataclysm`;
@@ -266,6 +274,12 @@ $: if (item?.type === "mod" && item.id && $data && !$data.hasFetchedMods) {
 load();
 loadDataOptionsFromLocation(false);
 
+function navigateTo(url: string) {
+  history.pushState(null, "", url);
+  load();
+}
+setContext("navigate", navigateTo);
+
 // Throttle replaceState to avoid browser warnings.
 // |throttle| isn't defined when running tests for some reason.
 const replaceState = throttle
@@ -281,7 +295,7 @@ const clearItem = () => {
       "",
       import.meta.env.BASE_URL +
         (search ? "search/" + encodeURIComponent(search) : "") +
-        location.search,
+        buildSearch(),
     );
   else
     replaceState(
@@ -289,7 +303,7 @@ const clearItem = () => {
       "",
       import.meta.env.BASE_URL +
         (search ? "search/" + encodeURIComponent(search) : "") +
-        location.search,
+        buildSearch(),
     );
   item = null;
 };
@@ -298,14 +312,15 @@ function maybeNavigate(event: MouseEvent) {
   const target = event.target as HTMLElement | null;
   const anchor = target?.closest("a") as HTMLAnchorElement | null;
   if (anchor && anchor.href) {
-    const { origin, pathname } = new URL(anchor.href);
+    const { origin, pathname, searchParams } = new URL(anchor.href);
     if (
       origin === location.origin &&
       pathname.startsWith(import.meta.env.BASE_URL)
     ) {
       event.preventDefault();
-      history.pushState(null, "", pathname + location.search);
-      load();
+      navigateTo(
+        pathname + buildSearch(searchParams.get("variant") ?? undefined),
+      );
     }
   }
 }
@@ -395,9 +410,7 @@ function newRandomPage(d: CddaData | null) {
     return;
   }
   const r = getRandomPage(d);
-  randomPage = `${import.meta.env.BASE_URL}${mapType(r.type)}/${r.id}${
-    location.search
-  }`;
+  randomPage = `${import.meta.env.BASE_URL}${mapType(r.type)}/${r.id}${buildSearch()}`;
 }
 $: newRandomPage($data);
 
@@ -434,7 +447,7 @@ function langHref(lang: string, href: string) {
       <!-- svelte-ignore a11y-invalid-attribute -->
       <strong>
         <a
-          href={import.meta.env.BASE_URL + location.search}
+          href={import.meta.env.BASE_URL + buildSearch()}
           on:click={() => (search = "")}
           ><span class="wide">Hitchhiker's Guide to the Cataclysm</span><span
             class="narrow">HHG</span
@@ -539,15 +552,15 @@ files in the game itself.`,
             >Cataclysm: Dark Days Ahead</a>
           <a
             slot="2"
-            href="{import.meta.env.BASE_URL}item/flashlight{location.search}"
+            href="{import.meta.env.BASE_URL}item/flashlight{buildSearch()}"
             >{t("flashlight", { _comment: "Item name" })}</a>
           <a
             slot="3"
-            href="{import.meta.env.BASE_URL}furniture/f_table{location.search}"
+            href="{import.meta.env.BASE_URL}furniture/f_table{buildSearch()}"
             >{t("table", { _comment: "Furniture" })}</a>
           <a
             slot="4"
-            href="{import.meta.env.BASE_URL}monster/mon_zombie{location.search}"
+            href="{import.meta.env.BASE_URL}monster/mon_zombie{buildSearch()}"
             >{t("zombie", { _comment: "Monster name" })}</a>
         </InterpolatedTranslation>
       </p>
@@ -628,25 +641,25 @@ Anyway?`,
 
       <h2>{t("Catalogs")}</h2>
       <ul>
-        <li><a href="/item{location.search}">{t("Items")}</a></li>
-        <li><a href="/monster{location.search}">{t("Monsters")}</a></li>
-        <li><a href="/furniture{location.search}">{t("Furniture")}</a></li>
-        <li><a href="/terrain{location.search}">{t("Terrain")}</a></li>
+        <li><a href="/item{buildSearch()}">{t("Items")}</a></li>
+        <li><a href="/monster{buildSearch()}">{t("Monsters")}</a></li>
+        <li><a href="/furniture{buildSearch()}">{t("Furniture")}</a></li>
+        <li><a href="/terrain{buildSearch()}">{t("Terrain")}</a></li>
         <li>
-          <a href="/vehicle_part{location.search}">{t("Vehicle Parts")}</a>
+          <a href="/vehicle_part{buildSearch()}">{t("Vehicle Parts")}</a>
         </li>
-        <li><a href="/tool_quality{location.search}">{t("Qualities")}</a></li>
-        <li><a href="/mutation{location.search}">{t("Mutations")}</a></li>
-        <li><a href="/martial_art{location.search}">{t("Martial Arts")}</a></li>
-        <li><a href="/json_flag{location.search}">{t("Flags")}</a></li>
+        <li><a href="/tool_quality{buildSearch()}">{t("Qualities")}</a></li>
+        <li><a href="/mutation{buildSearch()}">{t("Mutations")}</a></li>
+        <li><a href="/martial_art{buildSearch()}">{t("Martial Arts")}</a></li>
+        <li><a href="/json_flag{buildSearch()}">{t("Flags")}</a></li>
         <li>
-          <a href="/achievement{location.search}">{t("Achievements")}</a> /
-          <a href="/conduct{location.search}">{t("Conducts")}</a>
+          <a href="/achievement{buildSearch()}">{t("Achievements")}</a> /
+          <a href="/conduct{buildSearch()}">{t("Conducts")}</a>
         </li>
         <li>
-          <a href="/proficiency{location.search}">{t("Proficiencies")}</a>
+          <a href="/proficiency{buildSearch()}">{t("Proficiencies")}</a>
         </li>
-        <li><a href="/mod{location.search}">{t("Mods")}</a></li>
+        <li><a href="/mod{buildSearch()}">{t("Mods")}</a></li>
       </ul>
 
       <InterpolatedTranslation
@@ -748,8 +761,7 @@ Anyway?`,
     </p>
     {#if enabledMods.length > 0}
       <p class="data-options" style="display: flex; align-items: center;">
-        <a href="{import.meta.env.BASE_URL}mod{location.search}">{t("Mods")}</a
-        >:
+        <a href="{import.meta.env.BASE_URL}mod{buildSearch()}">{t("Mods")}</a>:
         <span style="margin-left: 0.5em">
           {#if $data && $data.availableMods.length === 0}
             <em style="color: var(--cata-color-gray)"
@@ -763,7 +775,7 @@ Anyway?`,
                 {#if i > 0}{", "}{/if}<a
                   href="{import.meta.env.BASE_URL}mod/{encodeURIComponent(
                     mod,
-                  )}{location.search}">{modLabel ? singular(modLabel) : mod}</a>
+                  )}{buildSearch()}">{modLabel ? singular(modLabel) : mod}</a>
               {/each}
             {/key}
           {:else}

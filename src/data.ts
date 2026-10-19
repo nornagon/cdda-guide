@@ -25,6 +25,7 @@ import {
   type ItemGroupData,
   type MapgenValue,
   type ItemBasicInfo,
+  type ItemVariant,
   type ComestibleSlot,
   type OvermapSpecial,
   type ArmorSlot,
@@ -123,6 +124,45 @@ export function translate(
 export const singular = (name: Translation): string =>
   translate(name, false, 1);
 
+export function applyVariantToItem<T extends Item>(
+  item: T,
+  variantId: string | undefined,
+): T {
+  if (!variantId || !item.variants) return item;
+  const variant = item.variants.find((v) => v.id === variantId);
+  if (!variant) return item;
+  const variantizedItem = { ...item };
+  if (variant.name != null) variantizedItem.name = variant.name;
+  if (variant.description != null) {
+    variantizedItem.description =
+      variant.append && variantizedItem.description != null
+        ? singular(variantizedItem.description) +
+          "  " +
+          singular(variant.description)
+        : variant.description;
+  }
+  if (variant.symbol != null) variantizedItem.symbol = variant.symbol;
+  if (variant.color != null) variantizedItem.color = variant.color;
+  if (variant.ascii_picture != null)
+    variantizedItem.ascii_picture = variant.ascii_picture;
+  return variantizedItem;
+}
+
+export function getVariantSpawnShares(variants: ItemVariant[]): number[] {
+  const weights = variants.map((variant) => variant.weight ?? 1);
+  const total = weights.reduce((left, right) => left + right, 0);
+
+  return weights.map((weight) => (total === 0 ? 0 : weight / total));
+}
+
+export function buildSearch(variantId?: string): string {
+  const params = new URLSearchParams(location.search);
+  params.delete("variant");
+  if (variantId) params.set("variant", variantId);
+  const s = params.toString();
+  return s ? "?" + s : "";
+}
+
 export const plural = (name: Translation, n: number = 2): string =>
   translate(name, true, n);
 
@@ -148,12 +188,6 @@ export const byName = (a: any, b: any) =>
 
 function isStringArray<T>(array: string[] | T[]): array is string[] {
   return typeof array[0] === "string";
-}
-
-export function showProbability(prob: number) {
-  const ret = (prob * 100).toFixed(2);
-  if (ret === "0.00") return "< 0.01%";
-  return ret + "%";
 }
 
 // Returns ml

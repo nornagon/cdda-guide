@@ -1,7 +1,13 @@
 <script lang="ts">
 import { setContext } from "svelte";
 import { t } from "@transifex/native";
-import { CddaData, getAllObjectSources, mapType, singular } from "../data";
+import {
+  buildSearch,
+  CddaData,
+  getAllObjectSources,
+  mapType,
+  singular,
+} from "../data";
 import type { SupportedTypeMapped, SupportedTypesWithMapped } from "../types";
 import CatalogSection from "../CatalogSection.svelte";
 import ColorText from "./ColorText.svelte";
@@ -130,7 +136,7 @@ setContext("data", data);
                 <a
                   href="{import.meta.env.BASE_URL}mod/{encodeURIComponent(
                     conflict.id,
-                  )}{location.search}">{conflict.label}</a>
+                  )}{buildSearch()}">{conflict.label}</a>
               {/each}
             </span>
           </InterpolatedTranslation>
@@ -153,7 +159,7 @@ setContext("data", data);
             <a
               href="{import.meta.env.BASE_URL}mod/{encodeURIComponent(
                 dependency.id,
-              )}{location.search}">{dependency.label}</a>
+              )}{buildSearch()}">{dependency.label}</a>
           {/each}
         </dd>
       {/if}
@@ -173,7 +179,7 @@ setContext("data", data);
             <a
               href="{import.meta.env.BASE_URL}mod/{encodeURIComponent(
                 conflict.id,
-              )}{location.search}">{conflict.label}</a>
+              )}{buildSearch()}">{conflict.label}</a>
           {/each}
         </dd>
       {/if}

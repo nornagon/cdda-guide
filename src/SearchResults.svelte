@@ -1,6 +1,8 @@
 <script lang="ts">
 import {
+  applyVariantToItem,
   mapType,
+  buildSearch,
   singular,
   singularName,
   loadProgress,
@@ -156,6 +158,11 @@ function filter(text: string): Map<string, SearchResult[]> {
   return byType;
 }
 
+function flattenWithVariant({ item, variant }: SearchResult) {
+  const flat = data.flatten(item) as Item;
+  return variant ? applyVariantToItem(flat, variant.id) : flat;
+}
+
 const cjkRegex =
   /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f\u3131-\ud79d]/;
 $: matchingObjects =
@@ -198,7 +205,7 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
             <OvermapAppearance overmapSpecial={result[0]} />
           </td>
           <td style="vertical-align: middle; padding-left: 5px;">
-            <a href="/overmap_special/{result[0].id}{location.search}"
+            <a href="/overmap_special/{result[0].id}{buildSearch()}"
               >{omsName(data, result[0])}</a
             >{#if result.length > 1}{" "}({result.length} variants){/if}
           </td>
@@ -207,8 +214,9 @@ function groupByAppearance(results: SearchResult[]): OvermapSpecial[][] {
     {:else}
       <h1>{type.replace(/_/g, " ")}</h1>
       <LimitedList items={results} let:item={result} limit={50}>
-        {@const item = data.flatten(result.item)}
-        <ItemSymbol {item} />
+        <ItemSymbol
+          item={flattenWithVariant(result)}
+          variantId={result.variant?.id} />
         <ThingLink
           type={mapType(result.item.type)}
           id={result.item.id}

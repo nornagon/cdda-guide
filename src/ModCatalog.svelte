@@ -1,6 +1,6 @@
 <script lang="ts">
 import { t } from "@transifex/native";
-import { CddaData, i18n, singular } from "./data";
+import { buildSearch, CddaData, i18n, singular } from "./data";
 import { isHiddenMod } from "./mods";
 
 export let data: CddaData;
@@ -61,7 +61,7 @@ $: displayedModGroups = groupModsByCategory(displayedMods);
             <a
               href="{import.meta.env.BASE_URL}mod/{encodeURIComponent(
                 mod.id,
-              )}{location.search}">{mod.label}</a>
+              )}{buildSearch()}">{mod.label}</a>
           </li>
         {/each}
       </ul>
