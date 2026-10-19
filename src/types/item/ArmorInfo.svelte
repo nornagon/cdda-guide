@@ -126,9 +126,13 @@ for (const apd of item.armor ?? []) {
       const existingScale = maxCoverage(bp, existing) / 100;
 
       const baseCoverage = apd.coverage ?? 0;
-      existing.coverage += (baseCoverage * scale) | 0;
-      existing.cover_melee += ((apd.cover_melee ?? baseCoverage) * scale) | 0;
-      existing.cover_ranged += ((apd.cover_ranged ?? baseCoverage) * scale) | 0;
+      existing.coverage = Math.trunc(existing.coverage + baseCoverage * scale);
+      existing.cover_melee = Math.trunc(
+        existing.cover_melee + (apd.cover_melee ?? baseCoverage) * scale,
+      );
+      existing.cover_ranged = Math.trunc(
+        existing.cover_ranged + (apd.cover_ranged ?? baseCoverage) * scale,
+      );
       existing.cover_vitals =
         (existing.cover_vitals ?? 0) + (apd.cover_vitals ?? 0);
 
@@ -138,14 +142,15 @@ for (const apd of item.armor ?? []) {
         apd.material_thickness ?? item.material_thickness,
         scale,
       );
-      existing.environmental_protection =
+      existing.environmental_protection = Math.trunc(
         weightedAverage(
           existing.environmental_protection ?? item.environmental_protection,
           existingScale,
           apd.environmental_protection ?? item.environmental_protection,
           scale,
-        ) | 0;
-      existing.environmental_protection_with_filter =
+        ),
+      );
+      existing.environmental_protection_with_filter = Math.trunc(
         weightedAverage(
           existing.environmental_protection_with_filter ??
             item.environmental_protection_with_filter,
@@ -153,22 +158,24 @@ for (const apd of item.armor ?? []) {
           apd.environmental_protection_with_filter ??
             item.environmental_protection_with_filter,
           scale,
-        ) | 0;
+        ),
+      );
 
       existing.layers = existing.layers ?? [];
       for (const layer of apd.layers ?? [])
         if (!existing.layers.includes(layer)) existing.layers.push(layer);
       for (const newMat of mats) {
-        const existingMat = (existing.material! as PartMaterial[]).find(
+        const existingMats = (existing.material! as PartMaterial[]).filter(
           (s) => s.type === newMat.type,
         );
-        if (existingMat) {
-          const maxCoverageNew = maxCoverage(bp, apd);
-          const maxCoverageMats = maxCoverage(bp, existing);
-          existingMat.covered_by_mat =
-            ((existingMat.covered_by_mat ?? 100) +
-              ((newMat.covered_by_mat ?? 100) * maxCoverageNew) / 100) |
-            0;
+        const maxCoverageNew = maxCoverage(bp, apd);
+        const maxCoverageMats = maxCoverage(bp, existing);
+        for (const existingMat of existingMats) {
+          existingMat.covered_by_mat = Math.trunc(
+            (existingMat.covered_by_mat ?? 100) +
+              ((newMat.covered_by_mat ?? 100) * baseCoverage * maxCoverageNew) /
+                10000,
+          );
 
           existingMat.thickness = weightedAverage(
             existingMat.thickness,
@@ -176,13 +183,15 @@ for (const apd of item.armor ?? []) {
             newMat.thickness,
             maxCoverageNew,
           );
-        } else {
-          const maxCoverageNew = maxCoverage(bp, apd);
+        }
+        if (!existingMats.length) {
           const modifiedMat = JSON.parse(
             JSON.stringify(newMat),
           ) as PartMaterial;
-          modifiedMat.covered_by_mat =
-            ((newMat.covered_by_mat ?? 100) * maxCoverageNew) / 100;
+          modifiedMat.covered_by_mat = Math.trunc(
+            ((newMat.covered_by_mat ?? 100) * baseCoverage * maxCoverageNew) /
+              10000,
+          );
           (existing.material as PartMaterial[]).push(modifiedMat);
         }
       }
@@ -199,13 +208,18 @@ for (const apd of item.armor ?? []) {
       const scale = maxCoverage(bp, newApd) / 100;
 
       const oldCoverage = newApd.coverage ?? 0;
-      newApd.coverage = (oldCoverage * scale) | 0;
-      newApd.cover_melee = ((newApd.cover_melee ?? oldCoverage) * scale) | 0;
-      newApd.cover_ranged = ((newApd.cover_ranged ?? oldCoverage) * scale) | 0;
+      newApd.coverage = Math.trunc(oldCoverage * scale);
+      newApd.cover_melee = Math.trunc(
+        (newApd.cover_melee ?? oldCoverage) * scale,
+      );
+      newApd.cover_ranged = Math.trunc(
+        (newApd.cover_ranged ?? oldCoverage) * scale,
+      );
       newApd.material = JSON.parse(JSON.stringify(mats)) as PartMaterial[];
       for (const mat of newApd.material ?? []) {
-        mat.covered_by_mat =
-          ((mat.covered_by_mat ?? 100) * newApd.coverage) / 100;
+        mat.covered_by_mat = Math.trunc(
+          ((mat.covered_by_mat ?? 100) * newApd.coverage) / 100,
+        );
       }
       normalizedPortionData.push(newApd as any /* TODO */);
     }
@@ -214,7 +228,7 @@ for (const apd of item.armor ?? []) {
 for (const apd of normalizedPortionData) {
   for (const mat of (apd.material ?? []) as PartMaterial[]) {
     mat.covered_by_mat = apd.coverage
-      ? (((mat.covered_by_mat ?? 100) / apd.coverage) * 100) | 0
+      ? Math.round(((mat.covered_by_mat ?? 100) / apd.coverage) * 100)
       : 100;
   }
 }
